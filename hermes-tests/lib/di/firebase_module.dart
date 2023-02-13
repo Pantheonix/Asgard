@@ -16,5 +16,6 @@ abstract class FirebaseModule {
       );
 
   @lazySingleton
-  Future<FirebaseStorage> get firebaseStorage async => FirebaseStorage.instanceFor(app: await firebaseApp);
+  Future<FirebaseStorage> get firebaseStorage async =>
+      FirebaseStorage.instanceFor(app: await firebaseApp);
 }
