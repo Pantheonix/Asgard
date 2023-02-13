@@ -1,5 +1,7 @@
-import 'package:hermes_tests/hermes_tests.dart' as hermes_tests;
+import 'package:firebase_dart/firebase_dart.dart';
+import 'package:hermes_tests/di/injection.dart';
 
-void main(List<String> arguments) {
-  print('Hello world: ${hermes_tests.calculate()}!');
+Future<void> main(List<String> arguments) async {
+  FirebaseDart.setup();
+  configureDependencies('dev');
 }
