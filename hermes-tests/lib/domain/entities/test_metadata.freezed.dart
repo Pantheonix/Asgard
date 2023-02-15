@@ -18,6 +18,10 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$TestMetadata {
   String get problemId => throw _privateConstructorUsedError;
   String get testId => throw _privateConstructorUsedError;
+  String get srcTestRootFolder => throw _privateConstructorUsedError;
+  String get destTestRootFolder => throw _privateConstructorUsedError;
+  String get inputFileName => throw _privateConstructorUsedError;
+  String get outputFileName => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $TestMetadataCopyWith<TestMetadata> get copyWith =>
@@ -30,7 +34,13 @@ abstract class $TestMetadataCopyWith<$Res> {
           TestMetadata value, $Res Function(TestMetadata) then) =
       _$TestMetadataCopyWithImpl<$Res, TestMetadata>;
   @useResult
-  $Res call({String problemId, String testId});
+  $Res call(
+      {String problemId,
+      String testId,
+      String srcTestRootFolder,
+      String destTestRootFolder,
+      String inputFileName,
+      String outputFileName});
 }
 
 /// @nodoc
@@ -48,6 +58,10 @@ class _$TestMetadataCopyWithImpl<$Res, $Val extends TestMetadata>
   $Res call({
     Object? problemId = null,
     Object? testId = null,
+    Object? srcTestRootFolder = null,
+    Object? destTestRootFolder = null,
+    Object? inputFileName = null,
+    Object? outputFileName = null,
   }) {
     return _then(_value.copyWith(
       problemId: null == problemId
@@ -57,6 +71,22 @@ class _$TestMetadataCopyWithImpl<$Res, $Val extends TestMetadata>
       testId: null == testId
           ? _value.testId
           : testId // ignore: cast_nullable_to_non_nullable
+              as String,
+      srcTestRootFolder: null == srcTestRootFolder
+          ? _value.srcTestRootFolder
+          : srcTestRootFolder // ignore: cast_nullable_to_non_nullable
+              as String,
+      destTestRootFolder: null == destTestRootFolder
+          ? _value.destTestRootFolder
+          : destTestRootFolder // ignore: cast_nullable_to_non_nullable
+              as String,
+      inputFileName: null == inputFileName
+          ? _value.inputFileName
+          : inputFileName // ignore: cast_nullable_to_non_nullable
+              as String,
+      outputFileName: null == outputFileName
+          ? _value.outputFileName
+          : outputFileName // ignore: cast_nullable_to_non_nullable
               as String,
     ) as $Val);
   }
@@ -70,7 +100,13 @@ abstract class _$$_TestMetadataCopyWith<$Res>
       __$$_TestMetadataCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String problemId, String testId});
+  $Res call(
+      {String problemId,
+      String testId,
+      String srcTestRootFolder,
+      String destTestRootFolder,
+      String inputFileName,
+      String outputFileName});
 }
 
 /// @nodoc
@@ -86,6 +122,10 @@ class __$$_TestMetadataCopyWithImpl<$Res>
   $Res call({
     Object? problemId = null,
     Object? testId = null,
+    Object? srcTestRootFolder = null,
+    Object? destTestRootFolder = null,
+    Object? inputFileName = null,
+    Object? outputFileName = null,
   }) {
     return _then(_$_TestMetadata(
       problemId: null == problemId
@@ -96,6 +136,22 @@ class __$$_TestMetadataCopyWithImpl<$Res>
           ? _value.testId
           : testId // ignore: cast_nullable_to_non_nullable
               as String,
+      srcTestRootFolder: null == srcTestRootFolder
+          ? _value.srcTestRootFolder
+          : srcTestRootFolder // ignore: cast_nullable_to_non_nullable
+              as String,
+      destTestRootFolder: null == destTestRootFolder
+          ? _value.destTestRootFolder
+          : destTestRootFolder // ignore: cast_nullable_to_non_nullable
+              as String,
+      inputFileName: null == inputFileName
+          ? _value.inputFileName
+          : inputFileName // ignore: cast_nullable_to_non_nullable
+              as String,
+      outputFileName: null == outputFileName
+          ? _value.outputFileName
+          : outputFileName // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -103,17 +159,33 @@ class __$$_TestMetadataCopyWithImpl<$Res>
 /// @nodoc
 
 class _$_TestMetadata extends _TestMetadata {
-  const _$_TestMetadata({required this.problemId, required this.testId})
+  const _$_TestMetadata(
+      {required this.problemId,
+      required this.testId,
+      required this.srcTestRootFolder,
+      required this.destTestRootFolder,
+      this.inputFileName = "input.txt",
+      this.outputFileName = "output.txt"})
       : super._();
 
   @override
   final String problemId;
   @override
   final String testId;
+  @override
+  final String srcTestRootFolder;
+  @override
+  final String destTestRootFolder;
+  @override
+  @JsonKey()
+  final String inputFileName;
+  @override
+  @JsonKey()
+  final String outputFileName;
 
   @override
   String toString() {
-    return 'TestMetadata(problemId: $problemId, testId: $testId)';
+    return 'TestMetadata(problemId: $problemId, testId: $testId, srcTestRootFolder: $srcTestRootFolder, destTestRootFolder: $destTestRootFolder, inputFileName: $inputFileName, outputFileName: $outputFileName)';
   }
 
   @override
@@ -123,11 +195,20 @@ class _$_TestMetadata extends _TestMetadata {
             other is _$_TestMetadata &&
             (identical(other.problemId, problemId) ||
                 other.problemId == problemId) &&
-            (identical(other.testId, testId) || other.testId == testId));
+            (identical(other.testId, testId) || other.testId == testId) &&
+            (identical(other.srcTestRootFolder, srcTestRootFolder) ||
+                other.srcTestRootFolder == srcTestRootFolder) &&
+            (identical(other.destTestRootFolder, destTestRootFolder) ||
+                other.destTestRootFolder == destTestRootFolder) &&
+            (identical(other.inputFileName, inputFileName) ||
+                other.inputFileName == inputFileName) &&
+            (identical(other.outputFileName, outputFileName) ||
+                other.outputFileName == outputFileName));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, problemId, testId);
+  int get hashCode => Object.hash(runtimeType, problemId, testId,
+      srcTestRootFolder, destTestRootFolder, inputFileName, outputFileName);
 
   @JsonKey(ignore: true)
   @override
@@ -139,13 +220,25 @@ class _$_TestMetadata extends _TestMetadata {
 abstract class _TestMetadata extends TestMetadata {
   const factory _TestMetadata(
       {required final String problemId,
-      required final String testId}) = _$_TestMetadata;
+      required final String testId,
+      required final String srcTestRootFolder,
+      required final String destTestRootFolder,
+      final String inputFileName,
+      final String outputFileName}) = _$_TestMetadata;
   const _TestMetadata._() : super._();
 
   @override
   String get problemId;
   @override
   String get testId;
+  @override
+  String get srcTestRootFolder;
+  @override
+  String get destTestRootFolder;
+  @override
+  String get inputFileName;
+  @override
+  String get outputFileName;
   @override
   @JsonKey(ignore: true)
   _$$_TestMetadataCopyWith<_$_TestMetadata> get copyWith =>

@@ -177,6 +177,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.6.3"
+  cqrs_mediator:
+    dependency: "direct main"
+    description:
+      name: cqrs_mediator
+      sha256: ac86e73c7dbf0c866a39bec1dcced5ca9a02d3be313e234526f4ea3c5367b86d
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.1"
   cron:
     dependency: "direct main"
     description:
@@ -465,14 +473,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
-  mockito:
+  mocktail:
     dependency: "direct main"
     description:
-      name: mockito
-      sha256: "2a8a17b82b1bde04d514e75d90d634a0ac23f6cb4991f6098009dd56836aeafe"
+      name: mocktail
+      sha256: "80a996cd9a69284b3dc521ce185ffe9150cde69767c2d3a0720147d93c0cef53"
       url: "https://pub.dev"
     source: hosted
-    version: "5.3.2"
+    version: "0.3.0"
   node_preamble:
     dependency: transitive
     description:

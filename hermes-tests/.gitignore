@@ -3,5 +3,5 @@
 .dart_tool/
 .idea/
 .vscode/
-firebase-config.json
-temp/test
+config.json
+temp/
