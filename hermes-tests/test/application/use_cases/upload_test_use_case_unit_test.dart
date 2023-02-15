@@ -43,8 +43,8 @@ void main() {
       // Arrange
       final TestMetadata testMetadata = TestMetadata(
         problemId: 'marsx',
-        testId: '1',
-        srcTestRootFolder: testConfig['tempTestLocalPath'],
+        testId: '2',
+        srcTestRootFolder: testConfig['tempUnarchivedTestLocalPath'],
         destTestRootFolder: testConfig['tempTestRemotePath'],
       );
 
@@ -65,7 +65,7 @@ void main() {
       final TestMetadata testMetadata = TestMetadata(
         problemId: 'marsx',
         testId: '3',
-        srcTestRootFolder: testConfig['tempTestLocalPath'],
+        srcTestRootFolder: testConfig['tempUnarchivedTestLocalPath'],
         destTestRootFolder: testConfig['tempTestRemotePath'],
       );
 
@@ -77,6 +77,15 @@ void main() {
       // Assert
       expect(result.isLeft(), true);
       expect(result.fold(id, id), isA<StorageFailure>());
+
+      // expect StorageFailure.invalidLocalTest
+      result.fold(
+        (l) => l.maybeMap(
+          invalidLocalTest: (_) => expect(true, true),
+          orElse: () => expect(true, false),
+        ),
+        (_) => expect(true, false),
+      );
     });
   });
 }
