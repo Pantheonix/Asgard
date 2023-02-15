@@ -16,6 +16,10 @@ class TestMetadata with _$TestMetadata {
   const TestMetadata._();
 
   String get testRelativePath => '$problemId/$testId';
+  String get archivedTestRelativePath => '$problemId/$testId.zip';
+
+  String get archivedTestPath => '$srcTestRootFolder/$archivedTestRelativePath';
+  String get unarchivedTestPath => '$destTestRootFolder/$testRelativePath';
 
   String get srcTestInputPath =>
       '$srcTestRootFolder/$testRelativePath/$inputFileName';
