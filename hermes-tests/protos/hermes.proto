@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.asgard.hermes";
+option java_outer_classname = "HermesTests";
+option objc_class_prefix = "Hermes";
+
+package asgard.hermes;
+
+// gRPC request and response messages
+message UploadRequest {
+    oneof packet {
+        Metadata metadata = 1;
+        Chunk chunk = 2;
+    }
+}
+
+message UploadResponse {
+    string message = 1;
+    UploadStatusCode code = 2;
+}
+
+// Hermes Service
+service HermesTestsService {
+    rpc UploadTest(stream UploadRequest) returns (UploadResponse) {}
+}
+
+// core messages
+message Metadata {
+    string problem_id = 1;
+    string test_id = 2;
+    int32 test_size = 3;
+}
+
+message Chunk {
+    bytes data = 1;
+}
+
+enum UploadStatusCode {
+    Ok = 0;
+    Failed = 1;
+    Unknown = 2;
+}
