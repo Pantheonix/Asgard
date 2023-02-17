@@ -45,19 +45,27 @@ void main() {
       );
 
       // Assert
-      expect(result.isRight(), true);
-      expect(result.fold(id, id), isA<TestMetadata>());
+      result.fold(
+        (f) => expect(true, false),
+        (actualTestMetadata) {
+          final TestMetadata expectedTestMetadata = testMetadata.copyWith(
+            srcTestRootFolder: testConfig['tempUnarchivedTestLocalPath'],
+            destTestRootFolder: testConfig['tempTestRemotePath'],
+          );
 
-      expect(File(testMetadata.destTestInputPath).existsSync(), true);
-      expect(File(testMetadata.destTestOutputPath).existsSync(), true);
+          expect(actualTestMetadata, expectedTestMetadata);
+          expect(File(testMetadata.destTestInputPath).existsSync(), true);
+          expect(File(testMetadata.destTestOutputPath).existsSync(), true);
 
-      _disposeLocalAsset(testMetadata.unarchivedTestPath);
+          _disposeLocalDirectory(testMetadata.unarchivedTestPath);
+        },
+      );
     });
 
     test(
         'Given metadata for archived test not existing on disk, '
         'When decode test use case is called, '
-        'Then storage failure is returned', () async {
+        'Then localTestNotFound storage failure is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata(
         problemId: 'marsx',
@@ -75,13 +83,9 @@ void main() {
       );
 
       // Assert
-      expect(result.isLeft(), true);
-      expect(result.fold(id, id), isA<StorageFailure>());
-
-      // expect StorageFailure.invalidLocalTest
       result.fold(
-        (l) => l.maybeMap(
-          invalidLocalTest: (_) => expect(true, true),
+        (f) => f.maybeMap(
+          localTestNotFound: (_) => expect(true, true),
           orElse: () => expect(true, false),
         ),
         (_) => expect(true, false),
@@ -90,7 +94,7 @@ void main() {
   });
 }
 
-void _disposeLocalAsset(String path) {
+void _disposeLocalDirectory(String path) {
   final Directory dir = Directory(path);
   if (dir.existsSync()) {
     dir.deleteSync(recursive: true);

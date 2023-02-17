@@ -60,7 +60,7 @@ void main() {
     test(
         'Given metadata for test not existing on disk, '
         'When upload test use case is called, '
-        'Then storage failure is returned', () async {
+        'Then localtTestNotFound storage failure is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata(
         problemId: 'marsx',
@@ -75,13 +75,9 @@ void main() {
       );
 
       // Assert
-      expect(result.isLeft(), true);
-      expect(result.fold(id, id), isA<StorageFailure>());
-
-      // expect StorageFailure.invalidLocalTest
       result.fold(
-        (l) => l.maybeMap(
-          invalidLocalTest: (_) => expect(true, true),
+        (f) => f.maybeMap(
+          localTestNotFound: (_) => expect(true, true),
           orElse: () => expect(true, false),
         ),
         (_) => expect(true, false),
