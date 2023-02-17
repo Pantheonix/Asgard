@@ -20,38 +20,52 @@ mixin _$StorageFailure {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(String message) unexpected,
-    required TResult Function(String message) invalidLocalTest,
+    required TResult Function(String message) localTestNotFound,
+    required TResult Function(String message) invalidLocalTestFormat,
+    required TResult Function(String message) testSizeLimitExceeded,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String message)? unexpected,
-    TResult? Function(String message)? invalidLocalTest,
+    TResult? Function(String message)? localTestNotFound,
+    TResult? Function(String message)? invalidLocalTestFormat,
+    TResult? Function(String message)? testSizeLimitExceeded,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String message)? unexpected,
-    TResult Function(String message)? invalidLocalTest,
+    TResult Function(String message)? localTestNotFound,
+    TResult Function(String message)? invalidLocalTestFormat,
+    TResult Function(String message)? testSizeLimitExceeded,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(Unexpected value) unexpected,
-    required TResult Function(InvalidLocalTest value) invalidLocalTest,
+    required TResult Function(LocalTestNotFound value) localTestNotFound,
+    required TResult Function(InvalidLocalTestFormat value)
+        invalidLocalTestFormat,
+    required TResult Function(TestSizeLimitExceeded value)
+        testSizeLimitExceeded,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(Unexpected value)? unexpected,
-    TResult? Function(InvalidLocalTest value)? invalidLocalTest,
+    TResult? Function(LocalTestNotFound value)? localTestNotFound,
+    TResult? Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
+    TResult? Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Unexpected value)? unexpected,
-    TResult Function(InvalidLocalTest value)? invalidLocalTest,
+    TResult Function(LocalTestNotFound value)? localTestNotFound,
+    TResult Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
+    TResult Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -161,7 +175,9 @@ class _$Unexpected implements Unexpected {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(String message) unexpected,
-    required TResult Function(String message) invalidLocalTest,
+    required TResult Function(String message) localTestNotFound,
+    required TResult Function(String message) invalidLocalTestFormat,
+    required TResult Function(String message) testSizeLimitExceeded,
   }) {
     return unexpected(message);
   }
@@ -170,7 +186,9 @@ class _$Unexpected implements Unexpected {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String message)? unexpected,
-    TResult? Function(String message)? invalidLocalTest,
+    TResult? Function(String message)? localTestNotFound,
+    TResult? Function(String message)? invalidLocalTestFormat,
+    TResult? Function(String message)? testSizeLimitExceeded,
   }) {
     return unexpected?.call(message);
   }
@@ -179,7 +197,9 @@ class _$Unexpected implements Unexpected {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String message)? unexpected,
-    TResult Function(String message)? invalidLocalTest,
+    TResult Function(String message)? localTestNotFound,
+    TResult Function(String message)? invalidLocalTestFormat,
+    TResult Function(String message)? testSizeLimitExceeded,
     required TResult orElse(),
   }) {
     if (unexpected != null) {
@@ -192,7 +212,11 @@ class _$Unexpected implements Unexpected {
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(Unexpected value) unexpected,
-    required TResult Function(InvalidLocalTest value) invalidLocalTest,
+    required TResult Function(LocalTestNotFound value) localTestNotFound,
+    required TResult Function(InvalidLocalTestFormat value)
+        invalidLocalTestFormat,
+    required TResult Function(TestSizeLimitExceeded value)
+        testSizeLimitExceeded,
   }) {
     return unexpected(this);
   }
@@ -201,7 +225,9 @@ class _$Unexpected implements Unexpected {
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(Unexpected value)? unexpected,
-    TResult? Function(InvalidLocalTest value)? invalidLocalTest,
+    TResult? Function(LocalTestNotFound value)? localTestNotFound,
+    TResult? Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
+    TResult? Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
   }) {
     return unexpected?.call(this);
   }
@@ -210,7 +236,9 @@ class _$Unexpected implements Unexpected {
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Unexpected value)? unexpected,
-    TResult Function(InvalidLocalTest value)? invalidLocalTest,
+    TResult Function(LocalTestNotFound value)? localTestNotFound,
+    TResult Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
+    TResult Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
     required TResult orElse(),
   }) {
     if (unexpected != null) {
@@ -232,22 +260,22 @@ abstract class Unexpected implements StorageFailure {
 }
 
 /// @nodoc
-abstract class _$$InvalidLocalTestCopyWith<$Res>
+abstract class _$$LocalTestNotFoundCopyWith<$Res>
     implements $StorageFailureCopyWith<$Res> {
-  factory _$$InvalidLocalTestCopyWith(
-          _$InvalidLocalTest value, $Res Function(_$InvalidLocalTest) then) =
-      __$$InvalidLocalTestCopyWithImpl<$Res>;
+  factory _$$LocalTestNotFoundCopyWith(
+          _$LocalTestNotFound value, $Res Function(_$LocalTestNotFound) then) =
+      __$$LocalTestNotFoundCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({String message});
 }
 
 /// @nodoc
-class __$$InvalidLocalTestCopyWithImpl<$Res>
-    extends _$StorageFailureCopyWithImpl<$Res, _$InvalidLocalTest>
-    implements _$$InvalidLocalTestCopyWith<$Res> {
-  __$$InvalidLocalTestCopyWithImpl(
-      _$InvalidLocalTest _value, $Res Function(_$InvalidLocalTest) _then)
+class __$$LocalTestNotFoundCopyWithImpl<$Res>
+    extends _$StorageFailureCopyWithImpl<$Res, _$LocalTestNotFound>
+    implements _$$LocalTestNotFoundCopyWith<$Res> {
+  __$$LocalTestNotFoundCopyWithImpl(
+      _$LocalTestNotFound _value, $Res Function(_$LocalTestNotFound) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -255,7 +283,7 @@ class __$$InvalidLocalTestCopyWithImpl<$Res>
   $Res call({
     Object? message = null,
   }) {
-    return _then(_$InvalidLocalTest(
+    return _then(_$LocalTestNotFound(
       message: null == message
           ? _value.message
           : message // ignore: cast_nullable_to_non_nullable
@@ -266,22 +294,22 @@ class __$$InvalidLocalTestCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$InvalidLocalTest implements InvalidLocalTest {
-  const _$InvalidLocalTest({required this.message});
+class _$LocalTestNotFound implements LocalTestNotFound {
+  const _$LocalTestNotFound({required this.message});
 
   @override
   final String message;
 
   @override
   String toString() {
-    return 'StorageFailure.invalidLocalTest(message: $message)';
+    return 'StorageFailure.localTestNotFound(message: $message)';
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$InvalidLocalTest &&
+            other is _$LocalTestNotFound &&
             (identical(other.message, message) || other.message == message));
   }
 
@@ -291,36 +319,42 @@ class _$InvalidLocalTest implements InvalidLocalTest {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$InvalidLocalTestCopyWith<_$InvalidLocalTest> get copyWith =>
-      __$$InvalidLocalTestCopyWithImpl<_$InvalidLocalTest>(this, _$identity);
+  _$$LocalTestNotFoundCopyWith<_$LocalTestNotFound> get copyWith =>
+      __$$LocalTestNotFoundCopyWithImpl<_$LocalTestNotFound>(this, _$identity);
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function(String message) unexpected,
-    required TResult Function(String message) invalidLocalTest,
+    required TResult Function(String message) localTestNotFound,
+    required TResult Function(String message) invalidLocalTestFormat,
+    required TResult Function(String message) testSizeLimitExceeded,
   }) {
-    return invalidLocalTest(message);
+    return localTestNotFound(message);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String message)? unexpected,
-    TResult? Function(String message)? invalidLocalTest,
+    TResult? Function(String message)? localTestNotFound,
+    TResult? Function(String message)? invalidLocalTestFormat,
+    TResult? Function(String message)? testSizeLimitExceeded,
   }) {
-    return invalidLocalTest?.call(message);
+    return localTestNotFound?.call(message);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String message)? unexpected,
-    TResult Function(String message)? invalidLocalTest,
+    TResult Function(String message)? localTestNotFound,
+    TResult Function(String message)? invalidLocalTestFormat,
+    TResult Function(String message)? testSizeLimitExceeded,
     required TResult orElse(),
   }) {
-    if (invalidLocalTest != null) {
-      return invalidLocalTest(message);
+    if (localTestNotFound != null) {
+      return localTestNotFound(message);
     }
     return orElse();
   }
@@ -329,42 +363,356 @@ class _$InvalidLocalTest implements InvalidLocalTest {
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(Unexpected value) unexpected,
-    required TResult Function(InvalidLocalTest value) invalidLocalTest,
+    required TResult Function(LocalTestNotFound value) localTestNotFound,
+    required TResult Function(InvalidLocalTestFormat value)
+        invalidLocalTestFormat,
+    required TResult Function(TestSizeLimitExceeded value)
+        testSizeLimitExceeded,
   }) {
-    return invalidLocalTest(this);
+    return localTestNotFound(this);
   }
 
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(Unexpected value)? unexpected,
-    TResult? Function(InvalidLocalTest value)? invalidLocalTest,
+    TResult? Function(LocalTestNotFound value)? localTestNotFound,
+    TResult? Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
+    TResult? Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
   }) {
-    return invalidLocalTest?.call(this);
+    return localTestNotFound?.call(this);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Unexpected value)? unexpected,
-    TResult Function(InvalidLocalTest value)? invalidLocalTest,
+    TResult Function(LocalTestNotFound value)? localTestNotFound,
+    TResult Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
+    TResult Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
     required TResult orElse(),
   }) {
-    if (invalidLocalTest != null) {
-      return invalidLocalTest(this);
+    if (localTestNotFound != null) {
+      return localTestNotFound(this);
     }
     return orElse();
   }
 }
 
-abstract class InvalidLocalTest implements StorageFailure {
-  const factory InvalidLocalTest({required final String message}) =
-      _$InvalidLocalTest;
+abstract class LocalTestNotFound implements StorageFailure {
+  const factory LocalTestNotFound({required final String message}) =
+      _$LocalTestNotFound;
 
   @override
   String get message;
   @override
   @JsonKey(ignore: true)
-  _$$InvalidLocalTestCopyWith<_$InvalidLocalTest> get copyWith =>
+  _$$LocalTestNotFoundCopyWith<_$LocalTestNotFound> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$InvalidLocalTestFormatCopyWith<$Res>
+    implements $StorageFailureCopyWith<$Res> {
+  factory _$$InvalidLocalTestFormatCopyWith(_$InvalidLocalTestFormat value,
+          $Res Function(_$InvalidLocalTestFormat) then) =
+      __$$InvalidLocalTestFormatCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String message});
+}
+
+/// @nodoc
+class __$$InvalidLocalTestFormatCopyWithImpl<$Res>
+    extends _$StorageFailureCopyWithImpl<$Res, _$InvalidLocalTestFormat>
+    implements _$$InvalidLocalTestFormatCopyWith<$Res> {
+  __$$InvalidLocalTestFormatCopyWithImpl(_$InvalidLocalTestFormat _value,
+      $Res Function(_$InvalidLocalTestFormat) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? message = null,
+  }) {
+    return _then(_$InvalidLocalTestFormat(
+      message: null == message
+          ? _value.message
+          : message // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$InvalidLocalTestFormat implements InvalidLocalTestFormat {
+  const _$InvalidLocalTestFormat({required this.message});
+
+  @override
+  final String message;
+
+  @override
+  String toString() {
+    return 'StorageFailure.invalidLocalTestFormat(message: $message)';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$InvalidLocalTestFormat &&
+            (identical(other.message, message) || other.message == message));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, message);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$InvalidLocalTestFormatCopyWith<_$InvalidLocalTestFormat> get copyWith =>
+      __$$InvalidLocalTestFormatCopyWithImpl<_$InvalidLocalTestFormat>(
+          this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(String message) unexpected,
+    required TResult Function(String message) localTestNotFound,
+    required TResult Function(String message) invalidLocalTestFormat,
+    required TResult Function(String message) testSizeLimitExceeded,
+  }) {
+    return invalidLocalTestFormat(message);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String message)? unexpected,
+    TResult? Function(String message)? localTestNotFound,
+    TResult? Function(String message)? invalidLocalTestFormat,
+    TResult? Function(String message)? testSizeLimitExceeded,
+  }) {
+    return invalidLocalTestFormat?.call(message);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String message)? unexpected,
+    TResult Function(String message)? localTestNotFound,
+    TResult Function(String message)? invalidLocalTestFormat,
+    TResult Function(String message)? testSizeLimitExceeded,
+    required TResult orElse(),
+  }) {
+    if (invalidLocalTestFormat != null) {
+      return invalidLocalTestFormat(message);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(Unexpected value) unexpected,
+    required TResult Function(LocalTestNotFound value) localTestNotFound,
+    required TResult Function(InvalidLocalTestFormat value)
+        invalidLocalTestFormat,
+    required TResult Function(TestSizeLimitExceeded value)
+        testSizeLimitExceeded,
+  }) {
+    return invalidLocalTestFormat(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(Unexpected value)? unexpected,
+    TResult? Function(LocalTestNotFound value)? localTestNotFound,
+    TResult? Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
+    TResult? Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
+  }) {
+    return invalidLocalTestFormat?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(Unexpected value)? unexpected,
+    TResult Function(LocalTestNotFound value)? localTestNotFound,
+    TResult Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
+    TResult Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
+    required TResult orElse(),
+  }) {
+    if (invalidLocalTestFormat != null) {
+      return invalidLocalTestFormat(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class InvalidLocalTestFormat implements StorageFailure {
+  const factory InvalidLocalTestFormat({required final String message}) =
+      _$InvalidLocalTestFormat;
+
+  @override
+  String get message;
+  @override
+  @JsonKey(ignore: true)
+  _$$InvalidLocalTestFormatCopyWith<_$InvalidLocalTestFormat> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$TestSizeLimitExceededCopyWith<$Res>
+    implements $StorageFailureCopyWith<$Res> {
+  factory _$$TestSizeLimitExceededCopyWith(_$TestSizeLimitExceeded value,
+          $Res Function(_$TestSizeLimitExceeded) then) =
+      __$$TestSizeLimitExceededCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String message});
+}
+
+/// @nodoc
+class __$$TestSizeLimitExceededCopyWithImpl<$Res>
+    extends _$StorageFailureCopyWithImpl<$Res, _$TestSizeLimitExceeded>
+    implements _$$TestSizeLimitExceededCopyWith<$Res> {
+  __$$TestSizeLimitExceededCopyWithImpl(_$TestSizeLimitExceeded _value,
+      $Res Function(_$TestSizeLimitExceeded) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? message = null,
+  }) {
+    return _then(_$TestSizeLimitExceeded(
+      message: null == message
+          ? _value.message
+          : message // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$TestSizeLimitExceeded implements TestSizeLimitExceeded {
+  const _$TestSizeLimitExceeded({required this.message});
+
+  @override
+  final String message;
+
+  @override
+  String toString() {
+    return 'StorageFailure.testSizeLimitExceeded(message: $message)';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$TestSizeLimitExceeded &&
+            (identical(other.message, message) || other.message == message));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, message);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$TestSizeLimitExceededCopyWith<_$TestSizeLimitExceeded> get copyWith =>
+      __$$TestSizeLimitExceededCopyWithImpl<_$TestSizeLimitExceeded>(
+          this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(String message) unexpected,
+    required TResult Function(String message) localTestNotFound,
+    required TResult Function(String message) invalidLocalTestFormat,
+    required TResult Function(String message) testSizeLimitExceeded,
+  }) {
+    return testSizeLimitExceeded(message);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String message)? unexpected,
+    TResult? Function(String message)? localTestNotFound,
+    TResult? Function(String message)? invalidLocalTestFormat,
+    TResult? Function(String message)? testSizeLimitExceeded,
+  }) {
+    return testSizeLimitExceeded?.call(message);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String message)? unexpected,
+    TResult Function(String message)? localTestNotFound,
+    TResult Function(String message)? invalidLocalTestFormat,
+    TResult Function(String message)? testSizeLimitExceeded,
+    required TResult orElse(),
+  }) {
+    if (testSizeLimitExceeded != null) {
+      return testSizeLimitExceeded(message);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(Unexpected value) unexpected,
+    required TResult Function(LocalTestNotFound value) localTestNotFound,
+    required TResult Function(InvalidLocalTestFormat value)
+        invalidLocalTestFormat,
+    required TResult Function(TestSizeLimitExceeded value)
+        testSizeLimitExceeded,
+  }) {
+    return testSizeLimitExceeded(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(Unexpected value)? unexpected,
+    TResult? Function(LocalTestNotFound value)? localTestNotFound,
+    TResult? Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
+    TResult? Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
+  }) {
+    return testSizeLimitExceeded?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(Unexpected value)? unexpected,
+    TResult Function(LocalTestNotFound value)? localTestNotFound,
+    TResult Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
+    TResult Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
+    required TResult orElse(),
+  }) {
+    if (testSizeLimitExceeded != null) {
+      return testSizeLimitExceeded(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class TestSizeLimitExceeded implements StorageFailure {
+  const factory TestSizeLimitExceeded({required final String message}) =
+      _$TestSizeLimitExceeded;
+
+  @override
+  String get message;
+  @override
+  @JsonKey(ignore: true)
+  _$$TestSizeLimitExceededCopyWith<_$TestSizeLimitExceeded> get copyWith =>
       throw _privateConstructorUsedError;
 }

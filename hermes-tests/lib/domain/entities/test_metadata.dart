@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hermes_tests/api/core/hermes.pb.dart';
 
 part 'test_metadata.freezed.dart';
 

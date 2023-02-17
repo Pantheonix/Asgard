@@ -7,7 +7,13 @@ class StorageFailure with _$StorageFailure {
   const factory StorageFailure.unexpected({
     required String message,
   }) = Unexpected;
-  const factory StorageFailure.invalidLocalTest({
+  const factory StorageFailure.localTestNotFound({
     required String message,
-  }) = InvalidLocalTest;
+  }) = LocalTestNotFound;
+  const factory StorageFailure.invalidLocalTestFormat({
+    required String message,
+  }) = InvalidLocalTestFormat;
+  const factory StorageFailure.testSizeLimitExceeded({
+    required String message,
+  }) = TestSizeLimitExceeded;
 }

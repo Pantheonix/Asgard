@@ -30,7 +30,7 @@ class UploadTestAsyncQueryHandler extends IAsyncQueryHandler<
     if (localInputFile.existsSync() == false) {
       return Future.value(
         left(
-          StorageFailure.invalidLocalTest(
+          StorageFailure.localTestNotFound(
             message:
                 'Input file not found for test ${command.testMetadata.testRelativePath}',
           ),
@@ -43,7 +43,7 @@ class UploadTestAsyncQueryHandler extends IAsyncQueryHandler<
     if (localOutputFile.existsSync() == false) {
       return Future.value(
         left(
-          StorageFailure.invalidLocalTest(
+          StorageFailure.localTestNotFound(
             message:
                 'Output file not found for test ${command.testMetadata.testRelativePath}',
           ),

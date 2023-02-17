@@ -29,7 +29,7 @@ class DecodeTestAsyncQueryHandler extends IAsyncQueryHandler<
     if (localArchivedTestFile.existsSync() == false) {
       return Future.value(
         left(
-          StorageFailure.invalidLocalTest(
+          StorageFailure.localTestNotFound(
             message:
                 'Archived test file not found for test ${command.testMetadata.testRelativePath}',
           ),
