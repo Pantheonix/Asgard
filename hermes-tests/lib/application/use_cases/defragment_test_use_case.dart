@@ -9,14 +9,14 @@ import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 class DefragmentTestAsyncQuery
     extends IAsyncQuery<Either<StorageFailure, TestMetadata>> {
   final Metadata testMetadata;
-  final Stream<Chunk> inputStream;
+  final Stream<Chunk> chunkStream;
   final String destTestRootFolderForChunkedTest;
   final String destTestRootFolderForArchivedTest;
   final int maxTestSize;
 
   DefragmentTestAsyncQuery({
     required this.testMetadata,
-    required this.inputStream,
+    required this.chunkStream,
     required this.destTestRootFolderForChunkedTest,
     required this.destTestRootFolderForArchivedTest,
     required this.maxTestSize,
@@ -51,8 +51,9 @@ class DefragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
 
     int writtenBytes = 0;
     try {
-      await command.inputStream.forEach((chunk) {
+      await command.chunkStream.forEach((chunk) {
         writtenBytes += chunk.data.length;
+        print('writtenBytes: $writtenBytes');
         if (writtenBytes > command.testMetadata.testSize) {
           throw Exception('Received more bytes than expected metadata size: '
               '${writtenBytes}B > ${command.testMetadata.testSize}B');
@@ -72,6 +73,7 @@ class DefragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
     }
 
     await sink.close();
+    print('output file stream closed');
 
     if (!_isZipFile(resultTestMetadata.archivedTestPath)) {
       _disposeLocalAsset(resultTestMetadata.archivedTestPath);
