@@ -39,13 +39,13 @@ void main() {
         ..testId = '2'
         ..testSize = testSize;
 
-      final Stream<Chunk> inputStream = _readStreamOfChunksForFile(inputPath);
+      final Stream<Chunk> chunkStream = _readStreamOfChunksForFile(inputPath);
 
       // Act
       final Either<StorageFailure, TestMetadata> result = await sut.run(
         DefragmentTestAsyncQuery(
           testMetadata: testMetadata,
-          inputStream: inputStream,
+          chunkStream: chunkStream,
           destTestRootFolderForChunkedTest:
               testConfig['tempArchivedTestLocalPath'],
           destTestRootFolderForArchivedTest:
@@ -89,13 +89,13 @@ void main() {
         ..testId = '2'
         ..testSize = testSize;
 
-      final Stream<Chunk> inputStream = _readStreamOfChunksForFile(inputPath);
+      final Stream<Chunk> chunkStream = _readStreamOfChunksForFile(inputPath);
 
       // Act
       final Either<StorageFailure, TestMetadata> result = await sut.run(
         DefragmentTestAsyncQuery(
           testMetadata: testMetadata,
-          inputStream: inputStream,
+          chunkStream: chunkStream,
           destTestRootFolderForChunkedTest:
               testConfig['tempArchivedTestLocalPath'],
           destTestRootFolderForArchivedTest:
@@ -129,13 +129,13 @@ void main() {
         ..testId = '2'
         ..testSize = testSize;
 
-      final Stream<Chunk> inputStream = _readStreamOfChunksForFile(inputPath);
+      final Stream<Chunk> chunkStream = _readStreamOfChunksForFile(inputPath);
 
       // Act
       final Either<StorageFailure, TestMetadata> result = await sut.run(
         DefragmentTestAsyncQuery(
           testMetadata: testMetadata,
-          inputStream: inputStream,
+          chunkStream: chunkStream,
           destTestRootFolderForChunkedTest:
               testConfig['tempArchivedTestLocalPath'],
           destTestRootFolderForArchivedTest:
