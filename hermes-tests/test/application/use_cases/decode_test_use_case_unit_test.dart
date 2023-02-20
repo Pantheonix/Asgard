@@ -3,18 +3,21 @@ import 'dart:io';
 import 'package:cqrs_mediator/cqrs_mediator.dart';
 import 'package:dartz/dartz.dart';
 import 'package:hermes_tests/application/use_cases/decode_test_use_case.dart';
-import 'package:hermes_tests/di/config.dart';
+import 'package:hermes_tests/di/config/config.dart';
+import 'package:hermes_tests/di/config/server_config.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:test/test.dart';
 
 void main() {
-  late final Map testConfig;
+  late final ServerConfig testConfig;
   late final Mediator sut;
 
   group('Decode Test UseCase Unit Tests', () {
     setUpAll(() {
-      testConfig = Config.fromJsonFile('config.json').test;
+      testConfig = ServerConfig.fromJson(
+        Config.fromJsonFile('config.json').test,
+      );
 
       Mediator.instance.registerHandler(
         () => DecodeTestAsyncQueryHandler(),
@@ -32,15 +35,15 @@ void main() {
       final TestMetadata testMetadata = TestMetadata(
         problemId: 'marsx',
         testId: '1',
-        srcTestRootFolder: testConfig['tempArchivedTestLocalPath'],
-        destTestRootFolder: testConfig['tempUnarchivedTestLocalPath'],
+        srcTestRootFolder: testConfig.tempArchivedTestLocalPath,
+        destTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
       );
 
       // Act
       final Either<StorageFailure, TestMetadata> result = await sut.run(
         DecodeTestAsyncQuery(
           testMetadata: testMetadata,
-          destTestRootFolderForUnarchivedTest: testConfig['tempTestRemotePath'],
+          destTestRootFolderForUnarchivedTest: testConfig.tempTestRemotePath,
         ),
       );
 
@@ -49,8 +52,8 @@ void main() {
         (f) => expect(true, false),
         (actualTestMetadata) {
           final TestMetadata expectedTestMetadata = testMetadata.copyWith(
-            srcTestRootFolder: testConfig['tempUnarchivedTestLocalPath'],
-            destTestRootFolder: testConfig['tempTestRemotePath'],
+            srcTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
+            destTestRootFolder: testConfig.tempTestRemotePath,
           );
 
           expect(actualTestMetadata, expectedTestMetadata);
@@ -70,15 +73,15 @@ void main() {
       final TestMetadata testMetadata = TestMetadata(
         problemId: 'marsx',
         testId: '3',
-        srcTestRootFolder: testConfig['tempArchivedTestLocalPath'],
-        destTestRootFolder: testConfig['tempUnarchivedTestLocalPath'],
+        srcTestRootFolder: testConfig.tempArchivedTestLocalPath,
+        destTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
       );
 
       // Act
       final Either<StorageFailure, TestMetadata> result = await sut.run(
         DecodeTestAsyncQuery(
           testMetadata: testMetadata,
-          destTestRootFolderForUnarchivedTest: testConfig['tempTestRemotePath'],
+          destTestRootFolderForUnarchivedTest: testConfig.tempTestRemotePath,
         ),
       );
 

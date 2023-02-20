@@ -3,15 +3,16 @@ import 'dart:io';
 
 import 'package:grpc/grpc.dart';
 import 'package:hermes_tests/api/core/hermes.pbgrpc.dart';
+import 'package:hermes_tests/di/config/server_config.dart';
 
 class HermesGrpcClient {
   late final ClientChannel channel;
   late final HermesTestsServiceClient client;
 
-  HermesGrpcClient.fromConfig(Map config) {
+  HermesGrpcClient.fromConfig(ServerConfig config) {
     channel = ClientChannel(
-      config['host'],
-      port: config['port'],
+      config.host,
+      port: config.port,
       options: const ChannelOptions(
         credentials: ChannelCredentials.insecure(),
       ),
@@ -20,7 +21,7 @@ class HermesGrpcClient {
     client = HermesTestsServiceClient(
       channel,
       options: CallOptions(
-        timeout: Duration(seconds: config['timeoutInSeconds']),
+        timeout: Duration(seconds: config.timeoutInSeconds),
       ),
     );
   }

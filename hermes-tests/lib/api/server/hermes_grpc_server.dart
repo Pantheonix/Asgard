@@ -7,11 +7,12 @@ import 'package:hermes_tests/api/core/hermes.pbgrpc.dart';
 import 'package:hermes_tests/application/use_cases/decode_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/defragment_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/upload_test_use_case.dart';
+import 'package:hermes_tests/di/config/server_config.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 
 class HermesGrpcServer extends HermesTestsServiceBase {
-  late final Map config;
+  late final ServerConfig config;
   late final Mediator mediator;
   late final Server server;
 
@@ -60,10 +61,9 @@ class HermesGrpcServer extends HermesTestsServiceBase {
       DefragmentTestAsyncQuery(
         testMetadata: metadata,
         chunkStream: chunkStreamController.stream,
-        destTestRootFolderForChunkedTest: config['tempArchivedTestLocalPath'],
-        destTestRootFolderForArchivedTest:
-            config['tempUnarchivedTestLocalPath'],
-        maxTestSize: config['testMaxSizeInBytes'],
+        destTestRootFolderForChunkedTest: config.tempArchivedTestLocalPath,
+        destTestRootFolderForArchivedTest: config.tempUnarchivedTestLocalPath,
+        maxTestSize: config.testMaxSizeInBytes,
       ),
     );
     print('defragment response received');
@@ -89,7 +89,7 @@ class HermesGrpcServer extends HermesTestsServiceBase {
         await mediator.run(
       DecodeTestAsyncQuery(
         testMetadata: archivedTestMetadata,
-        destTestRootFolderForUnarchivedTest: config['tempTestRemotePath'],
+        destTestRootFolderForUnarchivedTest: config.tempTestRemotePath,
       ),
     );
     print('decode response received');
@@ -141,8 +141,8 @@ class HermesGrpcServer extends HermesTestsServiceBase {
   Future<void> start() async {
     initServices();
     await server.serve(
-      address: config['host'],
-      port: config['port'],
+      address: config.host,
+      port: config.port,
     );
   }
 

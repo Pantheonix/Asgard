@@ -5,18 +5,21 @@ import 'package:cqrs_mediator/cqrs_mediator.dart';
 import 'package:dartz/dartz.dart';
 import 'package:hermes_tests/api/core/hermes.pb.dart';
 import 'package:hermes_tests/application/use_cases/defragment_test_use_case.dart';
-import 'package:hermes_tests/di/config.dart';
+import 'package:hermes_tests/di/config/config.dart';
+import 'package:hermes_tests/di/config/server_config.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:test/test.dart';
 
 void main() {
-  late final Map testConfig;
+  late final ServerConfig testConfig;
   late final Mediator sut;
 
   group('Defragment Test UseCase Unit Tests', () {
     setUpAll(() async {
-      testConfig = Config.fromJsonFile('config.json').test;
+      testConfig = ServerConfig.fromJson(
+        Config.fromJsonFile('config.json').test,
+      );
 
       Mediator.instance.registerHandler(
         () => DefragmentTestAsyncQueryHandler(),
@@ -47,10 +50,10 @@ void main() {
           testMetadata: testMetadata,
           chunkStream: chunkStream,
           destTestRootFolderForChunkedTest:
-              testConfig['tempArchivedTestLocalPath'],
+              testConfig.tempArchivedTestLocalPath,
           destTestRootFolderForArchivedTest:
-              testConfig['tempUnarchivedTestLocalPath'],
-          maxTestSize: testConfig['testMaxSizeInBytes'],
+              testConfig.tempUnarchivedTestLocalPath,
+          maxTestSize: testConfig.testMaxSizeInBytes,
         ),
       );
 
@@ -61,8 +64,8 @@ void main() {
           final TestMetadata expectedTestMetadata = TestMetadata(
             problemId: 'marsx',
             testId: '2',
-            srcTestRootFolder: testConfig['tempArchivedTestLocalPath'],
-            destTestRootFolder: testConfig['tempUnarchivedTestLocalPath'],
+            srcTestRootFolder: testConfig.tempArchivedTestLocalPath,
+            destTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
           );
 
           expect(actualTestMetadata, expectedTestMetadata);
@@ -97,10 +100,10 @@ void main() {
           testMetadata: testMetadata,
           chunkStream: chunkStream,
           destTestRootFolderForChunkedTest:
-              testConfig['tempArchivedTestLocalPath'],
+              testConfig.tempArchivedTestLocalPath,
           destTestRootFolderForArchivedTest:
-              testConfig['tempUnarchivedTestLocalPath'],
-          maxTestSize: testConfig['testMaxSizeInBytes'],
+              testConfig.tempUnarchivedTestLocalPath,
+          maxTestSize: testConfig.testMaxSizeInBytes,
         ),
       );
 
@@ -137,10 +140,10 @@ void main() {
           testMetadata: testMetadata,
           chunkStream: chunkStream,
           destTestRootFolderForChunkedTest:
-              testConfig['tempArchivedTestLocalPath'],
+              testConfig.tempArchivedTestLocalPath,
           destTestRootFolderForArchivedTest:
-              testConfig['tempUnarchivedTestLocalPath'],
-          maxTestSize: testConfig['testMaxSizeInBytes'],
+              testConfig.tempUnarchivedTestLocalPath,
+          maxTestSize: testConfig.testMaxSizeInBytes,
         ),
       );
 

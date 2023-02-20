@@ -4,11 +4,11 @@ import 'package:firebase_dart/firebase_dart.dart';
 import 'package:hermes_tests/api/client/hermes_grpc_client.dart';
 import 'package:hermes_tests/api/core/hermes.pb.dart';
 import 'package:hermes_tests/api/server/hermes_grpc_server.dart';
-import 'package:hermes_tests/di/config.dart';
+import 'package:hermes_tests/di/config/server_config.dart';
 import 'package:hermes_tests/di/injection.dart';
 import 'package:test/test.dart';
 
-late final Map testConfig;
+late final ServerConfig testConfig;
 late final HermesGrpcClient client;
 late final HermesGrpcServer server;
 late final FirebaseStorage storage;
@@ -19,7 +19,7 @@ void main() {
       FirebaseDart.setup();
       await configureDependencies('test');
 
-      testConfig = getIt<Config>().test;
+      testConfig = getIt<ServerConfig>();
       storage = await getIt.getAsync<FirebaseStorage>();
 
       client = HermesGrpcClient.fromConfig(testConfig);
@@ -64,9 +64,9 @@ void main() {
       expect(remoteTestOutputMetadata.fullPath, remoteTestOutputPath);
 
       final String localTestArchivePath =
-          '${testConfig['tempArchivedTestLocalPath']}/${testMetadata.problemId}/${testMetadata.testId}.zip';
+          '${testConfig.tempArchivedTestLocalPath}/${testMetadata.problemId}/${testMetadata.testId}.zip';
       final String localTestPath =
-          '${testConfig['tempUnarchivedTestLocalPath']}/${testMetadata.problemId}/${testMetadata.testId}';
+          '${testConfig.tempUnarchivedTestLocalPath}/${testMetadata.problemId}/${testMetadata.testId}';
 
       _disposeLocalFile(localTestArchivePath);
       _disposeLocalDirectory(localTestPath);

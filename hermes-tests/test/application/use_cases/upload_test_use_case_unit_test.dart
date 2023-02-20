@@ -1,7 +1,8 @@
 import 'package:cqrs_mediator/cqrs_mediator.dart';
 import 'package:dartz/dartz.dart';
 import 'package:hermes_tests/application/use_cases/upload_test_use_case.dart';
-import 'package:hermes_tests/di/config.dart';
+import 'package:hermes_tests/di/config/config.dart';
+import 'package:hermes_tests/di/config/server_config.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:hermes_tests/domain/interfaces/i_test_repository.dart';
@@ -13,13 +14,15 @@ class MockTestRepository extends Mock implements ITestRepository {}
 class FakeTestMetadata extends Fake implements TestMetadata {}
 
 void main() {
-  late final Map testConfig;
+  late final ServerConfig testConfig;
   late final MockTestRepository mockTestRepository;
   late final Mediator sut;
 
   group('Upload Test UseCase Unit Tests', () {
     setUpAll(() {
-      testConfig = Config.fromJsonFile('config.json').test;
+      testConfig = ServerConfig.fromJson(
+        Config.fromJsonFile('config.json').test,
+      );
       mockTestRepository = MockTestRepository();
 
       registerFallbackValue(FakeTestMetadata());
@@ -44,8 +47,8 @@ void main() {
       final TestMetadata testMetadata = TestMetadata(
         problemId: 'marsx',
         testId: '2',
-        srcTestRootFolder: testConfig['tempUnarchivedTestLocalPath'],
-        destTestRootFolder: testConfig['tempTestRemotePath'],
+        srcTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
+        destTestRootFolder: testConfig.tempTestRemotePath,
       );
 
       // Act
@@ -65,8 +68,8 @@ void main() {
       final TestMetadata testMetadata = TestMetadata(
         problemId: 'marsx',
         testId: '3',
-        srcTestRootFolder: testConfig['tempUnarchivedTestLocalPath'],
-        destTestRootFolder: testConfig['tempTestRemotePath'],
+        srcTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
+        destTestRootFolder: testConfig.tempTestRemotePath,
       );
 
       // Act
