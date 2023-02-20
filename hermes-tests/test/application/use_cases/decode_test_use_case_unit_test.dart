@@ -5,8 +5,10 @@ import 'package:dartz/dartz.dart';
 import 'package:hermes_tests/application/use_cases/decode_test_use_case.dart';
 import 'package:hermes_tests/di/config/config.dart';
 import 'package:hermes_tests/di/config/server_config.dart';
+import 'package:hermes_tests/domain/core/file_log_output.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
+import 'package:logger/logger.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -18,9 +20,16 @@ void main() {
       testConfig = ServerConfig.fromJson(
         Config.fromJsonFile('config.json').test,
       );
+      final logger = Logger(
+        output: FileLogOutput(
+          testConfig.logOutputFilePath,
+        ),
+      );
 
       Mediator.instance.registerHandler(
-        () => DecodeTestAsyncQueryHandler(),
+        () => DecodeTestAsyncQueryHandler(
+          logger,
+        ),
       );
 
       sut = Mediator.instance;

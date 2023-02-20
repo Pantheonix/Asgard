@@ -6,6 +6,7 @@ import 'package:hermes_tests/api/core/hermes.pb.dart';
 import 'package:hermes_tests/api/server/hermes_grpc_server.dart';
 import 'package:hermes_tests/di/config/server_config.dart';
 import 'package:hermes_tests/di/injection.dart';
+import 'package:logger/logger.dart';
 import 'package:test/test.dart';
 
 late final ServerConfig testConfig;
@@ -21,9 +22,14 @@ void main() {
 
       testConfig = getIt<ServerConfig>();
       storage = await getIt.getAsync<FirebaseStorage>();
+      final logger = getIt.get<Logger>();
 
       client = HermesGrpcClient.fromConfig(testConfig);
-      server = HermesGrpcServer.fromConfig(testConfig, mediator);
+      server = HermesGrpcServer(
+        testConfig,
+        mediator,
+        logger,
+      );
     });
 
     test(

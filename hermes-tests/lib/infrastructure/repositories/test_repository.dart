@@ -9,7 +9,9 @@ import 'package:injectable/injectable.dart';
 class TestRepository implements ITestRepository {
   final FirebaseStorage _storage;
 
-  TestRepository(this._storage);
+  TestRepository(
+    this._storage,
+  );
 
   @override
   Future<void> upload(TestMetadata testMetadata) async {

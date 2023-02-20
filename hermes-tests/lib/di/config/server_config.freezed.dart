@@ -27,6 +27,7 @@ mixin _$ServerConfig {
   String get tempUnarchivedTestLocalPath => throw _privateConstructorUsedError;
   String get tempTestRemotePath => throw _privateConstructorUsedError;
   int get testMaxSizeInBytes => throw _privateConstructorUsedError;
+  String get logOutputFilePath => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -47,7 +48,8 @@ abstract class $ServerConfigCopyWith<$Res> {
       String tempArchivedTestLocalPath,
       String tempUnarchivedTestLocalPath,
       String tempTestRemotePath,
-      int testMaxSizeInBytes});
+      int testMaxSizeInBytes,
+      String logOutputFilePath});
 }
 
 /// @nodoc
@@ -70,6 +72,7 @@ class _$ServerConfigCopyWithImpl<$Res, $Val extends ServerConfig>
     Object? tempUnarchivedTestLocalPath = null,
     Object? tempTestRemotePath = null,
     Object? testMaxSizeInBytes = null,
+    Object? logOutputFilePath = null,
   }) {
     return _then(_value.copyWith(
       host: null == host
@@ -100,6 +103,10 @@ class _$ServerConfigCopyWithImpl<$Res, $Val extends ServerConfig>
           ? _value.testMaxSizeInBytes
           : testMaxSizeInBytes // ignore: cast_nullable_to_non_nullable
               as int,
+      logOutputFilePath: null == logOutputFilePath
+          ? _value.logOutputFilePath
+          : logOutputFilePath // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
   }
 }
@@ -119,7 +126,8 @@ abstract class _$$_ServerConfigCopyWith<$Res>
       String tempArchivedTestLocalPath,
       String tempUnarchivedTestLocalPath,
       String tempTestRemotePath,
-      int testMaxSizeInBytes});
+      int testMaxSizeInBytes,
+      String logOutputFilePath});
 }
 
 /// @nodoc
@@ -140,6 +148,7 @@ class __$$_ServerConfigCopyWithImpl<$Res>
     Object? tempUnarchivedTestLocalPath = null,
     Object? tempTestRemotePath = null,
     Object? testMaxSizeInBytes = null,
+    Object? logOutputFilePath = null,
   }) {
     return _then(_$_ServerConfig(
       host: null == host
@@ -170,6 +179,10 @@ class __$$_ServerConfigCopyWithImpl<$Res>
           ? _value.testMaxSizeInBytes
           : testMaxSizeInBytes // ignore: cast_nullable_to_non_nullable
               as int,
+      logOutputFilePath: null == logOutputFilePath
+          ? _value.logOutputFilePath
+          : logOutputFilePath // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -184,7 +197,8 @@ class _$_ServerConfig implements _ServerConfig {
       required this.tempArchivedTestLocalPath,
       required this.tempUnarchivedTestLocalPath,
       required this.tempTestRemotePath,
-      required this.testMaxSizeInBytes});
+      required this.testMaxSizeInBytes,
+      required this.logOutputFilePath});
 
   factory _$_ServerConfig.fromJson(Map<String, dynamic> json) =>
       _$$_ServerConfigFromJson(json);
@@ -203,10 +217,12 @@ class _$_ServerConfig implements _ServerConfig {
   final String tempTestRemotePath;
   @override
   final int testMaxSizeInBytes;
+  @override
+  final String logOutputFilePath;
 
   @override
   String toString() {
-    return 'ServerConfig(host: $host, port: $port, timeoutInSeconds: $timeoutInSeconds, tempArchivedTestLocalPath: $tempArchivedTestLocalPath, tempUnarchivedTestLocalPath: $tempUnarchivedTestLocalPath, tempTestRemotePath: $tempTestRemotePath, testMaxSizeInBytes: $testMaxSizeInBytes)';
+    return 'ServerConfig(host: $host, port: $port, timeoutInSeconds: $timeoutInSeconds, tempArchivedTestLocalPath: $tempArchivedTestLocalPath, tempUnarchivedTestLocalPath: $tempUnarchivedTestLocalPath, tempTestRemotePath: $tempTestRemotePath, testMaxSizeInBytes: $testMaxSizeInBytes, logOutputFilePath: $logOutputFilePath)';
   }
 
   @override
@@ -228,7 +244,9 @@ class _$_ServerConfig implements _ServerConfig {
             (identical(other.tempTestRemotePath, tempTestRemotePath) ||
                 other.tempTestRemotePath == tempTestRemotePath) &&
             (identical(other.testMaxSizeInBytes, testMaxSizeInBytes) ||
-                other.testMaxSizeInBytes == testMaxSizeInBytes));
+                other.testMaxSizeInBytes == testMaxSizeInBytes) &&
+            (identical(other.logOutputFilePath, logOutputFilePath) ||
+                other.logOutputFilePath == logOutputFilePath));
   }
 
   @JsonKey(ignore: true)
@@ -241,7 +259,8 @@ class _$_ServerConfig implements _ServerConfig {
       tempArchivedTestLocalPath,
       tempUnarchivedTestLocalPath,
       tempTestRemotePath,
-      testMaxSizeInBytes);
+      testMaxSizeInBytes,
+      logOutputFilePath);
 
   @JsonKey(ignore: true)
   @override
@@ -265,7 +284,8 @@ abstract class _ServerConfig implements ServerConfig {
       required final String tempArchivedTestLocalPath,
       required final String tempUnarchivedTestLocalPath,
       required final String tempTestRemotePath,
-      required final int testMaxSizeInBytes}) = _$_ServerConfig;
+      required final int testMaxSizeInBytes,
+      required final String logOutputFilePath}) = _$_ServerConfig;
 
   factory _ServerConfig.fromJson(Map<String, dynamic> json) =
       _$_ServerConfig.fromJson;
@@ -284,6 +304,8 @@ abstract class _ServerConfig implements ServerConfig {
   String get tempTestRemotePath;
   @override
   int get testMaxSizeInBytes;
+  @override
+  String get logOutputFilePath;
   @override
   @JsonKey(ignore: true)
   _$$_ServerConfigCopyWith<_$_ServerConfig> get copyWith =>

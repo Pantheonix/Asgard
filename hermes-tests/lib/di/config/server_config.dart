@@ -13,6 +13,7 @@ class ServerConfig with _$ServerConfig {
     required String tempUnarchivedTestLocalPath,
     required String tempTestRemotePath,
     required int testMaxSizeInBytes,
+    required String logOutputFilePath,
   }) = _ServerConfig;
 
   factory ServerConfig.fromJson(Map<String, dynamic> json) =>

@@ -3,9 +3,11 @@ import 'package:dartz/dartz.dart';
 import 'package:hermes_tests/application/use_cases/upload_test_use_case.dart';
 import 'package:hermes_tests/di/config/config.dart';
 import 'package:hermes_tests/di/config/server_config.dart';
+import 'package:hermes_tests/domain/core/file_log_output.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:hermes_tests/domain/interfaces/i_test_repository.dart';
+import 'package:logger/logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -24,6 +26,11 @@ void main() {
         Config.fromJsonFile('config.json').test,
       );
       mockTestRepository = MockTestRepository();
+      final logger = Logger(
+        output: FileLogOutput(
+          testConfig.logOutputFilePath,
+        ),
+      );
 
       registerFallbackValue(FakeTestMetadata());
       when(
@@ -33,7 +40,10 @@ void main() {
       );
 
       Mediator.instance.registerHandler(
-        () => UploadTestAsyncQueryHandler(mockTestRepository),
+        () => UploadTestAsyncQueryHandler(
+          mockTestRepository,
+          logger,
+        ),
       );
 
       sut = Mediator.instance;

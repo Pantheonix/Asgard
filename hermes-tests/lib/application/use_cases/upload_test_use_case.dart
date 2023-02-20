@@ -6,6 +6,7 @@ import 'package:firebase_dart/firebase_dart.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:hermes_tests/domain/interfaces/i_test_repository.dart';
+import 'package:logger/logger.dart';
 
 class UploadTestAsyncQuery extends IAsyncQuery<Either<StorageFailure, Unit>> {
   final TestMetadata testMetadata;
@@ -18,21 +19,32 @@ class UploadTestAsyncQuery extends IAsyncQuery<Either<StorageFailure, Unit>> {
 class UploadTestAsyncQueryHandler extends IAsyncQueryHandler<
     Either<StorageFailure, Unit>, UploadTestAsyncQuery> {
   final ITestRepository _testRepository;
+  final Logger _logger;
 
-  UploadTestAsyncQueryHandler(this._testRepository);
+  UploadTestAsyncQueryHandler(
+    this._testRepository,
+    this._logger,
+  );
 
   @override
   Future<Either<StorageFailure, Unit>> call(
     UploadTestAsyncQuery command,
   ) async {
+    _logger.i(
+      'Calling Upload UseCase for test ${command.testMetadata.testRelativePath}...',
+    );
+
     // check if input file exists
     final File localInputFile = File(command.testMetadata.srcTestInputPath);
     if (localInputFile.existsSync() == false) {
+      final message =
+          'Input file not found for test ${command.testMetadata.testRelativePath}';
+      _logger.e(message);
+
       return Future.value(
         left(
           StorageFailure.localTestNotFound(
-            message:
-                'Input file not found for test ${command.testMetadata.testRelativePath}',
+            message: message,
           ),
         ),
       );
@@ -41,11 +53,14 @@ class UploadTestAsyncQueryHandler extends IAsyncQueryHandler<
     // check if output file exists
     final File localOutputFile = File(command.testMetadata.srcTestOutputPath);
     if (localOutputFile.existsSync() == false) {
+      final message =
+          'Output file not found for test ${command.testMetadata.testRelativePath}';
+      _logger.e(message);
+
       return Future.value(
         left(
           StorageFailure.localTestNotFound(
-            message:
-                'Output file not found for test ${command.testMetadata.testRelativePath}',
+            message: message,
           ),
         ),
       );
@@ -53,14 +68,19 @@ class UploadTestAsyncQueryHandler extends IAsyncQueryHandler<
 
     try {
       await _testRepository.upload(command.testMetadata);
+      _logger.i(
+        'Test successfully uploaded to ${command.testMetadata.destTestRootFolder}/${command.testMetadata.testRelativePath}',
+      );
 
       return Future.value(right(unit));
     } on FirebaseException catch (e) {
+      _logger.e(e.toString());
+
       return Future.value(
         left(
           StorageFailure.unexpected(
             message:
-                '${e.toString()} Unable to upload test ${command.testMetadata.testRelativePath}',
+                'Unable to upload test ${command.testMetadata.testRelativePath}',
           ),
         ),
       );

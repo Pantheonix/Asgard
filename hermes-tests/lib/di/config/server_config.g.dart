@@ -16,6 +16,7 @@ _$_ServerConfig _$$_ServerConfigFromJson(Map<String, dynamic> json) =>
           json['tempUnarchivedTestLocalPath'] as String,
       tempTestRemotePath: json['tempTestRemotePath'] as String,
       testMaxSizeInBytes: json['testMaxSizeInBytes'] as int,
+      logOutputFilePath: json['logOutputFilePath'] as String,
     );
 
 Map<String, dynamic> _$$_ServerConfigToJson(_$_ServerConfig instance) =>
@@ -27,4 +28,5 @@ Map<String, dynamic> _$$_ServerConfigToJson(_$_ServerConfig instance) =>
       'tempUnarchivedTestLocalPath': instance.tempUnarchivedTestLocalPath,
       'tempTestRemotePath': instance.tempTestRemotePath,
       'testMaxSizeInBytes': instance.testMaxSizeInBytes,
+      'logOutputFilePath': instance.logOutputFilePath,
     };

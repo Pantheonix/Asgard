@@ -6,8 +6,10 @@ import 'package:hermes_tests/application/use_cases/upload_test_use_case.dart';
 import 'package:hermes_tests/di/config/config.dart';
 import 'package:hermes_tests/di/config/server_config.dart';
 import 'package:hermes_tests/di/injection.config.dart';
+import 'package:hermes_tests/domain/core/file_log_output.dart';
 import 'package:hermes_tests/domain/interfaces/i_test_repository.dart';
 import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
 
 final getIt = GetIt.instance;
 final mediator = Mediator.instance;
@@ -18,16 +20,43 @@ Future<void> configureDependencies(String env) async {
   final config = getIt.get<Config>();
 
   if (env == 'test') {
-    getIt.registerLazySingleton(() => ServerConfig.fromJson(config.test));
+    getIt.registerLazySingleton(
+      () => ServerConfig.fromJson(
+        config.test,
+      ),
+    );
   } else if (env == 'dev') {
-    getIt.registerLazySingleton(() => ServerConfig.fromJson(config.dev));
+    getIt.registerLazySingleton(
+      () => ServerConfig.fromJson(
+        config.dev,
+      ),
+    );
   }
 
-  mediator.registerHandler(() => DefragmentTestAsyncQueryHandler());
-  mediator.registerHandler(() => DecodeTestAsyncQueryHandler());
+  final serverConfig = getIt.get<ServerConfig>();
+  final logger = Logger(
+    output: FileLogOutput(
+      serverConfig.logOutputFilePath,
+    ),
+  );
+  getIt.registerLazySingleton<Logger>(() => logger);
+
+  mediator.registerHandler(
+    () => DefragmentTestAsyncQueryHandler(
+      logger,
+    ),
+  );
+  mediator.registerHandler(
+    () => DecodeTestAsyncQueryHandler(
+      logger,
+    ),
+  );
 
   final testRepository = await getIt.getAsync<ITestRepository>();
   mediator.registerHandler(
-    () => UploadTestAsyncQueryHandler(testRepository),
+    () => UploadTestAsyncQueryHandler(
+      testRepository,
+      logger,
+    ),
   );
 }

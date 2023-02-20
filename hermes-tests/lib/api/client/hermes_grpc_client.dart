@@ -6,11 +6,11 @@ import 'package:hermes_tests/api/core/hermes.pbgrpc.dart';
 import 'package:hermes_tests/di/config/server_config.dart';
 
 class HermesGrpcClient {
-  late final ClientChannel channel;
-  late final HermesTestsServiceClient client;
+  late final ClientChannel _channel;
+  late final HermesTestsServiceClient _client;
 
   HermesGrpcClient.fromConfig(ServerConfig config) {
-    channel = ClientChannel(
+    _channel = ClientChannel(
       config.host,
       port: config.port,
       options: const ChannelOptions(
@@ -18,8 +18,8 @@ class HermesGrpcClient {
       ),
     );
 
-    client = HermesTestsServiceClient(
-      channel,
+    _client = HermesTestsServiceClient(
+      _channel,
       options: CallOptions(
         timeout: Duration(seconds: config.timeoutInSeconds),
       ),
@@ -31,7 +31,7 @@ class HermesGrpcClient {
     Metadata testMetadata,
   ) async {
     final requestStreamController = StreamController<UploadRequest>();
-    final response = client.uploadTest(requestStreamController.stream);
+    final response = _client.uploadTest(requestStreamController.stream);
 
     final File file = File(testPath);
     if (file.existsSync() == false) {
@@ -53,7 +53,7 @@ class HermesGrpcClient {
       ),
       onDone: () {
         requestStreamController.close();
-        print('client stream closed');
+        print('_client stream closed');
       },
       onError: (error) => requestStreamController.addError(error),
       cancelOnError: true,
@@ -63,6 +63,6 @@ class HermesGrpcClient {
   }
 
   Future<void> close() async {
-    await channel.shutdown();
+    await _channel.shutdown();
   }
 }

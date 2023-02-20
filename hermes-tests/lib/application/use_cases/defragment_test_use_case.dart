@@ -5,6 +5,7 @@ import 'package:dartz/dartz.dart';
 import 'package:hermes_tests/api/core/hermes.pb.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
+import 'package:logger/logger.dart';
 
 class DefragmentTestAsyncQuery
     extends IAsyncQuery<Either<StorageFailure, TestMetadata>> {
@@ -25,15 +26,28 @@ class DefragmentTestAsyncQuery
 
 class DefragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
     Either<StorageFailure, TestMetadata>, DefragmentTestAsyncQuery> {
+  final Logger _logger;
+
+  DefragmentTestAsyncQueryHandler(
+    this._logger,
+  );
+
   @override
   Future<Either<StorageFailure, TestMetadata>> call(
     DefragmentTestAsyncQuery command,
   ) async {
+    _logger.i(
+      'Calling Defragment UseCase for test ${command.testMetadata.testId}...',
+    );
+
     if (command.testMetadata.testSize > command.maxTestSize) {
+      final message =
+          'Test size ${command.testMetadata.testSize}B exceeds max size ${command.maxTestSize}B';
+      _logger.e(message);
+
       return left(
         StorageFailure.testSizeLimitExceeded(
-          message:
-              'Test size ${command.testMetadata.testSize}B exceeds max size ${command.maxTestSize}B',
+          message: message,
         ),
       );
     }
@@ -53,10 +67,14 @@ class DefragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
     try {
       await command.chunkStream.forEach((chunk) {
         writtenBytes += chunk.data.length;
-        print('writtenBytes: $writtenBytes');
+        _logger.i(
+          '$writtenBytes bytes written for test ${resultTestMetadata.testRelativePath}',
+        );
         if (writtenBytes > command.testMetadata.testSize) {
-          throw Exception('Received more bytes than expected metadata size: '
-              '${writtenBytes}B > ${command.testMetadata.testSize}B');
+          throw Exception(
+            'Received more bytes than expected metadata size: '
+            '${writtenBytes}B > ${command.testMetadata.testSize}B for test ${resultTestMetadata.testRelativePath}',
+          );
         }
 
         sink.add(chunk.data);
@@ -64,26 +82,33 @@ class DefragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
     } catch (e) {
       await sink.close();
       _disposeLocalAsset(resultTestMetadata.archivedTestPath);
+      _logger.e(e.toString());
 
       return left(
         StorageFailure.testSizeLimitExceeded(
-          message: 'Invalid test file ${resultTestMetadata.archivedTestPath}}',
+          message: e.toString(),
         ),
       );
     }
 
     await sink.close();
-    print('output file stream closed');
+    _logger.i('Output file stream closed');
 
     if (!_isZipFile(resultTestMetadata.archivedTestPath)) {
       _disposeLocalAsset(resultTestMetadata.archivedTestPath);
+      final message =
+          'Non-zip or tampered test file ${resultTestMetadata.archivedTestPath}';
+      _logger.e(message);
+
       return left(
         StorageFailure.invalidLocalTestFormat(
-          message:
-              'Non-zip or tampered test file ${resultTestMetadata.archivedTestPath}}',
+          message: message,
         ),
       );
     }
+    _logger.i(
+      'Test defragmented and saved to ${resultTestMetadata.archivedTestPath}',
+    );
 
     return right(resultTestMetadata);
   }
