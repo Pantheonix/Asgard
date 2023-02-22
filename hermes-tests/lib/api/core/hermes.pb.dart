@@ -95,22 +95,17 @@ class UploadRequest extends $pb.GeneratedMessage {
 
 class UploadResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UploadResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'asgard.hermes'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..e<UploadStatusCode>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'code', $pb.PbFieldType.OE, defaultOrMaker: UploadStatusCode.Ok, valueOf: UploadStatusCode.valueOf, enumValues: UploadStatusCode.values)
+    ..aOM<StatusResponse>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status', subBuilder: StatusResponse.create)
     ..hasRequiredFields = false
   ;
 
   UploadResponse._() : super();
   factory UploadResponse({
-    $core.String? message,
-    UploadStatusCode? code,
+    StatusResponse? status,
   }) {
     final _result = create();
-    if (message != null) {
-      _result.message = message;
-    }
-    if (code != null) {
-      _result.code = code;
+    if (status != null) {
+      _result.status = status;
     }
     return _result;
   }
@@ -136,22 +131,174 @@ class UploadResponse extends $pb.GeneratedMessage {
   static UploadResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get message => $_getSZ(0);
+  StatusResponse get status => $_getN(0);
   @$pb.TagNumber(1)
-  set message($core.String v) { $_setString(0, v); }
+  set status(StatusResponse v) { setField(1, v); }
   @$pb.TagNumber(1)
-  $core.bool hasMessage() => $_has(0);
+  $core.bool hasStatus() => $_has(0);
   @$pb.TagNumber(1)
-  void clearMessage() => clearField(1);
+  void clearStatus() => clearField(1);
+  @$pb.TagNumber(1)
+  StatusResponse ensureStatus() => $_ensure(0);
+}
+
+class DownloadRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DownloadRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'asgard.hermes'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'problemId')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'testId')
+    ..hasRequiredFields = false
+  ;
+
+  DownloadRequest._() : super();
+  factory DownloadRequest({
+    $core.String? problemId,
+    $core.String? testId,
+  }) {
+    final _result = create();
+    if (problemId != null) {
+      _result.problemId = problemId;
+    }
+    if (testId != null) {
+      _result.testId = testId;
+    }
+    return _result;
+  }
+  factory DownloadRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DownloadRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  DownloadRequest clone() => DownloadRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  DownloadRequest copyWith(void Function(DownloadRequest) updates) => super.copyWith((message) => updates(message as DownloadRequest)) as DownloadRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static DownloadRequest create() => DownloadRequest._();
+  DownloadRequest createEmptyInstance() => create();
+  static $pb.PbList<DownloadRequest> createRepeated() => $pb.PbList<DownloadRequest>();
+  @$core.pragma('dart2js:noInline')
+  static DownloadRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DownloadRequest>(create);
+  static DownloadRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get problemId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set problemId($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasProblemId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearProblemId() => clearField(1);
 
   @$pb.TagNumber(2)
-  UploadStatusCode get code => $_getN(1);
+  $core.String get testId => $_getSZ(1);
   @$pb.TagNumber(2)
-  set code(UploadStatusCode v) { setField(2, v); }
+  set testId($core.String v) { $_setString(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasCode() => $_has(1);
+  $core.bool hasTestId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearCode() => clearField(2);
+  void clearTestId() => clearField(2);
+}
+
+enum DownloadResponse_Packet {
+  metadata, 
+  chunk, 
+  status, 
+  notSet
+}
+
+class DownloadResponse extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, DownloadResponse_Packet> _DownloadResponse_PacketByTag = {
+    1 : DownloadResponse_Packet.metadata,
+    2 : DownloadResponse_Packet.chunk,
+    3 : DownloadResponse_Packet.status,
+    0 : DownloadResponse_Packet.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DownloadResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'asgard.hermes'), createEmptyInstance: create)
+    ..oo(0, [1, 2, 3])
+    ..aOM<Metadata>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'metadata', subBuilder: Metadata.create)
+    ..aOM<Chunk>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chunk', subBuilder: Chunk.create)
+    ..aOM<StatusResponse>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status', subBuilder: StatusResponse.create)
+    ..hasRequiredFields = false
+  ;
+
+  DownloadResponse._() : super();
+  factory DownloadResponse({
+    Metadata? metadata,
+    Chunk? chunk,
+    StatusResponse? status,
+  }) {
+    final _result = create();
+    if (metadata != null) {
+      _result.metadata = metadata;
+    }
+    if (chunk != null) {
+      _result.chunk = chunk;
+    }
+    if (status != null) {
+      _result.status = status;
+    }
+    return _result;
+  }
+  factory DownloadResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DownloadResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  DownloadResponse clone() => DownloadResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  DownloadResponse copyWith(void Function(DownloadResponse) updates) => super.copyWith((message) => updates(message as DownloadResponse)) as DownloadResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static DownloadResponse create() => DownloadResponse._();
+  DownloadResponse createEmptyInstance() => create();
+  static $pb.PbList<DownloadResponse> createRepeated() => $pb.PbList<DownloadResponse>();
+  @$core.pragma('dart2js:noInline')
+  static DownloadResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DownloadResponse>(create);
+  static DownloadResponse? _defaultInstance;
+
+  DownloadResponse_Packet whichPacket() => _DownloadResponse_PacketByTag[$_whichOneof(0)]!;
+  void clearPacket() => clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  Metadata get metadata => $_getN(0);
+  @$pb.TagNumber(1)
+  set metadata(Metadata v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasMetadata() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearMetadata() => clearField(1);
+  @$pb.TagNumber(1)
+  Metadata ensureMetadata() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  Chunk get chunk => $_getN(1);
+  @$pb.TagNumber(2)
+  set chunk(Chunk v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasChunk() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearChunk() => clearField(2);
+  @$pb.TagNumber(2)
+  Chunk ensureChunk() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  StatusResponse get status => $_getN(2);
+  @$pb.TagNumber(3)
+  set status(StatusResponse v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasStatus() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearStatus() => clearField(3);
+  @$pb.TagNumber(3)
+  StatusResponse ensureStatus() => $_ensure(2);
 }
 
 class Metadata extends $pb.GeneratedMessage {
@@ -274,5 +421,66 @@ class Chunk extends $pb.GeneratedMessage {
   $core.bool hasData() => $_has(0);
   @$pb.TagNumber(1)
   void clearData() => clearField(1);
+}
+
+class StatusResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StatusResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'asgard.hermes'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
+    ..e<StatusCode>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'code', $pb.PbFieldType.OE, defaultOrMaker: StatusCode.Ok, valueOf: StatusCode.valueOf, enumValues: StatusCode.values)
+    ..hasRequiredFields = false
+  ;
+
+  StatusResponse._() : super();
+  factory StatusResponse({
+    $core.String? message,
+    StatusCode? code,
+  }) {
+    final _result = create();
+    if (message != null) {
+      _result.message = message;
+    }
+    if (code != null) {
+      _result.code = code;
+    }
+    return _result;
+  }
+  factory StatusResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StatusResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  StatusResponse clone() => StatusResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  StatusResponse copyWith(void Function(StatusResponse) updates) => super.copyWith((message) => updates(message as StatusResponse)) as StatusResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static StatusResponse create() => StatusResponse._();
+  StatusResponse createEmptyInstance() => create();
+  static $pb.PbList<StatusResponse> createRepeated() => $pb.PbList<StatusResponse>();
+  @$core.pragma('dart2js:noInline')
+  static StatusResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StatusResponse>(create);
+  static StatusResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get message => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set message($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasMessage() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearMessage() => clearField(1);
+
+  @$pb.TagNumber(2)
+  StatusCode get code => $_getN(1);
+  @$pb.TagNumber(2)
+  set code(StatusCode v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCode() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCode() => clearField(2);
 }
 

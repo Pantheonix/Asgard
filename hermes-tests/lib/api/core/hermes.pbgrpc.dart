@@ -19,6 +19,12 @@ class HermesTestsServiceClient extends $grpc.Client {
           '/asgard.hermes.HermesTestsService/UploadTest',
           ($0.UploadRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) => $0.UploadResponse.fromBuffer(value));
+  static final _$downloadTest =
+      $grpc.ClientMethod<$0.DownloadRequest, $0.DownloadResponse>(
+          '/asgard.hermes.HermesTestsService/DownloadTest',
+          ($0.DownloadRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.DownloadResponse.fromBuffer(value));
 
   HermesTestsServiceClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
@@ -29,6 +35,14 @@ class HermesTestsServiceClient extends $grpc.Client {
       $async.Stream<$0.UploadRequest> request,
       {$grpc.CallOptions? options}) {
     return $createStreamingCall(_$uploadTest, request, options: options).single;
+  }
+
+  $grpc.ResponseStream<$0.DownloadResponse> downloadTest(
+      $0.DownloadRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createStreamingCall(
+        _$downloadTest, $async.Stream.fromIterable([request]),
+        options: options);
   }
 }
 
@@ -43,8 +57,22 @@ abstract class HermesTestsServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $0.UploadRequest.fromBuffer(value),
         ($0.UploadResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.DownloadRequest, $0.DownloadResponse>(
+        'DownloadTest',
+        downloadTest_Pre,
+        false,
+        true,
+        ($core.List<$core.int> value) => $0.DownloadRequest.fromBuffer(value),
+        ($0.DownloadResponse value) => value.writeToBuffer()));
+  }
+
+  $async.Stream<$0.DownloadResponse> downloadTest_Pre($grpc.ServiceCall call,
+      $async.Future<$0.DownloadRequest> request) async* {
+    yield* downloadTest(call, await request);
   }
 
   $async.Future<$0.UploadResponse> uploadTest(
       $grpc.ServiceCall call, $async.Stream<$0.UploadRequest> request);
+  $async.Stream<$0.DownloadResponse> downloadTest(
+      $grpc.ServiceCall call, $0.DownloadRequest request);
 }

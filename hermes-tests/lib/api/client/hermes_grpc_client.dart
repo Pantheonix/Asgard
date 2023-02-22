@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:grpc/grpc.dart';
-import 'package:hermes_tests/api/core/hermes.pbgrpc.dart';
+import 'package:hermes_tests/api/core/hermes.pbgrpc.dart' as hermes;
 import 'package:hermes_tests/di/config/server_config.dart';
 
 class HermesGrpcClient {
   late final ClientChannel _channel;
-  late final HermesTestsServiceClient _client;
+  late final hermes.HermesTestsServiceClient _client;
 
   HermesGrpcClient.fromConfig(ServerConfig config) {
     _channel = ClientChannel(
@@ -18,7 +18,7 @@ class HermesGrpcClient {
       ),
     );
 
-    _client = HermesTestsServiceClient(
+    _client = hermes.HermesTestsServiceClient(
       _channel,
       options: CallOptions(
         timeout: Duration(seconds: config.timeoutInSeconds),
@@ -26,30 +26,32 @@ class HermesGrpcClient {
     );
   }
 
-  Future<UploadResponse> uploadTest(
+  Future<hermes.UploadResponse> uploadTest(
     String testPath,
-    Metadata testMetadata,
+    hermes.Metadata testMetadata,
   ) async {
-    final requestStreamController = StreamController<UploadRequest>();
+    final requestStreamController = StreamController<hermes.UploadRequest>();
     final response = _client.uploadTest(requestStreamController.stream);
 
     final File file = File(testPath);
     if (file.existsSync() == false) {
       return Future.value(
-        UploadResponse()
-          ..code = UploadStatusCode.Failed
-          ..message = 'Test file not found',
+        hermes.UploadResponse()
+          ..status = (hermes.StatusResponse()
+            ..code = hermes.StatusCode.Failed
+            ..message = 'Test file not found'),
       );
     }
 
     final Stream<List<int>> fileDataStream = file.openRead();
-    final UploadRequest request = UploadRequest()..metadata = testMetadata;
+    final hermes.UploadRequest request = hermes.UploadRequest()
+      ..metadata = testMetadata;
 
     requestStreamController.add(request);
 
     fileDataStream.listen(
       (data) => requestStreamController.add(
-        UploadRequest()..chunk = (Chunk()..data = data),
+        hermes.UploadRequest()..chunk = (hermes.Chunk()..data = data),
       ),
       onDone: () {
         requestStreamController.close();

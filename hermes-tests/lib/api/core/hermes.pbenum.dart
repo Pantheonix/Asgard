@@ -9,20 +9,20 @@
 import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
-class UploadStatusCode extends $pb.ProtobufEnum {
-  static const UploadStatusCode Ok = UploadStatusCode._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'Ok');
-  static const UploadStatusCode Failed = UploadStatusCode._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'Failed');
-  static const UploadStatusCode Unknown = UploadStatusCode._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'Unknown');
+class StatusCode extends $pb.ProtobufEnum {
+  static const StatusCode Ok = StatusCode._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'Ok');
+  static const StatusCode Failed = StatusCode._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'Failed');
+  static const StatusCode Unknown = StatusCode._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'Unknown');
 
-  static const $core.List<UploadStatusCode> values = <UploadStatusCode> [
+  static const $core.List<StatusCode> values = <StatusCode> [
     Ok,
     Failed,
     Unknown,
   ];
 
-  static final $core.Map<$core.int, UploadStatusCode> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static UploadStatusCode? valueOf($core.int value) => _byValue[value];
+  static final $core.Map<$core.int, StatusCode> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static StatusCode? valueOf($core.int value) => _byValue[value];
 
-  const UploadStatusCode._($core.int v, $core.String n) : super(v, n);
+  const StatusCode._($core.int v, $core.String n) : super(v, n);
 }
 

@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:cqrs_mediator/cqrs_mediator.dart';
 import 'package:dartz/dartz.dart';
-import 'package:firebase_dart/firebase_dart.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:hermes_tests/domain/interfaces/i_test_repository.dart';
@@ -73,7 +72,7 @@ class UploadTestAsyncQueryHandler extends IAsyncQueryHandler<
       );
 
       return Future.value(right(unit));
-    } on FirebaseException catch (e) {
+    } on Exception catch (e) {
       _logger.e(e.toString());
 
       return Future.value(

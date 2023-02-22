@@ -51,11 +51,26 @@ class DecodeTestAsyncQueryHandler extends IAsyncQueryHandler<
       );
     }
 
-    final archivedTestInputStream = InputFileStream(
-      command.testMetadata.archivedTestPath,
-    );
-    final archive = ZipDecoder().decodeBuffer(archivedTestInputStream);
-    extractArchiveToDisk(archive, command.testMetadata.unarchivedTestPath);
+    try {
+      final archivedTestInputStream = InputFileStream(
+        command.testMetadata.archivedTestPath,
+      );
+      final archive = ZipDecoder().decodeBuffer(archivedTestInputStream);
+      extractArchiveToDisk(archive, command.testMetadata.unarchivedTestPath);
+    } catch (e) {
+      _logger.e(
+        '${e.toString()} when uploading test ${command.testMetadata.testRelativePath}',
+      );
+
+      return Future.value(
+        left(
+          StorageFailure.invalidLocalTestFormat(
+            message:
+                'Invalid local test format for test ${command.testMetadata.testRelativePath}',
+          ),
+        ),
+      );
+    }
 
     _logger.i(
       'Test decoded and saved to ${command.testMetadata.unarchivedTestPath}',

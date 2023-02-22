@@ -3,16 +3,16 @@ import 'dart:async';
 import 'package:cqrs_mediator/cqrs_mediator.dart';
 import 'package:dartz/dartz.dart';
 import 'package:grpc/grpc.dart';
-import 'package:hermes_tests/api/core/hermes.pbgrpc.dart';
-import 'package:hermes_tests/application/use_cases/decode_test_use_case.dart';
-import 'package:hermes_tests/application/use_cases/defragment_test_use_case.dart';
-import 'package:hermes_tests/application/use_cases/upload_test_use_case.dart';
+import 'package:hermes_tests/api/core/hermes.pbgrpc.dart' as hermes;
+import 'package:hermes_tests/application/use_cases/upload/decode_test_use_case.dart';
+import 'package:hermes_tests/application/use_cases/upload/defragment_test_use_case.dart';
+import 'package:hermes_tests/application/use_cases/upload/upload_test_use_case.dart';
 import 'package:hermes_tests/di/config/server_config.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:logger/logger.dart';
 
-class HermesGrpcServer extends HermesTestsServiceBase {
+class HermesGrpcServer extends hermes.HermesTestsServiceBase {
   late final Logger _logger;
   late final ServerConfig _config;
   late final Mediator _mediator;
@@ -25,24 +25,25 @@ class HermesGrpcServer extends HermesTestsServiceBase {
   );
 
   @override
-  Future<UploadResponse> uploadTest(
+  Future<hermes.UploadResponse> uploadTest(
     ServiceCall call,
-    Stream<UploadRequest> request,
+    Stream<hermes.UploadRequest> request,
   ) async {
     // extract metadata and chunk stream from request stream
     _logger.i('UploadTest method called');
 
-    late final UploadResponse response;
-    final chunkStreamController = StreamController<Chunk>();
+    late final hermes.UploadResponse response;
+    final chunkStreamController = StreamController<hermes.Chunk>();
     final requestBroadcastStream = request.asBroadcastStream();
     final firstPacket = await requestBroadcastStream.first;
 
     if (firstPacket.hasMetadata() == false) {
       _logger.e('Metadata not found');
 
-      return UploadResponse()
-        ..code = UploadStatusCode.Failed
-        ..message = 'Metadata not found';
+      return hermes.UploadResponse()
+        ..status = (hermes.StatusResponse()
+          ..code = hermes.StatusCode.Failed
+          ..message = 'Metadata not found');
     }
 
     final metadata = firstPacket.metadata;
@@ -79,9 +80,10 @@ class HermesGrpcServer extends HermesTestsServiceBase {
     defragmentResponse.fold(
       (failure) {
         _logger.e('Defragment response received: $failure');
-        response = UploadResponse()
-          ..code = UploadStatusCode.Failed
-          ..message = failure.message;
+        response = hermes.UploadResponse()
+          ..status = (hermes.StatusResponse()
+            ..code = hermes.StatusCode.Failed
+            ..message = failure.message);
       },
       (metadata) {
         _logger.i('Defragment response received: $metadata');
@@ -106,9 +108,10 @@ class HermesGrpcServer extends HermesTestsServiceBase {
     decodeResponse.fold(
       (failure) {
         _logger.e('Decode response received: $failure');
-        response = UploadResponse()
-          ..code = UploadStatusCode.Failed
-          ..message = failure.message;
+        response = hermes.UploadResponse()
+          ..status = (hermes.StatusResponse()
+            ..code = hermes.StatusCode.Failed
+            ..message = failure.message);
       },
       (metadata) {
         _logger.i('Decode response received: $metadata');
@@ -130,19 +133,28 @@ class HermesGrpcServer extends HermesTestsServiceBase {
     response = uploadResponse.fold(
       (failure) {
         _logger.e('Upload response received: $failure');
-        return UploadResponse()
-          ..code = UploadStatusCode.Failed
-          ..message = failure.message;
+        return hermes.UploadResponse()
+          ..status = (hermes.StatusResponse()
+            ..code = hermes.StatusCode.Failed
+            ..message = failure.message);
       },
       (success) {
         _logger.i('Upload response received: success');
-        return UploadResponse()
-          ..code = UploadStatusCode.Ok
-          ..message = 'Test uploaded successfully';
+        return hermes.UploadResponse()
+          ..status = (hermes.StatusResponse()
+            ..code = hermes.StatusCode.Ok
+            ..message = 'Test uploaded successfully');
       },
     );
 
     return response;
+  }
+
+  @override
+  Stream<hermes.DownloadResponse> downloadTest(
+      ServiceCall call, hermes.DownloadRequest request) {
+    // TODO: implement downloadTest
+    throw UnimplementedError();
   }
 
   void initServices() {

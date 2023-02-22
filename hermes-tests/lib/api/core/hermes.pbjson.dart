@@ -8,9 +8,9 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-@$core.Deprecated('Use uploadStatusCodeDescriptor instead')
-const UploadStatusCode$json = const {
-  '1': 'UploadStatusCode',
+@$core.Deprecated('Use statusCodeDescriptor instead')
+const StatusCode$json = const {
+  '1': 'StatusCode',
   '2': const [
     const {'1': 'Ok', '2': 0},
     const {'1': 'Failed', '2': 1},
@@ -18,8 +18,8 @@ const UploadStatusCode$json = const {
   ],
 };
 
-/// Descriptor for `UploadStatusCode`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List uploadStatusCodeDescriptor = $convert.base64Decode('ChBVcGxvYWRTdGF0dXNDb2RlEgYKAk9rEAASCgoGRmFpbGVkEAESCwoHVW5rbm93bhAC');
+/// Descriptor for `StatusCode`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List statusCodeDescriptor = $convert.base64Decode('CgpTdGF0dXNDb2RlEgYKAk9rEAASCgoGRmFpbGVkEAESCwoHVW5rbm93bhAC');
 @$core.Deprecated('Use uploadRequestDescriptor instead')
 const UploadRequest$json = const {
   '1': 'UploadRequest',
@@ -38,13 +38,38 @@ final $typed_data.Uint8List uploadRequestDescriptor = $convert.base64Decode('Cg1
 const UploadResponse$json = const {
   '1': 'UploadResponse',
   '2': const [
-    const {'1': 'message', '3': 1, '4': 1, '5': 9, '10': 'message'},
-    const {'1': 'code', '3': 2, '4': 1, '5': 14, '6': '.asgard.hermes.UploadStatusCode', '10': 'code'},
+    const {'1': 'status', '3': 1, '4': 1, '5': 11, '6': '.asgard.hermes.StatusResponse', '10': 'status'},
   ],
 };
 
 /// Descriptor for `UploadResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List uploadResponseDescriptor = $convert.base64Decode('Cg5VcGxvYWRSZXNwb25zZRIYCgdtZXNzYWdlGAEgASgJUgdtZXNzYWdlEjMKBGNvZGUYAiABKA4yHy5hc2dhcmQuaGVybWVzLlVwbG9hZFN0YXR1c0NvZGVSBGNvZGU=');
+final $typed_data.Uint8List uploadResponseDescriptor = $convert.base64Decode('Cg5VcGxvYWRSZXNwb25zZRI1CgZzdGF0dXMYASABKAsyHS5hc2dhcmQuaGVybWVzLlN0YXR1c1Jlc3BvbnNlUgZzdGF0dXM=');
+@$core.Deprecated('Use downloadRequestDescriptor instead')
+const DownloadRequest$json = const {
+  '1': 'DownloadRequest',
+  '2': const [
+    const {'1': 'problem_id', '3': 1, '4': 1, '5': 9, '10': 'problemId'},
+    const {'1': 'test_id', '3': 2, '4': 1, '5': 9, '10': 'testId'},
+  ],
+};
+
+/// Descriptor for `DownloadRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List downloadRequestDescriptor = $convert.base64Decode('Cg9Eb3dubG9hZFJlcXVlc3QSHQoKcHJvYmxlbV9pZBgBIAEoCVIJcHJvYmxlbUlkEhcKB3Rlc3RfaWQYAiABKAlSBnRlc3RJZA==');
+@$core.Deprecated('Use downloadResponseDescriptor instead')
+const DownloadResponse$json = const {
+  '1': 'DownloadResponse',
+  '2': const [
+    const {'1': 'metadata', '3': 1, '4': 1, '5': 11, '6': '.asgard.hermes.Metadata', '9': 0, '10': 'metadata'},
+    const {'1': 'chunk', '3': 2, '4': 1, '5': 11, '6': '.asgard.hermes.Chunk', '9': 0, '10': 'chunk'},
+    const {'1': 'status', '3': 3, '4': 1, '5': 11, '6': '.asgard.hermes.StatusResponse', '9': 0, '10': 'status'},
+  ],
+  '8': const [
+    const {'1': 'packet'},
+  ],
+};
+
+/// Descriptor for `DownloadResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List downloadResponseDescriptor = $convert.base64Decode('ChBEb3dubG9hZFJlc3BvbnNlEjUKCG1ldGFkYXRhGAEgASgLMhcuYXNnYXJkLmhlcm1lcy5NZXRhZGF0YUgAUghtZXRhZGF0YRIsCgVjaHVuaxgCIAEoCzIULmFzZ2FyZC5oZXJtZXMuQ2h1bmtIAFIFY2h1bmsSNwoGc3RhdHVzGAMgASgLMh0uYXNnYXJkLmhlcm1lcy5TdGF0dXNSZXNwb25zZUgAUgZzdGF0dXNCCAoGcGFja2V0');
 @$core.Deprecated('Use metadataDescriptor instead')
 const Metadata$json = const {
   '1': 'Metadata',
@@ -67,3 +92,14 @@ const Chunk$json = const {
 
 /// Descriptor for `Chunk`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List chunkDescriptor = $convert.base64Decode('CgVDaHVuaxISCgRkYXRhGAEgASgMUgRkYXRh');
+@$core.Deprecated('Use statusResponseDescriptor instead')
+const StatusResponse$json = const {
+  '1': 'StatusResponse',
+  '2': const [
+    const {'1': 'message', '3': 1, '4': 1, '5': 9, '10': 'message'},
+    const {'1': 'code', '3': 2, '4': 1, '5': 14, '6': '.asgard.hermes.StatusCode', '10': 'code'},
+  ],
+};
+
+/// Descriptor for `StatusResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List statusResponseDescriptor = $convert.base64Decode('Cg5TdGF0dXNSZXNwb25zZRIYCgdtZXNzYWdlGAEgASgJUgdtZXNzYWdlEi0KBGNvZGUYAiABKA4yGS5hc2dhcmQuaGVybWVzLlN0YXR1c0NvZGVSBGNvZGU=');
