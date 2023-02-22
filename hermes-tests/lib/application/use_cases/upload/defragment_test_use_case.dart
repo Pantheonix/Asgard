@@ -117,6 +117,10 @@ class DefragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
 bool _isZipFile(String filePath) {
   final File file = File(filePath);
   final List<int> bytes = file.readAsBytesSync();
+  if (bytes.isEmpty) {
+    return false;
+  }
+
   final String fileExtension = file.path.split('.').last;
 
   return fileExtension == 'zip' &&
