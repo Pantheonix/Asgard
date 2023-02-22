@@ -25,4 +25,19 @@ class TestRepository implements ITestRepository {
         .ref(testMetadata.destTestOutputPath)
         .putData(localOutputFile.readAsBytesSync());
   }
+
+  @override
+  Future<void> download(TestMetadata testMetadata) async {
+    final File localInputFile = File(testMetadata.destTestInputPath);
+    localInputFile.writeAsBytesSync(
+      (await _storage.ref(testMetadata.srcTestInputPath).getData())
+          as List<int>,
+    );
+
+    final File localOutputFile = File(testMetadata.destTestOutputPath);
+    localOutputFile.writeAsBytesSync(
+      (await _storage.ref(testMetadata.srcTestOutputPath).getData())
+          as List<int>,
+    );
+  }
 }
