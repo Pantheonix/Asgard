@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:cqrs_mediator/cqrs_mediator.dart';
 import 'package:dartz/dartz.dart';
-import 'package:hermes_tests/application/use_cases/decode_test_use_case.dart';
+import 'package:hermes_tests/application/use_cases/upload/decode_test_use_case.dart';
 import 'package:hermes_tests/di/config/config.dart';
 import 'package:hermes_tests/di/config/server_config.dart';
 import 'package:hermes_tests/domain/core/file_log_output.dart';
@@ -98,6 +98,36 @@ void main() {
       result.fold(
         (f) => f.maybeMap(
           localTestNotFound: (_) => expect(true, true),
+          orElse: () => expect(true, false),
+        ),
+        (_) => expect(true, false),
+      );
+    });
+
+    test(
+        'Given metadata for non-zip or tampered archived test, '
+        'When decode test use case is called, '
+        'Then invalidLocalTestFormat storage failure is returned', () async {
+      // Arrange
+      final TestMetadata testMetadata = TestMetadata(
+        problemId: 'marsx',
+        testId: '4',
+        srcTestRootFolder: testConfig.tempArchivedTestLocalPath,
+        destTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
+      );
+
+      // Act
+      final Either<StorageFailure, TestMetadata> result = await sut.run(
+        DecodeTestAsyncQuery(
+          testMetadata: testMetadata,
+          destTestRootFolderForUnarchivedTest: testConfig.tempTestRemotePath,
+        ),
+      );
+
+      // Assert
+      result.fold(
+        (f) => f.maybeMap(
+          invalidLocalTestFormat: (_) => expect(true, true),
           orElse: () => expect(true, false),
         ),
         (_) => expect(true, false),

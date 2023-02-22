@@ -53,7 +53,7 @@ void main() {
       );
 
       // Assert
-      expect(response.code, UploadStatusCode.Ok);
+      expect(response.status.code, StatusCode.Ok);
 
       final String remoteTestInputPath =
           'test/${testMetadata.problemId}/${testMetadata.testId}/input.txt';

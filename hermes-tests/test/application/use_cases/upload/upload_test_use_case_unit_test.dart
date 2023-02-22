@@ -1,6 +1,6 @@
 import 'package:cqrs_mediator/cqrs_mediator.dart';
 import 'package:dartz/dartz.dart';
-import 'package:hermes_tests/application/use_cases/upload_test_use_case.dart';
+import 'package:hermes_tests/application/use_cases/upload/upload_test_use_case.dart';
 import 'package:hermes_tests/di/config/config.dart';
 import 'package:hermes_tests/di/config/server_config.dart';
 import 'package:hermes_tests/domain/core/file_log_output.dart';
@@ -33,11 +33,6 @@ void main() {
       );
 
       registerFallbackValue(FakeTestMetadata());
-      when(
-        () => mockTestRepository.upload(any()),
-      ).thenAnswer(
-        (_) async => print('test uploaded'),
-      );
 
       Mediator.instance.registerHandler(
         () => UploadTestAsyncQueryHandler(
@@ -61,6 +56,12 @@ void main() {
         destTestRootFolder: testConfig.tempTestRemotePath,
       );
 
+      when(
+        () => mockTestRepository.upload(any()),
+      ).thenAnswer(
+        (_) async => print('test uploaded'),
+      );
+
       // Act
       final Either<StorageFailure, Unit> result = await sut.run(
         UploadTestAsyncQuery(testMetadata: testMetadata),
@@ -68,6 +69,10 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
+
+      verify(
+        () => mockTestRepository.upload(any()),
+      ).called(1);
     });
 
     test(
@@ -82,6 +87,12 @@ void main() {
         destTestRootFolder: testConfig.tempTestRemotePath,
       );
 
+      when(
+        () => mockTestRepository.upload(any()),
+      ).thenAnswer(
+        (_) async => print('test uploaded'),
+      );
+
       // Act
       final Either<StorageFailure, Unit> result = await sut.run(
         UploadTestAsyncQuery(testMetadata: testMetadata),
@@ -91,6 +102,39 @@ void main() {
       result.fold(
         (f) => f.maybeMap(
           localTestNotFound: (_) => expect(true, true),
+          orElse: () => expect(true, false),
+        ),
+        (_) => expect(true, false),
+      );
+    });
+
+    test(
+        'Given metadata for test existing on disk and remote upload fails, '
+        'When upload test use case is called, '
+        'Then unexpected storage failure is returned', () async {
+      // Arrange
+      final TestMetadata testMetadata = TestMetadata(
+        problemId: 'marsx',
+        testId: '2',
+        srcTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
+        destTestRootFolder: testConfig.tempTestRemotePath,
+      );
+
+      when(
+        () => mockTestRepository.upload(any()),
+      ).thenThrow(
+        Exception('test upload failed'),
+      );
+
+      // Act
+      final Either<StorageFailure, Unit> result = await sut.run(
+        UploadTestAsyncQuery(testMetadata: testMetadata),
+      );
+
+      // Assert
+      result.fold(
+        (f) => f.maybeMap(
+          unexpected: (_) => expect(true, true),
           orElse: () => expect(true, false),
         ),
         (_) => expect(true, false),
