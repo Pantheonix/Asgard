@@ -49,24 +49,20 @@ void main() {
       );
 
       // Act
-      final Either<StorageFailure, Stream<Chunk>> result = await sut.run(
+      final Either<StorageFailure, Tuple2<Stream<Chunk>, int>> result =
+          await sut.run(
         FragmentTestAsyncQuery(testMetadata: testMetadata),
       );
 
       // Assert
       result.fold(
         (f) => expect(true, false),
-        (chunkStream) async {
+        (responseTuple) async {
+          final chunkStream = responseTuple.value1;
           expect(chunkStream, isNotNull);
-          expect(chunkStream, isA<Stream<Chunk>>());
 
-          final List<Chunk> chunks = await chunkStream.toList();
           final expectedSize = File(testMetadata.archivedTestPath).lengthSync();
-          final actualSize = chunks.fold<int>(
-            0,
-            (previousValue, element) => previousValue + element.data.length,
-          );
-
+          final actualSize = responseTuple.value2;
           expect(actualSize, expectedSize);
         },
       );
@@ -85,7 +81,8 @@ void main() {
       );
 
       // Act
-      final Either<StorageFailure, Stream<Chunk>> result = await sut.run(
+      final Either<StorageFailure, Tuple2<Stream<Chunk>, int>> result =
+          await sut.run(
         FragmentTestAsyncQuery(testMetadata: testMetadata),
       );
 
@@ -112,7 +109,8 @@ void main() {
       );
 
       // Act
-      final Either<StorageFailure, Stream<Chunk>> result = await sut.run(
+      final Either<StorageFailure, Tuple2<Stream<Chunk>, int>> result =
+          await sut.run(
         FragmentTestAsyncQuery(testMetadata: testMetadata),
       );
 
