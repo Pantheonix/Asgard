@@ -9,7 +9,7 @@ import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:logger/logger.dart';
 
 class FragmentTestAsyncQuery
-    extends IAsyncQuery<Either<StorageFailure, Stream<Chunk>>> {
+    extends IAsyncQuery<Either<StorageFailure, Tuple2<Stream<Chunk>, int>>> {
   final TestMetadata testMetadata;
 
   FragmentTestAsyncQuery({
@@ -18,7 +18,8 @@ class FragmentTestAsyncQuery
 }
 
 class FragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
-    Either<StorageFailure, Stream<Chunk>>, FragmentTestAsyncQuery> {
+    Either<StorageFailure, Tuple2<Stream<Chunk>, int>>,
+    FragmentTestAsyncQuery> {
   final Logger _logger;
 
   FragmentTestAsyncQueryHandler(
@@ -26,7 +27,7 @@ class FragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
   );
 
   @override
-  Future<Either<StorageFailure, Stream<Chunk>>> call(
+  Future<Either<StorageFailure, Tuple2<Stream<Chunk>, int>>> call(
     FragmentTestAsyncQuery command,
   ) async {
     _logger.i(
@@ -50,6 +51,8 @@ class FragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
       );
     }
 
+    _logger.d('Archived test ${command.testMetadata.testId} exists!');
+
     // check if archived test is a zip file
     if (_isZipFile(command.testMetadata.archivedTestPath) == false) {
       final message =
@@ -63,11 +66,22 @@ class FragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
       );
     }
 
+    _logger.d('Archived test ${command.testMetadata.testId} is a zip file!');
+
     final Stream<List<int>> archivedTestData = archivedTestFile.openRead();
+    int bytesSent = 0;
 
     archivedTestData.listen(
-      (data) => chunkStreamController.add(Chunk()..data = data),
-      onDone: () => chunkStreamController.close(),
+      (data) {
+        chunkStreamController.add(Chunk()..data = data);
+        bytesSent += data.length;
+        _logger.d('Sent ${data.length} bytes');
+      },
+      onDone: () async {
+        _logger.d('Sent $bytesSent bytes in total!');
+
+        await chunkStreamController.close();
+      },
       onError: (error) => chunkStreamController.addError(error),
       cancelOnError: true,
     );
@@ -76,9 +90,10 @@ class FragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
       'Fragmented test ${command.testMetadata.testId} successfully!',
     );
 
-    return Future.value(
-      right(
+    return right(
+      Tuple2(
         chunkStreamController.stream,
+        archivedTestFile.lengthSync(),
       ),
     );
   }
