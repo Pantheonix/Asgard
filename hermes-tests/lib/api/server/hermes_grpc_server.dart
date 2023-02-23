@@ -3,7 +3,11 @@ import 'dart:async';
 import 'package:cqrs_mediator/cqrs_mediator.dart';
 import 'package:dartz/dartz.dart';
 import 'package:grpc/grpc.dart';
+import 'package:hermes_tests/api/core/hermes.pb.dart';
 import 'package:hermes_tests/api/core/hermes.pbgrpc.dart' as hermes;
+import 'package:hermes_tests/application/use_cases/download/download_test_use_case.dart';
+import 'package:hermes_tests/application/use_cases/download/encode_test_use_case.dart';
+import 'package:hermes_tests/application/use_cases/download/fragment_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/upload/decode_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/upload/defragment_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/upload/upload_test_use_case.dart';
@@ -152,9 +156,146 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
 
   @override
   Stream<hermes.DownloadResponse> downloadTest(
-      ServiceCall call, hermes.DownloadRequest request) {
-    // TODO: implement downloadTest
-    throw UnimplementedError();
+    ServiceCall call,
+    hermes.DownloadRequest request,
+  ) async* {
+    _logger.i('Download test method called');
+
+    late final StreamController<DownloadResponse> responseStreamController =
+        StreamController();
+
+    final testMetadataForDownloadRequest = TestMetadata(
+      problemId: request.problemId,
+      testId: request.testId,
+      srcTestRootFolder: _config.tempTestRemotePath,
+      destTestRootFolder: _config.tempUnarchivedTestLocalPath,
+    );
+
+    // call download use case
+    final Either<StorageFailure, TestMetadata> downloadResponse =
+        await _mediator.run(
+      DownloadTestAsyncQuery(
+        testMetadata: testMetadataForDownloadRequest,
+        destTestRootFolderForDownloadedTest: _config.tempArchivedTestLocalPath,
+      ),
+    );
+
+    late final TestMetadata downloadedTestMetadata;
+    downloadResponse.fold(
+      (failure) {
+        _logger.e('Download response received: $failure');
+        responseStreamController.add(
+          hermes.DownloadResponse()
+            ..status = (hermes.StatusResponse()
+              ..code = hermes.StatusCode.Failed
+              ..message = failure.message),
+        );
+      },
+      (metadata) {
+        _logger.i('Download response received: $metadata');
+        downloadedTestMetadata = metadata;
+      },
+    );
+
+    if (downloadResponse.isLeft()) {
+      yield* responseStreamController.stream;
+    }
+
+    // call encode use case
+    final Either<StorageFailure, TestMetadata> encodeResponse =
+        await _mediator.run(
+      EncodeTestAsyncQuery(
+        testMetadata: downloadedTestMetadata,
+      ),
+    );
+
+    late final TestMetadata encodedTestMetadata;
+    encodeResponse.fold(
+      (failure) {
+        _logger.e('Encode response received: $failure');
+        responseStreamController.add(
+          hermes.DownloadResponse()
+            ..status = (hermes.StatusResponse()
+              ..code = hermes.StatusCode.Failed
+              ..message = failure.message),
+        );
+      },
+      (metadata) {
+        _logger.i('Encode response received: $metadata');
+        encodedTestMetadata = metadata;
+      },
+    );
+
+    if (encodeResponse.isLeft()) {
+      yield* responseStreamController.stream;
+    }
+
+    // call fragment use case
+    final Either<StorageFailure, Tuple2<Stream<Chunk>, int>> fragmentResponse =
+        await _mediator.run(
+      FragmentTestAsyncQuery(
+        testMetadata: encodedTestMetadata,
+      ),
+    );
+
+    fragmentResponse.fold(
+      (failure) {
+        _logger.e('Fragment response received: $failure');
+        responseStreamController.add(
+          hermes.DownloadResponse()
+            ..status = (hermes.StatusResponse()
+              ..code = hermes.StatusCode.Failed
+              ..message = failure.message),
+        );
+      },
+      (responseTuple) async {
+        _logger.d('Fragment response received: $responseTuple');
+
+        final Stream<Chunk> chunkStream = responseTuple.value1;
+        final int testSize = responseTuple.value2;
+
+        // add metadata
+        responseStreamController.add(
+          hermes.DownloadResponse()
+            ..metadata = (hermes.Metadata()
+              ..problemId = testMetadataForDownloadRequest.problemId
+              ..testId = testMetadataForDownloadRequest.testId
+              ..testSize = testSize),
+        );
+        _logger.d('Metadata added to response stream controller');
+
+        // add status
+        responseStreamController.add(
+          hermes.DownloadResponse()
+            ..status = (hermes.StatusResponse()
+              ..code = hermes.StatusCode.Ok
+              ..message = 'Test downloaded successfully'),
+        );
+        _logger.d('Status added to response stream controller');
+
+        // add chunks
+        chunkStream.listen(
+          (chunk) {
+            responseStreamController.add(
+              hermes.DownloadResponse()
+                ..chunk = (hermes.Chunk()..data = chunk.data),
+            );
+            _logger.d(
+              'Chunk of ${chunk.data.length} bytes added to response stream controller',
+            );
+          },
+          onDone: () async {
+            await responseStreamController.close();
+            _logger.i('Response stream controller closed');
+          },
+          onError: (error) => responseStreamController.addError(error),
+          cancelOnError: true,
+        );
+        _logger.d('Chunks added to response stream controller');
+      },
+    );
+
+    yield* responseStreamController.stream;
   }
 
   void initServices() {
