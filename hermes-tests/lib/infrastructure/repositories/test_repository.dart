@@ -28,13 +28,22 @@ class TestRepository implements ITestRepository {
 
   @override
   Future<void> download(TestMetadata testMetadata) async {
+    final Directory localTestRootFolder = Directory(
+      '${testMetadata.destTestRootFolder}/${testMetadata.testRelativePath}',
+    );
+    localTestRootFolder.createSync();
+
     final File localInputFile = File(testMetadata.destTestInputPath);
+    localInputFile.createSync();
+
     localInputFile.writeAsBytesSync(
       (await _storage.ref(testMetadata.srcTestInputPath).getData())
           as List<int>,
     );
 
     final File localOutputFile = File(testMetadata.destTestOutputPath);
+    localOutputFile.createSync();
+
     localOutputFile.writeAsBytesSync(
       (await _storage.ref(testMetadata.srcTestOutputPath).getData())
           as List<int>,
