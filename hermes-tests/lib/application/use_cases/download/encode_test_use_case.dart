@@ -129,7 +129,8 @@ class EncodeTestAsyncQueryHandler extends IAsyncQueryHandler<
     // archive unarchived test folder
     ZipFileEncoder().zipDirectory(
       localUnarchivedTestFolder,
-      filename: command.testMetadata.archivedTestPath,
+      filename:
+          '${command.testMetadata.destTestRootFolder}/${command.testMetadata.archivedTestRelativePath}',
     );
 
     _logger.i(

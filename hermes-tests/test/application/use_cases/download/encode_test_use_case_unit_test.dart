@@ -62,9 +62,14 @@ void main() {
           );
 
           expect(actualTestMetadata, expectedTestMetadata);
-          expect(File(testMetadata.archivedTestPath).existsSync(), true);
+          expect(
+            File('${testMetadata.destTestRootFolder}/${testMetadata.archivedTestRelativePath}')
+                .existsSync(),
+            true,
+          );
 
-          _disposeLocalFile(testMetadata.archivedTestPath);
+          _disposeLocalFile(
+              '${testMetadata.destTestRootFolder}/${testMetadata.archivedTestRelativePath}');
         },
       );
     });
