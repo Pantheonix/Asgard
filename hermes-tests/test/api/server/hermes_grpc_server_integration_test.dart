@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dartz/dartz.dart';
 import 'package:firebase_dart/firebase_dart.dart';
 import 'package:hermes_tests/api/client/hermes_grpc_client.dart';
 import 'package:hermes_tests/api/core/hermes.pb.dart';
@@ -24,12 +25,17 @@ void main() {
       storage = await getIt.getAsync<FirebaseStorage>();
       final logger = getIt.get<Logger>();
 
-      client = HermesGrpcClient.fromConfig(testConfig);
+      client = HermesGrpcClient.fromConfig(
+        testConfig,
+        logger,
+      );
       server = HermesGrpcServer(
         testConfig,
         mediator,
         logger,
       );
+
+      server.start();
     });
 
     test(
@@ -43,8 +49,6 @@ void main() {
         ..problemId = 'marsx'
         ..testId = '10'
         ..testSize = File(testPath).lengthSync();
-
-      await server.start();
 
       // Act
       final UploadResponse response = await client.uploadTest(
@@ -79,9 +83,38 @@ void main() {
 
       await _disposeRemoteAsset(remoteTestInputPath);
       await _disposeRemoteAsset(remoteTestOutputPath);
+    });
 
-      client.close();
-      server.close();
+    test(
+        'Given grpc client requests given test to be downloaded, '
+        'When download rpc service method is called on the server-side, '
+        'Then the downloaded test archive is accessible from the local filesystem',
+        () async {
+      // Arrange
+      final request = DownloadRequest()
+        ..problemId = 'marsx'
+        ..testId = '9';
+
+      // Act
+      final Tuple2<StatusResponse, String> response =
+          await client.downloadTest(request);
+
+      // Assert
+      expect(response.value1.code, StatusCode.Ok);
+
+      final downloadedTestArchive = File(response.value2);
+      expect(downloadedTestArchive.existsSync(), true);
+
+      final String localTestArchivePath =
+          '${testConfig.tempArchivedTestLocalPath}/${request.problemId}/${request.testId}.zip';
+      final String localTestPath =
+          '${testConfig.tempUnarchivedTestLocalPath}/${request.problemId}/${request.testId}';
+      final String localTestClientDownloadPath =
+          '${testConfig.tempArchivedTestLocalPath}/${request.problemId}/${request.testId}-downloaded.zip';
+
+      _disposeLocalFile(localTestArchivePath);
+      _disposeLocalDirectory(localTestPath);
+      _disposeLocalFile(localTestClientDownloadPath);
     });
   });
 }
