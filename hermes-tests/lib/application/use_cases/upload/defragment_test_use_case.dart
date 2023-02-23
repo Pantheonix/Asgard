@@ -61,13 +61,14 @@ class DefragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
 
     final File outputDefragmentedArchivedTestFile =
         await File(resultTestMetadata.archivedTestPath).create(recursive: true);
-    final IOSink sink = outputDefragmentedArchivedTestFile.openWrite();
+    final IOSink outputFileSink =
+        outputDefragmentedArchivedTestFile.openWrite();
 
     int writtenBytes = 0;
     try {
       await command.chunkStream.forEach((chunk) {
         writtenBytes += chunk.data.length;
-        _logger.i(
+        _logger.d(
           '$writtenBytes bytes written for test ${resultTestMetadata.testRelativePath}',
         );
         if (writtenBytes > command.testMetadata.testSize) {
@@ -77,10 +78,10 @@ class DefragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
           );
         }
 
-        sink.add(chunk.data);
+        outputFileSink.add(chunk.data);
       });
     } catch (e) {
-      await sink.close();
+      await outputFileSink.close();
       _disposeLocalAsset(resultTestMetadata.archivedTestPath);
       _logger.e(e.toString());
 
@@ -91,7 +92,7 @@ class DefragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
       );
     }
 
-    await sink.close();
+    await outputFileSink.close();
     _logger.i('Output file stream closed');
 
     if (!_isZipFile(resultTestMetadata.archivedTestPath)) {
