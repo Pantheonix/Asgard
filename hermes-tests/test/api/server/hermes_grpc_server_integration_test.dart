@@ -11,9 +11,9 @@ import 'package:logger/logger.dart';
 import 'package:test/test.dart';
 
 late final ServerConfig testConfig;
-late final HermesGrpcClient client;
-late final HermesGrpcServer server;
 late final FirebaseStorage storage;
+late HermesGrpcClient client;
+late final HermesGrpcServer server;
 
 void main() {
   group('HermesGrpcServer Integration Test', () {
@@ -25,10 +25,6 @@ void main() {
       storage = await getIt.getAsync<FirebaseStorage>();
       final logger = getIt.get<Logger>();
 
-      client = HermesGrpcClient.fromConfig(
-        testConfig,
-        logger,
-      );
       server = HermesGrpcServer(
         testConfig,
         mediator,
@@ -36,6 +32,15 @@ void main() {
       );
 
       server.start();
+    });
+
+    setUp(() async {
+      final logger = getIt.get<Logger>();
+
+      client = HermesGrpcClient.fromConfig(
+        testConfig,
+        logger,
+      );
     });
 
     test(
@@ -83,6 +88,8 @@ void main() {
 
       await _disposeRemoteAsset(remoteTestInputPath);
       await _disposeRemoteAsset(remoteTestOutputPath);
+
+      client.close();
     });
 
     test(
@@ -115,6 +122,8 @@ void main() {
       _disposeLocalFile(localTestArchivePath);
       _disposeLocalDirectory(localTestPath);
       _disposeLocalFile(localTestClientDownloadPath);
+
+      client.close();
     });
   });
 }
