@@ -37,8 +37,12 @@ class HermesGrpcClient {
     final requestStreamController = StreamController<hermes.UploadRequest>();
     final response = _client.uploadTest(requestStreamController.stream);
 
+    _logger.d('Uploading test: $testPath (metadata: $testMetadata)');
+
     final File file = File(testPath);
     if (file.existsSync() == false) {
+      _logger.e('Test file not found: $testPath');
+
       return Future.value(
         hermes.UploadResponse()
           ..status = (hermes.StatusResponse()
@@ -52,6 +56,7 @@ class HermesGrpcClient {
       ..metadata = testMetadata;
 
     requestStreamController.add(request);
+    _logger.d('Added request to stream: $request');
 
     outputFileSink.listen(
       (data) => requestStreamController.add(
@@ -59,7 +64,7 @@ class HermesGrpcClient {
       ),
       onDone: () {
         requestStreamController.close();
-        print('_client stream closed');
+        _logger.d('_client stream closed');
       },
       onError: (error) => requestStreamController.addError(error),
       cancelOnError: true,
@@ -78,11 +83,15 @@ class HermesGrpcClient {
     final String testPath =
         'temp/test/archived/${downloadRequest.problemId}/${downloadRequest.testId}-downloaded.zip';
     final File downloadedTestFile = File(testPath);
+    downloadedTestFile.createSync(
+      recursive: true,
+    );
 
     final IOSink outputFileSink = downloadedTestFile.openWrite();
 
     _logger.d('Writing to file: $testPath');
 
+    int receivedBytes = 0;
     await for (final responseItem in responseStream) {
       if (responseItem.hasMetadata()) {
         responseMetadata = responseItem.metadata;
@@ -95,6 +104,12 @@ class HermesGrpcClient {
       }
 
       outputFileSink.add(responseItem.chunk.data);
+      receivedBytes += responseItem.chunk.data.length;
+
+      if (receivedBytes >= responseMetadata.testSize) {
+        _logger.d('Received all bytes: $receivedBytes');
+        break;
+      }
 
       _logger.d('Chunk received: ${responseItem.chunk.data.length} bytes');
     }
