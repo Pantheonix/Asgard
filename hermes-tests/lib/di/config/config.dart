@@ -5,7 +5,9 @@ class Config {
   late final Map<String, dynamic> _config;
 
   Config.fromJsonFile(String path) {
-    _config = jsonDecode(File(path).readAsStringSync());
+    _config = jsonDecode(
+      File(path).readAsStringSync(),
+    );
   }
 
   get firebase => _config['firebase'];

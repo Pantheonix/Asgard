@@ -37,11 +37,13 @@ Future<void> configureDependencies(String env) async {
   }
 
   final serverConfig = getIt.get<ServerConfig>();
+
   final logger = Logger(
     output: FileLogOutput(
       serverConfig.logOutputFilePath,
     ),
   );
+
   getIt.registerLazySingleton<Logger>(() => logger);
 
   mediator.registerHandler(
