@@ -31,10 +31,14 @@ class TestRepository implements ITestRepository {
     final Directory localTestRootFolder = Directory(
       '${testMetadata.destTestRootFolder}/${testMetadata.testRelativePath}',
     );
-    localTestRootFolder.createSync();
+    localTestRootFolder.createSync(
+      recursive: true,
+    );
 
     final File localInputFile = File(testMetadata.destTestInputPath);
-    localInputFile.createSync();
+    localInputFile.createSync(
+      recursive: true,
+    );
 
     localInputFile.writeAsBytesSync(
       (await _storage.ref(testMetadata.srcTestInputPath).getData())
@@ -42,7 +46,9 @@ class TestRepository implements ITestRepository {
     );
 
     final File localOutputFile = File(testMetadata.destTestOutputPath);
-    localOutputFile.createSync();
+    localOutputFile.createSync(
+      recursive: true,
+    );
 
     localOutputFile.writeAsBytesSync(
       (await _storage.ref(testMetadata.srcTestOutputPath).getData())
