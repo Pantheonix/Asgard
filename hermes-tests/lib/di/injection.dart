@@ -39,6 +39,7 @@ Future<void> configureDependencies(String env) async {
   final serverConfig = getIt.get<ServerConfig>();
 
   final logger = Logger(
+    filter: ProductionFilter(),
     output: FileLogOutput(
       serverConfig.logOutputFilePath,
     ),

@@ -249,7 +249,7 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
         );
       },
       (responseTuple) async {
-        _logger.d('Fragment response received: $responseTuple');
+        _logger.i('Fragment response received: $responseTuple');
 
         final Stream<Chunk> chunkStream = responseTuple.value1;
         final int testSize = responseTuple.value2;
@@ -262,7 +262,7 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
               ..testId = testMetadataForDownloadRequest.testId
               ..testSize = testSize),
         );
-        _logger.d('Metadata added to response stream controller');
+        _logger.i('Metadata added to response stream controller');
 
         // add status
         responseStreamController.add(
@@ -271,7 +271,7 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
               ..code = hermes.StatusCode.Ok
               ..message = 'Test downloaded successfully'),
         );
-        _logger.d('Status added to response stream controller');
+        _logger.i('Status added to response stream controller');
 
         // add chunks
         chunkStream.listen(
@@ -280,7 +280,7 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
               hermes.DownloadResponse()
                 ..chunk = (hermes.Chunk()..data = chunk.data),
             );
-            _logger.d(
+            _logger.i(
               'Chunk of ${chunk.data.length} bytes added to response stream controller',
             );
           },
@@ -291,7 +291,7 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
           onError: (error) => responseStreamController.addError(error),
           cancelOnError: true,
         );
-        _logger.d('Chunks added to response stream controller');
+        _logger.i('Chunks added to response stream controller');
       },
     );
 

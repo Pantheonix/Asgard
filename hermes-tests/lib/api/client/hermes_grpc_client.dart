@@ -37,7 +37,7 @@ class HermesGrpcClient {
     final requestStreamController = StreamController<hermes.UploadRequest>();
     final response = _client.uploadTest(requestStreamController.stream);
 
-    _logger.d('Uploading test: $testPath (metadata: $testMetadata)');
+    _logger.i('Uploading test: $testPath (metadata: $testMetadata)');
 
     final File file = File(testPath);
     if (file.existsSync() == false) {
@@ -56,7 +56,7 @@ class HermesGrpcClient {
       ..metadata = testMetadata;
 
     requestStreamController.add(request);
-    _logger.d('Added request to stream: $request');
+    _logger.i('Added request to stream: $request');
 
     outputFileSink.listen(
       (data) => requestStreamController.add(
@@ -64,7 +64,7 @@ class HermesGrpcClient {
       ),
       onDone: () {
         requestStreamController.close();
-        _logger.d('_client stream closed');
+        _logger.i('_client stream closed');
       },
       onError: (error) => requestStreamController.addError(error),
       cancelOnError: true,
@@ -89,7 +89,7 @@ class HermesGrpcClient {
 
     final IOSink outputFileSink = downloadedTestFile.openWrite();
 
-    _logger.d('Writing to file: $testPath');
+    _logger.i('Writing to file: $testPath');
 
     int receivedBytes = 0;
     await for (final responseItem in responseStream) {
@@ -107,16 +107,16 @@ class HermesGrpcClient {
       receivedBytes += responseItem.chunk.data.length;
 
       if (receivedBytes >= responseMetadata.testSize) {
-        _logger.d('Received all bytes: $receivedBytes');
+        _logger.i('Received all bytes: $receivedBytes');
         break;
       }
 
-      _logger.d('Chunk received: ${responseItem.chunk.data.length} bytes');
+      _logger.i('Chunk received: ${responseItem.chunk.data.length} bytes');
     }
 
     await outputFileSink.close();
 
-    _logger.d('Downloaded test file: $testPath');
+    _logger.i('Downloaded test file: $testPath');
 
     return Tuple2(
       responseStatus,

@@ -68,7 +68,7 @@ class DefragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
     try {
       await command.chunkStream.forEach((chunk) {
         writtenBytes += chunk.data.length;
-        _logger.d(
+        _logger.i(
           '$writtenBytes bytes written for test ${resultTestMetadata.testRelativePath}',
         );
         if (writtenBytes > command.testMetadata.testSize) {

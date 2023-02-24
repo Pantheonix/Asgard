@@ -51,7 +51,7 @@ class FragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
       );
     }
 
-    _logger.d('Archived test ${command.testMetadata.testId} exists!');
+    _logger.i('Archived test ${command.testMetadata.testId} exists!');
 
     // check if archived test is a zip file
     if (_isZipFile(command.testMetadata.archivedTestPath) == false) {
@@ -66,7 +66,7 @@ class FragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
       );
     }
 
-    _logger.d('Archived test ${command.testMetadata.testId} is a zip file!');
+    _logger.i('Archived test ${command.testMetadata.testId} is a zip file!');
 
     final Stream<List<int>> archivedTestData = archivedTestFile.openRead();
     int bytesSent = 0;
@@ -75,10 +75,10 @@ class FragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
       (data) {
         chunkStreamController.add(Chunk()..data = data);
         bytesSent += data.length;
-        _logger.d('Sent ${data.length} bytes');
+        _logger.i('Sent ${data.length} bytes');
       },
       onDone: () async {
-        _logger.d('Sent $bytesSent bytes in total!');
+        _logger.i('Sent $bytesSent bytes in total!');
 
         await chunkStreamController.close();
       },
