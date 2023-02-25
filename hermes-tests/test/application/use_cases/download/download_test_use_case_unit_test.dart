@@ -51,42 +51,30 @@ void main() {
         'Then test metadata for the unarchived local test is returned',
         () async {
       // Arrange
-      final TestMetadata requestTestMetadata = TestMetadata(
+      final TestMetadata requestTestMetadata = TestMetadata.testToDownload(
         problemId: 'marsx',
         testId: '2',
-        srcTestRootFolder: testConfig.tempTestRemotePath,
-        destTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
-      );
-
-      final TestMetadata responseTestMetadata = TestMetadata(
-        problemId: 'marsx',
-        testId: '2',
-        srcTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
-        destTestRootFolder: testConfig.tempArchivedTestLocalPath,
+        fromDir: testConfig.remoteUnarchivedTestFolder,
+        toDir: testConfig.tempLocalUnarchivedTestFolder,
+        inputFilename: testConfig.inputFilename,
+        outputFilename: testConfig.outputFilename,
       );
 
       when(
         () => mockTestRepository.download(requestTestMetadata),
       ).thenAnswer(
-        (_) async => print('test downloaded'),
+        (_) async => right(unit),
       );
 
       // Act
-      final Either<StorageFailure, TestMetadata> result = await sut.run(
+      final Either<StorageFailure, Unit> result = await sut.run(
         DownloadTestAsyncQuery(
           testMetadata: requestTestMetadata,
-          destTestRootFolderForDownloadedTest:
-              testConfig.tempArchivedTestLocalPath,
         ),
       );
 
       // Assert
-      result.fold(
-        (f) => expect(true, false),
-        (actualTestMetadata) {
-          expect(actualTestMetadata, responseTestMetadata);
-        },
-      );
+      expect(result.isRight(), true);
     });
 
     test(
@@ -95,25 +83,25 @@ void main() {
         'When download test use case is called, '
         'Then localTestNotFound storage failure is returned', () async {
       // Arrange
-      final TestMetadata requestTestMetadata = TestMetadata(
+      final TestMetadata requestTestMetadata = TestMetadata.testToDownload(
         problemId: 'marsx',
         testId: '6',
-        srcTestRootFolder: testConfig.tempTestRemotePath,
-        destTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
+        fromDir: testConfig.remoteUnarchivedTestFolder,
+        toDir: testConfig.tempLocalUnarchivedTestFolder,
+        inputFilename: testConfig.inputFilename,
+        outputFilename: testConfig.outputFilename,
       );
 
       when(
         () => mockTestRepository.download(any()),
       ).thenAnswer(
-        (_) async => print('test downloaded'),
+        (_) async => right(unit),
       );
 
       // Act
-      final Either<StorageFailure, TestMetadata> result = await sut.run(
+      final Either<StorageFailure, Unit> result = await sut.run(
         DownloadTestAsyncQuery(
           testMetadata: requestTestMetadata,
-          destTestRootFolderForDownloadedTest:
-              testConfig.tempArchivedTestLocalPath,
         ),
       );
 
@@ -133,25 +121,66 @@ void main() {
         'When download test use case is called, '
         'Then unexpected storage failure is returned', () async {
       // Arrange
-      final TestMetadata requestTestMetadata = TestMetadata(
+      final TestMetadata requestTestMetadata = TestMetadata.testToDownload(
         problemId: 'marsx',
         testId: '5',
-        srcTestRootFolder: testConfig.tempTestRemotePath,
-        destTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
+        fromDir: testConfig.remoteUnarchivedTestFolder,
+        toDir: testConfig.tempLocalUnarchivedTestFolder,
+        inputFilename: testConfig.inputFilename,
+        outputFilename: testConfig.outputFilename,
       );
 
       when(
         () => mockTestRepository.download(any()),
-      ).thenThrow(
-        Exception('test download failed'),
+      ).thenAnswer(
+        (_) async => left(
+          StorageFailure.unexpected(
+            message: 'test download failed',
+          ),
+        ),
       );
 
       // Act
-      final Either<StorageFailure, TestMetadata> result = await sut.run(
+      final Either<StorageFailure, Unit> result = await sut.run(
         DownloadTestAsyncQuery(
           testMetadata: requestTestMetadata,
-          destTestRootFolderForDownloadedTest:
-              testConfig.tempArchivedTestLocalPath,
+        ),
+      );
+
+      // Assert
+      result.fold(
+        (f) => f.maybeMap(
+          unexpected: (_) => expect(true, true),
+          orElse: () => expect(true, false),
+        ),
+        (_) => expect(true, false),
+      );
+    });
+
+    test(
+        'Given invalid test metadata, '
+        'When download test use case is called, '
+        'Then unexpected storage failure is returned', () async {
+      // Arrange
+      final TestMetadata requestTestMetadata = TestMetadata.testToUpload(
+        problemId: 'marsx',
+        testId: '5',
+        fromDir: testConfig.remoteUnarchivedTestFolder,
+        toDir: testConfig.tempLocalUnarchivedTestFolder,
+        inputFilename: testConfig.inputFilename,
+        outputFilename: testConfig.outputFilename,
+      );
+
+      when(
+        () => mockTestRepository.download(any()),
+      ).thenAnswer(
+        (_) async => right(unit),
+      );
+
+      // Act
+      final Either<StorageFailure, Unit> result = await sut.run(
+        DownloadTestAsyncQuery(
+          testMetadata: requestTestMetadata,
         ),
       );
 

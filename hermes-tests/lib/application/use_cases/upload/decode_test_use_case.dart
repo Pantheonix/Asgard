@@ -5,21 +5,20 @@ import 'package:dartz/dartz.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:archive/archive_io.dart';
+import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
+import 'package:path/path.dart' as path;
 
-class DecodeTestAsyncQuery
-    extends IAsyncQuery<Either<StorageFailure, TestMetadata>> {
+class DecodeTestAsyncQuery extends IAsyncQuery<Either<StorageFailure, Unit>> {
   final TestMetadata testMetadata;
-  final String destTestRootFolderForUnarchivedTest;
 
   DecodeTestAsyncQuery({
     required this.testMetadata,
-    required this.destTestRootFolderForUnarchivedTest,
   });
 }
 
 class DecodeTestAsyncQueryHandler extends IAsyncQueryHandler<
-    Either<StorageFailure, TestMetadata>, DecodeTestAsyncQuery> {
+    Either<StorageFailure, Unit>, DecodeTestAsyncQuery> {
   final Logger _logger;
 
   DecodeTestAsyncQueryHandler(
@@ -27,60 +26,76 @@ class DecodeTestAsyncQueryHandler extends IAsyncQueryHandler<
   );
 
   @override
-  Future<Either<StorageFailure, TestMetadata>> call(
+  Future<Either<StorageFailure, Unit>> call(
     DecodeTestAsyncQuery command,
   ) async {
-    _logger.i(
-      'Calling Decode UseCase for test ${command.testMetadata.testRelativePath}...',
-    );
+    return command.testMetadata.maybeMap(
+      testToDecode: (testMetadata) async {
+        final testRelativePath = path.join(
+          testMetadata.problemId,
+          testMetadata.testId,
+        );
+        _logger.i(
+          'Calling Decode UseCase for test $testMetadata...',
+        );
 
-    // check if archived test file exists
-    final File localArchivedTestFile =
-        File(command.testMetadata.archivedTestPath);
-    if (localArchivedTestFile.existsSync() == false) {
-      final message =
-          'Archived test file not found for test ${command.testMetadata.testRelativePath}';
-      _logger.e(message);
+        // check if archived test file exists
+        final localArchivedTestFilePath = path.join(
+          testMetadata.fromDir,
+          '$testRelativePath.${testMetadata.archiveTypeExtension}',
+        );
+        final File localArchivedTestFile = File(
+          localArchivedTestFilePath,
+        );
 
-      return Future.value(
-        left(
-          StorageFailure.localTestNotFound(
-            message: message,
-          ),
-        ),
-      );
-    }
+        if (localArchivedTestFile.existsSync() == false) {
+          final message = 'Archived test file not found for test $testMetadata';
+          _logger.e(message);
 
-    try {
-      final archivedTestInputStream = InputFileStream(
-        command.testMetadata.archivedTestPath,
-      );
-      final archive = ZipDecoder().decodeBuffer(archivedTestInputStream);
-      extractArchiveToDisk(archive, command.testMetadata.unarchivedTestPath);
-    } catch (e) {
-      _logger.e(
-        '${e.toString()} when uploading test ${command.testMetadata.testRelativePath}',
-      );
+          return left(
+            StorageFailure.localTestNotFound(
+              message: message,
+            ),
+          );
+        }
 
-      return Future.value(
-        left(
-          StorageFailure.invalidLocalTestFormat(
-            message:
-                'Invalid local test format for test ${command.testMetadata.testRelativePath}',
-          ),
-        ),
-      );
-    }
+        try {
+          final archivedTestInputStream = InputFileStream(
+            localArchivedTestFilePath,
+          );
+          final archive = ZipDecoder().decodeBuffer(archivedTestInputStream);
 
-    _logger.i(
-      'Test decoded and saved to ${command.testMetadata.unarchivedTestPath}',
-    );
+          final localUnarchivedTestFolderPath = path.join(
+            testMetadata.toDir,
+            testRelativePath,
+          );
+          extractArchiveToDisk(
+            archive,
+            localUnarchivedTestFolderPath,
+          );
+        } catch (e) {
+          _logger.e(
+            '${e.toString()} when uploading test $testMetadata',
+          );
 
-    return Future.value(
-      right(
-        command.testMetadata.copyWith(
-          srcTestRootFolder: command.testMetadata.destTestRootFolder,
-          destTestRootFolder: command.destTestRootFolderForUnarchivedTest,
+          return Future.value(
+            left(
+              StorageFailure.invalidLocalTestFormat(
+                message: 'Invalid local test format for test $testMetadata',
+              ),
+            ),
+          );
+        }
+
+        _logger.i(
+          'Test $testRelativePath decoded successfully',
+        );
+
+        return right(unit);
+      },
+      orElse: () => left(
+        StorageFailure.unexpected(
+          message: 'Invalid test metadata passed to DecodeTestUseCase',
         ),
       ),
     );

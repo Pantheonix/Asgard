@@ -6,9 +6,9 @@ import 'package:dartz/dartz.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:logger/logger.dart';
+import 'package:path/path.dart' as path;
 
-class EncodeTestAsyncQuery
-    extends IAsyncQuery<Either<StorageFailure, TestMetadata>> {
+class EncodeTestAsyncQuery extends IAsyncQuery<Either<StorageFailure, Unit>> {
   final TestMetadata testMetadata;
 
   EncodeTestAsyncQuery({
@@ -17,7 +17,7 @@ class EncodeTestAsyncQuery
 }
 
 class EncodeTestAsyncQueryHandler extends IAsyncQueryHandler<
-    Either<StorageFailure, TestMetadata>, EncodeTestAsyncQuery> {
+    Either<StorageFailure, Unit>, EncodeTestAsyncQuery> {
   final Logger _logger;
 
   EncodeTestAsyncQueryHandler(
@@ -25,122 +25,125 @@ class EncodeTestAsyncQueryHandler extends IAsyncQueryHandler<
   );
 
   @override
-  Future<Either<StorageFailure, TestMetadata>> call(
+  Future<Either<StorageFailure, Unit>> call(
     EncodeTestAsyncQuery command,
   ) async {
-    _logger.i(
-      'Calling Encode UseCase for test ${command.testMetadata.testRelativePath}...',
-    );
+    // argument guard
+    return command.testMetadata.maybeMap(
+      testToEncode: (testMetadata) async {
+        final testRelativePath = path.join(
+          testMetadata.problemId,
+          testMetadata.testId,
+        );
+        _logger.i(
+          'Calling Encode UseCase for test $testRelativePath...',
+        );
 
-    // check if archived test file exists
-    final File localArchivedTestFile = File(
-      '${command.testMetadata.destTestRootFolder}/${command.testMetadata.archivedTestRelativePath}',
-    );
+        // check if archived test file exists
+        final localArchivedTestFilePath = path.join(
+          testMetadata.toDir,
+          '$testRelativePath.${testMetadata.archiveTypeExtension}',
+        );
+        final File localArchivedTestFile = File(localArchivedTestFilePath);
 
-    if (localArchivedTestFile.existsSync()) {
-      _logger.i(
-        'Archived test file already exists for test ${command.testMetadata.testRelativePath}... Skip encoding',
-      );
+        if (localArchivedTestFile.existsSync()) {
+          _logger.i(
+            'Archived test file already exists for test $testRelativePath... Skip encoding',
+          );
 
-      return Future.value(
-        right(
-          command.testMetadata.copyWith(
-            srcTestRootFolder: command.testMetadata.destTestRootFolder,
-          ),
-        ),
-      );
-    }
+          return right(unit);
+        }
 
-    // check if unarchived test folder exists
-    final Directory localUnarchivedTestFolder = Directory(
-      '${command.testMetadata.srcTestRootFolder}/${command.testMetadata.testRelativePath}',
-    );
-    if (localUnarchivedTestFolder.existsSync() == false) {
-      final message =
-          'Unarchived test folder not found for test ${command.testMetadata.testRelativePath}';
-      _logger.e(message);
+        // check if unarchived test folder exists
+        final localUnarchivedTestFolderPath = path.join(
+          testMetadata.fromDir,
+          testRelativePath,
+        );
+        final Directory localUnarchivedTestFolder = Directory(
+          localUnarchivedTestFolderPath,
+        );
 
-      return Future.value(
-        left(
-          StorageFailure.localTestNotFound(
-            message: message,
-          ),
-        ),
-      );
-    }
+        if (localUnarchivedTestFolder.existsSync() == false) {
+          final message =
+              'Unarchived test folder not found for test $testRelativePath';
+          _logger.e(message);
 
-    // check if unarchived test folder has a valid format
-    final List<FileSystemEntity> localUnarchivedTestFolderContent =
-        localUnarchivedTestFolder.listSync();
-    localUnarchivedTestFolderContent.sort(
-      (file1, file2) => file1.path.compareTo(file2.path),
-    );
+          return left(
+            StorageFailure.localTestNotFound(
+              message: message,
+            ),
+          );
+        }
 
-    if (localUnarchivedTestFolderContent.length != 2) {
-      final message =
-          'Unarchived test folder has an invalid format for test ${command.testMetadata.testRelativePath}: it should contain only 2 files';
-      _logger.e(message);
+        // check if unarchived test folder has a valid format
+        final List<FileSystemEntity> localUnarchivedTestFolderContent =
+            localUnarchivedTestFolder.listSync();
+        localUnarchivedTestFolderContent.sort(
+          (file1, file2) => file1.path.compareTo(file2.path),
+        );
 
-      return Future.value(
-        left(
-          StorageFailure.invalidLocalTestFormat(
-            message: message,
-          ),
-        ),
-      );
-    }
+        if (localUnarchivedTestFolderContent.length != 2) {
+          final message =
+              'Unarchived test folder has an invalid format for test $testRelativePath: '
+              'it should contain only 2 files';
+          _logger.e(message);
 
-    if (localUnarchivedTestFolderContent
-            .elementAt(0)
-            .path
-            .endsWith(command.testMetadata.inputFileName) ==
-        false) {
-      final message =
-          'Unarchived test folder has an invalid format for test ${command.testMetadata.testRelativePath}: input file name is not ${command.testMetadata.inputFileName}';
-      _logger.e(message);
+          return left(
+            StorageFailure.invalidLocalTestFormat(
+              message: message,
+            ),
+          );
+        }
 
-      return Future.value(
-        left(
-          StorageFailure.invalidLocalTestFormat(
-            message: message,
-          ),
-        ),
-      );
-    }
+        if (localUnarchivedTestFolderContent
+                .elementAt(0)
+                .path
+                .endsWith(testMetadata.inputFilename) ==
+            false) {
+          final message =
+              'Unarchived test folder has an invalid format for test $testRelativePath: '
+              'input file name is not ${testMetadata.inputFilename}';
+          _logger.e(message);
 
-    if (localUnarchivedTestFolderContent
-            .elementAt(1)
-            .path
-            .endsWith(command.testMetadata.outputFileName) ==
-        false) {
-      final message =
-          'Unarchived test folder has an invalid format for test ${command.testMetadata.testRelativePath}: output file name is not ${command.testMetadata.outputFileName}';
-      _logger.e(message);
+          return left(
+            StorageFailure.invalidLocalTestFormat(
+              message: message,
+            ),
+          );
+        }
 
-      return Future.value(
-        left(
-          StorageFailure.invalidLocalTestFormat(
-            message: message,
-          ),
-        ),
-      );
-    }
+        if (localUnarchivedTestFolderContent
+                .elementAt(1)
+                .path
+                .endsWith(testMetadata.outputFilename) ==
+            false) {
+          final message =
+              'Unarchived test folder has an invalid format for test $testRelativePath: '
+              'output file name is not ${testMetadata.outputFilename}';
+          _logger.e(message);
 
-    // archive unarchived test folder
-    ZipFileEncoder().zipDirectory(
-      localUnarchivedTestFolder,
-      filename:
-          '${command.testMetadata.destTestRootFolder}/${command.testMetadata.archivedTestRelativePath}',
-    );
+          return left(
+            StorageFailure.invalidLocalTestFormat(
+              message: message,
+            ),
+          );
+        }
 
-    _logger.i(
-      'Test ${command.testMetadata.testRelativePath} encoded successfully',
-    );
+        // archive unarchived test folder
+        ZipFileEncoder().zipDirectory(
+          localUnarchivedTestFolder,
+          filename: localArchivedTestFilePath,
+        );
 
-    return Future.value(
-      right(
-        command.testMetadata.copyWith(
-          srcTestRootFolder: command.testMetadata.destTestRootFolder,
+        _logger.i(
+          'Test $testRelativePath encoded successfully',
+        );
+
+        return right(unit);
+      },
+      orElse: () => left(
+        StorageFailure.unexpected(
+          message: 'Invalid test metadata passed to EncodeTestUseCase',
         ),
       ),
     );

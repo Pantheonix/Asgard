@@ -7,6 +7,7 @@ import 'package:hermes_tests/api/core/hermes.pb.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:logger/logger.dart';
+import 'package:path/path.dart' as path;
 
 class FragmentTestAsyncQuery
     extends IAsyncQuery<Either<StorageFailure, Tuple2<Stream<Chunk>, int>>> {
@@ -30,70 +31,90 @@ class FragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
   Future<Either<StorageFailure, Tuple2<Stream<Chunk>, int>>> call(
     FragmentTestAsyncQuery command,
   ) async {
-    _logger.i(
-      'Calling Fragment UseCase for test ${command.testMetadata.testId}...',
-    );
+    // argument guard
+    return command.testMetadata.maybeMap(
+      testToFragment: (testMetadata) async {
+        final testRelativePath = path.join(
+          testMetadata.problemId,
+          testMetadata.testId,
+        );
+        _logger.i(
+          'Calling Fragment UseCase for test $testRelativePath...',
+        );
 
-    final StreamController<Chunk> chunkStreamController =
-        StreamController<Chunk>();
+        final StreamController<Chunk> chunkStreamController =
+            StreamController<Chunk>();
 
-    // check if archived test exists
-    final File archivedTestFile = File(command.testMetadata.archivedTestPath);
-    if (archivedTestFile.existsSync() == false) {
-      final message =
-          'Test ${command.testMetadata.testId} does not exist in ${command.testMetadata.archivedTestPath}';
-      _logger.e(message);
+        // check if archived test exists
+        final localArchivedTestFilePath = path.join(
+          testMetadata.fromDir,
+          '$testRelativePath.${testMetadata.archiveTypeExtension}',
+        );
+        final File localArchivedTestFile = File(localArchivedTestFilePath);
 
-      return left(
-        StorageFailure.localTestNotFound(
-          message: message,
-        ),
-      );
-    }
+        if (localArchivedTestFile.existsSync() == false) {
+          final message =
+              'Test $testRelativePath does not exist in $localArchivedTestFilePath';
+          _logger.e(message);
 
-    _logger.i('Archived test ${command.testMetadata.testId} exists!');
+          return left(
+            StorageFailure.localTestNotFound(
+              message: message,
+            ),
+          );
+        }
 
-    // check if archived test is a zip file
-    if (_isZipFile(command.testMetadata.archivedTestPath) == false) {
-      final message =
-          'Test ${command.testMetadata.testId} is not a zip file in ${command.testMetadata.archivedTestPath}';
-      _logger.e(message);
+        _logger.i('Archived test $testRelativePath exists!');
 
-      return left(
-        StorageFailure.invalidLocalTestFormat(
-          message: message,
-        ),
-      );
-    }
+        // check if archived test is a zip file
+        if (_isZipFile(localArchivedTestFilePath) == false) {
+          final message =
+              'Test $testRelativePath is not a zip file in $localArchivedTestFilePath';
+          _logger.e(message);
 
-    _logger.i('Archived test ${command.testMetadata.testId} is a zip file!');
+          return left(
+            StorageFailure.invalidLocalTestFormat(
+              message: message,
+            ),
+          );
+        }
 
-    final Stream<List<int>> archivedTestData = archivedTestFile.openRead();
-    int bytesSent = 0;
+        _logger.i('Archived test $testRelativePath is a zip file!');
 
-    archivedTestData.listen(
-      (data) {
-        chunkStreamController.add(Chunk()..data = data);
-        bytesSent += data.length;
-        _logger.i('Sent ${data.length} bytes');
+        final Stream<List<int>> localArchivedTestData =
+            localArchivedTestFile.openRead();
+        int bytesSent = 0;
+
+        localArchivedTestData.listen(
+          (data) {
+            chunkStreamController.add(Chunk()..data = data);
+            bytesSent += data.length;
+            _logger.i('Sent ${data.length} bytes');
+          },
+          onDone: () async {
+            _logger.i('Sent $bytesSent bytes in total!');
+
+            await chunkStreamController.close();
+          },
+          onError: (error) => chunkStreamController.addError(error),
+          cancelOnError: true,
+        );
+
+        _logger.i(
+          'Fragmented test $testRelativePath successfully!',
+        );
+
+        return right(
+          Tuple2(
+            chunkStreamController.stream,
+            localArchivedTestFile.lengthSync(),
+          ),
+        );
       },
-      onDone: () async {
-        _logger.i('Sent $bytesSent bytes in total!');
-
-        await chunkStreamController.close();
-      },
-      onError: (error) => chunkStreamController.addError(error),
-      cancelOnError: true,
-    );
-
-    _logger.i(
-      'Fragmented test ${command.testMetadata.testId} successfully!',
-    );
-
-    return right(
-      Tuple2(
-        chunkStreamController.stream,
-        archivedTestFile.lengthSync(),
+      orElse: () => left(
+        StorageFailure.unexpected(
+          message: 'Invalid test metadata passed to FragmentTestUseCase',
+        ),
       ),
     );
   }
@@ -106,10 +127,7 @@ bool _isZipFile(String filePath) {
     return false;
   }
 
-  final String fileExtension = file.path.split('.').last;
-
-  return fileExtension == 'zip' &&
-      bytes[0] == 0x50 &&
+  return bytes[0] == 0x50 &&
       bytes[1] == 0x4B &&
       bytes[2] == 0x03 &&
       bytes[3] == 0x04;

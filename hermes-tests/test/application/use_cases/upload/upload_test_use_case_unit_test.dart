@@ -49,22 +49,26 @@ void main() {
         'When upload test use case is called, '
         'Then no storage failure is returned', () async {
       // Arrange
-      final TestMetadata testMetadata = TestMetadata(
+      final TestMetadata testMetadata = TestMetadata.testToUpload(
         problemId: 'marsx',
         testId: '2',
-        srcTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
-        destTestRootFolder: testConfig.tempTestRemotePath,
+        fromDir: testConfig.tempLocalUnarchivedTestFolder,
+        toDir: testConfig.tempLocalUnarchivedTestFolder,
+        inputFilename: testConfig.inputFilename,
+        outputFilename: testConfig.outputFilename,
       );
 
       when(
         () => mockTestRepository.upload(any()),
       ).thenAnswer(
-        (_) async => print('test uploaded'),
+        (_) async => right(unit),
       );
 
       // Act
       final Either<StorageFailure, Unit> result = await sut.run(
-        UploadTestAsyncQuery(testMetadata: testMetadata),
+        UploadTestAsyncQuery(
+          testMetadata: testMetadata,
+        ),
       );
 
       // Assert
@@ -80,22 +84,30 @@ void main() {
         'When upload test use case is called, '
         'Then localtTestNotFound storage failure is returned', () async {
       // Arrange
-      final TestMetadata testMetadata = TestMetadata(
+      final TestMetadata testMetadata = TestMetadata.testToUpload(
         problemId: 'marsx',
         testId: '3',
-        srcTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
-        destTestRootFolder: testConfig.tempTestRemotePath,
+        fromDir: testConfig.tempLocalUnarchivedTestFolder,
+        toDir: testConfig.tempLocalUnarchivedTestFolder,
+        inputFilename: testConfig.inputFilename,
+        outputFilename: testConfig.outputFilename,
       );
 
       when(
         () => mockTestRepository.upload(any()),
       ).thenAnswer(
-        (_) async => print('test uploaded'),
+        (_) async => left(
+          StorageFailure.unexpected(
+            message: 'test upload failed',
+          ),
+        ),
       );
 
       // Act
       final Either<StorageFailure, Unit> result = await sut.run(
-        UploadTestAsyncQuery(testMetadata: testMetadata),
+        UploadTestAsyncQuery(
+          testMetadata: testMetadata,
+        ),
       );
 
       // Assert
@@ -113,22 +125,71 @@ void main() {
         'When upload test use case is called, '
         'Then unexpected storage failure is returned', () async {
       // Arrange
-      final TestMetadata testMetadata = TestMetadata(
+      final TestMetadata testMetadata = TestMetadata.testToUpload(
         problemId: 'marsx',
         testId: '2',
-        srcTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
-        destTestRootFolder: testConfig.tempTestRemotePath,
+        fromDir: testConfig.tempLocalUnarchivedTestFolder,
+        toDir: testConfig.tempLocalUnarchivedTestFolder,
+        inputFilename: testConfig.inputFilename,
+        outputFilename: testConfig.outputFilename,
       );
 
       when(
         () => mockTestRepository.upload(any()),
-      ).thenThrow(
-        Exception('test upload failed'),
+      ).thenAnswer(
+        (_) async => left(
+          StorageFailure.unexpected(
+            message: 'test upload failed',
+          ),
+        ),
       );
 
       // Act
       final Either<StorageFailure, Unit> result = await sut.run(
-        UploadTestAsyncQuery(testMetadata: testMetadata),
+        UploadTestAsyncQuery(
+          testMetadata: testMetadata,
+        ),
+      );
+
+      // Assert
+      result.fold(
+        (f) => f.maybeMap(
+          unexpected: (_) => expect(true, true),
+          orElse: () => expect(true, false),
+        ),
+        (_) => expect(true, false),
+      );
+    });
+
+    test(
+        'Given invalid test metadata, '
+        'When upload test use case is called, '
+        'Then unexpected storage failure is returned', () async {
+      // Arrange
+      final TestMetadata testMetadata = TestMetadata.testToDownload(
+        problemId: 'marsx',
+        testId: '2',
+        fromDir: testConfig.tempLocalUnarchivedTestFolder,
+        toDir: testConfig.tempLocalUnarchivedTestFolder,
+        inputFilename: testConfig.inputFilename,
+        outputFilename: testConfig.outputFilename,
+      );
+
+      when(
+        () => mockTestRepository.upload(any()),
+      ).thenAnswer(
+        (_) async => left(
+          StorageFailure.unexpected(
+            message: 'test upload failed',
+          ),
+        ),
+      );
+
+      // Act
+      final Either<StorageFailure, Unit> result = await sut.run(
+        UploadTestAsyncQuery(
+          testMetadata: testMetadata,
+        ),
       );
 
       // Assert

@@ -11,10 +11,14 @@ _$_ServerConfig _$$_ServerConfigFromJson(Map<String, dynamic> json) =>
       host: json['host'] as String,
       port: json['port'] as int,
       timeoutInSeconds: json['timeoutInSeconds'] as int,
-      tempArchivedTestLocalPath: json['tempArchivedTestLocalPath'] as String,
-      tempUnarchivedTestLocalPath:
-          json['tempUnarchivedTestLocalPath'] as String,
-      tempTestRemotePath: json['tempTestRemotePath'] as String,
+      tempLocalArchivedTestFolder:
+          json['tempLocalArchivedTestFolder'] as String,
+      tempLocalUnarchivedTestFolder:
+          json['tempLocalUnarchivedTestFolder'] as String,
+      remoteUnarchivedTestFolder: json['remoteUnarchivedTestFolder'] as String,
+      inputFilename: json['inputFilename'] as String,
+      outputFilename: json['outputFilename'] as String,
+      archiveTypeExtension: json['archiveTypeExtension'] as String,
       testMaxSizeInBytes: json['testMaxSizeInBytes'] as int,
       logOutputFilePath: json['logOutputFilePath'] as String,
     );
@@ -24,9 +28,12 @@ Map<String, dynamic> _$$_ServerConfigToJson(_$_ServerConfig instance) =>
       'host': instance.host,
       'port': instance.port,
       'timeoutInSeconds': instance.timeoutInSeconds,
-      'tempArchivedTestLocalPath': instance.tempArchivedTestLocalPath,
-      'tempUnarchivedTestLocalPath': instance.tempUnarchivedTestLocalPath,
-      'tempTestRemotePath': instance.tempTestRemotePath,
+      'tempLocalArchivedTestFolder': instance.tempLocalArchivedTestFolder,
+      'tempLocalUnarchivedTestFolder': instance.tempLocalUnarchivedTestFolder,
+      'remoteUnarchivedTestFolder': instance.remoteUnarchivedTestFolder,
+      'inputFilename': instance.inputFilename,
+      'outputFilename': instance.outputFilename,
+      'archiveTypeExtension': instance.archiveTypeExtension,
       'testMaxSizeInBytes': instance.testMaxSizeInBytes,
       'logOutputFilePath': instance.logOutputFilePath,
     };

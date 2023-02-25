@@ -1,33 +1,62 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hermes_tests/api/core/hermes.pb.dart';
 
 part 'test_metadata.freezed.dart';
 
 @freezed
 class TestMetadata with _$TestMetadata {
-  const factory TestMetadata({
+  const factory TestMetadata.testToFragment({
     required String problemId,
     required String testId,
-    required String srcTestRootFolder,
-    required String destTestRootFolder,
-    @Default("input.txt") String inputFileName,
-    @Default("output.txt") String outputFileName,
-  }) = _TestMetadata;
+    required String fromDir,
+    required String archiveTypeExtension,
+  }) = TestToFragment;
 
-  const TestMetadata._();
+  const factory TestMetadata.testToEncode({
+    required String problemId,
+    required String testId,
+    required String fromDir,
+    required String toDir,
+    required String archiveTypeExtension,
+    required String inputFilename,
+    required String outputFilename,
+  }) = TestToEncode;
 
-  String get testRelativePath => '$problemId/$testId';
-  String get archivedTestRelativePath => '$problemId/$testId.zip';
+  const factory TestMetadata.testToDownload({
+    required String problemId,
+    required String testId,
+    required String fromDir,
+    required String toDir,
+    required String inputFilename,
+    required String outputFilename,
+  }) = TestToDownload;
 
-  String get archivedTestPath => '$srcTestRootFolder/$archivedTestRelativePath';
-  String get unarchivedTestPath => '$destTestRootFolder/$testRelativePath';
+  const factory TestMetadata.testToDefragment({
+    required String problemId,
+    required String testId,
+    required int testSize,
+    required String toDir,
+    required String archiveTypeExtension,
+    required Stream<Chunk> chunkStream,
+    required int maxTestSize,
+  }) = TestToDefragment;
 
-  String get srcTestInputPath =>
-      '$srcTestRootFolder/$testRelativePath/$inputFileName';
-  String get srcTestOutputPath =>
-      '$srcTestRootFolder/$testRelativePath/$outputFileName';
+  const factory TestMetadata.testToDecode({
+    required String problemId,
+    required String testId,
+    required String fromDir,
+    required String toDir,
+    required String archiveTypeExtension,
+    required String inputFilename,
+    required String outputFilename,
+  }) = TestToDecode;
 
-  String get destTestInputPath =>
-      '$destTestRootFolder/$testRelativePath/$inputFileName';
-  String get destTestOutputPath =>
-      '$destTestRootFolder/$testRelativePath/$outputFileName';
+  const factory TestMetadata.testToUpload({
+    required String problemId,
+    required String testId,
+    required String fromDir,
+    required String toDir,
+    required String inputFilename,
+    required String outputFilename,
+  }) = TestToUpload;
 }

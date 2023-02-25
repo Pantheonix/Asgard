@@ -23,9 +23,13 @@ mixin _$ServerConfig {
   String get host => throw _privateConstructorUsedError;
   int get port => throw _privateConstructorUsedError;
   int get timeoutInSeconds => throw _privateConstructorUsedError;
-  String get tempArchivedTestLocalPath => throw _privateConstructorUsedError;
-  String get tempUnarchivedTestLocalPath => throw _privateConstructorUsedError;
-  String get tempTestRemotePath => throw _privateConstructorUsedError;
+  String get tempLocalArchivedTestFolder => throw _privateConstructorUsedError;
+  String get tempLocalUnarchivedTestFolder =>
+      throw _privateConstructorUsedError;
+  String get remoteUnarchivedTestFolder => throw _privateConstructorUsedError;
+  String get inputFilename => throw _privateConstructorUsedError;
+  String get outputFilename => throw _privateConstructorUsedError;
+  String get archiveTypeExtension => throw _privateConstructorUsedError;
   int get testMaxSizeInBytes => throw _privateConstructorUsedError;
   String get logOutputFilePath => throw _privateConstructorUsedError;
 
@@ -45,9 +49,12 @@ abstract class $ServerConfigCopyWith<$Res> {
       {String host,
       int port,
       int timeoutInSeconds,
-      String tempArchivedTestLocalPath,
-      String tempUnarchivedTestLocalPath,
-      String tempTestRemotePath,
+      String tempLocalArchivedTestFolder,
+      String tempLocalUnarchivedTestFolder,
+      String remoteUnarchivedTestFolder,
+      String inputFilename,
+      String outputFilename,
+      String archiveTypeExtension,
       int testMaxSizeInBytes,
       String logOutputFilePath});
 }
@@ -68,9 +75,12 @@ class _$ServerConfigCopyWithImpl<$Res, $Val extends ServerConfig>
     Object? host = null,
     Object? port = null,
     Object? timeoutInSeconds = null,
-    Object? tempArchivedTestLocalPath = null,
-    Object? tempUnarchivedTestLocalPath = null,
-    Object? tempTestRemotePath = null,
+    Object? tempLocalArchivedTestFolder = null,
+    Object? tempLocalUnarchivedTestFolder = null,
+    Object? remoteUnarchivedTestFolder = null,
+    Object? inputFilename = null,
+    Object? outputFilename = null,
+    Object? archiveTypeExtension = null,
     Object? testMaxSizeInBytes = null,
     Object? logOutputFilePath = null,
   }) {
@@ -87,17 +97,29 @@ class _$ServerConfigCopyWithImpl<$Res, $Val extends ServerConfig>
           ? _value.timeoutInSeconds
           : timeoutInSeconds // ignore: cast_nullable_to_non_nullable
               as int,
-      tempArchivedTestLocalPath: null == tempArchivedTestLocalPath
-          ? _value.tempArchivedTestLocalPath
-          : tempArchivedTestLocalPath // ignore: cast_nullable_to_non_nullable
+      tempLocalArchivedTestFolder: null == tempLocalArchivedTestFolder
+          ? _value.tempLocalArchivedTestFolder
+          : tempLocalArchivedTestFolder // ignore: cast_nullable_to_non_nullable
               as String,
-      tempUnarchivedTestLocalPath: null == tempUnarchivedTestLocalPath
-          ? _value.tempUnarchivedTestLocalPath
-          : tempUnarchivedTestLocalPath // ignore: cast_nullable_to_non_nullable
+      tempLocalUnarchivedTestFolder: null == tempLocalUnarchivedTestFolder
+          ? _value.tempLocalUnarchivedTestFolder
+          : tempLocalUnarchivedTestFolder // ignore: cast_nullable_to_non_nullable
               as String,
-      tempTestRemotePath: null == tempTestRemotePath
-          ? _value.tempTestRemotePath
-          : tempTestRemotePath // ignore: cast_nullable_to_non_nullable
+      remoteUnarchivedTestFolder: null == remoteUnarchivedTestFolder
+          ? _value.remoteUnarchivedTestFolder
+          : remoteUnarchivedTestFolder // ignore: cast_nullable_to_non_nullable
+              as String,
+      inputFilename: null == inputFilename
+          ? _value.inputFilename
+          : inputFilename // ignore: cast_nullable_to_non_nullable
+              as String,
+      outputFilename: null == outputFilename
+          ? _value.outputFilename
+          : outputFilename // ignore: cast_nullable_to_non_nullable
+              as String,
+      archiveTypeExtension: null == archiveTypeExtension
+          ? _value.archiveTypeExtension
+          : archiveTypeExtension // ignore: cast_nullable_to_non_nullable
               as String,
       testMaxSizeInBytes: null == testMaxSizeInBytes
           ? _value.testMaxSizeInBytes
@@ -123,9 +145,12 @@ abstract class _$$_ServerConfigCopyWith<$Res>
       {String host,
       int port,
       int timeoutInSeconds,
-      String tempArchivedTestLocalPath,
-      String tempUnarchivedTestLocalPath,
-      String tempTestRemotePath,
+      String tempLocalArchivedTestFolder,
+      String tempLocalUnarchivedTestFolder,
+      String remoteUnarchivedTestFolder,
+      String inputFilename,
+      String outputFilename,
+      String archiveTypeExtension,
       int testMaxSizeInBytes,
       String logOutputFilePath});
 }
@@ -144,9 +169,12 @@ class __$$_ServerConfigCopyWithImpl<$Res>
     Object? host = null,
     Object? port = null,
     Object? timeoutInSeconds = null,
-    Object? tempArchivedTestLocalPath = null,
-    Object? tempUnarchivedTestLocalPath = null,
-    Object? tempTestRemotePath = null,
+    Object? tempLocalArchivedTestFolder = null,
+    Object? tempLocalUnarchivedTestFolder = null,
+    Object? remoteUnarchivedTestFolder = null,
+    Object? inputFilename = null,
+    Object? outputFilename = null,
+    Object? archiveTypeExtension = null,
     Object? testMaxSizeInBytes = null,
     Object? logOutputFilePath = null,
   }) {
@@ -163,17 +191,29 @@ class __$$_ServerConfigCopyWithImpl<$Res>
           ? _value.timeoutInSeconds
           : timeoutInSeconds // ignore: cast_nullable_to_non_nullable
               as int,
-      tempArchivedTestLocalPath: null == tempArchivedTestLocalPath
-          ? _value.tempArchivedTestLocalPath
-          : tempArchivedTestLocalPath // ignore: cast_nullable_to_non_nullable
+      tempLocalArchivedTestFolder: null == tempLocalArchivedTestFolder
+          ? _value.tempLocalArchivedTestFolder
+          : tempLocalArchivedTestFolder // ignore: cast_nullable_to_non_nullable
               as String,
-      tempUnarchivedTestLocalPath: null == tempUnarchivedTestLocalPath
-          ? _value.tempUnarchivedTestLocalPath
-          : tempUnarchivedTestLocalPath // ignore: cast_nullable_to_non_nullable
+      tempLocalUnarchivedTestFolder: null == tempLocalUnarchivedTestFolder
+          ? _value.tempLocalUnarchivedTestFolder
+          : tempLocalUnarchivedTestFolder // ignore: cast_nullable_to_non_nullable
               as String,
-      tempTestRemotePath: null == tempTestRemotePath
-          ? _value.tempTestRemotePath
-          : tempTestRemotePath // ignore: cast_nullable_to_non_nullable
+      remoteUnarchivedTestFolder: null == remoteUnarchivedTestFolder
+          ? _value.remoteUnarchivedTestFolder
+          : remoteUnarchivedTestFolder // ignore: cast_nullable_to_non_nullable
+              as String,
+      inputFilename: null == inputFilename
+          ? _value.inputFilename
+          : inputFilename // ignore: cast_nullable_to_non_nullable
+              as String,
+      outputFilename: null == outputFilename
+          ? _value.outputFilename
+          : outputFilename // ignore: cast_nullable_to_non_nullable
+              as String,
+      archiveTypeExtension: null == archiveTypeExtension
+          ? _value.archiveTypeExtension
+          : archiveTypeExtension // ignore: cast_nullable_to_non_nullable
               as String,
       testMaxSizeInBytes: null == testMaxSizeInBytes
           ? _value.testMaxSizeInBytes
@@ -194,9 +234,12 @@ class _$_ServerConfig implements _ServerConfig {
       {required this.host,
       required this.port,
       required this.timeoutInSeconds,
-      required this.tempArchivedTestLocalPath,
-      required this.tempUnarchivedTestLocalPath,
-      required this.tempTestRemotePath,
+      required this.tempLocalArchivedTestFolder,
+      required this.tempLocalUnarchivedTestFolder,
+      required this.remoteUnarchivedTestFolder,
+      required this.inputFilename,
+      required this.outputFilename,
+      required this.archiveTypeExtension,
       required this.testMaxSizeInBytes,
       required this.logOutputFilePath});
 
@@ -210,11 +253,17 @@ class _$_ServerConfig implements _ServerConfig {
   @override
   final int timeoutInSeconds;
   @override
-  final String tempArchivedTestLocalPath;
+  final String tempLocalArchivedTestFolder;
   @override
-  final String tempUnarchivedTestLocalPath;
+  final String tempLocalUnarchivedTestFolder;
   @override
-  final String tempTestRemotePath;
+  final String remoteUnarchivedTestFolder;
+  @override
+  final String inputFilename;
+  @override
+  final String outputFilename;
+  @override
+  final String archiveTypeExtension;
   @override
   final int testMaxSizeInBytes;
   @override
@@ -222,7 +271,7 @@ class _$_ServerConfig implements _ServerConfig {
 
   @override
   String toString() {
-    return 'ServerConfig(host: $host, port: $port, timeoutInSeconds: $timeoutInSeconds, tempArchivedTestLocalPath: $tempArchivedTestLocalPath, tempUnarchivedTestLocalPath: $tempUnarchivedTestLocalPath, tempTestRemotePath: $tempTestRemotePath, testMaxSizeInBytes: $testMaxSizeInBytes, logOutputFilePath: $logOutputFilePath)';
+    return 'ServerConfig(host: $host, port: $port, timeoutInSeconds: $timeoutInSeconds, tempLocalArchivedTestFolder: $tempLocalArchivedTestFolder, tempLocalUnarchivedTestFolder: $tempLocalUnarchivedTestFolder, remoteUnarchivedTestFolder: $remoteUnarchivedTestFolder, inputFilename: $inputFilename, outputFilename: $outputFilename, archiveTypeExtension: $archiveTypeExtension, testMaxSizeInBytes: $testMaxSizeInBytes, logOutputFilePath: $logOutputFilePath)';
   }
 
   @override
@@ -234,15 +283,24 @@ class _$_ServerConfig implements _ServerConfig {
             (identical(other.port, port) || other.port == port) &&
             (identical(other.timeoutInSeconds, timeoutInSeconds) ||
                 other.timeoutInSeconds == timeoutInSeconds) &&
-            (identical(other.tempArchivedTestLocalPath,
-                    tempArchivedTestLocalPath) ||
-                other.tempArchivedTestLocalPath == tempArchivedTestLocalPath) &&
-            (identical(other.tempUnarchivedTestLocalPath,
-                    tempUnarchivedTestLocalPath) ||
-                other.tempUnarchivedTestLocalPath ==
-                    tempUnarchivedTestLocalPath) &&
-            (identical(other.tempTestRemotePath, tempTestRemotePath) ||
-                other.tempTestRemotePath == tempTestRemotePath) &&
+            (identical(other.tempLocalArchivedTestFolder,
+                    tempLocalArchivedTestFolder) ||
+                other.tempLocalArchivedTestFolder ==
+                    tempLocalArchivedTestFolder) &&
+            (identical(other.tempLocalUnarchivedTestFolder,
+                    tempLocalUnarchivedTestFolder) ||
+                other.tempLocalUnarchivedTestFolder ==
+                    tempLocalUnarchivedTestFolder) &&
+            (identical(other.remoteUnarchivedTestFolder,
+                    remoteUnarchivedTestFolder) ||
+                other.remoteUnarchivedTestFolder ==
+                    remoteUnarchivedTestFolder) &&
+            (identical(other.inputFilename, inputFilename) ||
+                other.inputFilename == inputFilename) &&
+            (identical(other.outputFilename, outputFilename) ||
+                other.outputFilename == outputFilename) &&
+            (identical(other.archiveTypeExtension, archiveTypeExtension) ||
+                other.archiveTypeExtension == archiveTypeExtension) &&
             (identical(other.testMaxSizeInBytes, testMaxSizeInBytes) ||
                 other.testMaxSizeInBytes == testMaxSizeInBytes) &&
             (identical(other.logOutputFilePath, logOutputFilePath) ||
@@ -256,9 +314,12 @@ class _$_ServerConfig implements _ServerConfig {
       host,
       port,
       timeoutInSeconds,
-      tempArchivedTestLocalPath,
-      tempUnarchivedTestLocalPath,
-      tempTestRemotePath,
+      tempLocalArchivedTestFolder,
+      tempLocalUnarchivedTestFolder,
+      remoteUnarchivedTestFolder,
+      inputFilename,
+      outputFilename,
+      archiveTypeExtension,
       testMaxSizeInBytes,
       logOutputFilePath);
 
@@ -281,9 +342,12 @@ abstract class _ServerConfig implements ServerConfig {
       {required final String host,
       required final int port,
       required final int timeoutInSeconds,
-      required final String tempArchivedTestLocalPath,
-      required final String tempUnarchivedTestLocalPath,
-      required final String tempTestRemotePath,
+      required final String tempLocalArchivedTestFolder,
+      required final String tempLocalUnarchivedTestFolder,
+      required final String remoteUnarchivedTestFolder,
+      required final String inputFilename,
+      required final String outputFilename,
+      required final String archiveTypeExtension,
       required final int testMaxSizeInBytes,
       required final String logOutputFilePath}) = _$_ServerConfig;
 
@@ -297,11 +361,17 @@ abstract class _ServerConfig implements ServerConfig {
   @override
   int get timeoutInSeconds;
   @override
-  String get tempArchivedTestLocalPath;
+  String get tempLocalArchivedTestFolder;
   @override
-  String get tempUnarchivedTestLocalPath;
+  String get tempLocalUnarchivedTestFolder;
   @override
-  String get tempTestRemotePath;
+  String get remoteUnarchivedTestFolder;
+  @override
+  String get inputFilename;
+  @override
+  String get outputFilename;
+  @override
+  String get archiveTypeExtension;
   @override
   int get testMaxSizeInBytes;
   @override

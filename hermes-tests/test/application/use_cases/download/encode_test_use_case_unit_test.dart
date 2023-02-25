@@ -40,38 +40,34 @@ void main() {
         'When encode test use case is called, '
         'Then metadata for corresponding archived test is returned', () async {
       // Arrange
-      final TestMetadata testMetadata = TestMetadata(
+      final TestMetadata testMetadata = TestMetadata.testToEncode(
         problemId: 'marsx',
         testId: '2',
-        srcTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
-        destTestRootFolder: testConfig.tempArchivedTestLocalPath,
+        archiveTypeExtension: testConfig.archiveTypeExtension,
+        fromDir: testConfig.tempLocalUnarchivedTestFolder,
+        toDir: testConfig.tempLocalArchivedTestFolder,
+        inputFilename: testConfig.inputFilename,
+        outputFilename: testConfig.outputFilename,
       );
 
       // Act
-      final Either<StorageFailure, TestMetadata> result = await sut.run(
-        EncodeTestAsyncQuery(testMetadata: testMetadata),
+      final Either<StorageFailure, Unit> result = await sut.run(
+        EncodeTestAsyncQuery(
+          testMetadata: testMetadata,
+        ),
       );
 
       // Assert
-      result.fold(
-        (f) => expect(true, false),
-        (actualTestMetadata) {
-          final TestMetadata expectedTestMetadata = testMetadata.copyWith(
-            srcTestRootFolder: testConfig.tempArchivedTestLocalPath,
-            destTestRootFolder: testConfig.tempArchivedTestLocalPath,
-          );
+      expect(result.isRight(), true);
 
-          expect(actualTestMetadata, expectedTestMetadata);
-          expect(
-            File('${testMetadata.destTestRootFolder}/${testMetadata.archivedTestRelativePath}')
-                .existsSync(),
-            true,
-          );
-
-          _disposeLocalFile(
-              '${testMetadata.destTestRootFolder}/${testMetadata.archivedTestRelativePath}');
-        },
+      final archivedTestFilePath =
+          '${testConfig.tempLocalArchivedTestFolder}/${testMetadata.problemId}/${testMetadata.testId}.${testConfig.archiveTypeExtension}';
+      expect(
+        File(archivedTestFilePath).existsSync(),
+        true,
       );
+
+      _disposeLocalFile(archivedTestFilePath);
     });
 
     test(
@@ -79,30 +75,25 @@ void main() {
         'When encode test use case is called, '
         'Then metadata for corresponding archived test is returned', () async {
       // Arrange
-      final TestMetadata testMetadata = TestMetadata(
+      final TestMetadata testMetadata = TestMetadata.testToEncode(
         problemId: 'marsx',
         testId: '1',
-        srcTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
-        destTestRootFolder: testConfig.tempArchivedTestLocalPath,
+        archiveTypeExtension: testConfig.archiveTypeExtension,
+        fromDir: testConfig.tempLocalUnarchivedTestFolder,
+        toDir: testConfig.tempLocalArchivedTestFolder,
+        inputFilename: testConfig.inputFilename,
+        outputFilename: testConfig.outputFilename,
       );
 
       // Act
-      final Either<StorageFailure, TestMetadata> result = await sut.run(
-        EncodeTestAsyncQuery(testMetadata: testMetadata),
+      final Either<StorageFailure, Unit> result = await sut.run(
+        EncodeTestAsyncQuery(
+          testMetadata: testMetadata,
+        ),
       );
 
       // Assert
-      result.fold(
-        (f) => expect(true, false),
-        (actualTestMetadata) {
-          final TestMetadata expectedTestMetadata = testMetadata.copyWith(
-            srcTestRootFolder: testConfig.tempArchivedTestLocalPath,
-            destTestRootFolder: testConfig.tempArchivedTestLocalPath,
-          );
-
-          expect(actualTestMetadata, expectedTestMetadata);
-        },
-      );
+      expect(result.isRight(), true);
     });
 
     test(
@@ -110,16 +101,21 @@ void main() {
         'When encode test use case is called, '
         'Then localTestNotFound storage failure is returned', () async {
       // Arrange
-      final TestMetadata testMetadata = TestMetadata(
+      final TestMetadata testMetadata = TestMetadata.testToEncode(
         problemId: 'marsx',
         testId: '3',
-        srcTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
-        destTestRootFolder: testConfig.tempArchivedTestLocalPath,
+        archiveTypeExtension: testConfig.archiveTypeExtension,
+        fromDir: testConfig.tempLocalUnarchivedTestFolder,
+        toDir: testConfig.tempLocalArchivedTestFolder,
+        inputFilename: testConfig.inputFilename,
+        outputFilename: testConfig.outputFilename,
       );
 
       // Act
-      final Either<StorageFailure, TestMetadata> result = await sut.run(
-        EncodeTestAsyncQuery(testMetadata: testMetadata),
+      final Either<StorageFailure, Unit> result = await sut.run(
+        EncodeTestAsyncQuery(
+          testMetadata: testMetadata,
+        ),
       );
 
       // Assert
@@ -137,22 +133,59 @@ void main() {
         'When encode test use case is called, '
         'Then invalidLocalTestFormat storage failure is returned', () async {
       // Arrange
-      final TestMetadata testMetadata = TestMetadata(
+      final TestMetadata testMetadata = TestMetadata.testToEncode(
         problemId: 'marsx',
         testId: '6',
-        srcTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
-        destTestRootFolder: testConfig.tempArchivedTestLocalPath,
+        archiveTypeExtension: testConfig.archiveTypeExtension,
+        fromDir: testConfig.tempLocalUnarchivedTestFolder,
+        toDir: testConfig.tempLocalArchivedTestFolder,
+        inputFilename: testConfig.inputFilename,
+        outputFilename: testConfig.outputFilename,
       );
 
       // Act
-      final Either<StorageFailure, TestMetadata> result = await sut.run(
-        EncodeTestAsyncQuery(testMetadata: testMetadata),
+      final Either<StorageFailure, Unit> result = await sut.run(
+        EncodeTestAsyncQuery(
+          testMetadata: testMetadata,
+        ),
       );
 
       // Assert
       result.fold(
         (f) => f.maybeMap(
           invalidLocalTestFormat: (_) => expect(true, true),
+          orElse: () => expect(true, false),
+        ),
+        (_) => expect(true, false),
+      );
+    });
+
+    test(
+        'Given invalid test metadata, '
+        'When encode test use case is called, '
+        'Then unexpected storage failure is returned', () async {
+      // Arrange
+      final TestMetadata testMetadata = TestMetadata.testToDecode(
+        problemId: 'marsx',
+        testId: '6',
+        archiveTypeExtension: testConfig.archiveTypeExtension,
+        fromDir: testConfig.tempLocalUnarchivedTestFolder,
+        toDir: testConfig.tempLocalArchivedTestFolder,
+        inputFilename: testConfig.inputFilename,
+        outputFilename: testConfig.outputFilename,
+      );
+
+      // Act
+      final Either<StorageFailure, Unit> result = await sut.run(
+        EncodeTestAsyncQuery(
+          testMetadata: testMetadata,
+        ),
+      );
+
+      // Assert
+      result.fold(
+        (f) => f.maybeMap(
+          unexpected: (_) => expect(true, true),
           orElse: () => expect(true, false),
         ),
         (_) => expect(true, false),

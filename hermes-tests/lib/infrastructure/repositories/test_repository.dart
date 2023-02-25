@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'package:dartz/dartz.dart';
 import 'package:firebase_dart/firebase_dart.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
+import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:hermes_tests/domain/interfaces/i_test_repository.dart';
 import 'package:injectable/injectable.dart';
+import 'package:path/path.dart' as path;
 
 @LazySingleton(as: ITestRepository)
 class TestRepository implements ITestRepository {
@@ -14,45 +17,140 @@ class TestRepository implements ITestRepository {
   );
 
   @override
-  Future<void> upload(TestMetadata testMetadata) async {
-    final File localInputFile = File(testMetadata.srcTestInputPath);
-    await _storage
-        .ref(testMetadata.destTestInputPath)
-        .putData(localInputFile.readAsBytesSync());
+  Future<Either<StorageFailure, Unit>> upload(
+    TestMetadata testMetadata,
+  ) async {
+    return await testMetadata.maybeMap(
+      testToUpload: (testMetadata) async {
+        try {
+          final localInputFilePath = path.join(
+            testMetadata.fromDir,
+            testMetadata.problemId,
+            testMetadata.testId,
+            testMetadata.inputFilename,
+          );
+          final File localInputFile = File(localInputFilePath);
 
-    final File localOutputFile = File(testMetadata.srcTestOutputPath);
-    await _storage
-        .ref(testMetadata.destTestOutputPath)
-        .putData(localOutputFile.readAsBytesSync());
+          final remoteInputFilePath = path.join(
+            testMetadata.toDir,
+            testMetadata.problemId,
+            testMetadata.testId,
+            testMetadata.inputFilename,
+          );
+          await _storage
+              .ref(remoteInputFilePath)
+              .putData(localInputFile.readAsBytesSync());
+
+          final localOutputFilePath = path.join(
+            testMetadata.fromDir,
+            testMetadata.problemId,
+            testMetadata.testId,
+            testMetadata.outputFilename,
+          );
+          final File localOutputFile = File(localOutputFilePath);
+
+          final remoteOutputFilePath = path.join(
+            testMetadata.toDir,
+            testMetadata.problemId,
+            testMetadata.testId,
+            testMetadata.outputFilename,
+          );
+          await _storage
+              .ref(remoteOutputFilePath)
+              .putData(localOutputFile.readAsBytesSync());
+
+          return right(unit);
+        } catch (e) {
+          return left(
+            StorageFailure.unexpected(
+              message: e.toString(),
+            ),
+          );
+        }
+      },
+      orElse: () => left(
+        StorageFailure.unexpected(
+          message: 'Invalid test metadata passed to repository upload method',
+        ),
+      ),
+    );
   }
 
   @override
-  Future<void> download(TestMetadata testMetadata) async {
-    final Directory localTestRootFolder = Directory(
-      '${testMetadata.destTestRootFolder}/${testMetadata.testRelativePath}',
-    );
-    localTestRootFolder.createSync(
-      recursive: true,
-    );
+  Future<Either<StorageFailure, Unit>> download(
+    TestMetadata testMetadata,
+  ) async {
+    return await testMetadata.maybeMap(
+      testToDownload: (testMetadata) async {
+        try {
+          final localTestRootFolderPath = path.join(
+            testMetadata.toDir,
+            testMetadata.problemId,
+            testMetadata.testId,
+          );
+          final Directory localTestRootFolder = Directory(
+            localTestRootFolderPath,
+          );
+          localTestRootFolder.createSync(
+            recursive: true,
+          );
 
-    final File localInputFile = File(testMetadata.destTestInputPath);
-    localInputFile.createSync(
-      recursive: true,
-    );
+          final localInputFilePath = path.join(
+            testMetadata.toDir,
+            testMetadata.problemId,
+            testMetadata.testId,
+            testMetadata.inputFilename,
+          );
+          final File localInputFile = File(localInputFilePath);
+          localInputFile.createSync(
+            recursive: true,
+          );
 
-    localInputFile.writeAsBytesSync(
-      (await _storage.ref(testMetadata.srcTestInputPath).getData())
-          as List<int>,
-    );
+          final remoteInputFilePath = path.join(
+            testMetadata.fromDir,
+            testMetadata.problemId,
+            testMetadata.testId,
+            testMetadata.inputFilename,
+          );
+          await localInputFile.writeAsBytes(
+            (await _storage.ref(remoteInputFilePath).getData()) as List<int>,
+          );
 
-    final File localOutputFile = File(testMetadata.destTestOutputPath);
-    localOutputFile.createSync(
-      recursive: true,
-    );
+          final localOutputFilePath = path.join(
+            testMetadata.toDir,
+            testMetadata.problemId,
+            testMetadata.testId,
+            testMetadata.outputFilename,
+          );
+          final File localOutputFile = File(localOutputFilePath);
+          localOutputFile.createSync(
+            recursive: true,
+          );
 
-    localOutputFile.writeAsBytesSync(
-      (await _storage.ref(testMetadata.srcTestOutputPath).getData())
-          as List<int>,
+          final remoteOutputFilePath = path.join(
+            testMetadata.fromDir,
+            testMetadata.problemId,
+            testMetadata.testId,
+            testMetadata.outputFilename,
+          );
+          await localOutputFile.writeAsBytes(
+            (await _storage.ref(remoteOutputFilePath).getData()) as List<int>,
+          );
+
+          return right(unit);
+        } catch (e) {
+          return left(
+            StorageFailure.unexpected(
+              message: e.toString(),
+            ),
+          );
+        }
+      },
+      orElse: () => left(
+        StorageFailure.unexpected(
+          message: 'Invalid test metadata passed to repository download method',
+        ),
+      ),
     );
   }
 }

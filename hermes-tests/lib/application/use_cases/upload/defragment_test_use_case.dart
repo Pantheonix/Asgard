@@ -2,30 +2,22 @@ import 'dart:io';
 
 import 'package:cqrs_mediator/cqrs_mediator.dart';
 import 'package:dartz/dartz.dart';
-import 'package:hermes_tests/api/core/hermes.pb.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:logger/logger.dart';
+import 'package:path/path.dart' as path;
 
 class DefragmentTestAsyncQuery
-    extends IAsyncQuery<Either<StorageFailure, TestMetadata>> {
-  final Metadata testMetadata;
-  final Stream<Chunk> chunkStream;
-  final String destTestRootFolderForChunkedTest;
-  final String destTestRootFolderForArchivedTest;
-  final int maxTestSize;
+    extends IAsyncQuery<Either<StorageFailure, Unit>> {
+  final TestMetadata testMetadata;
 
   DefragmentTestAsyncQuery({
     required this.testMetadata,
-    required this.chunkStream,
-    required this.destTestRootFolderForChunkedTest,
-    required this.destTestRootFolderForArchivedTest,
-    required this.maxTestSize,
   });
 }
 
 class DefragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
-    Either<StorageFailure, TestMetadata>, DefragmentTestAsyncQuery> {
+    Either<StorageFailure, Unit>, DefragmentTestAsyncQuery> {
   final Logger _logger;
 
   DefragmentTestAsyncQueryHandler(
@@ -33,85 +25,97 @@ class DefragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
   );
 
   @override
-  Future<Either<StorageFailure, TestMetadata>> call(
+  Future<Either<StorageFailure, Unit>> call(
     DefragmentTestAsyncQuery command,
   ) async {
-    _logger.i(
-      'Calling Defragment UseCase for test ${command.testMetadata.testId}...',
-    );
-
-    if (command.testMetadata.testSize > command.maxTestSize) {
-      final message =
-          'Test size ${command.testMetadata.testSize}B exceeds max size ${command.maxTestSize}B';
-      _logger.e(message);
-
-      return left(
-        StorageFailure.testSizeLimitExceeded(
-          message: message,
-        ),
-      );
-    }
-
-    final TestMetadata resultTestMetadata = TestMetadata(
-      problemId: command.testMetadata.problemId,
-      testId: command.testMetadata.testId,
-      srcTestRootFolder: command.destTestRootFolderForChunkedTest,
-      destTestRootFolder: command.destTestRootFolderForArchivedTest,
-    );
-
-    final File outputDefragmentedArchivedTestFile =
-        await File(resultTestMetadata.archivedTestPath).create(recursive: true);
-    final IOSink outputFileSink =
-        outputDefragmentedArchivedTestFile.openWrite();
-
-    int writtenBytes = 0;
-    try {
-      await command.chunkStream.forEach((chunk) {
-        writtenBytes += chunk.data.length;
-        _logger.i(
-          '$writtenBytes bytes written for test ${resultTestMetadata.testRelativePath}',
+    return command.testMetadata.maybeMap(
+      testToDefragment: (testMetadata) async {
+        final testRelativePath = path.join(
+          testMetadata.problemId,
+          testMetadata.testId,
         );
-        if (writtenBytes > command.testMetadata.testSize) {
-          throw Exception(
-            'Received more bytes than expected metadata size: '
-            '${writtenBytes}B > ${command.testMetadata.testSize}B for test ${resultTestMetadata.testRelativePath}',
+        _logger.i(
+          'Calling Defragment UseCase for test $testRelativePath...',
+        );
+
+        if (testMetadata.testSize > testMetadata.maxTestSize) {
+          final message =
+              'Test size ${testMetadata.testSize}B exceeds max size ${testMetadata.maxTestSize}B';
+          _logger.e(message);
+
+          return left(
+            StorageFailure.testSizeLimitExceeded(
+              message: message,
+            ),
           );
         }
 
-        outputFileSink.add(chunk.data);
-      });
-    } catch (e) {
-      await outputFileSink.close();
-      _disposeLocalAsset(resultTestMetadata.archivedTestPath);
-      _logger.e(e.toString());
+        final localArchivedTestFilePath = path.join(
+          testMetadata.toDir,
+          '$testRelativePath.${testMetadata.archiveTypeExtension}',
+        );
+        final File localArchivedTestFile = await File(
+          localArchivedTestFilePath,
+        ).create(
+          recursive: true,
+        );
+        final IOSink outputFileSink = localArchivedTestFile.openWrite();
 
-      return left(
-        StorageFailure.testSizeLimitExceeded(
-          message: e.toString(),
+        int writtenBytes = 0;
+        try {
+          await testMetadata.chunkStream.forEach((chunk) {
+            writtenBytes += chunk.data.length;
+            _logger.i(
+              '$writtenBytes bytes written for test $testRelativePath',
+            );
+            if (writtenBytes > testMetadata.testSize) {
+              throw Exception(
+                'Received more bytes than expected metadata size: '
+                '${writtenBytes}B > ${testMetadata.testSize}B for test ${testRelativePath}',
+              );
+            }
+
+            outputFileSink.add(chunk.data);
+          });
+        } catch (e) {
+          await outputFileSink.close();
+          _disposeLocalAsset(localArchivedTestFilePath);
+          _logger.e(e.toString());
+
+          return left(
+            StorageFailure.testSizeLimitExceeded(
+              message: e.toString(),
+            ),
+          );
+        }
+
+        await outputFileSink.close();
+        _logger.i('Output file stream closed');
+
+        if (!_isZipFile(localArchivedTestFilePath)) {
+          _disposeLocalAsset(localArchivedTestFilePath);
+          final message =
+              'Non-zip or tampered test file $localArchivedTestFilePath';
+          _logger.e(message);
+
+          return left(
+            StorageFailure.invalidLocalTestFormat(
+              message: message,
+            ),
+          );
+        }
+        _logger.i(
+          'Test defragmented and saved to $localArchivedTestFilePath',
+        );
+
+        return right(unit);
+      },
+      orElse: () => left(
+        StorageFailure.unexpected(
+          message: 'Invalid test metadata passed to DefragmentTestUseCase',
         ),
-      );
-    }
-
-    await outputFileSink.close();
-    _logger.i('Output file stream closed');
-
-    if (!_isZipFile(resultTestMetadata.archivedTestPath)) {
-      _disposeLocalAsset(resultTestMetadata.archivedTestPath);
-      final message =
-          'Non-zip or tampered test file ${resultTestMetadata.archivedTestPath}';
-      _logger.e(message);
-
-      return left(
-        StorageFailure.invalidLocalTestFormat(
-          message: message,
-        ),
-      );
-    }
-    _logger.i(
-      'Test defragmented and saved to ${resultTestMetadata.archivedTestPath}',
+      ),
     );
-
-    return right(resultTestMetadata);
   }
 }
 

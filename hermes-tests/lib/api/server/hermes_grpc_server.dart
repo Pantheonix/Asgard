@@ -53,34 +53,34 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
     final metadata = firstPacket.metadata;
     _logger.i('Metadata received: $metadata');
 
-    final chunkBroadcastStream = requestBroadcastStream
+    requestBroadcastStream
         .where((packet) => packet.hasChunk())
         .map((packet) => packet.chunk)
-        .asBroadcastStream();
-
-    chunkBroadcastStream.listen(
-      (chunk) => chunkStreamController.add(chunk),
-      onDone: () async {
-        await chunkStreamController.close();
-        _logger.i('Chunk stream controller closed');
-      },
-      onError: (error) => chunkStreamController.addError(error),
-      cancelOnError: true,
-    );
+        .listen(
+          (chunk) => chunkStreamController.add(chunk),
+          onDone: () async {
+            await chunkStreamController.close();
+            _logger.i('Chunk stream controller closed');
+          },
+          onError: (error) => chunkStreamController.addError(error),
+          cancelOnError: true,
+        );
 
     // call defragment use case
-    final Either<StorageFailure, TestMetadata> defragmentResponse =
-        await _mediator.run(
+    final Either<StorageFailure, Unit> defragmentResponse = await _mediator.run(
       DefragmentTestAsyncQuery(
-        testMetadata: metadata,
-        chunkStream: chunkStreamController.stream,
-        destTestRootFolderForChunkedTest: _config.tempArchivedTestLocalPath,
-        destTestRootFolderForArchivedTest: _config.tempUnarchivedTestLocalPath,
-        maxTestSize: _config.testMaxSizeInBytes,
+        testMetadata: TestMetadata.testToDefragment(
+          problemId: metadata.problemId,
+          testId: metadata.testId,
+          testSize: metadata.testSize,
+          toDir: _config.tempLocalArchivedTestFolder,
+          archiveTypeExtension: _config.archiveTypeExtension,
+          chunkStream: chunkStreamController.stream,
+          maxTestSize: _config.testMaxSizeInBytes,
+        ),
       ),
     );
 
-    late final TestMetadata archivedTestMetadata;
     defragmentResponse.fold(
       (failure) {
         _logger.e('Defragment response received: $failure');
@@ -89,9 +89,8 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
             ..code = hermes.StatusCode.Failed
             ..message = failure.message);
       },
-      (metadata) {
-        _logger.i('Defragment response received: $metadata');
-        archivedTestMetadata = metadata;
+      (success) {
+        _logger.i('Defragment response received: success');
       },
     );
 
@@ -100,15 +99,20 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
     }
 
     // call decode use case
-    final Either<StorageFailure, TestMetadata> decodeResponse =
-        await _mediator.run(
+    final Either<StorageFailure, Unit> decodeResponse = await _mediator.run(
       DecodeTestAsyncQuery(
-        testMetadata: archivedTestMetadata,
-        destTestRootFolderForUnarchivedTest: _config.tempTestRemotePath,
+        testMetadata: TestMetadata.testToDecode(
+          problemId: metadata.problemId,
+          testId: metadata.testId,
+          archiveTypeExtension: _config.archiveTypeExtension,
+          fromDir: _config.tempLocalArchivedTestFolder,
+          toDir: _config.tempLocalUnarchivedTestFolder,
+          inputFilename: _config.inputFilename,
+          outputFilename: _config.outputFilename,
+        ),
       ),
     );
 
-    late final TestMetadata unarchivedTestMetadata;
     decodeResponse.fold(
       (failure) {
         _logger.e('Decode response received: $failure');
@@ -117,9 +121,8 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
             ..code = hermes.StatusCode.Failed
             ..message = failure.message);
       },
-      (metadata) {
-        _logger.i('Decode response received: $metadata');
-        unarchivedTestMetadata = metadata;
+      (success) {
+        _logger.i('Decode response received: success');
       },
     );
 
@@ -130,7 +133,14 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
     // call upload use case
     final Either<StorageFailure, Unit> uploadResponse = await _mediator.run(
       UploadTestAsyncQuery(
-        testMetadata: unarchivedTestMetadata,
+        testMetadata: TestMetadata.testToUpload(
+          problemId: metadata.problemId,
+          testId: metadata.testId,
+          fromDir: _config.tempLocalUnarchivedTestFolder,
+          toDir: _config.remoteUnarchivedTestFolder,
+          inputFilename: _config.inputFilename,
+          outputFilename: _config.outputFilename,
+        ),
       ),
     );
 
@@ -164,23 +174,20 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
     late final StreamController<DownloadResponse> responseStreamController =
         StreamController();
 
-    final testMetadataForDownloadRequest = TestMetadata(
-      problemId: request.problemId,
-      testId: request.testId,
-      srcTestRootFolder: _config.tempTestRemotePath,
-      destTestRootFolder: _config.tempUnarchivedTestLocalPath,
-    );
-
     // call download use case
-    final Either<StorageFailure, TestMetadata> downloadResponse =
-        await _mediator.run(
+    final Either<StorageFailure, Unit> downloadResponse = await _mediator.run(
       DownloadTestAsyncQuery(
-        testMetadata: testMetadataForDownloadRequest,
-        destTestRootFolderForDownloadedTest: _config.tempArchivedTestLocalPath,
+        testMetadata: TestMetadata.testToDownload(
+          problemId: request.problemId,
+          testId: request.testId,
+          fromDir: _config.remoteUnarchivedTestFolder,
+          toDir: _config.tempLocalUnarchivedTestFolder,
+          inputFilename: _config.inputFilename,
+          outputFilename: _config.outputFilename,
+        ),
       ),
     );
 
-    late final TestMetadata downloadedTestMetadata;
     downloadResponse.fold(
       (failure) {
         _logger.e('Download response received: $failure');
@@ -191,9 +198,8 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
               ..message = failure.message),
         );
       },
-      (metadata) {
-        _logger.i('Download response received: $metadata');
-        downloadedTestMetadata = metadata;
+      (success) {
+        _logger.i('Download response received: success');
       },
     );
 
@@ -202,14 +208,19 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
     }
 
     // call encode use case
-    final Either<StorageFailure, TestMetadata> encodeResponse =
-        await _mediator.run(
+    final Either<StorageFailure, Unit> encodeResponse = await _mediator.run(
       EncodeTestAsyncQuery(
-        testMetadata: downloadedTestMetadata,
-      ),
+          testMetadata: TestMetadata.testToEncode(
+        problemId: request.problemId,
+        testId: request.testId,
+        fromDir: _config.tempLocalUnarchivedTestFolder,
+        toDir: _config.tempLocalArchivedTestFolder,
+        inputFilename: _config.inputFilename,
+        outputFilename: _config.outputFilename,
+        archiveTypeExtension: _config.archiveTypeExtension,
+      )),
     );
 
-    late final TestMetadata encodedTestMetadata;
     encodeResponse.fold(
       (failure) {
         _logger.e('Encode response received: $failure');
@@ -220,9 +231,8 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
               ..message = failure.message),
         );
       },
-      (metadata) {
-        _logger.i('Encode response received: $metadata');
-        encodedTestMetadata = metadata;
+      (success) {
+        _logger.i('Encode response received: success');
       },
     );
 
@@ -234,7 +244,12 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
     final Either<StorageFailure, Tuple2<Stream<Chunk>, int>> fragmentResponse =
         await _mediator.run(
       FragmentTestAsyncQuery(
-        testMetadata: encodedTestMetadata,
+        testMetadata: TestMetadata.testToFragment(
+          problemId: request.problemId,
+          testId: request.testId,
+          fromDir: _config.tempLocalArchivedTestFolder,
+          archiveTypeExtension: _config.archiveTypeExtension,
+        ),
       ),
     );
 
@@ -258,8 +273,8 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
         responseStreamController.add(
           hermes.DownloadResponse()
             ..metadata = (hermes.Metadata()
-              ..problemId = testMetadataForDownloadRequest.problemId
-              ..testId = testMetadataForDownloadRequest.testId
+              ..problemId = request.problemId
+              ..testId = request.testId
               ..testSize = testSize),
         );
         _logger.i('Metadata added to response stream controller');

@@ -41,17 +41,19 @@ void main() {
         'When fragment test use case is called, '
         'Then a stream of chunks is returned', () async {
       // Arrange
-      final TestMetadata testMetadata = TestMetadata(
+      final TestMetadata testMetadata = TestMetadata.testToFragment(
         problemId: 'marsx',
         testId: '1',
-        srcTestRootFolder: testConfig.tempArchivedTestLocalPath,
-        destTestRootFolder: testConfig.tempArchivedTestLocalPath,
+        archiveTypeExtension: testConfig.archiveTypeExtension,
+        fromDir: testConfig.tempLocalArchivedTestFolder,
       );
 
       // Act
       final Either<StorageFailure, Tuple2<Stream<Chunk>, int>> result =
           await sut.run(
-        FragmentTestAsyncQuery(testMetadata: testMetadata),
+        FragmentTestAsyncQuery(
+          testMetadata: testMetadata,
+        ),
       );
 
       // Assert
@@ -61,7 +63,9 @@ void main() {
           final chunkStream = responseTuple.value1;
           expect(chunkStream, isNotNull);
 
-          final expectedSize = File(testMetadata.archivedTestPath).lengthSync();
+          final expectedSize = File(
+            '${testConfig.tempLocalArchivedTestFolder}/${testMetadata.problemId}/${testMetadata.testId}.${testConfig.archiveTypeExtension}',
+          ).lengthSync();
           final actualSize = responseTuple.value2;
           expect(actualSize, expectedSize);
         },
@@ -73,17 +77,19 @@ void main() {
         'When fragment test use case is called, '
         'Then localTestNotFound storage failure is returned', () async {
       // Arrange
-      final TestMetadata testMetadata = TestMetadata(
+      final TestMetadata testMetadata = TestMetadata.testToFragment(
         problemId: 'marsx',
         testId: '7',
-        srcTestRootFolder: testConfig.tempArchivedTestLocalPath,
-        destTestRootFolder: testConfig.tempArchivedTestLocalPath,
+        archiveTypeExtension: testConfig.archiveTypeExtension,
+        fromDir: testConfig.tempLocalArchivedTestFolder,
       );
 
       // Act
       final Either<StorageFailure, Tuple2<Stream<Chunk>, int>> result =
           await sut.run(
-        FragmentTestAsyncQuery(testMetadata: testMetadata),
+        FragmentTestAsyncQuery(
+          testMetadata: testMetadata,
+        ),
       );
 
       // Assert
@@ -101,23 +107,57 @@ void main() {
         'When fragment test use case is called, '
         'Then invalidLocalTestFormat storage failure is returned', () async {
       // Arrange
-      final TestMetadata testMetadata = TestMetadata(
+      final TestMetadata testMetadata = TestMetadata.testToFragment(
         problemId: 'marsx',
         testId: '4',
-        srcTestRootFolder: testConfig.tempArchivedTestLocalPath,
-        destTestRootFolder: testConfig.tempArchivedTestLocalPath,
+        archiveTypeExtension: testConfig.archiveTypeExtension,
+        fromDir: testConfig.tempLocalArchivedTestFolder,
       );
 
       // Act
       final Either<StorageFailure, Tuple2<Stream<Chunk>, int>> result =
           await sut.run(
-        FragmentTestAsyncQuery(testMetadata: testMetadata),
+        FragmentTestAsyncQuery(
+          testMetadata: testMetadata,
+        ),
       );
 
       // Assert
       result.fold(
         (f) => f.maybeMap(
           invalidLocalTestFormat: (_) => expect(true, true),
+          orElse: () => expect(true, false),
+        ),
+        (_) => expect(true, false),
+      );
+    });
+
+    test(
+        'Given invalid test metadata, '
+        'When fragment test use case is called, '
+        'Then unexpected storage failure is returned', () async {
+      // Arrange
+      final TestMetadata testMetadata = TestMetadata.testToUpload(
+        problemId: 'marsx',
+        testId: '4',
+        fromDir: testConfig.tempLocalUnarchivedTestFolder,
+        toDir: testConfig.remoteUnarchivedTestFolder,
+        inputFilename: testConfig.inputFilename,
+        outputFilename: testConfig.outputFilename,
+      );
+
+      // Act
+      final Either<StorageFailure, Tuple2<Stream<Chunk>, int>> result =
+          await sut.run(
+        FragmentTestAsyncQuery(
+          testMetadata: testMetadata,
+        ),
+      );
+
+      // Assert
+      result.fold(
+        (f) => f.maybeMap(
+          unexpected: (_) => expect(true, true),
           orElse: () => expect(true, false),
         ),
         (_) => expect(true, false),

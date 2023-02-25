@@ -79,9 +79,9 @@ void main() {
       expect(remoteTestOutputMetadata.fullPath, remoteTestOutputPath);
 
       final String localTestArchivePath =
-          '${testConfig.tempArchivedTestLocalPath}/${testMetadata.problemId}/${testMetadata.testId}.zip';
+          '${testConfig.tempLocalArchivedTestFolder}/${testMetadata.problemId}/${testMetadata.testId}.zip';
       final String localTestPath =
-          '${testConfig.tempUnarchivedTestLocalPath}/${testMetadata.problemId}/${testMetadata.testId}';
+          '${testConfig.tempLocalUnarchivedTestFolder}/${testMetadata.problemId}/${testMetadata.testId}';
 
       _disposeLocalFile(localTestArchivePath);
       _disposeLocalDirectory(localTestPath);
@@ -113,11 +113,11 @@ void main() {
       expect(downloadedTestArchive.existsSync(), true);
 
       final String localTestArchivePath =
-          '${testConfig.tempArchivedTestLocalPath}/${request.problemId}/${request.testId}.zip';
+          '${testConfig.tempLocalArchivedTestFolder}/${request.problemId}/${request.testId}.zip';
       final String localTestPath =
-          '${testConfig.tempUnarchivedTestLocalPath}/${request.problemId}/${request.testId}';
+          '${testConfig.tempLocalUnarchivedTestFolder}/${request.problemId}/${request.testId}';
       final String localTestClientDownloadPath =
-          '${testConfig.tempArchivedTestLocalPath}/${request.problemId}/${request.testId}-downloaded.zip';
+          '${testConfig.tempLocalArchivedTestFolder}/${request.problemId}/${request.testId}-downloaded.zip';
 
       _disposeLocalFile(localTestArchivePath);
       _disposeLocalDirectory(localTestPath);

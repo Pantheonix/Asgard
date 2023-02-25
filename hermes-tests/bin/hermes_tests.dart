@@ -6,11 +6,12 @@ import 'package:hermes_tests/di/config/server_config.dart';
 import 'package:hermes_tests/di/injection.dart';
 import 'package:logger/logger.dart';
 
-// TODO 1: add better test organization in test folder in order to easily distinguish between UseCase-InputTests relationships
-// TODO 2: refactor TestMetadata to reflect every possible DTO stage (stream, archive, unarchive, remote)
-// TODO 3: declare a static helper class for file management and centralize all file operations in it
-// TODO 4: add chunking logic in FragmentTestUseCase tweaked by a given chunk size
-// TODO 5: check file content, not just metadata in integration tests
+// TODO: refactor TestMetadata to reflect every possible DTO stage (stream, archive, unarchive, remote)
+// TODO: declare a static helper class for file management and centralize all file operations in it
+
+// TODO: add chunking logic in FragmentTestUseCase tweaked by a given chunk size
+// TODO: add better test organization in test folder in order to easily distinguish between UseCase-InputTests relationships
+// TODO: check file content, not just metadata in integration tests
 
 Future<void> main(List<String> arguments) async {
   FirebaseDart.setup();
@@ -31,12 +32,14 @@ Future<void> main(List<String> arguments) async {
   } catch (e) {
     print(e);
   } finally {
-    ProcessSignal.sigint.watch().listen((ProcessSignal signal) async {
-      print("Exiting...");
-      await hermesServer.close().then(
-            (_) => print("Server shutdown."),
-          );
-      exit(0);
-    });
+    ProcessSignal.sigint.watch().listen(
+      (ProcessSignal signal) async {
+        print("Exiting...");
+        await hermesServer.close().then(
+              (_) => print("Server shutdown."),
+            );
+        exit(0);
+      },
+    );
   }
 }

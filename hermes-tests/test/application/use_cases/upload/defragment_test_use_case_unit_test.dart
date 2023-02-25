@@ -46,46 +46,40 @@ void main() {
       final String inputPath = 'temp/test/archived/marsx/1-valid.zip';
       final int testSize = File(inputPath).lengthSync();
 
-      final Metadata testMetadata = Metadata()
+      final Metadata metadata = Metadata()
         ..problemId = 'marsx'
         ..testId = '2'
         ..testSize = testSize;
 
       final Stream<Chunk> chunkStream = _readStreamOfChunksForFile(inputPath);
 
+      final testMetadata = TestMetadata.testToDefragment(
+        problemId: metadata.problemId,
+        testId: metadata.testId,
+        testSize: testSize,
+        toDir: testConfig.tempLocalArchivedTestFolder,
+        archiveTypeExtension: testConfig.archiveTypeExtension,
+        chunkStream: chunkStream,
+        maxTestSize: testConfig.testMaxSizeInBytes,
+      );
+
       // Act
-      final Either<StorageFailure, TestMetadata> result = await sut.run(
+      final Either<StorageFailure, Unit> result = await sut.run(
         DefragmentTestAsyncQuery(
           testMetadata: testMetadata,
-          chunkStream: chunkStream,
-          destTestRootFolderForChunkedTest:
-              testConfig.tempArchivedTestLocalPath,
-          destTestRootFolderForArchivedTest:
-              testConfig.tempUnarchivedTestLocalPath,
-          maxTestSize: testConfig.testMaxSizeInBytes,
         ),
       );
 
       // Assert
-      result.fold(
-        (f) => expect(true, false),
-        (actualTestMetadata) {
-          final TestMetadata expectedTestMetadata = TestMetadata(
-            problemId: 'marsx',
-            testId: '2',
-            srcTestRootFolder: testConfig.tempArchivedTestLocalPath,
-            destTestRootFolder: testConfig.tempUnarchivedTestLocalPath,
-          );
+      expect(result.isRight(), true);
 
-          expect(actualTestMetadata, expectedTestMetadata);
+      final archivedTestPath =
+          '${testConfig.tempLocalArchivedTestFolder}/${testMetadata.problemId}/${testMetadata.testId}.${testConfig.archiveTypeExtension}';
+      final File file = File(archivedTestPath);
+      expect(file.existsSync(), true);
+      expect(file.lengthSync(), testSize);
 
-          final File file = File(actualTestMetadata.archivedTestPath);
-          expect(file.existsSync(), true);
-          expect(file.lengthSync(), testSize);
-
-          _disposeLocalFile(actualTestMetadata.archivedTestPath);
-        },
-      );
+      _disposeLocalFile(archivedTestPath);
     });
 
     test(
@@ -96,23 +90,27 @@ void main() {
       final String inputPath = 'temp/test/archived/marsx/1-invalid.tar.xz';
       final int testSize = File(inputPath).lengthSync();
 
-      final Metadata testMetadata = Metadata()
+      final Metadata metadata = Metadata()
         ..problemId = 'marsx'
         ..testId = '2'
         ..testSize = testSize;
 
       final Stream<Chunk> chunkStream = _readStreamOfChunksForFile(inputPath);
 
+      final testMetadata = TestMetadata.testToDefragment(
+        problemId: metadata.problemId,
+        testId: metadata.testId,
+        testSize: testSize,
+        toDir: testConfig.tempLocalArchivedTestFolder,
+        archiveTypeExtension: testConfig.archiveTypeExtension,
+        chunkStream: chunkStream,
+        maxTestSize: testConfig.testMaxSizeInBytes,
+      );
+
       // Act
-      final Either<StorageFailure, TestMetadata> result = await sut.run(
+      final Either<StorageFailure, Unit> result = await sut.run(
         DefragmentTestAsyncQuery(
           testMetadata: testMetadata,
-          chunkStream: chunkStream,
-          destTestRootFolderForChunkedTest:
-              testConfig.tempArchivedTestLocalPath,
-          destTestRootFolderForArchivedTest:
-              testConfig.tempUnarchivedTestLocalPath,
-          maxTestSize: testConfig.testMaxSizeInBytes,
         ),
       );
 
@@ -136,23 +134,27 @@ void main() {
       final String inputPath = 'temp/test/archived/marsx/1-oversize.zip';
       final int testSize = File(inputPath).lengthSync();
 
-      final Metadata testMetadata = Metadata()
+      final Metadata metadata = Metadata()
         ..problemId = 'marsx'
         ..testId = '2'
         ..testSize = testSize;
 
       final Stream<Chunk> chunkStream = _readStreamOfChunksForFile(inputPath);
 
+      final testMetadata = TestMetadata.testToDefragment(
+        problemId: metadata.problemId,
+        testId: metadata.testId,
+        testSize: testSize,
+        toDir: testConfig.tempLocalArchivedTestFolder,
+        archiveTypeExtension: testConfig.archiveTypeExtension,
+        chunkStream: chunkStream,
+        maxTestSize: testConfig.testMaxSizeInBytes,
+      );
+
       // Act
-      final Either<StorageFailure, TestMetadata> result = await sut.run(
+      final Either<StorageFailure, Unit> result = await sut.run(
         DefragmentTestAsyncQuery(
           testMetadata: testMetadata,
-          chunkStream: chunkStream,
-          destTestRootFolderForChunkedTest:
-              testConfig.tempArchivedTestLocalPath,
-          destTestRootFolderForArchivedTest:
-              testConfig.tempUnarchivedTestLocalPath,
-          maxTestSize: testConfig.testMaxSizeInBytes,
         ),
       );
 
@@ -167,10 +169,51 @@ void main() {
         (_) => expect(true, false),
       );
     });
+
+    test(
+        'Given invalid test metadata, '
+        'When defragment test use case is called, '
+        'Then unexpected storage failure is returned', () async {
+      // Arrange
+      final String inputPath = 'temp/test/archived/marsx/1-oversize.zip';
+      final int testSize = File(inputPath).lengthSync();
+
+      final Metadata metadata = Metadata()
+        ..problemId = 'marsx'
+        ..testId = '2'
+        ..testSize = testSize;
+
+      final Stream<Chunk> chunkStream = _readStreamOfChunksForFile(inputPath);
+
+      final testMetadata = TestMetadata.testToFragment(
+        problemId: metadata.problemId,
+        testId: metadata.testId,
+        archiveTypeExtension: testConfig.archiveTypeExtension,
+        fromDir: testConfig.tempLocalArchivedTestFolder,
+      );
+
+      // Act
+      final Either<StorageFailure, Unit> result = await sut.run(
+        DefragmentTestAsyncQuery(
+          testMetadata: testMetadata,
+        ),
+      );
+
+      // Assert
+      result.fold(
+        (f) {
+          f.maybeMap(
+            unexpected: (_) => expect(true, true),
+            orElse: () => expect(true, false),
+          );
+        },
+        (_) => expect(true, false),
+      );
+    });
   });
 }
 
-Stream<Chunk> _readStreamOfChunksForFile(String inputPath) {
+Stream<Chunk> _readStreamOfChunksForFile(String inputPath) async* {
   final StreamController<Chunk> streamController = StreamController<Chunk>();
 
   final File file = File(inputPath);
@@ -183,7 +226,7 @@ Stream<Chunk> _readStreamOfChunksForFile(String inputPath) {
     cancelOnError: true,
   );
 
-  return streamController.stream;
+  yield* streamController.stream;
 }
 
 void _disposeLocalFile(String path) {
