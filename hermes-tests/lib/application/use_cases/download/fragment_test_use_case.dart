@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cqrs_mediator/cqrs_mediator.dart';
 import 'package:dartz/dartz.dart';
 import 'package:hermes_tests/api/core/hermes.pb.dart';
+import 'package:hermes_tests/domain/core/file_manager.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:logger/logger.dart';
@@ -67,7 +68,7 @@ class FragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
         _logger.i('Archived test $testRelativePath exists!');
 
         // check if archived test is a zip file
-        if (_isZipFile(localArchivedTestFilePath) == false) {
+        if (!FileManager.isZipFile(localArchivedTestFilePath)) {
           final message =
               'Test $testRelativePath is not a zip file in $localArchivedTestFilePath';
           _logger.e(message);
@@ -118,17 +119,4 @@ class FragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
       ),
     );
   }
-}
-
-bool _isZipFile(String filePath) {
-  final File file = File(filePath);
-  final List<int> bytes = file.readAsBytesSync();
-  if (bytes.isEmpty) {
-    return false;
-  }
-
-  return bytes[0] == 0x50 &&
-      bytes[1] == 0x4B &&
-      bytes[2] == 0x03 &&
-      bytes[3] == 0x04;
 }

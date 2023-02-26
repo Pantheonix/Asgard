@@ -6,6 +6,7 @@ import 'package:hermes_tests/application/use_cases/download/encode_test_use_case
 import 'package:hermes_tests/di/config/config.dart';
 import 'package:hermes_tests/di/config/server_config.dart';
 import 'package:hermes_tests/domain/core/file_log_output.dart';
+import 'package:hermes_tests/domain/core/file_manager.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:logger/logger.dart';
@@ -67,7 +68,7 @@ void main() {
         true,
       );
 
-      _disposeLocalFile(archivedTestFilePath);
+      FileManager.disposeLocalFile(archivedTestFilePath);
     });
 
     test(
@@ -192,11 +193,4 @@ void main() {
       );
     });
   });
-}
-
-void _disposeLocalFile(String path) {
-  final File file = File(path);
-  if (file.existsSync()) {
-    file.deleteSync();
-  }
 }

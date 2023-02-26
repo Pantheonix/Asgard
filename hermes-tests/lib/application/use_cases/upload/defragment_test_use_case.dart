@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cqrs_mediator/cqrs_mediator.dart';
 import 'package:dartz/dartz.dart';
+import 'package:hermes_tests/domain/core/file_manager.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:logger/logger.dart';
@@ -71,7 +72,7 @@ class DefragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
             if (writtenBytes > testMetadata.testSize) {
               throw Exception(
                 'Received more bytes than expected metadata size: '
-                '${writtenBytes}B > ${testMetadata.testSize}B for test ${testRelativePath}',
+                '${writtenBytes}B > ${testMetadata.testSize}B for test $testRelativePath',
               );
             }
 
@@ -79,7 +80,7 @@ class DefragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
           });
         } catch (e) {
           await outputFileSink.close();
-          _disposeLocalAsset(localArchivedTestFilePath);
+          FileManager.disposeLocalFile(localArchivedTestFilePath);
           _logger.e(e.toString());
 
           return left(
@@ -92,8 +93,8 @@ class DefragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
         await outputFileSink.close();
         _logger.i('Output file stream closed');
 
-        if (!_isZipFile(localArchivedTestFilePath)) {
-          _disposeLocalAsset(localArchivedTestFilePath);
+        if (!FileManager.isZipFile(localArchivedTestFilePath)) {
+          FileManager.disposeLocalFile(localArchivedTestFilePath);
           final message =
               'Non-zip or tampered test file $localArchivedTestFilePath';
           _logger.e(message);
@@ -116,28 +117,5 @@ class DefragmentTestAsyncQueryHandler extends IAsyncQueryHandler<
         ),
       ),
     );
-  }
-}
-
-bool _isZipFile(String filePath) {
-  final File file = File(filePath);
-  final List<int> bytes = file.readAsBytesSync();
-  if (bytes.isEmpty) {
-    return false;
-  }
-
-  final String fileExtension = file.path.split('.').last;
-
-  return fileExtension == 'zip' &&
-      bytes[0] == 0x50 &&
-      bytes[1] == 0x4B &&
-      bytes[2] == 0x03 &&
-      bytes[3] == 0x04;
-}
-
-void _disposeLocalAsset(String path) {
-  final File file = File(path);
-  if (file.existsSync()) {
-    file.deleteSync();
   }
 }

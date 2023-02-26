@@ -8,6 +8,7 @@ import 'package:hermes_tests/application/use_cases/upload/defragment_test_use_ca
 import 'package:hermes_tests/di/config/config.dart';
 import 'package:hermes_tests/di/config/server_config.dart';
 import 'package:hermes_tests/domain/core/file_log_output.dart';
+import 'package:hermes_tests/domain/core/file_manager.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:logger/logger.dart';
@@ -51,7 +52,8 @@ void main() {
         ..testId = '2'
         ..testSize = testSize;
 
-      final Stream<Chunk> chunkStream = _readStreamOfChunksForFile(inputPath);
+      final Stream<Chunk> chunkStream =
+          FileManager.readStreamOfChunksForFile(inputPath);
 
       final testMetadata = TestMetadata.testToDefragment(
         problemId: metadata.problemId,
@@ -79,7 +81,7 @@ void main() {
       expect(file.existsSync(), true);
       expect(file.lengthSync(), testSize);
 
-      _disposeLocalFile(archivedTestPath);
+      FileManager.disposeLocalFile(archivedTestPath);
     });
 
     test(
@@ -95,7 +97,8 @@ void main() {
         ..testId = '2'
         ..testSize = testSize;
 
-      final Stream<Chunk> chunkStream = _readStreamOfChunksForFile(inputPath);
+      final Stream<Chunk> chunkStream =
+          FileManager.readStreamOfChunksForFile(inputPath);
 
       final testMetadata = TestMetadata.testToDefragment(
         problemId: metadata.problemId,
@@ -139,7 +142,8 @@ void main() {
         ..testId = '2'
         ..testSize = testSize;
 
-      final Stream<Chunk> chunkStream = _readStreamOfChunksForFile(inputPath);
+      final Stream<Chunk> chunkStream =
+          FileManager.readStreamOfChunksForFile(inputPath);
 
       final testMetadata = TestMetadata.testToDefragment(
         problemId: metadata.problemId,
@@ -183,7 +187,8 @@ void main() {
         ..testId = '2'
         ..testSize = testSize;
 
-      final Stream<Chunk> chunkStream = _readStreamOfChunksForFile(inputPath);
+      final Stream<Chunk> chunkStream =
+          FileManager.readStreamOfChunksForFile(inputPath);
 
       final testMetadata = TestMetadata.testToFragment(
         problemId: metadata.problemId,
@@ -211,27 +216,4 @@ void main() {
       );
     });
   });
-}
-
-Stream<Chunk> _readStreamOfChunksForFile(String inputPath) async* {
-  final StreamController<Chunk> streamController = StreamController<Chunk>();
-
-  final File file = File(inputPath);
-  final Stream<List<int>> fileData = file.openRead();
-
-  fileData.listen(
-    (data) => streamController.add(Chunk()..data = data),
-    onDone: () => streamController.close(),
-    onError: (error) => streamController.addError(error),
-    cancelOnError: true,
-  );
-
-  yield* streamController.stream;
-}
-
-void _disposeLocalFile(String path) {
-  final File file = File(path);
-  if (file.existsSync()) {
-    file.deleteSync();
-  }
 }

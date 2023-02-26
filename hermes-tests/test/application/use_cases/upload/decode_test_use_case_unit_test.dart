@@ -6,6 +6,7 @@ import 'package:hermes_tests/application/use_cases/upload/decode_test_use_case.d
 import 'package:hermes_tests/di/config/config.dart';
 import 'package:hermes_tests/di/config/server_config.dart';
 import 'package:hermes_tests/domain/core/file_log_output.dart';
+import 'package:hermes_tests/domain/core/file_manager.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:logger/logger.dart';
@@ -74,7 +75,7 @@ void main() {
         true,
       );
 
-      _disposeLocalDirectory(
+      FileManager.disposeLocalDirectory(
         '${testConfig.tempLocalUnarchivedTestFolder}/${testMetadata.problemId}/${testMetadata.testId}',
       );
     });
@@ -175,11 +176,4 @@ void main() {
       );
     });
   });
-}
-
-void _disposeLocalDirectory(String path) {
-  final Directory dir = Directory(path);
-  if (dir.existsSync()) {
-    dir.deleteSync(recursive: true);
-  }
 }

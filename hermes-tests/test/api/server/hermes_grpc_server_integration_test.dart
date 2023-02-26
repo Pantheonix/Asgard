@@ -7,6 +7,7 @@ import 'package:hermes_tests/api/core/hermes.pb.dart';
 import 'package:hermes_tests/api/server/hermes_grpc_server.dart';
 import 'package:hermes_tests/di/config/server_config.dart';
 import 'package:hermes_tests/di/injection.dart';
+import 'package:hermes_tests/domain/core/file_manager.dart';
 import 'package:logger/logger.dart';
 import 'package:test/test.dart';
 
@@ -83,11 +84,11 @@ void main() {
       final String localTestPath =
           '${testConfig.tempLocalUnarchivedTestFolder}/${testMetadata.problemId}/${testMetadata.testId}';
 
-      _disposeLocalFile(localTestArchivePath);
-      _disposeLocalDirectory(localTestPath);
+      FileManager.disposeLocalFile(localTestArchivePath);
+      FileManager.disposeLocalDirectory(localTestPath);
 
-      await _disposeRemoteAsset(remoteTestInputPath);
-      await _disposeRemoteAsset(remoteTestOutputPath);
+      await FileManager.disposeRemoteAsset(storage, remoteTestInputPath);
+      await FileManager.disposeRemoteAsset(storage, remoteTestOutputPath);
 
       client.close();
     });
@@ -119,29 +120,11 @@ void main() {
       final String localTestClientDownloadPath =
           '${testConfig.tempLocalArchivedTestFolder}/${request.problemId}/${request.testId}-downloaded.zip';
 
-      _disposeLocalFile(localTestArchivePath);
-      _disposeLocalDirectory(localTestPath);
-      _disposeLocalFile(localTestClientDownloadPath);
+      FileManager.disposeLocalFile(localTestArchivePath);
+      FileManager.disposeLocalDirectory(localTestPath);
+      FileManager.disposeLocalFile(localTestClientDownloadPath);
 
       client.close();
     });
   });
-}
-
-Future<void> _disposeRemoteAsset(String path) async {
-  await storage.ref(path).delete();
-}
-
-void _disposeLocalDirectory(String path) {
-  final Directory dir = Directory(path);
-  if (dir.existsSync()) {
-    dir.deleteSync(recursive: true);
-  }
-}
-
-void _disposeLocalFile(String path) {
-  final File file = File(path);
-  if (file.existsSync()) {
-    file.deleteSync();
-  }
 }
