@@ -1,17 +1,17 @@
 import 'dart:io';
 
+import 'package:cron/cron.dart';
 import 'package:firebase_dart/firebase_dart.dart';
 import 'package:hermes_tests/api/server/hermes_grpc_server.dart';
 import 'package:hermes_tests/di/config/server_config.dart';
 import 'package:hermes_tests/di/injection.dart';
+import 'package:hermes_tests/domain/core/file_manager.dart';
 import 'package:logger/logger.dart';
-
-// TODO: refactor TestMetadata to reflect every possible DTO stage (stream, archive, unarchive, remote)
-// TODO: declare a static helper class for file management and centralize all file operations in it
 
 // TODO: add chunking logic in FragmentTestUseCase tweaked by a given chunk size
 // TODO: add better test organization in test folder in order to easily distinguish between UseCase-InputTests relationships
 // TODO: check file content, not just metadata in integration tests
+// TODO: move test metadata validation logic from use cases to domain layer
 
 Future<void> main(List<String> arguments) async {
   FirebaseDart.setup();
@@ -21,6 +21,22 @@ Future<void> main(List<String> arguments) async {
     await configureDependencies('dev');
 
     final config = getIt<ServerConfig>();
+
+    // define a cron job which will delete all files
+    // from temp local archived and unarchived folders
+
+    // final everyFiveSeconds = '*/5 * * * * *';
+    final everyDayAtMidnight = '0 0 * * *';
+
+    Cron().schedule(Schedule.parse(everyDayAtMidnight), () async {
+      FileManager.disposeLocalDirectoryChildren(
+        config.tempLocalArchivedTestFolder,
+      );
+      FileManager.disposeLocalDirectoryChildren(
+        config.tempLocalUnarchivedTestFolder,
+      );
+    });
+
     final logger = getIt<Logger>();
 
     hermesServer = HermesGrpcServer(
