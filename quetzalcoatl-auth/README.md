@@ -1,16 +1,6 @@
-## Quetzalcoatl Auth
+## Quetzalcoatl
+Quetzalcoatl is a .NET Core Web API based microservice that provides a RESTful API to manage users and related security concerns.
 
-### EF Core Migrations useful CLI commands
+![](../assets/Quetzalcoatl-Architecture.png)
 
-- **add migration**:
-```bash
-dotnet ef migrations add InitDatabase --project YourDataAccessLibraryName -s YourWebProjectName -c YourDbContextClassName --verbose 
-```
-- **update database**:
-```bash
-dotnet ef database update InitDatabase --project YourDataAccessLibraryName -s YourWebProjectName -c YourDbContextClassName --verbose
-```
-- **remove migration**:
-```bash
-dotnet ef migrations remove --project YourDataAccessLibraryName -s YourWebProjectName -c YourDbContextClassName --verbose
-```
+Quetzalcoatl Service Endpoints Overview
