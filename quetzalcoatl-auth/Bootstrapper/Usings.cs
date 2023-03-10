@@ -4,4 +4,5 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Identity;
 global using FastEndpoints.Security;
 global using Api.Auth.Register;
+global using Api;
 global using Domain.Entities;
