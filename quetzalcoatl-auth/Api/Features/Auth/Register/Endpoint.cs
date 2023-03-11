@@ -17,20 +17,22 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, RegisterUserRe
 
     public override async Task HandleAsync(RegisterUserRequest req, CancellationToken ct)
     {
-        // create user using command
-        var userRegistered = await _mapper.Map<CreateUserCommand>(req).ExecuteAsync(ct: ct);
+        var createUserCommand = _mapper.Map<CreateUserCommand>(req);
+        var userRegistered = await createUserCommand.ExecuteAsync(ct: ct);
 
-        // generate token using command
-        var token = await _mapper.Map<GenerateJwtTokenCommand>(userRegistered).ExecuteAsync(ct: ct);
+        var generateJwtTokenCommand = _mapper.Map<GenerateJwtTokenCommand>(userRegistered);
+        var token = await generateJwtTokenCommand.ExecuteAsync(ct: ct);
 
-        await SendOkAsync(
-            new RegisterUserResponse
+        await SendCreatedAtAsync(
+            endpointName: "/api/users/{id}",
+            routeValues: new { id = userRegistered.Id },
+            responseBody: new RegisterUserResponse
             {
                 Email = userRegistered.Email!,
                 Username = userRegistered.UserName!,
                 Token = token
             },
-            ct
+            cancellation: ct
         );
     }
 }

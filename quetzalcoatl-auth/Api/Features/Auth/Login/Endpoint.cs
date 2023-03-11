@@ -1,6 +1,6 @@
-﻿namespace Api.Auth.Login;
+﻿namespace Api.Features.Auth.Login;
 
-public class LoginEndpoint : Endpoint<LoginRequest, LoginResponse, Mapper>
+public class LoginEndpoint : Endpoint<LoginRequest, LoginResponse>
 {
     public override void Configure()
     {
