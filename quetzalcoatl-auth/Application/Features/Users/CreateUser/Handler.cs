@@ -1,19 +1,14 @@
-namespace Application.Features.Identity;
-
-public class CreateUserCommand : ICommand<ApplicationUser>
-{
-    public string UserName { get; set; } = default!;
-    public string Email { get; set; } = default!;
-    public string Password { get; set; } = default!;
-}
+namespace Application.Features.Users.CreateUser;
 
 public class CreateUserCommandHandler : CommandHandler<CreateUserCommand, ApplicationUser>
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IMapper _mapper;
 
-    public CreateUserCommandHandler(UserManager<ApplicationUser> userManager)
+    public CreateUserCommandHandler(UserManager<ApplicationUser> userManager, IMapper mapper)
     {
         _userManager = userManager;
+        _mapper = mapper;
     }
 
     public override async Task<ApplicationUser> ExecuteAsync(
@@ -21,8 +16,7 @@ public class CreateUserCommandHandler : CommandHandler<CreateUserCommand, Applic
         CancellationToken ct = default
     )
     {
-        var user = new ApplicationUser { Email = command.Email, UserName = command.UserName };
-
+        var user = _mapper.Map<ApplicationUser>(command);
         var result = await _userManager.CreateAsync(user, command.Password);
 
         if (!result.Succeeded)

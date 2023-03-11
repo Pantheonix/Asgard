@@ -1,10 +1,4 @@
-namespace Application.Features.Identity;
-
-public class ValidateUserCredentialsCommand : ICommand<ApplicationUser>
-{
-    public string Email { get; set; } = default!;
-    public string Password { get; set; } = default!;
-}
+namespace Application.Features.Users.ValidateUserCredentials;
 
 public class ValidateUserCredentialsCommandHandler
     : CommandHandler<ValidateUserCredentialsCommand, ApplicationUser>

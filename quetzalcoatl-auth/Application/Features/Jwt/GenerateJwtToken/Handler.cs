@@ -1,9 +1,4 @@
-namespace Application.Features.Jwt;
-
-public class GenerateJwtTokenCommand : ICommand<string>
-{
-    public ApplicationUser User { get; set; } = default!;
-}
+namespace Application.Features.Jwt.GenerateJwtToken;
 
 public class GenerateJwtTokenCommandHandler : CommandHandler<GenerateJwtTokenCommand, string>
 {

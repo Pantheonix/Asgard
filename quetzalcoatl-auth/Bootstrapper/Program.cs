@@ -1,5 +1,3 @@
-using Api.Features.Auth.Register;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(
@@ -11,7 +9,7 @@ builder.Services
 builder.Services.AddFastEndpoints(options =>
 {
     options.DisableAutoDiscovery = true;
-    options.Assemblies = new[] { typeof(RegisterUserEndpoint).Assembly };
+    options.Assemblies = new[] { typeof(IApiMarker).Assembly, typeof(IApplicationMarker).Assembly };
 });
 
 var jwtConfig = new JwtConfig();
@@ -20,7 +18,7 @@ builder.Configuration.Bind(nameof(jwtConfig), jwtConfig);
 builder.Services.AddSingleton(jwtConfig);
 builder.Services.AddJWTBearerAuth(jwtConfig.SecretKey);
 
-builder.Services.AddAutoMapper(typeof(IApiMarker));
+builder.Services.AddAutoMapper(typeof(IApiMarker), typeof(IApplicationMarker));
 
 var app = builder.Build();
 
