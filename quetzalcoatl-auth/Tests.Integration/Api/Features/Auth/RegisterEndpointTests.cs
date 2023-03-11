@@ -1,10 +1,7 @@
-using Api.Features.Auth.Register;
-
 namespace Tests.Integration.Api.Features.Auth;
 
 public class RegisterEndpointTests : IClassFixture<ApiWebFactory>
 {
-    private readonly ApiWebFactory _apiWebFactory;
     private readonly HttpClient _client;
 
     private readonly Faker<RegisterUserRequest> _registerUserRequestFaker =
@@ -22,12 +19,11 @@ public class RegisterEndpointTests : IClassFixture<ApiWebFactory>
 
     public RegisterEndpointTests(ApiWebFactory apiWebFactory)
     {
-        _apiWebFactory = apiWebFactory;
-        _client = _apiWebFactory.CreateClient();
+        _client = apiWebFactory.CreateClient();
     }
 
     [Fact]
-    public async Task GivenValidUser_WhenRegistering_ThenReturnsOk()
+    public async Task GivenValidUser_WhenRegistering_ThenReturnsCreated()
     {
         // Arrange
         var request = _registerUserRequestFaker.Generate();
@@ -41,7 +37,7 @@ public class RegisterEndpointTests : IClassFixture<ApiWebFactory>
 
         // Assert
         response.Should().NotBeNull();
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
 
         result.Should().NotBeNull();
         result!.Username.Should().Be(request.Username);
