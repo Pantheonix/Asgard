@@ -29,9 +29,4 @@
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\Api\Api.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="DotNet.Testcontainers">
-      <HintPath>..\..\..\..\..\..\..\home\sami\.nuget\packages\dotnet.testcontainers\1.6.0\lib\netstandard2.1\DotNet.Testcontainers.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 </Project>

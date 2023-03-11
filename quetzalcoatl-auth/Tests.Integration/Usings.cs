@@ -16,3 +16,4 @@ global using System.Net;
 global using FluentAssertions;
 global using Api.Features.Auth.Register;
 global using Testcontainers.MsSql;
+global using Bootstrapper;
