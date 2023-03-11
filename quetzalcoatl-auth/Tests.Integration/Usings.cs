@@ -1,7 +1,4 @@
 global using Xunit;
-global using DotNet.Testcontainers.Builders;
-global using DotNet.Testcontainers.Containers;
-global using DotNet.Testcontainers.Configurations;
 global using Microsoft.AspNetCore.Mvc.Testing;
 global using Api;
 global using Microsoft.AspNetCore.Hosting;
@@ -17,3 +14,5 @@ global using Api.Auth.Register;
 global using FastEndpoints;
 global using System.Net;
 global using FluentAssertions;
+global using Api.Features.Auth.Register;
+global using Testcontainers.MsSql;
