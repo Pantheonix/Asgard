@@ -1,15 +1,36 @@
 ﻿namespace Api.Features.Auth.Login;
 
-public class LoginEndpoint : Endpoint<LoginRequest, LoginResponse>
+public class LoginUserEndpoint : Endpoint<LoginUserRequest, LoginUserResponse>
 {
-    public override void Configure()
+    private readonly IMapper _mapper;
+
+    public LoginUserEndpoint(IMapper mapper)
     {
-        Post("/api/login");
-        AllowAnonymous();
+        _mapper = mapper;
     }
 
-    public override Task HandleAsync(LoginRequest req, CancellationToken ct)
+    public override void Configure()
     {
-        return SendOkAsync(Response, ct);
+        Post("login");
+        Group<AuthenticationGroup>();
+    }
+
+    public override async Task HandleAsync(LoginUserRequest req, CancellationToken ct)
+    {
+        var validateUserCredentialsCommand = _mapper.Map<ValidateUserCredentialsCommand>(req);
+        var user = await validateUserCredentialsCommand.ExecuteAsync(ct: ct);
+
+        var generateJwtTokenCommand = _mapper.Map<GenerateJwtTokenCommand>(user);
+        var token = await generateJwtTokenCommand.ExecuteAsync(ct: ct);
+
+        await SendOkAsync(
+            response: new LoginUserResponse
+            {
+                Username = user.UserName!,
+                Email = user.Email!,
+                Token = token
+            },
+            cancellation: ct
+        );
     }
 }

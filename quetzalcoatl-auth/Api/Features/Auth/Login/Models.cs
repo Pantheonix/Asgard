@@ -1,13 +1,19 @@
 ﻿namespace Api.Features.Auth.Login;
 
-public class LoginRequest { }
+public class LoginUserRequest
+{
+    public string Email { get; set; } = default!;
+    public string Password { get; set; } = default!;
+}
 
-public class Validator : Validator<LoginRequest>
+public class Validator : Validator<LoginUserRequest>
 {
     public Validator() { }
 }
 
-public class LoginResponse
+public class LoginUserResponse
 {
-    public string Message => "This endpoint hasn't been implemented yet!";
+    public string Username { get; set; } = default!;
+    public string Email { get; set; } = default!;
+    public string Token { get; set; } = default!;
 }

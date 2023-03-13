@@ -1,10 +1,10 @@
-﻿namespace Api.Auth.Register;
+﻿namespace Api.Features.Auth.Register;
 
 public class RegisterUserRequest
 {
-    public string Username { get; set; } = String.Empty;
-    public string Email { get; set; } = String.Empty;
-    public string Password { get; set; } = String.Empty;
+    public string Username { get; init; } = default!;
+    public string Email { get; init; } = default!;
+    public string Password { get; init; } = default!;
 }
 
 public class Validator : Validator<RegisterUserRequest>
@@ -39,7 +39,7 @@ public class Validator : Validator<RegisterUserRequest>
 
 public class RegisterUserResponse
 {
-    public string Username { get; set; } = String.Empty;
-    public string Email { get; set; } = String.Empty;
-    public string Token { get; set; } = String.Empty;
+    public string Username { get; init; } = default!;
+    public string Email { get; init; } = default!;
+    public string Token { get; init; } = default!;
 }

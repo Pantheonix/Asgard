@@ -2,34 +2,34 @@
 
 public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, RegisterUserResponse>
 {
-    private readonly AutoMapper.IMapper _mapper;
+    private readonly IMapper _mapper;
 
-    public RegisterUserEndpoint(AutoMapper.IMapper mapper)
+    public RegisterUserEndpoint(IMapper mapper)
     {
         _mapper = mapper;
     }
 
     public override void Configure()
     {
-        Post("/api/register");
-        AllowAnonymous();
+        Post("register");
+        Group<AuthenticationGroup>();
     }
 
     public override async Task HandleAsync(RegisterUserRequest req, CancellationToken ct)
     {
         var createUserCommand = _mapper.Map<CreateUserCommand>(req);
-        var userRegistered = await createUserCommand.ExecuteAsync(ct: ct);
+        var user = await createUserCommand.ExecuteAsync(ct: ct);
 
-        var generateJwtTokenCommand = _mapper.Map<GenerateJwtTokenCommand>(userRegistered);
+        var generateJwtTokenCommand = _mapper.Map<GenerateJwtTokenCommand>(user);
         var token = await generateJwtTokenCommand.ExecuteAsync(ct: ct);
 
         await SendCreatedAtAsync(
             endpointName: "/api/users/{id}",
-            routeValues: new { id = userRegistered.Id },
+            routeValues: new { id = user.Id },
             responseBody: new RegisterUserResponse
             {
-                Email = userRegistered.Email!,
-                Username = userRegistered.UserName!,
+                Username = user.UserName!,
+                Email = user.Email!,
                 Token = token
             },
             cancellation: ct

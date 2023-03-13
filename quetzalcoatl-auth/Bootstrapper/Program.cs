@@ -26,14 +26,21 @@ builder.Services
     .AddSingleton(jwtConfig)
     .AddJWTBearerAuth(jwtConfig.SecretKey)
     .AddAutoMapper(typeof(IApiMarker), typeof(IApplicationMarker))
-    .AddSwaggerDoc();
+    .AddSwaggerDoc(settings =>
+    {
+        settings.Title = "Quetzalcoatl Auth API";
+        settings.Version = "v1";
+    });
 
 var app = builder.Build();
 
 app.UseDefaultExceptionHandler()
     .UseAuthentication()
     .UseAuthorization()
-    .UseFastEndpoints()
+    .UseFastEndpoints(config =>
+    {
+        config.Endpoints.RoutePrefix = "api";
+    })
     .UseSwaggerGen();
 
 app.Run();
