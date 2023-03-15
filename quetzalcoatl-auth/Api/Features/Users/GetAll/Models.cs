@@ -1,13 +1,8 @@
 ﻿namespace Api.Features.Users.GetAll;
 
-public class Request { }
+public class GetAllUsersRequest { }
 
-public class Validator : Validator<Request>
+public class GetAllUsersResponse
 {
-    public Validator() { }
-}
-
-public class Response
-{
-    public string Message => "This endpoint hasn't been implemented yet!";
+    public IEnumerable<UserDto> Users { get; set; } = new List<UserDto>();
 }
