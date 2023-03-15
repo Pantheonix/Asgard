@@ -1,15 +1,32 @@
 ﻿namespace Api.Features.Users.Get;
 
-public class Endpoint : Endpoint<Request, Response, Mapper>
+public class GetUserEndpoint : Endpoint<GetUserRequest, GetUserResponse>
 {
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IMapper _mapper;
+
+    public GetUserEndpoint(UserManager<ApplicationUser> userManager, IMapper mapper)
+    {
+        _userManager = userManager;
+        _mapper = mapper;
+    }
+
     public override void Configure()
     {
-        Get("{id}");
+        Get("{username}");
         Group<UsersGroup>();
     }
 
-    public override Task HandleAsync(Request req, CancellationToken ct)
+    public override async Task HandleAsync(GetUserRequest req, CancellationToken ct)
     {
-        return SendOkAsync(Response, ct);
+        var user = _userManager.Users.FirstOrDefault(user => req.Username.Equals(user.UserName));
+
+        if (user == null)
+        {
+            await SendNotFoundAsync(ct);
+            return;
+        }
+        
+        await SendOkAsync(response: _mapper.Map<GetUserResponse>(user), ct);
     }
 }

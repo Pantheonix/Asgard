@@ -1,13 +1,13 @@
 ﻿namespace Api.Features.Users.Get;
 
-public class Request { }
-
-public class Validator : Validator<Request>
+public class GetUserRequest
 {
-    public Validator() { }
+    [BindFrom("username")]
+    public string Username { get; set; } = string.Empty;
 }
 
-public class Response
+public class GetUserResponse
 {
-    public string Message => "This endpoint hasn't been implemented yet!";
+    public string Username { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
 }
