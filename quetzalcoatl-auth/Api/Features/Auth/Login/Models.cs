@@ -6,11 +6,6 @@ public class LoginUserRequest
     public string Password { get; set; } = default!;
 }
 
-public class Validator : Validator<LoginUserRequest>
-{
-    public Validator() { }
-}
-
 public class LoginUserResponse
 {
     public string Username { get; set; } = default!;
