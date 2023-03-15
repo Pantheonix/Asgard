@@ -15,3 +15,6 @@ global using Api.Features.Auth.Register;
 global using Testcontainers.MsSql;
 global using Bootstrapper;
 global using Api.Features.Auth.Login;
+global using Api.Features.Users.GetAll;
+global using Api.Features.Users.Get;
+global using Api.Features.Users.Core;

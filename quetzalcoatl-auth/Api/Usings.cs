@@ -6,3 +6,6 @@ global using Microsoft.AspNetCore.Builder;
 global using Application.Features.Users.ValidateUserCredentials;
 global using Application.Features.Jwt.GenerateJwtToken;
 global using Application.Features.Users.CreateUser;
+global using Domain.Entities;
+global using Microsoft.AspNetCore.Identity;
+global using Api.Features.Users.Core;

@@ -1,5 +1,3 @@
-using FastEndpoints.Swagger;
-
 var builder = WebApplication.CreateBuilder(args);
 
 var jwtConfig = new JwtConfig();
