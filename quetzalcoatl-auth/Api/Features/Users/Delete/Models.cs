@@ -1,13 +1,7 @@
 ﻿namespace Api.Features.Users.Delete;
 
-public class Request { }
-
-public class Validator : Validator<Request>
+public class DeleteUserRequest
 {
-    public Validator() { }
-}
-
-public class Response
-{
-    public string Message => "This endpoint hasn't been implemented yet!";
+    [BindFrom("id")]
+    public Guid Id { get; set; } = Guid.Empty;
 }
