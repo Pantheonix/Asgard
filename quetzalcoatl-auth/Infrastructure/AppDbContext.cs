@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class AppDbContext : IdentityDbContext<ApplicationUser>
+public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
     public AppDbContext() { }
 
@@ -10,5 +10,15 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<ApplicationUser>(b =>
+        {
+            b.Property(u => u.Id).HasDefaultValueSql("newsequentialid()");
+        });
+
+        modelBuilder.Entity<ApplicationRole>(b =>
+        {
+            b.Property(u => u.Id).HasDefaultValueSql("newsequentialid()");
+        });
     }
 }

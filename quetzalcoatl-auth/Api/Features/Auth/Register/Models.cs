@@ -9,6 +9,7 @@ public class RegisterUserRequest
 
 public class RegisterUserResponse
 {
+    public Guid Id { get; set; } = default!;
     public string Username { get; init; } = default!;
     public string Email { get; init; } = default!;
     public string Token { get; init; } = default!;

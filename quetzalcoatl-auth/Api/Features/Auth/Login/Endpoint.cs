@@ -26,6 +26,7 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, LoginUserResponse>
         await SendOkAsync(
             response: new LoginUserResponse
             {
+                Id = user.Id,
                 Username = user.UserName!,
                 Email = user.Email!,
                 Token = token

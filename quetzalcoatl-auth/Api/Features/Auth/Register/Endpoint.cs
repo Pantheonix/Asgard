@@ -28,6 +28,7 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, RegisterUserRe
             routeValues: new { id = user.Id },
             responseBody: new RegisterUserResponse
             {
+                Id = user.Id,
                 Username = user.UserName!,
                 Email = user.Email!,
                 Token = token

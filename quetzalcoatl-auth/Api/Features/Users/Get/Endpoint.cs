@@ -13,13 +13,13 @@ public class GetUserEndpoint : Endpoint<GetUserRequest, GetUserResponse>
 
     public override void Configure()
     {
-        Get("{username}");
+        Get("{id}");
         Group<UsersGroup>();
     }
 
     public override async Task HandleAsync(GetUserRequest req, CancellationToken ct)
     {
-        var user = _userManager.Users.FirstOrDefault(user => req.Username.Equals(user.UserName));
+        var user = _userManager.Users.FirstOrDefault(user => req.Id == user.Id);
 
         if (user == null)
         {

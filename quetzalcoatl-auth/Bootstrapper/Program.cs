@@ -8,7 +8,10 @@ builder.Services.AddDbContext<AppDbContext>(
 );
 
 builder.Services
-    .AddIdentity<ApplicationUser, IdentityRole>()
+    .AddIdentity<ApplicationUser, ApplicationRole>(identity =>
+    {
+        identity.User.RequireUniqueEmail = true;
+    })
     .AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services

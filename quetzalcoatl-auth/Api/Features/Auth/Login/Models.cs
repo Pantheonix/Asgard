@@ -8,6 +8,7 @@ public class LoginUserRequest
 
 public class LoginUserResponse
 {
+    public Guid Id { get; set; } = Guid.Empty;
     public string Username { get; set; } = default!;
     public string Email { get; set; } = default!;
     public string Token { get; set; } = default!;

@@ -3,7 +3,7 @@ namespace Tests.Integration.Api.Features.Users;
 public class GetAllEndpointTests : IClassFixture<ApiWebFactory>
 {
     #region SetUp
-    
+
     private readonly HttpClient _client;
 
     private readonly Faker<RegisterUserRequest> _registerUserRequestFaker =
@@ -16,7 +16,7 @@ public class GetAllEndpointTests : IClassFixture<ApiWebFactory>
     {
         _client = apiWebFactory.CreateClient();
     }
-    
+
     #endregion
 
     [Fact]
@@ -63,13 +63,13 @@ public class GetAllEndpointTests : IClassFixture<ApiWebFactory>
         #region Act
 
         _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
-        
+
         var (response, result) = await _client.GETAsync<
             GetAllUsersEndpoint,
             GetAllUsersRequest,
             GetAllUsersResponse
         >(new GetAllUsersRequest());
-        
+
         _client.DefaultRequestHeaders.Remove("Authorization");
 
         #endregion
@@ -78,10 +78,17 @@ public class GetAllEndpointTests : IClassFixture<ApiWebFactory>
 
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         result.Should().NotBeNull();
-        result!.Users.Should().BeEquivalentTo(users);
-        
+        result!.Users
+            .Select(user =>
+            {
+                user.Id = Guid.Empty;
+                return user;
+            })
+            .Should()
+            .BeEquivalentTo(users);
+
         #endregion
     }
 

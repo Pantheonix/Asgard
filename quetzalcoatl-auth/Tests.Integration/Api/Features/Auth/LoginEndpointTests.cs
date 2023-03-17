@@ -62,7 +62,8 @@ public class LoginEndpointTests : IClassFixture<ApiWebFactory>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
         result.Should().NotBeNull();
-        result!.Username.Should().Be(registerRequest.Username);
+        result!.Id.Should().NotBeEmpty();
+        result.Username.Should().Be(registerRequest.Username);
         result.Email.Should().Be(registerRequest.Email);
         result.Token.Should().NotBeNullOrWhiteSpace();
         

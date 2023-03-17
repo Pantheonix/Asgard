@@ -48,7 +48,8 @@ public class RegisterEndpointTests : IClassFixture<ApiWebFactory>
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
         result.Should().NotBeNull();
-        result!.Username.Should().Be(request.Username);
+        result!.Id.Should().NotBeEmpty();
+        result.Username.Should().Be(request.Username);
         result.Email.Should().Be(request.Email);
         result.Token.Should().NotBeNullOrWhiteSpace();
         

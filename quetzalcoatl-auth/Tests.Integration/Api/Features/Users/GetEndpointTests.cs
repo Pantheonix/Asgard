@@ -30,11 +30,13 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
             .RuleFor(rule => rule.Password, validPassword)
             .Generate();
 
-        await _client.POSTAsync<RegisterUserEndpoint, RegisterUserRequest, RegisterUserResponse>(
-            registerUserRequest
-        );
+        var (_, registerUserResponse) = await _client.POSTAsync<
+            RegisterUserEndpoint,
+            RegisterUserRequest,
+            RegisterUserResponse
+        >(registerUserRequest);
 
-        var request = new GetUserRequest { Username = registerUserRequest.Username };
+        var request = new GetUserRequest { Id = registerUserResponse!.Id };
 
         #endregion
 
@@ -63,9 +65,11 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
             .RuleFor(rule => rule.Password, validPassword)
             .Generate();
 
-        await _client.POSTAsync<RegisterUserEndpoint, RegisterUserRequest, RegisterUserResponse>(
-            registerUserRequest
-        );
+        var (_, registerUserResponse) = await _client.POSTAsync<
+            RegisterUserEndpoint,
+            RegisterUserRequest,
+            RegisterUserResponse
+        >(registerUserRequest);
 
         var loginUserRequest = new LoginUserRequest
         {
@@ -81,10 +85,11 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
 
         var token = loginResult!.Token;
 
-        var request = new GetUserRequest { Username = registerUserRequest.Username };
+        var request = new GetUserRequest { Id = registerUserResponse!.Id };
 
         var expectedResponse = new GetUserResponse
         {
+            Id = Guid.Empty,
             Username = registerUserRequest.Username,
             Email = registerUserRequest.Email
         };
@@ -111,6 +116,7 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         result.Should().NotBeNull();
+        result!.Id = Guid.Empty;
         result.Should().BeEquivalentTo(expectedResponse);
 
         #endregion
@@ -145,7 +151,7 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
 
         var token = loginResult!.Token;
 
-        var request = new GetUserRequest { Username = "non-existing-user" };
+        var request = new GetUserRequest { Id = Guid.NewGuid() };
 
         #endregion
 
@@ -153,10 +159,7 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
 
         _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
 
-        var response = await _client.GETAsync<
-            GetUserEndpoint,
-            GetUserRequest
-        >(request);
+        var response = await _client.GETAsync<GetUserEndpoint, GetUserRequest>(request);
 
         _client.DefaultRequestHeaders.Remove("Authorization");
 

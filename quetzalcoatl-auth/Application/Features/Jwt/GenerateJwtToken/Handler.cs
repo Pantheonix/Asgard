@@ -24,10 +24,10 @@ public class GenerateJwtTokenCommandHandler : CommandHandler<GenerateJwtTokenCom
             expireAt: DateTime.UtcNow.AddDays(_jwtConfig.JwtLifetime),
             priviledges: u =>
             {
-                u.Claims.Add(new Claim(JwtRegisteredClaimNames.Sub, command.User.Id));
+                u.Claims.Add(new Claim(JwtRegisteredClaimNames.Sub, command.User.Id.ToString()));
                 u.Claims.Add(new Claim(JwtRegisteredClaimNames.Email, command.User.Email!));
                 u.Claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
-                u["userId"] = command.User.Id;
+                u["userId"] = command.User.Id.ToString();
             }
         );
 
