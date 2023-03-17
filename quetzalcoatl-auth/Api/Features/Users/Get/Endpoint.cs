@@ -19,14 +19,14 @@ public class GetUserEndpoint : Endpoint<GetUserRequest, GetUserResponse>
 
     public override async Task HandleAsync(GetUserRequest req, CancellationToken ct)
     {
-        var user = _userManager.Users.FirstOrDefault(user => req.Id == user.Id);
+        var user = await _userManager.FindByIdAsync(req.Id.ToString());
 
         if (user == null)
         {
             await SendNotFoundAsync(ct);
             return;
         }
-        
+
         await SendOkAsync(response: _mapper.Map<GetUserResponse>(user), ct);
     }
 }

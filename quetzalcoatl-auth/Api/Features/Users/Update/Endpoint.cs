@@ -19,7 +19,7 @@ public class UpdateUserEndpoint : Endpoint<UpdateUserRequest, UpdateUserResponse
 
     public override async Task HandleAsync(UpdateUserRequest req, CancellationToken ct)
     {
-        var userToUpdate = _userManager.Users.FirstOrDefault(user => req.Id == user.Id);
+        var userToUpdate = await _userManager.FindByIdAsync(req.Id.ToString());
 
         if (userToUpdate == null)
         {
@@ -40,7 +40,7 @@ public class UpdateUserEndpoint : Endpoint<UpdateUserRequest, UpdateUserResponse
 
         ThrowIfAnyErrors();
 
-        var updatedUser = _userManager.Users.FirstOrDefault(user => req.Id == user.Id);
+        var updatedUser = await _userManager.FindByIdAsync(req.Id.ToString());
 
         await SendOkAsync(response: _mapper.Map<UpdateUserResponse>(updatedUser), ct);
     }
