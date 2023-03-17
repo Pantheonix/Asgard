@@ -9,3 +9,4 @@ global using Application.Features.Users.CreateUser;
 global using Domain.Entities;
 global using Microsoft.AspNetCore.Identity;
 global using Api.Features.Users.Core;
+global using Microsoft.IdentityModel.Tokens;
