@@ -1,13 +1,16 @@
 ﻿namespace Api.Features.Users.Update;
 
-public class Request { }
-
-public class Validator : Validator<Request>
+public class UpdateUserRequest
 {
-    public Validator() { }
+    [BindFrom("id")]
+    public Guid Id { get; set; } = Guid.Empty;
+    public string Username { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
 }
 
-public class Response
+public class UpdateUserResponse
 {
-    public string Message => "This endpoint hasn't been implemented yet!";
+    public Guid Id { get; set; } = Guid.Empty;
+    public string Username { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
 }
