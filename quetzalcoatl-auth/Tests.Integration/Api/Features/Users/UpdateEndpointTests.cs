@@ -2,6 +2,8 @@ namespace Tests.Integration.Api.Features.Users;
 
 public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
 {
+    #region SetUp
+    
     private readonly HttpClient _client;
 
     private readonly Faker<RegisterUserRequest> _registerUserRequestFaker =
@@ -14,6 +16,8 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
     {
         _client = apiWebFactory.CreateClient();
     }
+    
+    #endregion
 
     [Fact]
     public async Task GivenAnonymousUser_WhenUpdatingUser_ThenReturnsUnauthorized()
@@ -26,12 +30,13 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
             .RuleFor(rule => rule.Password, validPassword)
             .Generate();
 
-        await _client.POSTAsync<RegisterUserEndpoint, RegisterUserRequest, RegisterUserResponse>(
+        var (_, registerUserResponse) = await _client.POSTAsync<RegisterUserEndpoint, RegisterUserRequest, RegisterUserResponse>(
             registerUserRequest
         );
 
         var request = new UpdateUserRequest
         {
+            Id = registerUserResponse!.Id,
             Username = $"{registerUserRequest.Username}-updated",
             Email = $"{registerUserRequest.Email}-updated"
         };

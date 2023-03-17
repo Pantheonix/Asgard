@@ -19,3 +19,4 @@ global using Api.Features.Users.GetAll;
 global using Api.Features.Users.Get;
 global using Api.Features.Users.Core;
 global using Api.Features.Users.Update;
+global using Api.Features.Users.Delete;
