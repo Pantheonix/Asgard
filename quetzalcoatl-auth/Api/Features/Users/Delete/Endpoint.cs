@@ -18,7 +18,7 @@ public class DeleteUserEndpoint : Endpoint<DeleteUserRequest>
     public override async Task HandleAsync(DeleteUserRequest req, CancellationToken ct)
     {
         var userToDelete = await _userManager.FindByIdAsync(req.Id.ToString());
-        
+
         if (userToDelete == null)
         {
             await SendNotFoundAsync(ct);
@@ -26,7 +26,7 @@ public class DeleteUserEndpoint : Endpoint<DeleteUserRequest>
         }
 
         var result = await _userManager.DeleteAsync(userToDelete);
-        
+
         if (!result.Succeeded)
         {
             AddError(
@@ -35,9 +35,9 @@ public class DeleteUserEndpoint : Endpoint<DeleteUserRequest>
                     .Aggregate("Identity Errors: ", (a, b) => $"{a}, {b}")
             );
         }
-        
+
         ThrowIfAnyErrors();
-        
+
         await SendNoContentAsync(ct);
     }
 }

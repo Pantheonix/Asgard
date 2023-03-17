@@ -3,7 +3,7 @@ namespace Tests.Integration.Api.Features.Auth;
 public class LoginEndpointTests : IClassFixture<ApiWebFactory>
 {
     #region SetUp
-    
+
     private readonly HttpClient _client;
 
     private readonly Faker<RegisterUserRequest> _registerUserRequestFaker =
@@ -20,14 +20,14 @@ public class LoginEndpointTests : IClassFixture<ApiWebFactory>
     {
         _client = apiWebFactory.CreateClient();
     }
-    
+
     #endregion
 
     [Fact]
     public async Task GivenValidUserCredentials_WhenLoggingIn_ThenReturnsOk()
     {
         #region Arrange
-        
+
         const string validPassword = "P@ssw0rd!";
         var registerRequest = _registerUserRequestFaker
             .Clone()
@@ -43,30 +43,30 @@ public class LoginEndpointTests : IClassFixture<ApiWebFactory>
             .RuleFor(rule => rule.Email, registerRequest.Email)
             .RuleFor(rule => rule.Password, validPassword)
             .Generate();
-        
+
         #endregion
-        
+
         #region Act
-        
+
         var (response, result) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
             LoginUserResponse
         >(loginRequest);
-        
+
         #endregion
 
         #region Assert
-        
+
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         result.Should().NotBeNull();
         result!.Id.Should().NotBeEmpty();
         result.Username.Should().Be(registerRequest.Username);
         result.Email.Should().Be(registerRequest.Email);
         result.Token.Should().NotBeNullOrWhiteSpace();
-        
+
         #endregion
     }
 
@@ -74,7 +74,7 @@ public class LoginEndpointTests : IClassFixture<ApiWebFactory>
     public async Task GivenInvalidUserCredentials_WhenLoggingIn_ThenReturnsBadRequest()
     {
         #region Arrange
-        
+
         const string validPassword = "P@ssw0rd!";
         var registerRequest = _registerUserRequestFaker
             .Clone()
@@ -91,27 +91,27 @@ public class LoginEndpointTests : IClassFixture<ApiWebFactory>
             .RuleFor(rule => rule.Email, registerRequest.Email)
             .RuleFor(rule => rule.Password, invalidPassword)
             .Generate();
-        
+
         #endregion
-        
+
         #region Act
-        
+
         var (response, result) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
             ErrorResponse
         >(loginRequest);
-        
+
         #endregion
-        
+
         #region Assert
 
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        
+
         result.Should().NotBeNull();
         result!.Errors.Should().NotBeEmpty();
-        
+
         #endregion
     }
 }

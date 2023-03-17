@@ -1,4 +1,3 @@
-
 namespace Tests.Integration.Api.Features.Users;
 
 public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
@@ -156,7 +155,7 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
         var token = loginResult!.Token;
 
         _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
-        
+
         var (_, getAllUsersResponse) = await _client.GETAsync<
             GetAllUsersEndpoint,
             GetAllUsersRequest,

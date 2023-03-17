@@ -11,12 +11,16 @@ public class LoginUserSummary : Summary<LoginUserEndpoint>
             Email = "test@gmail.com",
             Password = "Password123!"
         };
-        Response<LoginUserResponse>(200, "User logged in successfully", example: new()
-        {
-            Username = "Test",
-            Email = "test@gmail.com",
-            Token = "JWT Access Token"
-        });
+        Response<LoginUserResponse>(
+            200,
+            "User logged in successfully",
+            example: new()
+            {
+                Username = "Test",
+                Email = "test@gmail.com",
+                Token = "JWT Access Token"
+            }
+        );
         Response<ErrorResponse>(400, "Invalid credentials");
         Response<ErrorResponse>(500, "Internal server error");
     }
