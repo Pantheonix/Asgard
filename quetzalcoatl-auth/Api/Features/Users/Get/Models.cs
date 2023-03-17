@@ -2,7 +2,6 @@
 
 public class GetUserRequest
 {
-    [BindFrom("id")]
     public Guid Id { get; set; } = Guid.Empty;
 }
 

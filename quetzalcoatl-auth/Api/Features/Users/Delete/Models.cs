@@ -2,6 +2,5 @@
 
 public class DeleteUserRequest
 {
-    [BindFrom("id")]
     public Guid Id { get; set; } = Guid.Empty;
 }
