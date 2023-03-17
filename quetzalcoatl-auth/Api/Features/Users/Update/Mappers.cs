@@ -5,8 +5,16 @@ public class UpdateUserRequestToApplicationUserProfile : Profile
     public UpdateUserRequestToApplicationUserProfile()
     {
         CreateMap<UpdateUserRequest, ApplicationUser>()
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Username))
-            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email));
+            .ForMember(dest => dest.UserName, opt =>
+            {
+                opt.PreCondition(src => !src.Username.IsNullOrEmpty());
+                opt.MapFrom(src => src.Username);
+            })
+            .ForMember(dest => dest.Email, opt =>
+            {
+                opt.PreCondition(src => !src.Email.IsNullOrEmpty());
+                opt.MapFrom(src => src.Email);
+            });
     }
 }
 
