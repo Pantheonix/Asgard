@@ -3,7 +3,7 @@ namespace Tests.Integration.Api.Features.Users;
 public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
 {
     #region SetUp
-    
+
     private readonly HttpClient _client;
 
     private readonly Faker<RegisterUserRequest> _registerUserRequestFaker =
@@ -16,7 +16,7 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
     {
         _client = apiWebFactory.CreateClient();
     }
-    
+
     #endregion
 
     [Fact]
@@ -30,9 +30,11 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
             .RuleFor(rule => rule.Password, validPassword)
             .Generate();
 
-        var (_, registerUserResponse) = await _client.POSTAsync<RegisterUserEndpoint, RegisterUserRequest, RegisterUserResponse>(
-            registerUserRequest
-        );
+        var (_, registerUserResponse) = await _client.POSTAsync<
+            RegisterUserEndpoint,
+            RegisterUserRequest,
+            RegisterUserResponse
+        >(registerUserRequest);
 
         var request = new UpdateUserRequest
         {
@@ -185,6 +187,77 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
 
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+
+        #endregion
+    }
+
+    [Fact]
+    public async Task GivenAuthorizedUserAndValidRequestForPartialUpdate_WhenUpdatingUser_ThenReturnsOk()
+    {
+        #region Arrange
+
+        const string validPassword = "P@ssw0rd!";
+        var registerUserRequest = _registerUserRequestFaker
+            .Clone()
+            .RuleFor(rule => rule.Password, validPassword)
+            .Generate();
+
+        var (_, registerUserResponse) = await _client.POSTAsync<
+            RegisterUserEndpoint,
+            RegisterUserRequest,
+            RegisterUserResponse
+        >(registerUserRequest);
+
+        var loginUserRequest = new LoginUserRequest
+        {
+            Email = registerUserRequest.Email,
+            Password = validPassword
+        };
+
+        var (_, loginResult) = await _client.POSTAsync<
+            LoginUserEndpoint,
+            LoginUserRequest,
+            LoginUserResponse
+        >(loginUserRequest);
+
+        var token = loginResult!.Token;
+
+        var request = new UpdateUserRequest
+        {
+            Id = registerUserResponse!.Id,
+            Username = $"{registerUserRequest.Username}-updated"
+        };
+
+        var expectedResponse = new UpdateUserResponse
+        {
+            Id = registerUserResponse.Id,
+            Username = request.Username,
+            Email = registerUserRequest.Email
+        };
+
+        #endregion
+
+        #region Act
+
+        _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+
+        var (response, result) = await _client.PUTAsync<
+            UpdateUserEndpoint,
+            UpdateUserRequest,
+            UpdateUserResponse
+        >(request);
+
+        _client.DefaultRequestHeaders.Remove("Authorization");
+
+        #endregion
+
+        #region Assert
+
+        response.Should().NotBeNull();
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(expectedResponse);
 
         #endregion
     }
