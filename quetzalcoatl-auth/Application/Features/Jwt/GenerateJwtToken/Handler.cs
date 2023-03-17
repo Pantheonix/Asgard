@@ -1,3 +1,5 @@
+using Domain.Configs;
+
 namespace Application.Features.Jwt.GenerateJwtToken;
 
 public class GenerateJwtTokenCommandHandler : CommandHandler<GenerateJwtTokenCommand, string>
