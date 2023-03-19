@@ -14,7 +14,9 @@ public class GetUserSummary : Summary<GetUserEndpoint>
             {
                 Id = Guid.NewGuid(),
                 Username = "Test",
-                Email = "test@gmail.com"
+                Email = "test@gmail.com",
+                Fullname = "Test User",
+                Bio = "Test user bio"
             }
         );
         Response<ErrorResponse>(404, "User not found");

@@ -15,5 +15,15 @@ public class Validator : Validator<UpdateUserRequest>
             .EmailAddress()
             .WithMessage("Email is invalid")
             .When(x => !x.Email.IsNullOrEmpty());
+
+        RuleFor(x => x.Fullname)
+            .MaximumLength(50)
+            .WithMessage("Fullname must be at most 50 characters long")
+            .When(x => !string.IsNullOrWhiteSpace(x.Fullname));
+
+        RuleFor(x => x.Bio)
+            .MaximumLength(300)
+            .WithMessage("Bio must be at most 300 characters long")
+            .When(x => !string.IsNullOrWhiteSpace(x.Bio));
     }
 }

@@ -20,6 +20,22 @@ public class UpdateUserRequestToApplicationUserProfile : Profile
                     opt.PreCondition(src => !src.Email.IsNullOrEmpty());
                     opt.MapFrom(src => src.Email);
                 }
+            )
+            .ForMember(
+                dest => dest.Fullname,
+                opt =>
+                {
+                    opt.PreCondition(src => !string.IsNullOrWhiteSpace(src.Fullname));
+                    opt.MapFrom(src => src.Fullname);
+                }
+            )
+            .ForMember(
+                dest => dest.Bio,
+                opt =>
+                {
+                    opt.PreCondition(src => !string.IsNullOrWhiteSpace(src.Bio));
+                    opt.MapFrom(src => src.Bio);
+                }
             );
     }
 }

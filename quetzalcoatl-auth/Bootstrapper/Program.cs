@@ -3,11 +3,11 @@ var builder = WebApplication.CreateBuilder(args);
 var jwtConfig = new JwtConfig();
 builder.Configuration.Bind(nameof(jwtConfig), jwtConfig);
 
-builder.Services.AddDbContext<AppDbContext>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
-
 builder.Services
+    .AddDbContext<AppDbContext>(
+        options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+    )
     .AddIdentity<ApplicationUser, ApplicationRole>(identity =>
     {
         identity.User.RequireUniqueEmail = true;

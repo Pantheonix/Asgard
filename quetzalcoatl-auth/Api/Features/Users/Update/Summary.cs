@@ -11,6 +11,8 @@ public class UpdateUserSummary : Summary<UpdateUserEndpoint>
             Id = Guid.NewGuid(),
             Username = "Test",
             Email = "test@gmail.com",
+            Fullname = "Test User",
+            Bio = "Test user bio"
         };
         Response<UpdateUserResponse>(
             200,
@@ -20,6 +22,8 @@ public class UpdateUserSummary : Summary<UpdateUserEndpoint>
                 Id = Guid.NewGuid(),
                 Username = "Test",
                 Email = "test@gmail.com",
+                Fullname = "Test User",
+                Bio = "Test user bio"
             }
         );
         Response<ErrorResponse>(400, "Validation failure");

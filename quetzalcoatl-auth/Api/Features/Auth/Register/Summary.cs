@@ -10,7 +10,9 @@ public class RegisterUserSummary : Summary<RegisterUserEndpoint>
         {
             Username = "Test",
             Email = "test@gmail.com",
-            Password = "Password123!"
+            Password = "Password123!",
+            Fullname = "Test User",
+            Bio = "Test user bio"
         };
         Response<RegisterUserResponse>(
             201,
@@ -19,6 +21,8 @@ public class RegisterUserSummary : Summary<RegisterUserEndpoint>
             {
                 Username = "Test",
                 Email = "test@gmail.com",
+                Fullname = "Test User",
+                Bio = "Test user bio",
                 Token = "JWT Access Token"
             }
         );

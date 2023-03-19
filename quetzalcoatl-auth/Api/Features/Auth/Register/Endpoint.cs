@@ -31,6 +31,8 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, RegisterUserRe
                 Id = user.Id,
                 Username = user.UserName!,
                 Email = user.Email!,
+                Fullname = user.Fullname,
+                Bio = user.Bio,
                 Token = token
             },
             cancellation: ct
