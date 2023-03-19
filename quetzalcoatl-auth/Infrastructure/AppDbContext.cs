@@ -2,6 +2,8 @@ namespace Infrastructure;
 
 public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
+    public DbSet<Picture> Pictures { get; set; } = default!;
+    
     public AppDbContext() { }
 
     public AppDbContext(DbContextOptions<AppDbContext> options)

@@ -21,7 +21,7 @@ public class UpdateUserEndpoint : Endpoint<UpdateUserRequest, UpdateUserResponse
     {
         var userToUpdate = await _userManager.FindByIdAsync(req.Id.ToString());
 
-        if (userToUpdate == null)
+        if (userToUpdate is null)
         {
             await SendNotFoundAsync(ct);
             return;

@@ -22,6 +22,10 @@ public class CreateUserCommandToApplicationUserProfile : Profile
                     opt.PreCondition(src => !string.IsNullOrWhiteSpace(src.Bio));
                     opt.MapFrom(src => src.Bio);
                 }
+            )
+            .ForMember(
+                dest => dest.ProfilePicture,
+                opt => opt.MapFrom(src => new Picture { Data = src.ProfilePictureData! })
             );
     }
 }

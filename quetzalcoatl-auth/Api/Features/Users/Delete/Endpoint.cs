@@ -19,7 +19,7 @@ public class DeleteUserEndpoint : Endpoint<DeleteUserRequest>
     {
         var userToDelete = await _userManager.FindByIdAsync(req.Id.ToString());
 
-        if (userToDelete == null)
+        if (userToDelete is null)
         {
             await SendNotFoundAsync(ct);
             return;

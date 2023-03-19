@@ -23,6 +23,7 @@ public class RegisterUserSummary : Summary<RegisterUserEndpoint>
                 Email = "test@gmail.com",
                 Fullname = "Test User",
                 Bio = "Test user bio",
+                ProfilePictureUrl = "https://picsum.photos/id/237/200/300",
                 Token = "JWT Access Token"
             }
         );

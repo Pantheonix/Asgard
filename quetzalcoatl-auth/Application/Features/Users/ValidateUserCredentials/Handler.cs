@@ -18,7 +18,7 @@ public class ValidateUserCredentialsCommandHandler
         // check if user exists
         var user = await _userManager.FindByEmailAsync(command.Email);
 
-        if (user == null)
+        if (user is null)
         {
             ThrowError("Invalid credentials");
         }

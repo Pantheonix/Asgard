@@ -20,6 +20,10 @@ public class RegisterUserRequestToCreateUserCommandProfile : Profile
                     opt.PreCondition(src => !string.IsNullOrWhiteSpace(src.Bio));
                     opt.MapFrom(src => src.Bio);
                 }
+            )
+            .ForMember(
+                dest => dest.ProfilePictureData,
+                opt => opt.MapFrom(src => src.ProfilePicture!.GetBytes())
             );
     }
 }

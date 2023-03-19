@@ -21,7 +21,7 @@ public class GetUserEndpoint : Endpoint<GetUserRequest, GetUserResponse>
     {
         var user = await _userManager.FindByIdAsync(req.Id.ToString());
 
-        if (user == null)
+        if (user is null)
         {
             await SendNotFoundAsync(ct);
             return;

@@ -1,4 +1,4 @@
-namespace Bootstrapper;
+namespace Bootstrapper.Extensions;
 
 public static class ServiceCollectionExtensions
 {

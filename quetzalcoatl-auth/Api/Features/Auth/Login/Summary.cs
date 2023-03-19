@@ -18,6 +18,8 @@ public class LoginUserSummary : Summary<LoginUserEndpoint>
             {
                 Username = "Test",
                 Email = "test@gmail.com",
+                Fullname = "Test User",
+                Bio = "Test User Bio",
                 Token = "JWT Access Token"
             }
         );

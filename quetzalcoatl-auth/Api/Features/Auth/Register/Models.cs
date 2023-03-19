@@ -7,6 +7,7 @@ public class RegisterUserRequest
     public string Password { get; init; } = default!;
     public string? Fullname { get; init; }
     public string? Bio { get; init; }
+    public IFormFile ProfilePicture { get; set; } = default!;
 }
 
 public class RegisterUserResponse
@@ -16,5 +17,6 @@ public class RegisterUserResponse
     public string Email { get; init; } = default!;
     public string? Fullname { get; init; }
     public string? Bio { get; init; }
+    public string ProfilePictureUrl { get; init; } = default!;
     public string Token { get; init; } = default!;
 }

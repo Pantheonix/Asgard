@@ -12,6 +12,7 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, RegisterUserRe
     public override void Configure()
     {
         Post("register");
+        AllowFileUploads();
         Group<AuthenticationGroup>();
     }
 
@@ -33,6 +34,7 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, RegisterUserRe
                 Email = user.Email!,
                 Fullname = user.Fullname,
                 Bio = user.Bio,
+                ProfilePictureUrl = $"/api/images/{user.ProfilePicture.Id.ToString()}.jpg",
                 Token = token
             },
             cancellation: ct

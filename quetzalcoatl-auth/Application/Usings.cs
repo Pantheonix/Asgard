@@ -6,3 +6,4 @@ global using System.IdentityModel.Tokens.Jwt;
 global using System.Security.Claims;
 global using AutoMapper;
 global using IMapper = AutoMapper.IMapper;
+global using Domain.Configs;
