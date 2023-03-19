@@ -10,7 +10,9 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
         new Faker<RegisterUserRequest>()
             .RuleFor(rule => rule.Username, faker => faker.Internet.UserName().ClampLength(3))
             .RuleFor(rule => rule.Email, faker => faker.Internet.Email())
-            .RuleFor(rule => rule.Password, faker => faker.Internet.Password());
+            .RuleFor(rule => rule.Password, faker => faker.Internet.Password())
+            .RuleFor(rule => rule.Fullname, faker => faker.Internet.UserName().ClampLength(0, 50))
+            .RuleFor(rule => rule.Bio, faker => faker.Lorem.Sentence().ClampLength(0, 300));
 
     public GetEndpointTests(ApiWebFactory apiWebFactory)
     {
@@ -91,7 +93,9 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
         {
             Id = Guid.Empty,
             Username = registerUserRequest.Username,
-            Email = registerUserRequest.Email
+            Email = registerUserRequest.Email,
+            Fullname = registerUserRequest.Fullname,
+            Bio = registerUserRequest.Bio
         };
 
         #endregion

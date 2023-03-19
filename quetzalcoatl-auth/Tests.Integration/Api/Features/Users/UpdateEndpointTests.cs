@@ -10,7 +10,9 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
         new Faker<RegisterUserRequest>()
             .RuleFor(rule => rule.Username, faker => faker.Internet.UserName().ClampLength(3))
             .RuleFor(rule => rule.Email, faker => faker.Internet.Email())
-            .RuleFor(rule => rule.Password, faker => faker.Internet.Password());
+            .RuleFor(rule => rule.Password, faker => faker.Internet.Password())
+            .RuleFor(rule => rule.Fullname, faker => faker.Internet.UserName().ClampLength(0, 50))
+            .RuleFor(rule => rule.Bio, faker => faker.Lorem.Sentence().ClampLength(0, 300));
 
     public UpdateEndpointTests(ApiWebFactory apiWebFactory)
     {
@@ -94,7 +96,7 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
         {
             Id = registerUserResponse!.Id,
             Username = $"{registerUserRequest.Username}-updated",
-            Email = $"invalid-email"
+            Email = "invalid-email"
         };
 
         #endregion
@@ -225,14 +227,17 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
         var request = new UpdateUserRequest
         {
             Id = registerUserResponse!.Id,
-            Username = $"{registerUserRequest.Username}-updated"
+            Username = $"{registerUserRequest.Username}-updated",
+            Fullname = $"{registerUserRequest.Fullname}-updated"
         };
 
         var expectedResponse = new UpdateUserResponse
         {
             Id = registerUserResponse.Id,
             Username = request.Username,
-            Email = registerUserRequest.Email
+            Email = registerUserRequest.Email,
+            Fullname = request.Fullname,
+            Bio = registerUserRequest.Bio
         };
 
         #endregion
@@ -297,14 +302,18 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
         {
             Id = registerUserResponse!.Id,
             Username = $"{registerUserRequest.Username}-updated",
-            Email = $"{registerUserRequest.Email}-updated"
+            Email = $"{registerUserRequest.Email}-updated",
+            Fullname = $"{registerUserRequest.Fullname}-updated",
+            Bio = $"{registerUserRequest.Bio}-updated"
         };
 
         var expectedResponse = new UpdateUserResponse
         {
             Id = registerUserResponse.Id,
             Username = request.Username,
-            Email = request.Email
+            Email = request.Email,
+            Fullname = request.Fullname,
+            Bio = request.Bio
         };
 
         #endregion
