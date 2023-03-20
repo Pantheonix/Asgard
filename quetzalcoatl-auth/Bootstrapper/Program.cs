@@ -8,6 +8,7 @@ builder.Services
         options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
     )
+    .AddScoped<IPictureRepository, PictureRepository>()
     .AddIdentity<ApplicationUser, ApplicationRole>(identity =>
     {
         identity.User.RequireUniqueEmail = true;

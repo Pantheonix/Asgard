@@ -2,11 +2,11 @@ namespace Api.Features.Images.Get;
 
 public class GetImageEndpoint : Endpoint<GetImageRequest>
 {
-    private readonly AppDbContext _context;
+    private readonly IPictureRepository _pictureRepository;
 
-    public GetImageEndpoint(AppDbContext context)
+    public GetImageEndpoint(IPictureRepository pictureRepository)
     {
-        _context = context;
+        _pictureRepository = pictureRepository;
     }
 
     public override void Configure()
@@ -17,10 +17,7 @@ public class GetImageEndpoint : Endpoint<GetImageRequest>
 
     public override async Task HandleAsync(GetImageRequest req, CancellationToken ct)
     {
-        var image = await _context.Pictures.FirstOrDefaultAsync(
-            p => p.Id == req.Id,
-            cancellationToken: ct
-        );
+        var image = await _pictureRepository.GetPictureByIdAsync(req.Id, ct);
 
         if (image is null)
         {

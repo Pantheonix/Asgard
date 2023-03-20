@@ -7,3 +7,5 @@ global using FastEndpoints.Swagger;
 global using Domain.Entities;
 global using Application;
 global using Domain.Configs;
+global using Domain.Interfaces;
+global using Infrastructure.Repositories;
