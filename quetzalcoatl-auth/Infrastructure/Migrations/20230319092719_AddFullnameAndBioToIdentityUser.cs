@@ -15,26 +15,24 @@ namespace Infrastructure.Migrations
                 table: "AspNetUsers",
                 type: "nvarchar(300)",
                 maxLength: 300,
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "Fullname",
                 table: "AspNetUsers",
                 type: "nvarchar(50)",
                 maxLength: 50,
-                nullable: true);
+                nullable: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Bio",
-                table: "AspNetUsers");
+            migrationBuilder.DropColumn(name: "Bio", table: "AspNetUsers");
 
-            migrationBuilder.DropColumn(
-                name: "Fullname",
-                table: "AspNetUsers");
+            migrationBuilder.DropColumn(name: "Fullname", table: "AspNetUsers");
         }
     }
 }

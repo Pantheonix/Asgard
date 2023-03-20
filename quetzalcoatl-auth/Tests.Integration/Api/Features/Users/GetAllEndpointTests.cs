@@ -45,7 +45,7 @@ public class GetAllEndpointTests : IClassFixture<ApiWebFactory>
                 .Generate();
 
             await userManager.CreateAsync(applicationUser, validPassword);
-            
+
             users.Add(MapUserDtoFrom(applicationUser));
         }
 

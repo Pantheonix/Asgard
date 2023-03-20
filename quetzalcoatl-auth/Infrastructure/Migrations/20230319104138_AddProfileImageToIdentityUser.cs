@@ -13,12 +13,13 @@ namespace Infrastructure.Migrations
         {
             migrationBuilder.CreateTable(
                 name: "Pictures",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Data = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
+                columns: table =>
+                    new
+                    {
+                        Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                        Data = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                        UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Pictures", x => x.Id);
@@ -27,21 +28,23 @@ namespace Infrastructure.Migrations
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Pictures_UserId",
                 table: "Pictures",
                 column: "UserId",
-                unique: true);
+                unique: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Pictures");
+            migrationBuilder.DropTable(name: "Pictures");
         }
     }
 }

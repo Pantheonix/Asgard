@@ -75,7 +75,7 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
         var users = new List<ApplicationUser>();
 
         const string validPassword = "P@ssw0rd!";
-        
+
         for (var i = 0; i < 3; i++)
         {
             var profilePicture = new Picture { Data = profilePictureData };
@@ -168,13 +168,13 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
         var token = loginResult!.Token;
 
         var request = new DeleteUserRequest { Id = users.ElementAt(1).Id };
-        
+
         #endregion
 
         #region Act
 
         _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
-        
+
         var response = await _client.DELETEAsync<DeleteUserEndpoint, DeleteUserRequest>(request);
 
         _client.DefaultRequestHeaders.Remove("Authorization");

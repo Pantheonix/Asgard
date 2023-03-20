@@ -88,13 +88,13 @@ public class GetImageEndpointTests : IClassFixture<ApiWebFactory>
             Email = applicationUser.Email!,
             Password = validPassword
         };
-        
+
         var (_, loginResult) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
             LoginUserResponse
         >(loginUserRequest);
-        
+
         var token = loginResult!.Token;
 
         #endregion
@@ -102,11 +102,11 @@ public class GetImageEndpointTests : IClassFixture<ApiWebFactory>
         #region Act
 
         _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
-        
+
         var response = await _client.GETAsync<GetImageEndpoint, GetImageRequest>(request);
 
         _client.DefaultRequestHeaders.Remove("Authorization");
-        
+
         #endregion
 
         #region Assert
@@ -145,13 +145,13 @@ public class GetImageEndpointTests : IClassFixture<ApiWebFactory>
             Email = applicationUser.Email!,
             Password = validPassword
         };
-        
+
         var (_, loginResult) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
             LoginUserResponse
         >(loginUserRequest);
-        
+
         var token = loginResult!.Token;
 
         #endregion
@@ -159,11 +159,11 @@ public class GetImageEndpointTests : IClassFixture<ApiWebFactory>
         #region Act
 
         _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
-        
+
         var response = await _client.GETAsync<GetImageEndpoint, GetImageRequest>(request);
 
         _client.DefaultRequestHeaders.Remove("Authorization");
-        
+
         #endregion
 
         #region Assert
