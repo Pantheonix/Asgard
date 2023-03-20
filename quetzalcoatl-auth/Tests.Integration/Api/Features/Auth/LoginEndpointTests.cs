@@ -86,7 +86,7 @@ public class LoginEndpointTests : IClassFixture<ApiWebFactory>
     {
         #region Arrange
 
-       using var scope = _apiWebFactory.Services.CreateScope();
+        using var scope = _apiWebFactory.Services.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
         var profilePictureData = await ImageHelpers.GetImageAsByteArrayAsync(

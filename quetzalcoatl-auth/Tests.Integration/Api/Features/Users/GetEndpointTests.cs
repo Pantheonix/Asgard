@@ -4,18 +4,18 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
 {
     #region SetUp
 
+    private readonly ApiWebFactory _apiWebFactory;
     private readonly HttpClient _client;
 
-    private readonly Faker<RegisterUserRequest> _registerUserRequestFaker =
-        new Faker<RegisterUserRequest>()
-            .RuleFor(rule => rule.Username, faker => faker.Internet.UserName().ClampLength(3))
-            .RuleFor(rule => rule.Email, faker => faker.Internet.Email())
-            .RuleFor(rule => rule.Password, faker => faker.Internet.Password())
-            .RuleFor(rule => rule.Fullname, faker => faker.Internet.UserName().ClampLength(0, 50))
-            .RuleFor(rule => rule.Bio, faker => faker.Lorem.Sentence().ClampLength(0, 300));
+    private readonly Faker<ApplicationUser> _applicationUserFaker = new Faker<ApplicationUser>()
+        .RuleFor(rule => rule.UserName, faker => faker.Internet.UserName().ClampLength(3))
+        .RuleFor(rule => rule.Email, faker => faker.Internet.Email())
+        .RuleFor(rule => rule.Fullname, faker => faker.Internet.UserName().ClampLength(0, 50))
+        .RuleFor(rule => rule.Bio, faker => faker.Lorem.Sentence().ClampLength(0, 300));
 
     public GetEndpointTests(ApiWebFactory apiWebFactory)
     {
+        _apiWebFactory = apiWebFactory;
         _client = apiWebFactory.CreateClient();
     }
 
@@ -26,19 +26,23 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
     {
         #region Arrange
 
-        const string validPassword = "P@ssw0rd!";
-        var registerUserRequest = _registerUserRequestFaker
+        using var scope = _apiWebFactory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+        var profilePictureData = await ImageHelpers.GetImageAsByteArrayAsync(
+            "https://picsum.photos/200"
+        );
+        var profilePicture = new Picture { Data = profilePictureData };
+
+        var applicationUser = _applicationUserFaker
             .Clone()
-            .RuleFor(rule => rule.Password, validPassword)
+            .RuleFor(rule => rule.ProfilePicture, profilePicture)
             .Generate();
 
-        var (_, registerUserResponse) = await _client.POSTAsync<
-            RegisterUserEndpoint,
-            RegisterUserRequest,
-            RegisterUserResponse
-        >(registerUserRequest);
+        const string validPassword = "P@ssw0rd!";
+        await userManager.CreateAsync(applicationUser, validPassword);
 
-        var request = new GetUserRequest { Id = registerUserResponse!.Id };
+        var request = new GetUserRequest { Id = applicationUser.Id };
 
         #endregion
 
@@ -61,21 +65,25 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
     {
         #region Arrange
 
-        const string validPassword = "P@ssw0rd!";
-        var registerUserRequest = _registerUserRequestFaker
+        using var scope = _apiWebFactory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+        var profilePictureData = await ImageHelpers.GetImageAsByteArrayAsync(
+            "https://picsum.photos/200"
+        );
+        var profilePicture = new Picture { Data = profilePictureData };
+
+        var applicationUser = _applicationUserFaker
             .Clone()
-            .RuleFor(rule => rule.Password, validPassword)
+            .RuleFor(rule => rule.ProfilePicture, profilePicture)
             .Generate();
 
-        var (_, registerUserResponse) = await _client.POSTAsync<
-            RegisterUserEndpoint,
-            RegisterUserRequest,
-            RegisterUserResponse
-        >(registerUserRequest);
+        const string validPassword = "P@ssw0rd!";
+        await userManager.CreateAsync(applicationUser, validPassword);
 
         var loginUserRequest = new LoginUserRequest
         {
-            Email = registerUserRequest.Email,
+            Email = applicationUser.Email!,
             Password = validPassword
         };
 
@@ -87,15 +95,20 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
 
         var token = loginResult!.Token;
 
-        var request = new GetUserRequest { Id = registerUserResponse!.Id };
+        var request = new GetUserRequest { Id = applicationUser.Id };
 
         var expectedResponse = new GetUserResponse
         {
-            Id = Guid.Empty,
-            Username = registerUserRequest.Username,
-            Email = registerUserRequest.Email,
-            Fullname = registerUserRequest.Fullname,
-            Bio = registerUserRequest.Bio
+            Id = applicationUser.Id,
+            Username = applicationUser.UserName!,
+            Email = applicationUser.Email!,
+            Fullname = applicationUser.Fullname,
+            Bio = applicationUser.Bio,
+            ProfilePictureUrl = applicationUser.GetProfilePictureUrl(
+                ProfilePictureConstants.BaseUrl,
+                ProfilePictureConstants.EndpointUrl,
+                ProfilePictureConstants.Extension
+            )
         };
 
         #endregion
@@ -120,7 +133,6 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         result.Should().NotBeNull();
-        result!.Id = Guid.Empty;
         result.Should().BeEquivalentTo(expectedResponse);
 
         #endregion
@@ -131,19 +143,25 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
     {
         #region Arrange
 
-        const string validPassword = "P@ssw0rd!";
-        var registerUserRequest = _registerUserRequestFaker
+        using var scope = _apiWebFactory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+        var profilePictureData = await ImageHelpers.GetImageAsByteArrayAsync(
+            "https://picsum.photos/200"
+        );
+        var profilePicture = new Picture { Data = profilePictureData };
+
+        var applicationUser = _applicationUserFaker
             .Clone()
-            .RuleFor(rule => rule.Password, validPassword)
+            .RuleFor(rule => rule.ProfilePicture, profilePicture)
             .Generate();
 
-        await _client.POSTAsync<RegisterUserEndpoint, RegisterUserRequest, RegisterUserResponse>(
-            registerUserRequest
-        );
+        const string validPassword = "P@ssw0rd!";
+        await userManager.CreateAsync(applicationUser, validPassword);
 
         var loginUserRequest = new LoginUserRequest
         {
-            Email = registerUserRequest.Email,
+            Email = applicationUser.Email!,
             Password = validPassword
         };
 

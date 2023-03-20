@@ -26,3 +26,4 @@ global using System.Net.Http.Headers;
 global using System.Net.Mime;
 global using Domain.Entities;
 global using Microsoft.AspNetCore.Identity;
+global using Api.Features.Core;

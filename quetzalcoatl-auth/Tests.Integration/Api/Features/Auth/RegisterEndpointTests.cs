@@ -94,7 +94,11 @@ public class RegisterEndpointTests : IClassFixture<ApiWebFactory>
     {
         #region Arrange
 
-        var request = _registerUserRequestFaker.Generate();
+        const string invalidPassword = "invalidpassword";
+        var request = _registerUserRequestFaker
+            .Clone()
+            .RuleFor(rule => rule.Password, invalidPassword)
+            .Generate();
 
         request.ProfilePicture = await ImageHelpers.GetImageAsFormFileAsync(
             "https://picsum.photos/id/237/200/300",

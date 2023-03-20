@@ -4,18 +4,18 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
 {
     #region SetUp
 
+    private readonly ApiWebFactory _apiWebFactory;
     private readonly HttpClient _client;
 
-    private readonly Faker<RegisterUserRequest> _registerUserRequestFaker =
-        new Faker<RegisterUserRequest>()
-            .RuleFor(rule => rule.Username, faker => faker.Internet.UserName().ClampLength(3))
-            .RuleFor(rule => rule.Email, faker => faker.Internet.Email())
-            .RuleFor(rule => rule.Password, faker => faker.Internet.Password())
-            .RuleFor(rule => rule.Fullname, faker => faker.Internet.UserName().ClampLength(0, 50))
-            .RuleFor(rule => rule.Bio, faker => faker.Lorem.Sentence().ClampLength(0, 300));
+    private readonly Faker<ApplicationUser> _applicationUserFaker = new Faker<ApplicationUser>()
+        .RuleFor(rule => rule.UserName, faker => faker.Internet.UserName().ClampLength(3))
+        .RuleFor(rule => rule.Email, faker => faker.Internet.Email())
+        .RuleFor(rule => rule.Fullname, faker => faker.Internet.UserName().ClampLength(0, 50))
+        .RuleFor(rule => rule.Bio, faker => faker.Lorem.Sentence().ClampLength(0, 300));
 
     public UpdateEndpointTests(ApiWebFactory apiWebFactory)
     {
+        _apiWebFactory = apiWebFactory;
         _client = apiWebFactory.CreateClient();
     }
 
@@ -26,30 +26,71 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
     {
         #region Arrange
 
-        const string validPassword = "P@ssw0rd!";
-        var registerUserRequest = _registerUserRequestFaker
+        using var scope = _apiWebFactory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+        var profilePictureData = await ImageHelpers.GetImageAsByteArrayAsync(
+            "https://picsum.photos/200"
+        );
+        var profilePicture = new Picture { Data = profilePictureData };
+
+        var applicationUser = _applicationUserFaker
             .Clone()
-            .RuleFor(rule => rule.Password, validPassword)
+            .RuleFor(rule => rule.ProfilePicture, profilePicture)
             .Generate();
 
-        var (_, registerUserResponse) = await _client.POSTAsync<
-            RegisterUserEndpoint,
-            RegisterUserRequest,
-            RegisterUserResponse
-        >(registerUserRequest);
+        const string validPassword = "P@ssw0rd!";
+        await userManager.CreateAsync(applicationUser, validPassword);
 
-        var request = new UpdateUserRequest
-        {
-            Id = registerUserResponse!.Id,
-            Username = $"{registerUserRequest.Username}-updated",
-            Email = $"{registerUserRequest.Email}-updated"
-        };
+        var updateProfilePictureFormFile = await ImageHelpers.GetImageAsFormFileAsync(
+            "https://picsum.photos/200/300",
+            "demo.jpg"
+        );
+
+        _client.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json")
+        );
+        _client.DefaultRequestHeaders.TryAddWithoutValidation(
+            "Content-Type",
+            "multipart/form-data"
+        );
+
+        var requestForm = new MultipartFormDataContent();
+
+        requestForm.Add(
+            new StringContent($"{applicationUser.UserName!}-updated"),
+            nameof(applicationUser.UserName)
+        );
+        requestForm.Add(
+            new StringContent($"{applicationUser.Email!}-updated"),
+            nameof(applicationUser.Email)
+        );
+        requestForm.Add(
+            new StringContent($"{applicationUser.Fullname!}-updated"),
+            nameof(applicationUser.Fullname)
+        );
+        requestForm.Add(
+            new StringContent($"{applicationUser.Bio!}-updated"),
+            nameof(applicationUser.Bio)
+        );
+
+        var profilePictureContent = new StreamContent(
+            updateProfilePictureFormFile.OpenReadStream()
+        );
+        profilePictureContent.Headers.ContentType = MediaTypeHeaderValue.Parse(
+            MediaTypeNames.Image.Jpeg
+        );
+        requestForm.Add(
+            profilePictureContent,
+            nameof(applicationUser.ProfilePicture),
+            updateProfilePictureFormFile.FileName
+        );
 
         #endregion
 
         #region Act
 
-        var response = await _client.PUTAsync<UpdateUserEndpoint, UpdateUserRequest>(request);
+        var response = await _client.PutAsync($"/api/users/{applicationUser.Id}", requestForm);
 
         #endregion
 
@@ -66,21 +107,66 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
     {
         #region Arrange
 
-        const string validPassword = "P@ssw0rd!";
-        var registerUserRequest = _registerUserRequestFaker
+        using var scope = _apiWebFactory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+        var profilePictureData = await ImageHelpers.GetImageAsByteArrayAsync(
+            "https://picsum.photos/200"
+        );
+        var profilePicture = new Picture { Data = profilePictureData };
+
+        var applicationUser = _applicationUserFaker
             .Clone()
-            .RuleFor(rule => rule.Password, validPassword)
+            .RuleFor(rule => rule.ProfilePicture, profilePicture)
             .Generate();
 
-        var (_, registerUserResponse) = await _client.POSTAsync<
-            RegisterUserEndpoint,
-            RegisterUserRequest,
-            RegisterUserResponse
-        >(registerUserRequest);
+        const string validPassword = "P@ssw0rd!";
+        await userManager.CreateAsync(applicationUser, validPassword);
+
+        var updateProfilePictureFormFile = await ImageHelpers.GetImageAsFormFileAsync(
+            "https://picsum.photos/200/300",
+            "demo.jpg"
+        );
+
+        _client.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json")
+        );
+        _client.DefaultRequestHeaders.TryAddWithoutValidation(
+            "Content-Type",
+            "multipart/form-data"
+        );
+
+        var requestForm = new MultipartFormDataContent();
+
+        requestForm.Add(
+            new StringContent($"{applicationUser.UserName!}-updated"),
+            nameof(applicationUser.UserName)
+        );
+        requestForm.Add(new StringContent("invalid-email-updated"), nameof(applicationUser.Email));
+        requestForm.Add(
+            new StringContent($"{applicationUser.Fullname!}-updated"),
+            nameof(applicationUser.Fullname)
+        );
+        requestForm.Add(
+            new StringContent($"{applicationUser.Bio!}-updated"),
+            nameof(applicationUser.Bio)
+        );
+
+        var profilePictureContent = new StreamContent(
+            updateProfilePictureFormFile.OpenReadStream()
+        );
+        profilePictureContent.Headers.ContentType = MediaTypeHeaderValue.Parse(
+            MediaTypeNames.Image.Jpeg
+        );
+        requestForm.Add(
+            profilePictureContent,
+            nameof(applicationUser.ProfilePicture),
+            updateProfilePictureFormFile.FileName
+        );
 
         var loginUserRequest = new LoginUserRequest
         {
-            Email = registerUserRequest.Email,
+            Email = applicationUser.Email!,
             Password = validPassword
         };
 
@@ -92,24 +178,13 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
 
         var token = loginResult!.Token;
 
-        var request = new UpdateUserRequest
-        {
-            Id = registerUserResponse!.Id,
-            Username = $"{registerUserRequest.Username}-updated",
-            Email = "invalid-email"
-        };
-
         #endregion
 
         #region Act
 
         _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
 
-        var (response, result) = await _client.PUTAsync<
-            UpdateUserEndpoint,
-            UpdateUserRequest,
-            ErrorResponse
-        >(request);
+        var response = await _client.PutAsync($"/api/users/{applicationUser.Id}", requestForm);
 
         _client.DefaultRequestHeaders.Remove("Authorization");
 
@@ -120,8 +195,10 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
+        var result = await response.Content.ReadAsAsync<ErrorResponse>();
+
         result.Should().NotBeNull();
-        result!.Errors.Keys.Should().Contain(nameof(request.Email));
+        result!.Errors.Keys.Should().Contain(nameof(applicationUser.Email));
 
         #endregion
     }
@@ -131,30 +208,70 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
     {
         #region Arrange
 
-        var users = new List<RegisterUserRequest>();
+        using var scope = _apiWebFactory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+        var profilePictureData = await ImageHelpers.GetImageAsByteArrayAsync(
+            "https://picsum.photos/200"
+        );
+        var profilePicture = new Picture { Data = profilePictureData };
+
+        var applicationUser = _applicationUserFaker
+            .Clone()
+            .RuleFor(rule => rule.ProfilePicture, profilePicture)
+            .Generate();
 
         const string validPassword = "P@ssw0rd!";
-        for (var i = 0; i < 3; i++)
-        {
-            var registerUserRequest = _registerUserRequestFaker
-                .Clone()
-                .RuleFor(rule => rule.Password, $"{validPassword}{i}")
-                .Generate();
+        await userManager.CreateAsync(applicationUser, validPassword);
 
-            users.Add(registerUserRequest);
+        var updateProfilePictureFormFile = await ImageHelpers.GetImageAsFormFileAsync(
+            "https://picsum.photos/200/300",
+            "demo.jpg"
+        );
 
-            await _client.POSTAsync<
-                RegisterUserEndpoint,
-                RegisterUserRequest,
-                RegisterUserResponse
-            >(registerUserRequest);
-        }
+        _client.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json")
+        );
+        _client.DefaultRequestHeaders.TryAddWithoutValidation(
+            "Content-Type",
+            "multipart/form-data"
+        );
 
-        const string userPassword = $"{validPassword}0";
+        var requestForm = new MultipartFormDataContent();
+
+        requestForm.Add(
+            new StringContent($"{applicationUser.UserName!}-updated"),
+            nameof(applicationUser.UserName)
+        );
+        requestForm.Add(
+            new StringContent($"{applicationUser.Email!}-updated"),
+            nameof(applicationUser.Email)
+        );
+        requestForm.Add(
+            new StringContent($"{applicationUser.Fullname!}-updated"),
+            nameof(applicationUser.Fullname)
+        );
+        requestForm.Add(
+            new StringContent($"{applicationUser.Bio!}-updated"),
+            nameof(applicationUser.Bio)
+        );
+
+        var profilePictureContent = new StreamContent(
+            updateProfilePictureFormFile.OpenReadStream()
+        );
+        profilePictureContent.Headers.ContentType = MediaTypeHeaderValue.Parse(
+            MediaTypeNames.Image.Jpeg
+        );
+        requestForm.Add(
+            profilePictureContent,
+            nameof(applicationUser.ProfilePicture),
+            updateProfilePictureFormFile.FileName
+        );
+
         var loginUserRequest = new LoginUserRequest
         {
-            Email = users.ElementAt(0).Email,
-            Password = userPassword
+            Email = applicationUser.Email!,
+            Password = validPassword
         };
 
         var (_, loginResult) = await _client.POSTAsync<
@@ -165,21 +282,16 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
 
         var token = loginResult!.Token;
 
-        var user = users.ElementAt(0);
-        var request = new UpdateUserRequest
-        {
-            Id = Guid.NewGuid(),
-            Username = $"{user.Username}-updated",
-            Email = $"{user.Email}-updated"
-        };
-
         #endregion
 
         #region Act
 
         _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
 
-        var response = await _client.PUTAsync<UpdateUserEndpoint, UpdateUserRequest>(request);
+        var response = await _client.PutAsync(
+            $"/api/users/{Guid.NewGuid().ToString()}",
+            requestForm
+        );
 
         _client.DefaultRequestHeaders.Remove("Authorization");
 
@@ -198,21 +310,61 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
     {
         #region Arrange
 
-        const string validPassword = "P@ssw0rd!";
-        var registerUserRequest = _registerUserRequestFaker
+        using var scope = _apiWebFactory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+        var profilePictureData = await ImageHelpers.GetImageAsByteArrayAsync(
+            "https://picsum.photos/200"
+        );
+        var profilePicture = new Picture { Data = profilePictureData };
+
+        var applicationUser = _applicationUserFaker
             .Clone()
-            .RuleFor(rule => rule.Password, validPassword)
+            .RuleFor(rule => rule.ProfilePicture, profilePicture)
             .Generate();
 
-        var (_, registerUserResponse) = await _client.POSTAsync<
-            RegisterUserEndpoint,
-            RegisterUserRequest,
-            RegisterUserResponse
-        >(registerUserRequest);
+        const string validPassword = "P@ssw0rd!";
+        await userManager.CreateAsync(applicationUser, validPassword);
+
+        var updateProfilePictureFormFile = await ImageHelpers.GetImageAsFormFileAsync(
+            "https://picsum.photos/200/300",
+            "demo.jpg"
+        );
+
+        _client.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json")
+        );
+        _client.DefaultRequestHeaders.TryAddWithoutValidation(
+            "Content-Type",
+            "multipart/form-data"
+        );
+
+        var requestForm = new MultipartFormDataContent();
+
+        requestForm.Add(
+            new StringContent($"{applicationUser.UserName!}-updated"),
+            nameof(applicationUser.UserName)
+        );
+        requestForm.Add(
+            new StringContent($"{applicationUser.Fullname!}-updated"),
+            nameof(applicationUser.Fullname)
+        );
+
+        var profilePictureContent = new StreamContent(
+            updateProfilePictureFormFile.OpenReadStream()
+        );
+        profilePictureContent.Headers.ContentType = MediaTypeHeaderValue.Parse(
+            MediaTypeNames.Image.Jpeg
+        );
+        requestForm.Add(
+            profilePictureContent,
+            nameof(applicationUser.ProfilePicture),
+            updateProfilePictureFormFile.FileName
+        );
 
         var loginUserRequest = new LoginUserRequest
         {
-            Email = registerUserRequest.Email,
+            Email = applicationUser.Email!,
             Password = validPassword
         };
 
@@ -224,20 +376,18 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
 
         var token = loginResult!.Token;
 
-        var request = new UpdateUserRequest
-        {
-            Id = registerUserResponse!.Id,
-            Username = $"{registerUserRequest.Username}-updated",
-            Fullname = $"{registerUserRequest.Fullname}-updated"
-        };
-
         var expectedResponse = new UpdateUserResponse
         {
-            Id = registerUserResponse.Id,
-            Username = request.Username,
-            Email = registerUserRequest.Email,
-            Fullname = request.Fullname,
-            Bio = registerUserRequest.Bio
+            Id = applicationUser.Id,
+            Username = $"{applicationUser.UserName!}-updated",
+            Email = applicationUser.Email!,
+            Fullname = $"{applicationUser.Fullname!}-updated",
+            Bio = applicationUser.Bio,
+            ProfilePictureUrl = applicationUser.GetProfilePictureUrl(
+                ProfilePictureConstants.BaseUrl,
+                ProfilePictureConstants.EndpointUrl,
+                ProfilePictureConstants.Extension
+            )
         };
 
         #endregion
@@ -246,11 +396,7 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
 
         _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
 
-        var (response, result) = await _client.PUTAsync<
-            UpdateUserEndpoint,
-            UpdateUserRequest,
-            UpdateUserResponse
-        >(request);
+        var response = await _client.PutAsync($"/api/users/{applicationUser.Id}", requestForm);
 
         _client.DefaultRequestHeaders.Remove("Authorization");
 
@@ -261,8 +407,12 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
+        var result = await response.Content.ReadAsAsync<UpdateUserResponse>();
+
         result.Should().NotBeNull();
-        result.Should().BeEquivalentTo(expectedResponse);
+        result
+            .Should()
+            .BeEquivalentTo(expectedResponse, opt => opt.Excluding(r => r.ProfilePictureUrl));
 
         #endregion
     }
@@ -272,21 +422,69 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
     {
         #region Arrange
 
-        const string validPassword = "P@ssw0rd!";
-        var registerUserRequest = _registerUserRequestFaker
+        using var scope = _apiWebFactory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+        var profilePictureData = await ImageHelpers.GetImageAsByteArrayAsync(
+            "https://picsum.photos/200"
+        );
+        var profilePicture = new Picture { Data = profilePictureData };
+
+        var applicationUser = _applicationUserFaker
             .Clone()
-            .RuleFor(rule => rule.Password, validPassword)
+            .RuleFor(rule => rule.ProfilePicture, profilePicture)
             .Generate();
 
-        var (_, registerUserResponse) = await _client.POSTAsync<
-            RegisterUserEndpoint,
-            RegisterUserRequest,
-            RegisterUserResponse
-        >(registerUserRequest);
+        const string validPassword = "P@ssw0rd!";
+        await userManager.CreateAsync(applicationUser, validPassword);
+
+        var updateProfilePictureFormFile = await ImageHelpers.GetImageAsFormFileAsync(
+            "https://picsum.photos/200/300",
+            "demo.jpg"
+        );
+
+        _client.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json")
+        );
+        _client.DefaultRequestHeaders.TryAddWithoutValidation(
+            "Content-Type",
+            "multipart/form-data"
+        );
+
+        var requestForm = new MultipartFormDataContent();
+
+        requestForm.Add(
+            new StringContent($"{applicationUser.UserName!}-updated"),
+            nameof(applicationUser.UserName)
+        );
+        requestForm.Add(
+            new StringContent($"{applicationUser.Email!}-updated"),
+            nameof(applicationUser.Email)
+        );
+        requestForm.Add(
+            new StringContent($"{applicationUser.Fullname!}-updated"),
+            nameof(applicationUser.Fullname)
+        );
+        requestForm.Add(
+            new StringContent($"{applicationUser.Bio!}-updated"),
+            nameof(applicationUser.Bio)
+        );
+
+        var profilePictureContent = new StreamContent(
+            updateProfilePictureFormFile.OpenReadStream()
+        );
+        profilePictureContent.Headers.ContentType = MediaTypeHeaderValue.Parse(
+            MediaTypeNames.Image.Jpeg
+        );
+        requestForm.Add(
+            profilePictureContent,
+            nameof(applicationUser.ProfilePicture),
+            updateProfilePictureFormFile.FileName
+        );
 
         var loginUserRequest = new LoginUserRequest
         {
-            Email = registerUserRequest.Email,
+            Email = applicationUser.Email!,
             Password = validPassword
         };
 
@@ -298,22 +496,18 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
 
         var token = loginResult!.Token;
 
-        var request = new UpdateUserRequest
-        {
-            Id = registerUserResponse!.Id,
-            Username = $"{registerUserRequest.Username}-updated",
-            Email = $"{registerUserRequest.Email}-updated",
-            Fullname = $"{registerUserRequest.Fullname}-updated",
-            Bio = $"{registerUserRequest.Bio}-updated"
-        };
-
         var expectedResponse = new UpdateUserResponse
         {
-            Id = registerUserResponse.Id,
-            Username = request.Username,
-            Email = request.Email,
-            Fullname = request.Fullname,
-            Bio = request.Bio
+            Id = applicationUser.Id,
+            Username = $"{applicationUser.UserName!}-updated",
+            Email = $"{applicationUser.Email!}-updated",
+            Fullname = $"{applicationUser.Fullname!}-updated",
+            Bio = $"{applicationUser.Bio!}-updated",
+            ProfilePictureUrl = applicationUser.GetProfilePictureUrl(
+                ProfilePictureConstants.BaseUrl,
+                ProfilePictureConstants.EndpointUrl,
+                ProfilePictureConstants.Extension
+            )
         };
 
         #endregion
@@ -322,11 +516,7 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
 
         _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
 
-        var (response, result) = await _client.PUTAsync<
-            UpdateUserEndpoint,
-            UpdateUserRequest,
-            UpdateUserResponse
-        >(request);
+        var response = await _client.PutAsync($"/api/users/{applicationUser.Id}", requestForm);
 
         _client.DefaultRequestHeaders.Remove("Authorization");
 
@@ -337,8 +527,12 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
+        var result = await response.Content.ReadAsAsync<UpdateUserResponse>();
+
         result.Should().NotBeNull();
-        result.Should().BeEquivalentTo(expectedResponse);
+        result
+            .Should()
+            .BeEquivalentTo(expectedResponse, opt => opt.Excluding(r => r.ProfilePictureUrl));
 
         #endregion
     }
