@@ -2,7 +2,7 @@ namespace Tests.Integration.Core;
 
 public static class ImageHelpers
 {
-    private static async Task<byte[]> GetImageAsByteArrayAsync(string urlImage)
+    public static async Task<byte[]> GetImageAsByteArrayAsync(string urlImage)
     {
         var client = new HttpClient();
         var response = await client.GetAsync(urlImage);
