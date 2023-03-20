@@ -12,3 +12,5 @@ global using Api.Features.Users.Core;
 global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.AspNetCore.Http;
 global using Api.Features.Core;
+global using Infrastructure;
+global using Microsoft.EntityFrameworkCore;
