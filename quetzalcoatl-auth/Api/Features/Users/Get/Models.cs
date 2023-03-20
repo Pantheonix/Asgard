@@ -12,4 +12,5 @@ public class GetUserResponse
     public string Email { get; set; } = string.Empty;
     public string? Fullname { get; set; }
     public string? Bio { get; set; }
+    public string ProfilePictureUrl { get; set; } = string.Empty;
 }

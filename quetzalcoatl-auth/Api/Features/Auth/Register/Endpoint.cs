@@ -34,7 +34,11 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, RegisterUserRe
                 Email = user.Email!,
                 Fullname = user.Fullname,
                 Bio = user.Bio,
-                ProfilePictureUrl = $"/api/images/{user.ProfilePicture.Id.ToString()}.jpg",
+                ProfilePictureUrl = user.GetProfilePictureUrl(
+                    ProfilePictureConstants.BaseUrl,
+                    ProfilePictureConstants.EndpointUrl,
+                    ProfilePictureConstants.Extension
+                ),
                 Token = token
             },
             cancellation: ct

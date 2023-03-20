@@ -23,6 +23,18 @@ public class ApplicationUserToGetUserResponseProfile : Profile
                     opt.PreCondition(src => !string.IsNullOrWhiteSpace(src.Bio));
                     opt.MapFrom(src => src.Bio);
                 }
+            )
+            .ForMember(
+                dest => dest.ProfilePictureUrl,
+                opt =>
+                    opt.MapFrom(
+                        src =>
+                            src.GetProfilePictureUrl(
+                                ProfilePictureConstants.BaseUrl,
+                                ProfilePictureConstants.EndpointUrl,
+                                ProfilePictureConstants.Extension
+                            )
+                    )
             );
     }
 }

@@ -25,5 +25,18 @@ public class Validator : Validator<UpdateUserRequest>
             .MaximumLength(300)
             .WithMessage("Bio must be at most 300 characters long")
             .When(x => !string.IsNullOrWhiteSpace(x.Bio));
+
+        RuleFor(x => x.ProfilePicture)
+            .Cascade(CascadeMode.Stop)
+            .Must(x => IsAllowedSize(x!.Length))
+            .WithMessage("Profile picture size is invalid")
+            .Must(x => IsAllowedType(x!.ContentType))
+            .WithMessage("Profile picture must be a valid image")
+            .When(x => x.ProfilePicture is not null);
     }
+
+    private static bool IsAllowedSize(long length) => length <= 10_000_000;
+
+    private static bool IsAllowedType(string contentType) =>
+        contentType.ToLower() is "image/png" or "image/jpeg" or "image/jpg";
 }

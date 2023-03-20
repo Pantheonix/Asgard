@@ -36,6 +36,14 @@ public class UpdateUserRequestToApplicationUserProfile : Profile
                     opt.PreCondition(src => !string.IsNullOrWhiteSpace(src.Bio));
                     opt.MapFrom(src => src.Bio);
                 }
+            )
+            .ForMember(
+                dest => dest.ProfilePicture,
+                opt =>
+                {
+                    opt.PreCondition(src => src.ProfilePicture is not null);
+                    opt.MapFrom(src => new Picture { Data = src.ProfilePicture!.GetBytes() });
+                }
             );
     }
 }
@@ -47,6 +55,20 @@ public class ApplicationUserToUpdateUserResponseProfile : Profile
         CreateMap<ApplicationUser, UpdateUserResponse>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.UserName))
-            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email));
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+            .ForMember(dest => dest.Fullname, opt => opt.MapFrom(src => src.Fullname))
+            .ForMember(dest => dest.Bio, opt => opt.MapFrom(src => src.Bio))
+            .ForMember(
+                dest => dest.ProfilePictureUrl,
+                opt =>
+                    opt.MapFrom(
+                        src =>
+                            src.GetProfilePictureUrl(
+                                ProfilePictureConstants.BaseUrl,
+                                ProfilePictureConstants.EndpointUrl,
+                                ProfilePictureConstants.Extension
+                            )
+                    )
+            );
     }
 }

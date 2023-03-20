@@ -7,6 +7,7 @@ public class UpdateUserRequest
     public string? Email { get; set; }
     public string? Fullname { get; set; }
     public string? Bio { get; set; }
+    public IFormFile? ProfilePicture { get; set; }
 }
 
 public class UpdateUserResponse
@@ -16,4 +17,5 @@ public class UpdateUserResponse
     public string Email { get; set; } = string.Empty;
     public string? Fullname { get; set; }
     public string? Bio { get; set; }
+    public string ProfilePictureUrl { get; set; } = string.Empty;
 }

@@ -14,6 +14,7 @@ public class UpdateUserEndpoint : Endpoint<UpdateUserRequest, UpdateUserResponse
     public override void Configure()
     {
         Put("{id}");
+        AllowFileUploads();
         Group<UsersGroup>();
     }
 
