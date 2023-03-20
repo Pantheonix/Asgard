@@ -3,7 +3,7 @@ namespace Infrastructure;
 public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
     public DbSet<Picture> Pictures { get; set; } = default!;
-    
+
     public AppDbContext() { }
 
     public AppDbContext(DbContextOptions<AppDbContext> options)
@@ -22,5 +22,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
         {
             b.Property(u => u.Id).HasDefaultValueSql("newsequentialid()");
         });
+
+        modelBuilder.Entity<ApplicationUser>().Navigation(b => b.ProfilePicture).AutoInclude();
     }
 }

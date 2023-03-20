@@ -13,5 +13,6 @@ public class LoginUserResponse
     public string Email { get; set; } = default!;
     public string? Fullname { get; set; }
     public string? Bio { get; set; }
+    public string ProfilePictureUrl { get; set; } = default!;
     public string Token { get; set; } = default!;
 }

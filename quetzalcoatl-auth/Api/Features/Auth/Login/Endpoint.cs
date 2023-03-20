@@ -31,6 +31,7 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, LoginUserResponse>
                 Email = user.Email!,
                 Fullname = user.Fullname,
                 Bio = user.Bio,
+                ProfilePictureUrl = $"/api/images/{user.ProfilePicture.Id.ToString()}.jpg",
                 Token = token
             },
             cancellation: ct
