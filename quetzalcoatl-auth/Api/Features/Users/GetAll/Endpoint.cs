@@ -7,8 +7,8 @@ public class GetAllUsersEndpoint : Endpoint<GetAllUsersRequest, GetAllUsersRespo
 
     public GetAllUsersEndpoint(UserManager<ApplicationUser> userManager, IMapper mapper)
     {
-        _userManager = userManager;
-        _mapper = mapper;
+        _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
     public override void Configure()

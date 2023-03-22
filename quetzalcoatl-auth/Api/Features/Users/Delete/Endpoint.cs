@@ -6,7 +6,7 @@ public class DeleteUserEndpoint : Endpoint<DeleteUserRequest>
 
     public DeleteUserEndpoint(UserManager<ApplicationUser> userManager)
     {
-        _userManager = userManager;
+        _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
     }
 
     public override void Configure()

@@ -7,8 +7,8 @@ public class CreateUserCommandHandler : CommandHandler<CreateUserCommand, Applic
 
     public CreateUserCommandHandler(UserManager<ApplicationUser> userManager, IMapper mapper)
     {
-        _userManager = userManager;
-        _mapper = mapper;
+        _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
     public override async Task<ApplicationUser> ExecuteAsync(

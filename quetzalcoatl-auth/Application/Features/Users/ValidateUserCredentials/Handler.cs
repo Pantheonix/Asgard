@@ -7,7 +7,7 @@ public class ValidateUserCredentialsCommandHandler
 
     public ValidateUserCredentialsCommandHandler(UserManager<ApplicationUser> userManager)
     {
-        _userManager = userManager;
+        _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
     }
 
     public override async Task<ApplicationUser> ExecuteAsync(

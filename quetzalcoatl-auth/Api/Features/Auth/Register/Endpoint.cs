@@ -6,7 +6,7 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, RegisterUserRe
 
     public RegisterUserEndpoint(IMapper mapper)
     {
-        _mapper = mapper;
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
 
     public override void Configure()

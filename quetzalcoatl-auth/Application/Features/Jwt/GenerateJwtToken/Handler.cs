@@ -10,8 +10,8 @@ public class GenerateJwtTokenCommandHandler : CommandHandler<GenerateJwtTokenCom
         UserManager<ApplicationUser> userManager
     )
     {
-        _jwtConfig = jwtConfig;
-        _userManager = userManager;
+        _jwtConfig = jwtConfig ?? throw new ArgumentNullException(nameof(jwtConfig));
+        _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
     }
 
     public override Task<string> ExecuteAsync(

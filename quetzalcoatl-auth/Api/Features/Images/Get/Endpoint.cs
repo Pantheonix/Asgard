@@ -6,7 +6,8 @@ public class GetImageEndpoint : Endpoint<GetImageRequest>
 
     public GetImageEndpoint(IPictureRepository pictureRepository)
     {
-        _pictureRepository = pictureRepository;
+        _pictureRepository =
+            pictureRepository ?? throw new ArgumentNullException(nameof(pictureRepository));
     }
 
     public override void Configure()
