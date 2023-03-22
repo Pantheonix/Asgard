@@ -9,3 +9,5 @@ global using Application;
 global using Domain.Configs;
 global using Domain.Interfaces;
 global using Infrastructure.Repositories;
+global using Serilog;
+global using Serilog.Events;
