@@ -3,10 +3,12 @@
 public class LoginUserEndpoint : Endpoint<LoginUserRequest, LoginUserResponse>
 {
     private readonly IMapper _mapper;
+    private readonly ILogger<LoginUserEndpoint> _logger;
 
-    public LoginUserEndpoint(IMapper mapper)
+    public LoginUserEndpoint(IMapper mapper, ILogger<LoginUserEndpoint> logger)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public override void Configure()
@@ -17,6 +19,8 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, LoginUserResponse>
 
     public override async Task HandleAsync(LoginUserRequest req, CancellationToken ct)
     {
+        _logger.LogInformation("Login user {Email}", req.Email);
+        
         var validateUserCredentialsCommand = _mapper.Map<ValidateUserCredentialsCommand>(req);
         var user = await validateUserCredentialsCommand.ExecuteAsync(ct: ct);
 

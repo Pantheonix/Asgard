@@ -4,14 +4,17 @@ public class GenerateJwtTokenCommandHandler : CommandHandler<GenerateJwtTokenCom
 {
     private readonly JwtConfig _jwtConfig;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ILogger<GenerateJwtTokenCommandHandler> _logger;
 
     public GenerateJwtTokenCommandHandler(
         JwtConfig jwtConfig,
-        UserManager<ApplicationUser> userManager
+        UserManager<ApplicationUser> userManager,
+        ILogger<GenerateJwtTokenCommandHandler> logger
     )
     {
         _jwtConfig = jwtConfig ?? throw new ArgumentNullException(nameof(jwtConfig));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public override Task<string> ExecuteAsync(
@@ -19,6 +22,8 @@ public class GenerateJwtTokenCommandHandler : CommandHandler<GenerateJwtTokenCom
         CancellationToken ct = default
     )
     {
+        _logger.LogInformation("Generate JWT token for user {Email}", command.User.Email);
+
         var jwtToken = JWTBearer.CreateToken(
             signingKey: _jwtConfig.SecretKey,
             expireAt: DateTime.UtcNow.AddDays(_jwtConfig.JwtLifetime),

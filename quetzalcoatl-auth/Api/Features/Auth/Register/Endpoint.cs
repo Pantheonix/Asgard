@@ -3,10 +3,12 @@
 public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, RegisterUserResponse>
 {
     private readonly IMapper _mapper;
+    private readonly ILogger<RegisterUserEndpoint> _logger;
 
-    public RegisterUserEndpoint(IMapper mapper)
+    public RegisterUserEndpoint(IMapper mapper, ILogger<RegisterUserEndpoint> logger)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public override void Configure()
@@ -18,6 +20,8 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, RegisterUserRe
 
     public override async Task HandleAsync(RegisterUserRequest req, CancellationToken ct)
     {
+        _logger.LogInformation("Registering user {Username}", req.Username);
+        
         var createUserCommand = _mapper.Map<CreateUserCommand>(req);
         var user = await createUserCommand.ExecuteAsync(ct: ct);
 

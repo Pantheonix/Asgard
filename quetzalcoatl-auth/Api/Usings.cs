@@ -13,3 +13,4 @@ global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.AspNetCore.Http;
 global using Api.Features.Core;
 global using Domain.Interfaces;
+global using Microsoft.Extensions.Logging;
