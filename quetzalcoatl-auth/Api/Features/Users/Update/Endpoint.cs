@@ -39,8 +39,11 @@ public class UpdateUserEndpoint : Endpoint<UpdateUserRequest, UpdateUserResponse
 
         if (userToUpdate is null || !isAllowed)
         {
-            _logger.LogWarning("User with id {Id} not found", req.Id.ToString());
-            await SendUnauthorizedAsync(ct);
+            _logger.LogWarning(
+                "User with id {Id} could not be updated due to lack of permissions",
+                req.Id.ToString()
+            );
+            await SendForbiddenAsync(ct);
             return;
         }
 

@@ -204,7 +204,7 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
     }
 
     [Fact]
-    public async Task GivenAuthorizedUserAndRequestForUpdatingOtherUserThanSelf_WhenUpdatingUser_ThenReturnsUnauthorized()
+    public async Task GivenAuthorizedUserAndRequestForUpdatingOtherUserThanSelf_WhenUpdatingUser_ThenReturnsForbidden()
     {
         #region Arrange
 
@@ -300,7 +300,7 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
         #region Assert
 
         response.Should().NotBeNull();
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
 
         #endregion
     }
