@@ -23,6 +23,8 @@ public class GenerateJwtTokenCommandHandler : CommandHandler<GenerateJwtTokenCom
     )
     {
         _logger.LogInformation("Generate JWT token for user {Email}", command.User.Email);
+        
+        var userRoles = _userManager.GetRolesAsync(command.User).Result;
 
         var jwtToken = JWTBearer.CreateToken(
             signingKey: _jwtConfig.SecretKey,
@@ -32,6 +34,7 @@ public class GenerateJwtTokenCommandHandler : CommandHandler<GenerateJwtTokenCom
                 u.Claims.Add(new Claim(JwtRegisteredClaimNames.Sub, command.User.Id.ToString()));
                 u.Claims.Add(new Claim(JwtRegisteredClaimNames.Email, command.User.Email!));
                 u.Claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
+                u.Roles.AddRange(userRoles);
             }
         );
 
