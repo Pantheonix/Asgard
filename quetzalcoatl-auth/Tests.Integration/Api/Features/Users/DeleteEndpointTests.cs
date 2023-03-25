@@ -61,7 +61,7 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
     }
 
     [Fact]
-    public async Task GivenAuthorizedUserAndIdOfNonExistingUser_WhenDeletingUser_ThenReturnsNotFound()
+    public async Task GivenAuthorizedUserButNonAdmin_WhenDeletingUser_ThenReturnsForbidden()
     {
         #region Arrange
 
@@ -120,6 +120,78 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
         #region Assert
 
         response.Should().NotBeNull();
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+
+        #endregion
+    }
+
+    [Fact]
+    public async Task GivenAuthorizedUserAndIdOfNonExistingUser_WhenDeletingUser_ThenReturnsNotFound()
+    {
+        #region Arrange
+
+        using var scope = _apiWebFactory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<
+            RoleManager<IdentityRole<Guid>>
+        >();
+
+        await roleManager.CreateAsync(new IdentityRole<Guid>(ApplicationRoles.Admin.ToString()));
+
+        var profilePictureData = await ImageHelpers.GetImageAsByteArrayAsync(
+            "https://picsum.photos/200"
+        );
+
+        var users = new List<ApplicationUser>();
+
+        const string validPassword = "P@ssw0rd!";
+
+        for (var i = 0; i < 3; i++)
+        {
+            var profilePicture = new Picture { Data = profilePictureData };
+            var applicationUser = _applicationUserFaker
+                .Clone()
+                .RuleFor(rule => rule.ProfilePicture, profilePicture)
+                .Generate();
+
+            users.Add(applicationUser);
+
+            await userManager.CreateAsync(applicationUser, validPassword);
+        }
+
+        await userManager.AddToRoleAsync(users.ElementAt(0), ApplicationRoles.Admin.ToString());
+
+        var loginUserRequest = new LoginUserRequest
+        {
+            Email = users.ElementAt(0).Email!,
+            Password = validPassword
+        };
+
+        var (_, loginResult) = await _client.POSTAsync<
+            LoginUserEndpoint,
+            LoginUserRequest,
+            LoginUserResponse
+        >(loginUserRequest);
+
+        var token = loginResult!.Token;
+
+        var request = new DeleteUserRequest { Id = Guid.NewGuid() };
+
+        #endregion
+
+        #region Act
+
+        _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+
+        var response = await _client.DELETEAsync<DeleteUserEndpoint, DeleteUserRequest>(request);
+
+        _client.DefaultRequestHeaders.Remove("Authorization");
+
+        #endregion
+
+        #region Assert
+
+        response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
         #endregion
@@ -132,6 +204,11 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
 
         using var scope = _apiWebFactory.Services.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<
+            RoleManager<IdentityRole<Guid>>
+        >();
+
+        await roleManager.CreateAsync(new IdentityRole<Guid>(ApplicationRoles.Admin.ToString()));
 
         var profilePictureData = await ImageHelpers.GetImageAsByteArrayAsync(
             "https://picsum.photos/200"
@@ -152,6 +229,8 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
 
             await userManager.CreateAsync(applicationUser, validPassword);
         }
+
+        await userManager.AddToRoleAsync(users.ElementAt(0), ApplicationRoles.Admin.ToString());
 
         var loginUserRequest = new LoginUserRequest
         {
