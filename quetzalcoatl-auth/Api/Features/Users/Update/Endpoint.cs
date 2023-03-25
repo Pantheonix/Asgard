@@ -28,12 +28,19 @@ public class UpdateUserEndpoint : Endpoint<UpdateUserRequest, UpdateUserResponse
     {
         _logger.LogInformation("Updating user with id {Id}", req.Id.ToString());
 
+        var subClaim = User.Claims
+            .Where(c => c.Type == ClaimTypes.NameIdentifier)
+            .Select(c => c.Value)
+            .FirstOrDefault();
+
+        var isAllowed = subClaim is not null && subClaim == req.Id.ToString();
+
         var userToUpdate = await _userManager.FindByIdAsync(req.Id.ToString());
 
-        if (userToUpdate is null)
+        if (userToUpdate is null || !isAllowed)
         {
             _logger.LogWarning("User with id {Id} not found", req.Id.ToString());
-            await SendNotFoundAsync(ct);
+            await SendUnauthorizedAsync(ct);
             return;
         }
 
