@@ -10,12 +10,12 @@ public class ApiWebFactory : WebApplicationFactory<IProgramMarker>, IAsyncLifeti
     {
         builder.ConfigureTestServices(services =>
         {
-            services.RemoveDbContext<AppDbContext>();
-            services.AddDbContext<AppDbContext>(options =>
+            services.RemoveDbContext<ApplicationDbContext>();
+            services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(_database.GetConnectionString());
             });
-            services.EnsureDbCreated<AppDbContext>();
+            services.EnsureDbCreated<ApplicationDbContext>();
         });
     }
 

@@ -1,12 +1,12 @@
 namespace Infrastructure;
 
-public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
 {
     public DbSet<Picture> Pictures { get; set; } = default!;
 
-    public AppDbContext() { }
+    public ApplicationDbContext() { }
 
-    public AppDbContext(DbContextOptions<AppDbContext> options)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -14,11 +14,6 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<ApplicationUser>(b =>
-        {
-            b.Property(u => u.Id).HasDefaultValueSql("newsequentialid()");
-        });
-
-        modelBuilder.Entity<ApplicationRole>(b =>
         {
             b.Property(u => u.Id).HasDefaultValueSql("newsequentialid()");
         });

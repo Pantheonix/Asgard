@@ -2,9 +2,9 @@ namespace Infrastructure.Repositories;
 
 public class PictureRepository : IPictureRepository
 {
-    private readonly AppDbContext _context;
+    private readonly ApplicationDbContext _context;
 
-    public PictureRepository(AppDbContext context)
+    public PictureRepository(ApplicationDbContext context)
     {
         _context = context;
     }
