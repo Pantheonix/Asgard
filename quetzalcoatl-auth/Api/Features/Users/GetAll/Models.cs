@@ -4,5 +4,5 @@ public class GetAllUsersRequest { }
 
 public class GetAllUsersResponse
 {
-    public IEnumerable<UserDto> Users { get; set; } = new List<UserDto>();
+    public IEnumerable<UserDto> Users { get; init; } = new List<UserDto>();
 }
