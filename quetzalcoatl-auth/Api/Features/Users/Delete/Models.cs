@@ -2,5 +2,5 @@
 
 public class DeleteUserRequest
 {
-    public Guid Id { get; init; } = Guid.Empty;
+    public Guid Id { get; set; } = Guid.Empty;
 }

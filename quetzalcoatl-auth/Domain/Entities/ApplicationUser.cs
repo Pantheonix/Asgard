@@ -8,5 +8,5 @@ public class ApplicationUser : IdentityUser<Guid>
     [MaxLength(300)]
     public string? Bio { get; set; }
 
-    public Picture ProfilePicture { get; set; } = default!;
+    public Picture? ProfilePicture { get; set; }
 }

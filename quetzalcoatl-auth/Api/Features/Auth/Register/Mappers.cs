@@ -23,7 +23,11 @@ public class RegisterUserRequestToCreateUserCommandProfile : Profile
             )
             .ForMember(
                 dest => dest.ProfilePictureData,
-                opt => opt.MapFrom(src => src.ProfilePicture.GetBytes())
+                opt =>
+                {
+                    opt.PreCondition(src => src.ProfilePicture is not null);
+                    opt.MapFrom(src => src.ProfilePicture!.GetBytes());
+                }
             );
     }
 }

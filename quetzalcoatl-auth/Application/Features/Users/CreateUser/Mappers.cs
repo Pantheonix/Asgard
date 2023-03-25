@@ -25,7 +25,11 @@ public class CreateUserCommandToApplicationUserProfile : Profile
             )
             .ForMember(
                 dest => dest.ProfilePicture,
-                opt => opt.MapFrom(src => new Picture { Data = src.ProfilePictureData! })
+                opt =>
+                {
+                    opt.PreCondition(src => src.ProfilePictureData is not null);
+                    opt.MapFrom(src => new Picture { Data = src.ProfilePictureData! });
+                }
             );
     }
 }

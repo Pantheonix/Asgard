@@ -40,12 +40,11 @@ public class Validator : Validator<RegisterUserRequest>
 
         RuleFor(x => x.ProfilePicture)
             .Cascade(CascadeMode.Stop)
-            .NotEmpty()
-            .WithMessage("Profile picture is required")
             .Must(x => IsAllowedSize(x!.Length))
             .WithMessage("Profile picture size is invalid")
             .Must(x => IsAllowedType(x!.ContentType))
-            .WithMessage("Profile picture must be a valid image");
+            .WithMessage("Profile picture must be a valid image")
+            .When(x => x.ProfilePicture is not null);
     }
 
     private static bool IsAllowedSize(long length) => length <= 10_000_000;

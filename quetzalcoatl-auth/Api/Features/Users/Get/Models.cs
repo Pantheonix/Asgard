@@ -2,7 +2,7 @@
 
 public class GetUserRequest
 {
-    public Guid Id { get; init; } = Guid.Empty;
+    public Guid Id { get; set; } = Guid.Empty;
 }
 
 public class GetUserResponse
@@ -12,5 +12,5 @@ public class GetUserResponse
     public string Email { get; set; } = string.Empty;
     public string? Fullname { get; set; }
     public string? Bio { get; set; }
-    public string ProfilePictureUrl { get; set; } = string.Empty;
+    public string? ProfilePictureUrl { get; set; }
 }
