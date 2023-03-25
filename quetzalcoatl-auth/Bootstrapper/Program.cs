@@ -13,22 +13,25 @@ try
     var jwtConfig = new JwtConfig();
     builder.Configuration.Bind(nameof(jwtConfig), jwtConfig);
 
+    var adminConfig = new AdminConfig();
+    builder.Configuration.Bind(nameof(adminConfig), adminConfig);
+
     builder.Host.UseSerilog(
         (context, services, configuration) =>
             configuration.ReadFrom.Configuration(context.Configuration).ReadFrom.Services(services)
     );
 
     builder.Services
-        .AddDbContext<AppDbContext>(
+        .AddDbContext<ApplicationDbContext>(
             options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
         )
         .AddScoped<IPictureRepository, PictureRepository>()
-        .AddIdentity<ApplicationUser, ApplicationRole>(identity =>
+        .AddIdentity<ApplicationUser, IdentityRole<Guid>>(identity =>
         {
             identity.User.RequireUniqueEmail = true;
         })
-        .AddEntityFrameworkStores<AppDbContext>();
+        .AddEntityFrameworkStores<ApplicationDbContext>();
 
     builder.Services
         .AddFastEndpoints(options =>
@@ -41,6 +44,7 @@ try
             };
         })
         .AddSingleton(jwtConfig)
+        .AddSingleton(adminConfig)
         .AddJWTBearerAuth(jwtConfig.SecretKey)
         .AddAutoMapper(typeof(IApiMarker), typeof(IApplicationMarker))
         .AddSwaggerDoc(settings =>
@@ -50,6 +54,8 @@ try
         });
 
     var app = builder.Build();
+
+    await app.UseSeedData();
 
     app.UseSerilogRequestLogging()
         .UseDefaultExceptionHandler()
