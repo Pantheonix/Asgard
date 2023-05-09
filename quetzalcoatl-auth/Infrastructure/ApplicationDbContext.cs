@@ -3,6 +3,7 @@ namespace Infrastructure;
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
 {
     public DbSet<Picture> Pictures { get; set; } = default!;
+    public DbSet<RefreshToken> RefreshTokens { get; set; } = default!;
 
     public ApplicationDbContext() { }
 

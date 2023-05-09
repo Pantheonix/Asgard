@@ -28,7 +28,7 @@ public class GetAllEndpointTests : IClassFixture<ApiWebFactory>
 
         using var scope = _apiWebFactory.Services.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        
+
         var existingUsers = await userManager.Users.ToListAsync();
         await userManager.DeleteAsync(existingUsers.ElementAt(0));
 
@@ -58,13 +58,13 @@ public class GetAllEndpointTests : IClassFixture<ApiWebFactory>
             Password = validPassword
         };
 
-        var (_, loginResult) = await _client.POSTAsync<
+        var (loginHttpResponse, _) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
-            LoginUserResponse
+            UserTokenResponse
         >(loginUserRequest);
 
-        var token = loginResult!.Token;
+        var token = TokenHelpers.ExtractTokenFromResponse(loginHttpResponse);
 
         #endregion
 

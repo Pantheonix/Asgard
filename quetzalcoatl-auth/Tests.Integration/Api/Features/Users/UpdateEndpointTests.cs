@@ -170,14 +170,14 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
             Password = validPassword
         };
 
-        var (_, loginResult) = await _client.POSTAsync<
+        var (loginHttpResponse, _) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
-            LoginUserResponse
+            UserTokenResponse
         >(loginUserRequest);
 
-        var token = loginResult!.Token;
-
+        var token = TokenHelpers.ExtractTokenFromResponse(loginHttpResponse);
+        
         #endregion
 
         #region Act
@@ -274,13 +274,13 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
             Password = validPassword
         };
 
-        var (_, loginResult) = await _client.POSTAsync<
+        var (loginHttpResponse, _) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
-            LoginUserResponse
+            UserTokenResponse
         >(loginUserRequest);
 
-        var token = loginResult!.Token;
+        var token = TokenHelpers.ExtractTokenFromResponse(loginHttpResponse);
 
         #endregion
 
@@ -368,13 +368,13 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
             Password = validPassword
         };
 
-        var (_, loginResult) = await _client.POSTAsync<
+        var (loginHttpResponse, _) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
-            LoginUserResponse
+            UserTokenResponse
         >(loginUserRequest);
 
-        var token = loginResult!.Token;
+        var token = TokenHelpers.ExtractTokenFromResponse(loginHttpResponse);
 
         var expectedResponse = new UpdateUserResponse
         {
@@ -488,13 +488,13 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
             Password = validPassword
         };
 
-        var (_, loginResult) = await _client.POSTAsync<
+        var (loginHttpResponse, _) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
-            LoginUserResponse
+            UserTokenResponse
         >(loginUserRequest);
 
-        var token = loginResult!.Token;
+        var token = TokenHelpers.ExtractTokenFromResponse(loginHttpResponse);
 
         var expectedResponse = new UpdateUserResponse
         {

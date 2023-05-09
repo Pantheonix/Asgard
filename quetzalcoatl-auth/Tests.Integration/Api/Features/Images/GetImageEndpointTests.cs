@@ -42,7 +42,7 @@ public class GetImageEndpointTests : IClassFixture<ApiWebFactory>
         const string validPassword = "P@ssw0rd!";
         await userManager.CreateAsync(applicationUser, validPassword);
 
-        var request = new GetImageRequest { Id = applicationUser.ProfilePicture.Id };
+        var request = new GetImageRequest { Id = applicationUser.ProfilePicture!.Id };
 
         #endregion
 
@@ -89,14 +89,14 @@ public class GetImageEndpointTests : IClassFixture<ApiWebFactory>
             Password = validPassword
         };
 
-        var (_, loginResult) = await _client.POSTAsync<
+        var (loginHttpResponse, _) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
-            LoginUserResponse
+            UserTokenResponse
         >(loginUserRequest);
 
-        var token = loginResult!.Token;
-
+        var token = TokenHelpers.ExtractTokenFromResponse(loginHttpResponse);
+        
         #endregion
 
         #region Act
@@ -138,7 +138,7 @@ public class GetImageEndpointTests : IClassFixture<ApiWebFactory>
         const string validPassword = "P@ssw0rd!";
         await userManager.CreateAsync(applicationUser, validPassword);
 
-        var request = new GetImageRequest { Id = applicationUser.ProfilePicture.Id };
+        var request = new GetImageRequest { Id = applicationUser.ProfilePicture!.Id };
 
         var loginUserRequest = new LoginUserRequest
         {
@@ -146,13 +146,13 @@ public class GetImageEndpointTests : IClassFixture<ApiWebFactory>
             Password = validPassword
         };
 
-        var (_, loginResult) = await _client.POSTAsync<
+        var (loginHttpResponse, _) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
-            LoginUserResponse
+            UserTokenResponse
         >(loginUserRequest);
 
-        var token = loginResult!.Token;
+        var token = TokenHelpers.ExtractTokenFromResponse(loginHttpResponse);
 
         #endregion
 

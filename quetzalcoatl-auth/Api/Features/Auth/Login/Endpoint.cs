@@ -1,12 +1,21 @@
 ﻿namespace Api.Features.Auth.Login;
 
-public class LoginUserEndpoint : Endpoint<LoginUserRequest, LoginUserResponse>
+public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
 {
+    private readonly JwtConfig _jwtConfig;
+    private readonly UserManager<ApplicationUser> _userManager;
     private readonly IMapper _mapper;
     private readonly ILogger<LoginUserEndpoint> _logger;
 
-    public LoginUserEndpoint(IMapper mapper, ILogger<LoginUserEndpoint> logger)
+    public LoginUserEndpoint(
+        JwtConfig jwtConfig,
+        UserManager<ApplicationUser> userManager,
+        IMapper mapper,
+        ILogger<LoginUserEndpoint> logger
+    )
     {
+        _jwtConfig = jwtConfig ?? throw new ArgumentNullException(nameof(jwtConfig));
+        _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -20,15 +29,48 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, LoginUserResponse>
     public override async Task HandleAsync(LoginUserRequest req, CancellationToken ct)
     {
         _logger.LogInformation("Login user {Email}", req.Email);
-        
+
         var validateUserCredentialsCommand = _mapper.Map<ValidateUserCredentialsCommand>(req);
         var user = await validateUserCredentialsCommand.ExecuteAsync(ct: ct);
 
-        var generateJwtTokenCommand = _mapper.Map<GenerateJwtTokenCommand>(user);
-        var token = await generateJwtTokenCommand.ExecuteAsync(ct: ct);
+        var userRoles = await _userManager.GetRolesAsync(user);
+        var tokenResponse = await CreateTokenWith<UserTokenServiceEndpoint>(
+            user.Id.ToString(),
+            up =>
+            {
+                up.Claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()));
+                up.Claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email!));
+                up.Claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
+                up.Roles.AddRange(userRoles);
+            }
+        );
+
+        HttpContext.Response.Cookies.Append(
+            CookieAuthenticationDefaults.CookiePrefix + "AccessToken",
+            tokenResponse.AccessToken,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.Strict,
+                Secure = true,
+                Expires = DateTimeOffset.UtcNow.AddHours(_jwtConfig.JwtAccessTokenLifetime)
+            }
+        );
+
+        HttpContext.Response.Cookies.Append(
+            CookieAuthenticationDefaults.CookiePrefix + "RefreshToken",
+            tokenResponse.RefreshToken,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.Strict,
+                Secure = true,
+                Expires = DateTimeOffset.UtcNow.AddDays(_jwtConfig.JwtRefreshTokenLifetime)
+            }
+        );
 
         await SendOkAsync(
-            response: new LoginUserResponse
+            response: new UserTokenResponse
             {
                 Id = user.Id,
                 Username = user.UserName!,
@@ -40,7 +82,6 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, LoginUserResponse>
                     ProfilePictureConstants.EndpointUrl,
                     ProfilePictureConstants.Extension
                 ),
-                Token = token
             },
             cancellation: ct
         );

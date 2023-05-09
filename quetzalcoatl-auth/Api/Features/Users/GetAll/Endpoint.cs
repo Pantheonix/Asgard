@@ -26,7 +26,7 @@ public class GetAllUsersEndpoint : Endpoint<GetAllUsersRequest, GetAllUsersRespo
     public override async Task HandleAsync(GetAllUsersRequest req, CancellationToken ct)
     {
         _logger.LogInformation("Getting all users");
-        
+
         var users = _userManager.Users.Select(user => _mapper.Map<UserDto>(user));
 
         await SendOkAsync(response: new GetAllUsersResponse { Users = users }, ct);

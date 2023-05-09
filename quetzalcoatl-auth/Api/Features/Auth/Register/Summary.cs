@@ -1,3 +1,5 @@
+using Api.Features.Auth.RefreshToken;
+
 namespace Api.Features.Auth.Register;
 
 public class RegisterUserSummary : Summary<RegisterUserEndpoint>
@@ -14,7 +16,7 @@ public class RegisterUserSummary : Summary<RegisterUserEndpoint>
             Fullname = "Test User",
             Bio = "Test user bio"
         };
-        Response<RegisterUserResponse>(
+        Response<UserTokenResponse>(
             201,
             "User created/registered successfully",
             example: new()
@@ -24,7 +26,6 @@ public class RegisterUserSummary : Summary<RegisterUserEndpoint>
                 Fullname = "Test User",
                 Bio = "Test user bio",
                 ProfilePictureUrl = "https://picsum.photos/id/237/200/300",
-                Token = "JWT Access Token"
             }
         );
         Response<ErrorResponse>(400, "Validation failure");

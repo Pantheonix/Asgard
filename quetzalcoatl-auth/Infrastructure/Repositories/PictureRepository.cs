@@ -6,7 +6,7 @@ public class PictureRepository : IPictureRepository
 
     public PictureRepository(ApplicationDbContext context)
     {
-        _context = context;
+        _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
     public async Task<Picture?> GetPictureByIdAsync(Guid id, CancellationToken ct)

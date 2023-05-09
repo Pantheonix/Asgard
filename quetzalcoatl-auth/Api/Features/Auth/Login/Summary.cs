@@ -1,3 +1,5 @@
+using Api.Features.Auth.RefreshToken;
+
 namespace Api.Features.Auth.Login;
 
 public class LoginUserSummary : Summary<LoginUserEndpoint>
@@ -11,7 +13,7 @@ public class LoginUserSummary : Summary<LoginUserEndpoint>
             Email = "test@gmail.com",
             Password = "Password123!"
         };
-        Response<LoginUserResponse>(
+        Response<UserTokenResponse>(
             200,
             "User logged in successfully",
             example: new()
@@ -20,7 +22,6 @@ public class LoginUserSummary : Summary<LoginUserEndpoint>
                 Email = "test@gmail.com",
                 Fullname = "Test User",
                 Bio = "Test User Bio",
-                Token = "JWT Access Token"
             }
         );
         Response<ErrorResponse>(400, "Invalid credentials");

@@ -18,7 +18,8 @@ namespace Infrastructure.Migrations
                 nullable: false,
                 oldClrType: typeof(Guid),
                 oldType: "uniqueidentifier",
-                oldDefaultValueSql: "newsequentialid()");
+                oldDefaultValueSql: "newsequentialid()"
+            );
         }
 
         /// <inheritdoc />
@@ -31,7 +32,8 @@ namespace Infrastructure.Migrations
                 nullable: false,
                 defaultValueSql: "newsequentialid()",
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uniqueidentifier"
+            );
         }
     }
 }

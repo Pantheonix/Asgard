@@ -74,8 +74,12 @@ public class RegisterEndpointTests : IClassFixture<ApiWebFactory>
         #region Assert
 
         response.Should().NotBeNull();
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        // check if AccessToken and RefreshToken cookies exist
+        response.Headers.TryGetValues("Set-Cookie", out var tokenCookiesValues).Should().BeTrue();
+        tokenCookiesValues.Should().HaveCount(2);
 
-        var result = await response.Content.ReadAsAsync<RegisterUserResponse>();
+        var result = await response.Content.ReadAsAsync<UserTokenResponse>();
 
         result.Should().NotBeNull();
         result!.Id.Should().NotBeEmpty();
@@ -84,7 +88,6 @@ public class RegisterEndpointTests : IClassFixture<ApiWebFactory>
         result.Fullname.Should().Be(request.Fullname);
         result.Bio.Should().Be(request.Bio);
         result.ProfilePictureUrl.Should().NotBeNullOrWhiteSpace();
-        result.Token.Should().NotBeNullOrWhiteSpace();
 
         #endregion
     }
@@ -138,6 +141,8 @@ public class RegisterEndpointTests : IClassFixture<ApiWebFactory>
 
         response.Should().NotBeNull();
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        // check if AccessToken and RefreshToken cookies exist
+        response.Headers.TryGetValues("Set-Cookie", out _).Should().BeFalse();
 
         var result = await response.Content.ReadAsAsync<ErrorResponse>();
 

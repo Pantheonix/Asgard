@@ -87,13 +87,13 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
             Password = validPassword
         };
 
-        var (_, loginResult) = await _client.POSTAsync<
+        var (loginHttpResponse, _) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
-            LoginUserResponse
+            UserTokenResponse
         >(loginUserRequest);
 
-        var token = loginResult!.Token;
+        var token = TokenHelpers.ExtractTokenFromResponse(loginHttpResponse);
 
         var request = new GetUserRequest { Id = applicationUser.Id };
 
@@ -165,13 +165,13 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
             Password = validPassword
         };
 
-        var (_, loginResult) = await _client.POSTAsync<
+        var (loginHttpResponse, _) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
-            LoginUserResponse
+            UserTokenResponse
         >(loginUserRequest);
 
-        var token = loginResult!.Token;
+        var token = TokenHelpers.ExtractTokenFromResponse(loginHttpResponse);
 
         var request = new GetUserRequest { Id = Guid.NewGuid() };
 

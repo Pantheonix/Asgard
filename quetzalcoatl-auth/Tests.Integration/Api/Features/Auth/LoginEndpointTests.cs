@@ -59,7 +59,7 @@ public class LoginEndpointTests : IClassFixture<ApiWebFactory>
         var (response, result) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
-            LoginUserResponse
+            UserTokenResponse
         >(loginRequest);
 
         #endregion
@@ -76,7 +76,6 @@ public class LoginEndpointTests : IClassFixture<ApiWebFactory>
         result.Fullname.Should().Be(applicationUser.Fullname);
         result.Bio.Should().Be(applicationUser.Bio);
         result.ProfilePictureUrl.Should().NotBeNullOrWhiteSpace();
-        result.Token.Should().NotBeNullOrWhiteSpace();
 
         #endregion
     }

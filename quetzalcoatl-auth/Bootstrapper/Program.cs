@@ -27,6 +27,7 @@ try
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
         )
         .AddScoped<IPictureRepository, PictureRepository>()
+        .AddScoped<IRefreshTokenRepository, RefreshTokenRepository>()
         .AddIdentity<ApplicationUser, IdentityRole<Guid>>(identity =>
         {
             identity.User.RequireUniqueEmail = true;

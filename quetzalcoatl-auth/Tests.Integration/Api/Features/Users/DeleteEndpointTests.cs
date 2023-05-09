@@ -95,13 +95,13 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
             Password = validPassword
         };
 
-        var (_, loginResult) = await _client.POSTAsync<
+        var (loginHttpResponse, _) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
-            LoginUserResponse
+            UserTokenResponse
         >(loginUserRequest);
 
-        var token = loginResult!.Token;
+        var token = TokenHelpers.ExtractTokenFromResponse(loginHttpResponse);
 
         var request = new DeleteUserRequest { Id = Guid.NewGuid() };
 
@@ -167,13 +167,13 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
             Password = validPassword
         };
 
-        var (_, loginResult) = await _client.POSTAsync<
+        var (loginHttpResponse, _) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
-            LoginUserResponse
+            UserTokenResponse
         >(loginUserRequest);
 
-        var token = loginResult!.Token;
+        var token = TokenHelpers.ExtractTokenFromResponse(loginHttpResponse);
 
         var request = new DeleteUserRequest { Id = Guid.NewGuid() };
 
@@ -238,13 +238,13 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
             Password = validPassword
         };
 
-        var (_, loginResult) = await _client.POSTAsync<
+        var (loginHttpResponse, _) = await _client.POSTAsync<
             LoginUserEndpoint,
             LoginUserRequest,
-            LoginUserResponse
+            UserTokenResponse
         >(loginUserRequest);
 
-        var token = loginResult!.Token;
+        var token = TokenHelpers.ExtractTokenFromResponse(loginHttpResponse);
 
         var request = new DeleteUserRequest { Id = users.ElementAt(1).Id };
 
