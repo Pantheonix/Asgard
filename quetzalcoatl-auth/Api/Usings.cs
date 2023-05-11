@@ -19,3 +19,4 @@ global using Domain.Configs;
 global using Microsoft.AspNetCore.Authentication.Cookies;
 global using Microsoft.IdentityModel.JsonWebTokens;
 global using FastEndpoints.Security;
+global using Microsoft.AspNetCore.Mvc;

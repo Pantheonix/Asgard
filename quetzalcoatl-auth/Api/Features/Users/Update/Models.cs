@@ -2,6 +2,7 @@
 
 public class UpdateUserRequest
 {
+    [FromRoute]
     public Guid Id { get; set; } = Guid.Empty;
     public string? Username { get; set; }
     public string? Email { get; set; }
