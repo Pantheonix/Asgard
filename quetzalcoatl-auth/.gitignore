@@ -1,0 +1,6 @@
+.vscode/
+.idea/
+*/bin/
+*/obj/
+*/Logs/
+QuetzalcoatlAuth.sln.DotSettings.user
