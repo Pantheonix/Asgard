@@ -7,4 +7,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="7.0.3" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.EntityFrameworkCore.Abstractions">
+      <HintPath>..\..\..\..\..\..\..\home\sami\.nuget\packages\microsoft.entityframeworkcore.abstractions\7.0.3\lib\net6.0\Microsoft.EntityFrameworkCore.Abstractions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

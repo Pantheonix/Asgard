@@ -177,7 +177,7 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
         >(loginUserRequest);
 
         var token = TokenHelpers.ExtractTokenFromResponse(loginHttpResponse);
-        
+
         #endregion
 
         #region Act

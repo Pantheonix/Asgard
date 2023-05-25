@@ -81,7 +81,7 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
                     ProfilePictureConstants.BaseUrl,
                     ProfilePictureConstants.EndpointUrl,
                     ProfilePictureConstants.Extension
-                ),
+                )
             },
             cancellation: ct
         );

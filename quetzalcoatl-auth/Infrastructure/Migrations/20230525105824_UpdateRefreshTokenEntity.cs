@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddRefreshTokenEntity : Migration
+    public partial class UpdateRefreshTokenEntity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,14 +16,16 @@ namespace Infrastructure.Migrations
                 columns: table =>
                     new
                     {
-                        Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                        Token = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                        Token = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                         ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                        IsUsed = table.Column<bool>(type: "bit", nullable: false),
+                        IsInvalidated = table.Column<bool>(type: "bit", nullable: false),
+                        Jti = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                         UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                     },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Token);
                     table.ForeignKey(
                         name: "FK_RefreshTokens_AspNetUsers_UserId",
                         column: x => x.UserId,

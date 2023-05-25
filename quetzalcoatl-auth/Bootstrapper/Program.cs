@@ -13,6 +13,16 @@ try
     var jwtConfig = new JwtConfig();
     builder.Configuration.Bind(nameof(jwtConfig), jwtConfig);
 
+    var tokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.SecretKey)),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        RequireExpirationTime = false,
+        ValidateLifetime = true
+    };
+
     var adminConfig = new AdminConfig();
     builder.Configuration.Bind(nameof(adminConfig), adminConfig);
 
@@ -46,6 +56,7 @@ try
         })
         .AddSingleton(jwtConfig)
         .AddSingleton(adminConfig)
+        .AddSingleton(tokenValidationParameters)
         .AddJWTBearerAuth(jwtConfig.SecretKey)
         .AddAutoMapper(typeof(IApiMarker), typeof(IApplicationMarker))
         .AddSwaggerDoc(settings =>
