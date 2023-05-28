@@ -61,8 +61,6 @@ public class UserTokenServiceEndpoint : RefreshTokenService<UserTokenRequest, Us
 
         if (lastNotExpiredRefreshTokenUsedByUser is not null)
         {
-            // await _tokenRepository.DeleteRefreshTokenAsync(token, new CancellationToken());
-            
             token.Token = lastNotExpiredRefreshTokenUsedByUser.Token;
             token.CreationDate = lastNotExpiredRefreshTokenUsedByUser.CreationDate;
             token.ExpiryDate = lastNotExpiredRefreshTokenUsedByUser.ExpiryDate;
