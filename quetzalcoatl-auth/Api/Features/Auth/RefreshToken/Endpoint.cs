@@ -114,7 +114,7 @@ public class UserTokenServiceEndpoint : RefreshTokenService<UserTokenRequest, Us
             .Value;
 
         var storedRefreshToken = await _tokenRepository.GetRefreshTokenAsync(
-            rt => rt.Token == Guid.Parse(req.RefreshToken) && rt.Jti == Guid.Parse(jti)
+            rt => rt.Token == Guid.Parse(req.RefreshToken) && rt.Jti == Guid.Parse(jti) && rt.UserId == Guid.Parse(req.UserId)
         );
 
         if (storedRefreshToken is null)

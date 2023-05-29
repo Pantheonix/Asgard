@@ -39,8 +39,8 @@ LABEL stage=builder
 RUN dotnet publish -c release --no-build -o /publish
 
 # Final Stage/Image
-FROM mcr.microsoft.com/dotnet/runtime:7.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS final
 WORKDIR /publish
 COPY --from=publish /publish .
 
-ENTRYPOINT ["dotnet", "Bootstrapper.dll"]
+ENTRYPOINT ["dotnet", "Bootstrapper.dll", "--no-launch-profile"]

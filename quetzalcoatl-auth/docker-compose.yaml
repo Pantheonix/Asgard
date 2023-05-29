@@ -1,0 +1,25 @@
+# Define services + volumes for quetzalcoatl
+version: '3.7'
+services:
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5210:5000"
+    env_file:
+      - .env
+    depends_on:
+      - mssql-db
+      
+  mssql-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    user: root
+    env_file:
+      - .env
+    volumes:
+      - quetzalcoatl-db:/var/opt/mssql/data
+      
+volumes:
+  quetzalcoatl-db:
+      
