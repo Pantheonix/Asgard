@@ -20,3 +20,4 @@ global using Microsoft.AspNetCore.Authentication.Cookies;
 global using FastEndpoints.Security;
 global using Microsoft.AspNetCore.Mvc;
 global using System.IdentityModel.Tokens.Jwt;
+global using Microsoft.Extensions.Options;

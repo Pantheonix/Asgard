@@ -8,13 +8,13 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
     private readonly ILogger<LoginUserEndpoint> _logger;
 
     public LoginUserEndpoint(
-        JwtConfig jwtConfig,
+        IOptions<JwtConfig> jwtConfig,
         UserManager<ApplicationUser> userManager,
         IMapper mapper,
         ILogger<LoginUserEndpoint> logger
     )
     {
-        _jwtConfig = jwtConfig ?? throw new ArgumentNullException(nameof(jwtConfig));
+        _jwtConfig = jwtConfig.Value ?? throw new ArgumentNullException(nameof(jwtConfig));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));

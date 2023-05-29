@@ -9,7 +9,7 @@ public class UserTokenServiceEndpoint : RefreshTokenService<UserTokenRequest, Us
     private readonly ILogger<UserTokenServiceEndpoint> _logger;
 
     public UserTokenServiceEndpoint(
-        JwtConfig jwtConfig,
+        IOptions<JwtConfig> jwtConfig,
         TokenValidationParameters tokenValidationParameters,
         UserManager<ApplicationUser> userManager,
         IRefreshTokenRepository tokenRepository,
@@ -28,9 +28,9 @@ public class UserTokenServiceEndpoint : RefreshTokenService<UserTokenRequest, Us
 
         Setup(opt =>
         {
-            opt.TokenSigningKey = jwtConfig.SecretKey;
-            opt.AccessTokenValidity = jwtConfig.JwtAccessTokenLifetime;
-            opt.RefreshTokenValidity = jwtConfig.JwtRefreshTokenLifetime;
+            opt.TokenSigningKey = jwtConfig.Value.SecretKey;
+            opt.AccessTokenValidity = jwtConfig.Value.JwtAccessTokenLifetime;
+            opt.RefreshTokenValidity = jwtConfig.Value.JwtRefreshTokenLifetime;
             opt.Endpoint(
                 "/auth/refresh-token",
                 ep =>

@@ -10,21 +10,20 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
-    var jwtConfig = new JwtConfig();
-    builder.Configuration.Bind(nameof(jwtConfig), jwtConfig);
-
+    builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection(nameof(JwtConfig)));
+    builder.Services.Configure<AdminConfig>(builder.Configuration.GetSection(nameof(AdminConfig)));
+    
+    var jwtConfig = builder.Configuration.GetSection(nameof(JwtConfig)).Get<JwtConfig>();
     var tokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.SecretKey)),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig!.SecretKey)),
         ValidateIssuer = false,
         ValidateAudience = false,
         RequireExpirationTime = false,
         ValidateLifetime = true
     };
 
-    var adminConfig = new AdminConfig();
-    builder.Configuration.Bind(nameof(adminConfig), adminConfig);
 
     builder.Host.UseSerilog(
         (context, services, configuration) =>
@@ -57,8 +56,6 @@ try
                 typeof(IApplicationMarker).Assembly
             };
         })
-        .AddSingleton(jwtConfig)
-        .AddSingleton(adminConfig)
         .AddSingleton(tokenValidationParameters)
         .AddJWTBearerAuth(jwtConfig.SecretKey)
         .AddAutoMapper(typeof(IApiMarker), typeof(IApplicationMarker))

@@ -24,19 +24,19 @@ public static class WebApplicationExtensions
         }
 
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-        var adminConfig = services.GetRequiredService<AdminConfig>();
+        var adminConfig = services.GetRequiredService<IOptions<AdminConfig>>();
 
         var adminUser = new ApplicationUser
         {
-            UserName = adminConfig.UserName,
-            Email = adminConfig.Email
+            UserName = adminConfig.Value.UserName,
+            Email = adminConfig.Value.Email
         };
 
-        var adminUserExists = await userManager.FindByEmailAsync(adminConfig.Email);
+        var adminUserExists = await userManager.FindByEmailAsync(adminConfig.Value.Email);
 
         if (adminUserExists is null)
         {
-            var resultCreateUser = await userManager.CreateAsync(adminUser, adminConfig.Password);
+            var resultCreateUser = await userManager.CreateAsync(adminUser, adminConfig.Value.Password);
             var resultAddRole = await userManager.AddToRoleAsync(
                 adminUser,
                 ApplicationRoles.Admin.ToString()

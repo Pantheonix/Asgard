@@ -11,6 +11,7 @@ global using Domain.Interfaces;
 global using Infrastructure.Repositories;
 global using Serilog;
 global using Serilog.Events;
+global using Microsoft.Extensions.Options;
 global using Microsoft.AspNetCore.Identity;
 global using Bootstrapper.Extensions;
 global using System.Text;
