@@ -55,18 +55,21 @@ public class UserTokenServiceEndpoint : RefreshTokenService<UserTokenRequest, Us
         var token = _mapper.Map<Domain.Entities.RefreshToken>(response);
 
         var lastNotExpiredRefreshTokenUsedByUser = await _tokenRepository.GetRefreshTokenAsync(
-            rt => rt.UserId == Guid.Parse(response.UserId) && rt.ExpiryDate > DateTime.UtcNow && rt.IsUsed == false,
+            rt =>
+                rt.UserId == Guid.Parse(response.UserId)
+                && rt.ExpiryDate > DateTime.UtcNow
+                && !rt.IsUsed
+                && !rt.IsInvalidated,
             rtOrd => rtOrd.OrderByDescending(rt => rt.ExpiryDate)
         );
 
         if (lastNotExpiredRefreshTokenUsedByUser is not null)
         {
-            token.Token = lastNotExpiredRefreshTokenUsedByUser.Token;
             token.CreationDate = lastNotExpiredRefreshTokenUsedByUser.CreationDate;
             token.ExpiryDate = lastNotExpiredRefreshTokenUsedByUser.ExpiryDate;
             token.IsUsed = false;
         }
-        
+
         await _tokenRepository.CreateRefreshTokenAsync(token, new CancellationToken());
     }
 
@@ -106,9 +109,10 @@ public class UserTokenServiceEndpoint : RefreshTokenService<UserTokenRequest, Us
         ThrowIfAnyErrors();
 
         // check if the refresh token exists in the database
-        var jti = validatedAccessToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti)
+        var jti = validatedAccessToken.Claims
+            .Single(x => x.Type == JwtRegisteredClaimNames.Jti)
             .Value;
-        
+
         var storedRefreshToken = await _tokenRepository.GetRefreshTokenAsync(
             rt => rt.Token == Guid.Parse(req.RefreshToken) && rt.Jti == Guid.Parse(jti)
         );

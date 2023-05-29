@@ -21,14 +21,20 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         await _context.SaveChangesAsync(ct);
     }
 
-    public async Task DeleteRefreshTokenAsync(RefreshToken refreshToken, CancellationToken ct)
+    public Task DeleteRefreshTokenAsync(Expression<Func<RefreshToken, bool>>? filter = null)
     {
-        _context.RefreshTokens.Remove(refreshToken);
-        await _context.SaveChangesAsync(ct);
+        if (filter is not null)
+        {
+            _context.RefreshTokens.RemoveRange(_context.RefreshTokens.Where(filter));
+        }
+        
+        return Task.CompletedTask;
     }
 
-    public async Task<RefreshToken?> GetRefreshTokenAsync(Expression<Func<RefreshToken, bool>>? filter,
-        Func<IQueryable<RefreshToken>, IOrderedQueryable<RefreshToken>>? orderBy)
+    public async Task<RefreshToken?> GetRefreshTokenAsync(
+        Expression<Func<RefreshToken, bool>>? filter,
+        Func<IQueryable<RefreshToken>, IOrderedQueryable<RefreshToken>>? orderBy
+    )
     {
         IQueryable<RefreshToken> query = _context.RefreshTokens;
 
@@ -41,7 +47,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         {
             return await orderBy(query).FirstOrDefaultAsync();
         }
-       
+
         return await query.FirstOrDefaultAsync();
     }
 }

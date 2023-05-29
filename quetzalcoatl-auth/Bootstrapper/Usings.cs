@@ -15,3 +15,4 @@ global using Microsoft.AspNetCore.Identity;
 global using Bootstrapper.Extensions;
 global using System.Text;
 global using Microsoft.IdentityModel.Tokens;
+global using Infrastructure.Triggers;

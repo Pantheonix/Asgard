@@ -34,7 +34,10 @@ try
     builder.Services
         .AddDbContext<ApplicationDbContext>(
             options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+                options.UseTriggers(triggerOptions => triggerOptions.AddTrigger<DeleteStaleRefreshTokens>());
+            }
         )
         .AddScoped<IPictureRepository, PictureRepository>()
         .AddScoped<IRefreshTokenRepository, RefreshTokenRepository>()
