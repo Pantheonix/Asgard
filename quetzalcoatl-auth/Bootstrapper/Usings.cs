@@ -17,3 +17,5 @@ global using Bootstrapper.Extensions;
 global using System.Text;
 global using Microsoft.IdentityModel.Tokens;
 global using Infrastructure.Triggers;
+global using HealthChecks.UI.Client;
+global using Microsoft.AspNetCore.Diagnostics.HealthChecks;

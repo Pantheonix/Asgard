@@ -23,21 +23,23 @@ try
         RequireExpirationTime = false,
         ValidateLifetime = true
     };
+    var dsnConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
+    builder.Services.AddHealthChecks().AddSqlServer(dsnConnectionString!);
 
     builder.Host.UseSerilog(
         (context, services, configuration) =>
             configuration.ReadFrom.Configuration(context.Configuration).ReadFrom.Services(services)
     );
-
+    
     builder.Services
-        .AddDbContext<ApplicationDbContext>(
-            options =>
-            {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-                options.UseTriggers(triggerOptions => triggerOptions.AddTrigger<DeleteStaleRefreshTokens>());
-            }
-        )
+        .AddDbContext<ApplicationDbContext>(options =>
+        {
+            options.UseSqlServer(dsnConnectionString);
+            options.UseTriggers(
+                triggerOptions => triggerOptions.AddTrigger<DeleteStaleRefreshTokens>()
+            );
+        })
         .AddScoped<IPictureRepository, PictureRepository>()
         .AddScoped<IRefreshTokenRepository, RefreshTokenRepository>()
         .AddIdentity<ApplicationUser, IdentityRole<Guid>>(identity =>
@@ -45,6 +47,11 @@ try
             identity.User.RequireUniqueEmail = true;
         })
         .AddEntityFrameworkStores<ApplicationDbContext>();
+
+    if (builder.Environment.IsDevelopment())
+    {
+        builder.Services.EnsureDbCreated<ApplicationDbContext>();
+    }
 
     builder.Services
         .AddFastEndpoints(options =>
@@ -66,8 +73,17 @@ try
         });
 
     var app = builder.Build();
+    
+    if (app.Environment.IsDevelopment())
+    {
+        await app.UseSeedData();
+    }
 
-    await app.UseSeedData();
+    app.MapHealthChecks(
+            "/_health",
+            new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse, }
+        )
+        .RequireHost("*:5210");
 
     app.UseSerilogRequestLogging()
         .UseDefaultExceptionHandler()

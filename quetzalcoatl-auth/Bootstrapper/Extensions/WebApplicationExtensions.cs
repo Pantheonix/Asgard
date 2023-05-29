@@ -36,7 +36,10 @@ public static class WebApplicationExtensions
 
         if (adminUserExists is null)
         {
-            var resultCreateUser = await userManager.CreateAsync(adminUser, adminConfig.Value.Password);
+            var resultCreateUser = await userManager.CreateAsync(
+                adminUser,
+                adminConfig.Value.Password
+            );
             var resultAddRole = await userManager.AddToRoleAsync(
                 adminUser,
                 ApplicationRoles.Admin.ToString()

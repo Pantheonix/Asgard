@@ -27,7 +27,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         {
             _context.RefreshTokens.RemoveRange(_context.RefreshTokens.Where(filter));
         }
-        
+
         return Task.CompletedTask;
     }
 
