@@ -29,8 +29,8 @@ public class UserTokenServiceEndpoint : RefreshTokenService<UserTokenRequest, Us
         Setup(opt =>
         {
             opt.TokenSigningKey = jwtConfig.SecretKey;
-            opt.AccessTokenValidity = TimeSpan.FromMinutes(jwtConfig.JwtAccessTokenLifetime);
-            opt.RefreshTokenValidity = TimeSpan.FromDays(jwtConfig.JwtRefreshTokenLifetime);
+            opt.AccessTokenValidity = jwtConfig.JwtAccessTokenLifetime;
+            opt.RefreshTokenValidity = jwtConfig.JwtRefreshTokenLifetime;
             opt.Endpoint(
                 "/auth/refresh-token",
                 ep =>

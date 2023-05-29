@@ -54,7 +54,7 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, UserTokenRespo
                 HttpOnly = true,
                 SameSite = SameSiteMode.Strict,
                 Secure = true,
-                Expires = DateTimeOffset.UtcNow.AddHours(_jwtConfig.JwtAccessTokenLifetime)
+                Expires = DateTimeOffset.UtcNow.AddTicks(_jwtConfig.JwtAccessTokenLifetime.Ticks)
             }
         );
 
@@ -66,7 +66,7 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, UserTokenRespo
                 HttpOnly = true,
                 SameSite = SameSiteMode.Strict,
                 Secure = true,
-                Expires = DateTimeOffset.UtcNow.AddDays(_jwtConfig.JwtRefreshTokenLifetime)
+                Expires = DateTimeOffset.UtcNow.AddTicks(_jwtConfig.JwtRefreshTokenLifetime.Ticks)
             }
         );
 
