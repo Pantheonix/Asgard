@@ -153,4 +153,51 @@ class TestRepository implements ITestRepository {
       ),
     );
   }
+
+  @override
+  Future<Either<StorageFailure, Unit>> delete(TestMetadata testMetadata) async {
+    return await testMetadata.maybeMap(
+      testToDelete: (testMetadata) async {
+        try {
+          final remoteInputFilePath = path.join(
+            testMetadata.fromDir,
+            testMetadata.problemId,
+            testMetadata.testId,
+            testMetadata.inputFilename,
+          );
+          await _storage.ref(remoteInputFilePath).delete();
+
+          final remoteOutputFilePath = path.join(
+            testMetadata.fromDir,
+            testMetadata.problemId,
+            testMetadata.testId,
+            testMetadata.outputFilename,
+          );
+          await _storage.ref(remoteOutputFilePath).delete();
+
+          return right(unit);
+        } catch (e) {
+          return left(
+            StorageFailure.unexpected(
+              message: e.toString(),
+            ),
+          );
+        }
+      }, 
+      orElse: () {
+        return left(
+          StorageFailure.unexpected(
+            message: 'Invalid test metadata passed to repository delete method',
+          ),
+        );
+      }
+    );
+  }
+
+  @override
+  Future<Either<StorageFailure, Unit>> getDownloadLinkForTest(
+      TestMetadata testMetadata) {
+    // TODO: implement getDownloadLinkForTest
+    throw UnimplementedError();
+  }
 }

@@ -330,4 +330,16 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
     await _server.shutdown();
     _logger.i('Server closed');
   }
+  
+  @override
+  Future<DeleteTestResponse> deleteTest(ServiceCall call, DeleteTestRequest request) {
+    // TODO: implement deleteTest
+    throw UnimplementedError();
+  }
+  
+  @override
+  Future<GetDownloadLinkForTestResponse> getDownloadLinkForTest(ServiceCall call, GetDownloadLinkForTestRequest request) {
+    // TODO: implement getDownloadLinkForTest
+    throw UnimplementedError();
+  }
 }

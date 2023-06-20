@@ -33,10 +33,34 @@ message DownloadResponse {
     }
 }
 
+// gRPC GetDownloadLinkForTest request and response messages
+message GetDownloadLinkForTestRequest {
+    string problem_id = 1;
+    string test_id = 2;
+}
+
+message GetDownloadLinkForTestResponse {
+    string input_link = 1;
+    string output_link = 2;
+    StatusResponse status = 3;
+}
+
+// gRPC DeleteTest request and response messages
+message DeleteTestRequest {
+    string problem_id = 1;
+    string test_id = 2;
+}
+
+message DeleteTestResponse {
+    StatusResponse status = 1;
+}
+
 // Hermes Service
 service HermesTestsService {
     rpc UploadTest(stream UploadRequest) returns (UploadResponse) {}
     rpc DownloadTest(DownloadRequest) returns (stream DownloadResponse) {}
+    rpc GetDownloadLinkForTest(GetDownloadLinkForTestRequest) returns (GetDownloadLinkForTestResponse) {}
+    rpc DeleteTest(DeleteTestRequest) returns (DeleteTestResponse) {}
 }
 
 // core messages

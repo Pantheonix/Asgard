@@ -59,4 +59,21 @@ class TestMetadata with _$TestMetadata {
     required String inputFilename,
     required String outputFilename,
   }) = TestToUpload;
+
+  const factory TestMetadata.testToDelete({
+    required String problemId,
+    required String testId,
+    required String fromDir,
+    required String inputFilename,
+    required String outputFilename,
+  }) = TestToDelete;
+
+  // const factory TestMetadata.testToGetDownloadLink({
+  //   required String problemId,
+  //   required String testId,
+  //   required String fromDir,
+  //   required String toDir,
+  //   required String inputFilename,
+  //   required String outputFilename,
+  // }) = TestToGetDownloadLink;
 }

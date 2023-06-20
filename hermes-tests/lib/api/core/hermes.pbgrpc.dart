@@ -25,6 +25,18 @@ class HermesTestsServiceClient extends $grpc.Client {
           ($0.DownloadRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $0.DownloadResponse.fromBuffer(value));
+  static final _$getDownloadLinkForTest = $grpc.ClientMethod<
+          $0.GetDownloadLinkForTestRequest, $0.GetDownloadLinkForTestResponse>(
+      '/asgard.hermes.HermesTestsService/GetDownloadLinkForTest',
+      ($0.GetDownloadLinkForTestRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) =>
+          $0.GetDownloadLinkForTestResponse.fromBuffer(value));
+  static final _$deleteTest =
+      $grpc.ClientMethod<$0.DeleteTestRequest, $0.DeleteTestResponse>(
+          '/asgard.hermes.HermesTestsService/DeleteTest',
+          ($0.DeleteTestRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $0.DeleteTestResponse.fromBuffer(value));
 
   HermesTestsServiceClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
@@ -43,6 +55,19 @@ class HermesTestsServiceClient extends $grpc.Client {
     return $createStreamingCall(
         _$downloadTest, $async.Stream.fromIterable([request]),
         options: options);
+  }
+
+  $grpc.ResponseFuture<$0.GetDownloadLinkForTestResponse>
+      getDownloadLinkForTest($0.GetDownloadLinkForTestRequest request,
+          {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$getDownloadLinkForTest, request,
+        options: options);
+  }
+
+  $grpc.ResponseFuture<$0.DeleteTestResponse> deleteTest(
+      $0.DeleteTestRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$deleteTest, request, options: options);
   }
 }
 
@@ -64,6 +89,22 @@ abstract class HermesTestsServiceBase extends $grpc.Service {
         true,
         ($core.List<$core.int> value) => $0.DownloadRequest.fromBuffer(value),
         ($0.DownloadResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.GetDownloadLinkForTestRequest,
+            $0.GetDownloadLinkForTestResponse>(
+        'GetDownloadLinkForTest',
+        getDownloadLinkForTest_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.GetDownloadLinkForTestRequest.fromBuffer(value),
+        ($0.GetDownloadLinkForTestResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.DeleteTestRequest, $0.DeleteTestResponse>(
+        'DeleteTest',
+        deleteTest_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.DeleteTestRequest.fromBuffer(value),
+        ($0.DeleteTestResponse value) => value.writeToBuffer()));
   }
 
   $async.Stream<$0.DownloadResponse> downloadTest_Pre($grpc.ServiceCall call,
@@ -71,8 +112,23 @@ abstract class HermesTestsServiceBase extends $grpc.Service {
     yield* downloadTest(call, await request);
   }
 
+  $async.Future<$0.GetDownloadLinkForTestResponse> getDownloadLinkForTest_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$0.GetDownloadLinkForTestRequest> request) async {
+    return getDownloadLinkForTest(call, await request);
+  }
+
+  $async.Future<$0.DeleteTestResponse> deleteTest_Pre($grpc.ServiceCall call,
+      $async.Future<$0.DeleteTestRequest> request) async {
+    return deleteTest(call, await request);
+  }
+
   $async.Future<$0.UploadResponse> uploadTest(
       $grpc.ServiceCall call, $async.Stream<$0.UploadRequest> request);
   $async.Stream<$0.DownloadResponse> downloadTest(
       $grpc.ServiceCall call, $0.DownloadRequest request);
+  $async.Future<$0.GetDownloadLinkForTestResponse> getDownloadLinkForTest(
+      $grpc.ServiceCall call, $0.GetDownloadLinkForTestRequest request);
+  $async.Future<$0.DeleteTestResponse> deleteTest(
+      $grpc.ServiceCall call, $0.DeleteTestRequest request);
 }
