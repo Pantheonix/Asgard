@@ -46,10 +46,18 @@ Future<void> main(List<String> arguments) async {
   // }
 
   // delete
-  final response = await client.deleteTest(
-    DeleteTestRequest()
-      ..problemId = 'stardust'
-      ..testId = '10',
+  // final response = await client.deleteTest(
+  //   DeleteTestRequest()
+  //     ..problemId = 'stardust'
+  //     ..testId = '10',
+  // );
+  // logger.d(response);
+
+  // get download link
+  final response = await client.getDownloadLinkForTest(
+    GetDownloadLinkForTestRequest()
+    ..problemId = 'stardust'
+    ..testId = '9',
   );
   logger.d(response);
 

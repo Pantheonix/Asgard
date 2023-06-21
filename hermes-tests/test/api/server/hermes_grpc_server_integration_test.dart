@@ -156,5 +156,25 @@ void main() {
 
       client.close();
     });
+
+    test(
+        'Given grpc client requests to retrieve the download link for a given test, '
+        'When getDownloadLink rpc service method is called on the server-side, '
+        'Then the download link is successfully retrieved', () async {
+      // Arrange
+      final request = GetDownloadLinkForTestRequest()
+        ..problemId = 'marsx'
+        ..testId = '9';
+
+      // Act
+      final response = await client.getDownloadLinkForTest(request);
+
+      // Assert
+      expect(response.status.code, StatusCode.Ok);
+      expect(response.inputLink, isNotNull);
+      expect(response.outputLink, isNotNull);
+
+      client.close();
+    });
   });
 }

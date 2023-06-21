@@ -9,6 +9,7 @@ import 'package:hermes_tests/application/use_cases/delete/delete_test_use_case.d
 import 'package:hermes_tests/application/use_cases/download/download_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/download/encode_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/download/fragment_test_use_case.dart';
+import 'package:hermes_tests/application/use_cases/get_download_link/get_download_link_for_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/upload/decode_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/upload/defragment_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/upload/upload_test_use_case.dart';
@@ -351,9 +352,35 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
 
   @override
   Future<GetDownloadLinkForTestResponse> getDownloadLinkForTest(
-      ServiceCall call, GetDownloadLinkForTestRequest request) {
-    // TODO: implement getDownloadLinkForTest
-    throw UnimplementedError();
+      ServiceCall call, GetDownloadLinkForTestRequest request) async {
+    _logger.i('Get download link for test method called');
+
+    final Either<StorageFailure, GetDownloadLinkForTestResponse> getDownloadLinkResponse =
+        await _mediator.run(
+      GetDownloadLinkForTestAsyncQuery(
+        testMetadata: TestMetadata.testToGetDownloadLinkFor(
+          problemId: request.problemId,
+          testId: request.testId,
+          fromDir: _config.remoteUnarchivedTestFolder,
+          inputFilename: _config.inputFilename,
+          outputFilename: _config.outputFilename,
+        ),
+      ),
+    );
+
+    return getDownloadLinkResponse.fold(
+      (failure) {
+        _logger.e('Get download link response received: $failure');
+        return GetDownloadLinkForTestResponse()
+          ..status = (hermes.StatusResponse()
+            ..code = hermes.StatusCode.Failed
+            ..message = failure.message);
+      },
+      (response) {
+        _logger.i('Get download link response received: $response');
+        return response;
+      },
+    );
   }
 
   void initServices() {

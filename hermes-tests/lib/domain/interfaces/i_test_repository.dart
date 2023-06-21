@@ -7,6 +7,6 @@ abstract class ITestRepository {
   Future<Either<StorageFailure, Unit>> upload(TestMetadata testMetadata);
   Future<Either<StorageFailure, Unit>> download(TestMetadata testMetadata);
   Future<Either<StorageFailure, Unit>> delete(TestMetadata testMetadata);
-  Future<Either<StorageFailure, Unit>> getDownloadLinkForTest(
+  Future<Either<StorageFailure, GetDownloadLinkForTestResponse>> getDownloadLinkForTest(
       TestMetadata testMetadata);
 }
