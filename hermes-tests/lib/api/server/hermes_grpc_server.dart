@@ -5,6 +5,7 @@ import 'package:dartz/dartz.dart';
 import 'package:grpc/grpc.dart';
 import 'package:hermes_tests/api/core/hermes.pb.dart';
 import 'package:hermes_tests/api/core/hermes.pbgrpc.dart' as hermes;
+import 'package:hermes_tests/application/use_cases/delete/delete_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/download/download_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/download/encode_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/download/fragment_test_use_case.dart';
@@ -313,6 +314,48 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
     yield* responseStreamController.stream;
   }
 
+  @override
+  Future<DeleteTestResponse> deleteTest(
+      ServiceCall call, DeleteTestRequest request) async {
+    _logger.i('Delete test method called');
+
+    final Either<StorageFailure, Unit> deleteResponse = await _mediator.run(
+      DeleteTestAsyncQuery(
+        testMetadata: TestMetadata.testToDelete(
+          problemId: request.problemId,
+          testId: request.testId,
+          fromDir: _config.remoteUnarchivedTestFolder,
+          inputFilename: _config.inputFilename,
+          outputFilename: _config.outputFilename,
+        ),
+      ),
+    );
+
+    return deleteResponse.fold(
+      (failure) {
+        _logger.e('Delete response received: $failure');
+        return DeleteTestResponse()
+          ..status = (hermes.StatusResponse()
+            ..code = hermes.StatusCode.Failed
+            ..message = failure.message);
+      },
+      (success) {
+        _logger.i('Delete response received: success');
+        return DeleteTestResponse()
+          ..status = (hermes.StatusResponse()
+            ..code = hermes.StatusCode.Ok
+            ..message = 'Test deleted successfully');
+      },
+    );
+  }
+
+  @override
+  Future<GetDownloadLinkForTestResponse> getDownloadLinkForTest(
+      ServiceCall call, GetDownloadLinkForTestRequest request) {
+    // TODO: implement getDownloadLinkForTest
+    throw UnimplementedError();
+  }
+
   void initServices() {
     _server = Server([this]);
   }
@@ -329,17 +372,5 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
   Future<void> close() async {
     await _server.shutdown();
     _logger.i('Server closed');
-  }
-  
-  @override
-  Future<DeleteTestResponse> deleteTest(ServiceCall call, DeleteTestRequest request) {
-    // TODO: implement deleteTest
-    throw UnimplementedError();
-  }
-  
-  @override
-  Future<GetDownloadLinkForTestResponse> getDownloadLinkForTest(ServiceCall call, GetDownloadLinkForTestRequest request) {
-    // TODO: implement getDownloadLinkForTest
-    throw UnimplementedError();
   }
 }

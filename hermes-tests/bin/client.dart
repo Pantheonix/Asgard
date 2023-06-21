@@ -36,14 +36,22 @@ Future<void> main(List<String> arguments) async {
   // }
 
   // download
-  for (int i = 1; i <= 10; i++) {
-    final response = await client.downloadTest(
-      DownloadRequest()
-        ..problemId = 'dyson'
-        ..testId = '$i',
-    );
-    logger.d(response);
-  }
+  // for (int i = 1; i <= 10; i++) {
+  //   final response = await client.downloadTest(
+  //     DownloadRequest()
+  //       ..problemId = 'dyson'
+  //       ..testId = '$i',
+  //   );
+  //   logger.d(response);
+  // }
+
+  // delete
+  final response = await client.deleteTest(
+    DeleteTestRequest()
+      ..problemId = 'stardust'
+      ..testId = '10',
+  );
+  logger.d(response);
 
   await client.close();
 }

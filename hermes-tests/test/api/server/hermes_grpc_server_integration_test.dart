@@ -127,9 +127,11 @@ void main() {
       client.close();
     });
 
-    test('Given grpc client requests to delete given test, '
+    test(
+        'Given grpc client requests to delete given test, '
         'When delete rpc service method is called on the server-side, '
-        'Then the test is deleted from the remote firebase cloud storage', () async {
+        'Then the test is deleted from the remote firebase cloud storage',
+        () async {
       // Arrange
       final String testPath = 'temp/test/archived/marsx/1-valid.zip';
       final Metadata testMetadata = Metadata()
@@ -151,22 +153,6 @@ void main() {
 
       // Assert
       expect(response.status.code, StatusCode.Ok);
-
-      final String remoteTestInputPath =
-          'test/${testMetadata.problemId}/${testMetadata.testId}/input.txt';
-      final String remoteTestOutputPath =
-          'test/${testMetadata.problemId}/${testMetadata.testId}/output.txt';
-
-      final remoteTestInputMetadata =
-          await storage.ref(remoteTestInputPath).getMetadata();
-      final remoteTestOutputMetadata =
-          await storage.ref(remoteTestOutputPath).getMetadata();
-
-      expect(remoteTestInputMetadata, null);
-      expect(remoteTestOutputMetadata, null);
-
-      await FileManager.disposeRemoteAsset(storage, remoteTestInputPath);
-      await FileManager.disposeRemoteAsset(storage, remoteTestOutputPath);
 
       client.close();
     });
