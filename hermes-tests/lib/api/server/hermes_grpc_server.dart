@@ -355,8 +355,8 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
       ServiceCall call, GetDownloadLinkForTestRequest request) async {
     _logger.i('Get download link for test method called');
 
-    final Either<StorageFailure, GetDownloadLinkForTestResponse> getDownloadLinkResponse =
-        await _mediator.run(
+    final Either<StorageFailure, GetDownloadLinkForTestResponse>
+        getDownloadLinkResponse = await _mediator.run(
       GetDownloadLinkForTestAsyncQuery(
         testMetadata: TestMetadata.testToGetDownloadLinkFor(
           problemId: request.problemId,

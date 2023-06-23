@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:hermes_tests/api/client/hermes_grpc_client.dart';
 import 'package:hermes_tests/api/core/hermes.pb.dart';
 import 'package:hermes_tests/di/config/config.dart';
@@ -56,10 +54,11 @@ Future<void> main(List<String> arguments) async {
   // get download link
   final response = await client.getDownloadLinkForTest(
     GetDownloadLinkForTestRequest()
-    ..problemId = 'stardust'
-    ..testId = '9',
+      ..problemId = 'stardust'
+      ..testId = '9',
   );
   logger.d(response);
+  print(response);
 
   await client.close();
 }

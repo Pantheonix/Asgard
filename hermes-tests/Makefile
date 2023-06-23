@@ -4,3 +4,6 @@ pbgen:
 
 wgen:
 	dart run build_runner watch --delete-conflicting-outputs
+
+drun:
+	dapr run --app-id hermes-tests-service --app-port 4000 -- dart run bin/hermes_tests.dart

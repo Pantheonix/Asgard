@@ -16,7 +16,7 @@ import 'package:logger/logger.dart';
 Future<void> main(List<String> arguments) async {
   FirebaseDart.setup();
   late final HermesGrpcServer hermesServer;
-
+  
   try {
     await configureDependencies('dev');
 
