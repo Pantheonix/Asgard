@@ -2,7 +2,7 @@
 using Grpc.Core;
 using Grpc.Net.Client;
 
-const string address = "http://localhost:4000";
+const string address = "http://localhost:50010";
 using var channel = GrpcChannel.ForAddress(address);
 var client = new HermesTestsService.HermesTestsServiceClient(channel);
 
@@ -13,7 +13,12 @@ try
         ProblemId = "stardust",
         TestId = "9"
     };
-    var response = await client.GetDownloadLinkForTestAsync(data);
+    var metadata = new Grpc.Core.Metadata
+    {
+        { "dapr-app-id", "hermes-tests-service" }
+    };
+    
+    var response = await client.GetDownloadLinkForTestAsync(data, metadata);
 
     Console.WriteLine(response);
 }
