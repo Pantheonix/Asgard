@@ -3,7 +3,4 @@
 namespace EnkiProblems.MongoDB;
 
 [CollectionDefinition(EnkiProblemsTestConsts.CollectionDefinitionName)]
-public class EnkiProblemsMongoCollection : EnkiProblemsMongoDbCollectionFixtureBase
-{
-
-}
+public class EnkiProblemsMongoCollection : EnkiProblemsMongoDbCollectionFixtureBase { }

@@ -1,2 +1,3 @@
 ﻿using System.Runtime.CompilerServices;
-[assembly:InternalsVisibleToAttribute("EnkiProblems.MongoDB.Tests")]
+
+[assembly: InternalsVisibleToAttribute("EnkiProblems.MongoDB.Tests")]

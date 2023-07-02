@@ -23,7 +23,10 @@ public abstract class EnkiProblemsTestBase<TStartupModule> : AbpIntegratedTest<T
         return WithUnitOfWorkAsync(new AbpUnitOfWorkOptions(), func);
     }
 
-    protected virtual async Task WithUnitOfWorkAsync(AbpUnitOfWorkOptions options, Func<Task> action)
+    protected virtual async Task WithUnitOfWorkAsync(
+        AbpUnitOfWorkOptions options,
+        Func<Task> action
+    )
     {
         using (var scope = ServiceProvider.CreateScope())
         {
@@ -43,7 +46,10 @@ public abstract class EnkiProblemsTestBase<TStartupModule> : AbpIntegratedTest<T
         return WithUnitOfWorkAsync(new AbpUnitOfWorkOptions(), func);
     }
 
-    protected virtual async Task<TResult> WithUnitOfWorkAsync<TResult>(AbpUnitOfWorkOptions options, Func<Task<TResult>> func)
+    protected virtual async Task<TResult> WithUnitOfWorkAsync<TResult>(
+        AbpUnitOfWorkOptions options,
+        Func<Task<TResult>> func
+    )
     {
         using (var scope = ServiceProvider.CreateScope())
         {

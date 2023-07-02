@@ -23,8 +23,8 @@ namespace EnkiProblems;
     typeof(AbpOpenIddictDomainSharedModule),
     typeof(AbpPermissionManagementDomainSharedModule),
     typeof(AbpSettingManagementDomainSharedModule),
-    typeof(AbpTenantManagementDomainSharedModule)    
-    )]
+    typeof(AbpTenantManagementDomainSharedModule)
+)]
 public class EnkiProblemsDomainSharedModule : AbpModule
 {
     public override void PreConfigureServices(ServiceConfigurationContext context)

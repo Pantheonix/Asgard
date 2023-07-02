@@ -61,7 +61,10 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
 
     private void ConfigureCache(IConfiguration configuration)
     {
-        Configure<AbpDistributedCacheOptions>(options => { options.KeyPrefix = "EnkiProblems:"; });
+        Configure<AbpDistributedCacheOptions>(options =>
+        {
+            options.KeyPrefix = "EnkiProblems:";
+        });
     }
 
     private void ConfigureVirtualFileSystem(ServiceConfigurationContext context)
@@ -73,17 +76,29 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
             Configure<AbpVirtualFileSystemOptions>(options =>
             {
                 options.FileSets.ReplaceEmbeddedByPhysical<EnkiProblemsDomainSharedModule>(
-                    Path.Combine(hostingEnvironment.ContentRootPath,
-                        $"..{Path.DirectorySeparatorChar}EnkiProblems.Domain.Shared"));
+                    Path.Combine(
+                        hostingEnvironment.ContentRootPath,
+                        $"..{Path.DirectorySeparatorChar}EnkiProblems.Domain.Shared"
+                    )
+                );
                 options.FileSets.ReplaceEmbeddedByPhysical<EnkiProblemsDomainModule>(
-                    Path.Combine(hostingEnvironment.ContentRootPath,
-                        $"..{Path.DirectorySeparatorChar}EnkiProblems.Domain"));
+                    Path.Combine(
+                        hostingEnvironment.ContentRootPath,
+                        $"..{Path.DirectorySeparatorChar}EnkiProblems.Domain"
+                    )
+                );
                 options.FileSets.ReplaceEmbeddedByPhysical<EnkiProblemsApplicationContractsModule>(
-                    Path.Combine(hostingEnvironment.ContentRootPath,
-                        $"..{Path.DirectorySeparatorChar}EnkiProblems.Application.Contracts"));
+                    Path.Combine(
+                        hostingEnvironment.ContentRootPath,
+                        $"..{Path.DirectorySeparatorChar}EnkiProblems.Application.Contracts"
+                    )
+                );
                 options.FileSets.ReplaceEmbeddedByPhysical<EnkiProblemsApplicationModule>(
-                    Path.Combine(hostingEnvironment.ContentRootPath,
-                        $"..{Path.DirectorySeparatorChar}EnkiProblems.Application"));
+                    Path.Combine(
+                        hostingEnvironment.ContentRootPath,
+                        $"..{Path.DirectorySeparatorChar}EnkiProblems.Application"
+                    )
+                );
             });
         }
     }
@@ -96,54 +111,70 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         });
     }
 
-    private void ConfigureAuthentication(ServiceConfigurationContext context, IConfiguration configuration)
+    private void ConfigureAuthentication(
+        ServiceConfigurationContext context,
+        IConfiguration configuration
+    )
     {
-        context.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        context.Services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
                 options.Authority = configuration["AuthServer:Authority"];
-                options.RequireHttpsMetadata = Convert.ToBoolean(configuration["AuthServer:RequireHttpsMetadata"]);
+                options.RequireHttpsMetadata = Convert.ToBoolean(
+                    configuration["AuthServer:RequireHttpsMetadata"]
+                );
                 options.Audience = "EnkiProblems";
             });
     }
 
-    private static void ConfigureSwaggerServices(ServiceConfigurationContext context, IConfiguration configuration)
+    private static void ConfigureSwaggerServices(
+        ServiceConfigurationContext context,
+        IConfiguration configuration
+    )
     {
         context.Services.AddAbpSwaggerGenWithOAuth(
             configuration["AuthServer:Authority"],
-            new Dictionary<string, string>
-            {
-                    {"EnkiProblems", "EnkiProblems API"}
-            },
+            new Dictionary<string, string> { { "EnkiProblems", "EnkiProblems API" } },
             options =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "EnkiProblems API", Version = "v1" });
+                options.SwaggerDoc(
+                    "v1",
+                    new OpenApiInfo { Title = "EnkiProblems API", Version = "v1" }
+                );
                 options.DocInclusionPredicate((docName, description) => true);
                 options.CustomSchemaIds(type => type.FullName);
-            });
+            }
+        );
     }
 
     private void ConfigureDataProtection(
         ServiceConfigurationContext context,
         IConfiguration configuration,
-        IWebHostEnvironment hostingEnvironment)
+        IWebHostEnvironment hostingEnvironment
+    )
     {
-        var dataProtectionBuilder = context.Services.AddDataProtection().SetApplicationName("EnkiProblems");
+        var dataProtectionBuilder = context.Services
+            .AddDataProtection()
+            .SetApplicationName("EnkiProblems");
         if (!hostingEnvironment.IsDevelopment())
         {
             var redis = ConnectionMultiplexer.Connect(configuration["Redis:Configuration"]);
-            dataProtectionBuilder.PersistKeysToStackExchangeRedis(redis, "EnkiProblems-Protection-Keys");
+            dataProtectionBuilder.PersistKeysToStackExchangeRedis(
+                redis,
+                "EnkiProblems-Protection-Keys"
+            );
         }
     }
 
     private void ConfigureDistributedLocking(
         ServiceConfigurationContext context,
-        IConfiguration configuration)
+        IConfiguration configuration
+    )
     {
         context.Services.AddSingleton<IDistributedLockProvider>(sp =>
         {
-            var connection = ConnectionMultiplexer
-                .Connect(configuration["Redis:Configuration"]);
+            var connection = ConnectionMultiplexer.Connect(configuration["Redis:Configuration"]);
             return new RedisDistributedSynchronizationProvider(connection.GetDatabase());
         });
     }
@@ -155,10 +186,12 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
             options.AddDefaultPolicy(builder =>
             {
                 builder
-                    .WithOrigins(configuration["App:CorsOrigins"]?
-                        .Split(",", StringSplitOptions.RemoveEmptyEntries)
-                        .Select(o => o.RemovePostFix("/"))
-                        .ToArray() ?? Array.Empty<string>())
+                    .WithOrigins(
+                        configuration["App:CorsOrigins"]
+                            ?.Split(",", StringSplitOptions.RemoveEmptyEntries)
+                            .Select(o => o.RemovePostFix("/"))
+                            .ToArray() ?? Array.Empty<string>()
+                    )
                     .WithAbpExposedHeaders()
                     .SetIsOriginAllowedToAllowWildcardSubdomains()
                     .AllowAnyHeader()

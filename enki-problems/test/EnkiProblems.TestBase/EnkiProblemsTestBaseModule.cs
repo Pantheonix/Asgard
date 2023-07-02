@@ -14,13 +14,10 @@ namespace EnkiProblems;
     typeof(AbpTestBaseModule),
     typeof(AbpAuthorizationModule),
     typeof(EnkiProblemsDomainModule)
-    )]
+)]
 public class EnkiProblemsTestBaseModule : AbpModule
 {
-    public override void PreConfigureServices(ServiceConfigurationContext context)
-    {
-
-    }
+    public override void PreConfigureServices(ServiceConfigurationContext context) { }
 
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
@@ -43,9 +40,7 @@ public class EnkiProblemsTestBaseModule : AbpModule
         {
             using (var scope = context.ServiceProvider.CreateScope())
             {
-                await scope.ServiceProvider
-                    .GetRequiredService<IDataSeeder>()
-                    .SeedAsync();
+                await scope.ServiceProvider.GetRequiredService<IDataSeeder>().SeedAsync();
             }
         });
     }

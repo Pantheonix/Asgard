@@ -8,16 +8,9 @@ var client = new HermesTestsService.HermesTestsServiceClient(channel);
 
 try
 {
-    var data = new GetDownloadLinkForTestRequest
-    {
-        ProblemId = "stardust",
-        TestId = "9"
-    };
-    var metadata = new Grpc.Core.Metadata
-    {
-        { "dapr-app-id", "hermes-tests-service" }
-    };
-    
+    var data = new GetDownloadLinkForTestRequest { ProblemId = "stardust", TestId = "9" };
+    var metadata = new Grpc.Core.Metadata { { "dapr-app-id", "hermes-tests-service" } };
+
     var response = await client.GetDownloadLinkForTestAsync(data, metadata);
 
     Console.WriteLine(response);

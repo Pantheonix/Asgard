@@ -13,16 +13,16 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
+        Log.Logger = new LoggerConfiguration().MinimumLevel
+            .Information()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("Volo.Abp", LogEventLevel.Warning)
 #if DEBUG
-                .MinimumLevel.Override("EnkiProblems", LogEventLevel.Debug)
+            .MinimumLevel.Override("EnkiProblems", LogEventLevel.Debug)
 #else
-                .MinimumLevel.Override("EnkiProblems", LogEventLevel.Information)
+            .MinimumLevel.Override("EnkiProblems", LogEventLevel.Information)
 #endif
-                .Enrich.FromLogContext()
+            .Enrich.FromLogContext()
             .WriteTo.Async(c => c.File("Logs/logs.txt"))
             .WriteTo.Async(c => c.Console())
             .CreateLogger();
@@ -34,8 +34,10 @@ class Program
         Host.CreateDefaultBuilder(args)
             .AddAppSettingsSecretsJson()
             .ConfigureLogging((context, logging) => logging.ClearProviders())
-            .ConfigureServices((hostContext, services) =>
-            {
-                services.AddHostedService<DbMigratorHostedService>();
-            });
+            .ConfigureServices(
+                (hostContext, services) =>
+                {
+                    services.AddHostedService<DbMigratorHostedService>();
+                }
+            );
 }

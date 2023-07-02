@@ -14,9 +14,11 @@ public class Program
     {
         Log.Logger = new LoggerConfiguration()
 #if DEBUG
-            .MinimumLevel.Debug()
+        .MinimumLevel
+            .Debug()
 #else
-            .MinimumLevel.Information()
+        .MinimumLevel
+            .Information()
 #endif
             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
             .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
@@ -29,9 +31,7 @@ public class Program
         {
             Log.Information("Starting EnkiProblems.HttpApi.Host.");
             var builder = WebApplication.CreateBuilder(args);
-            builder.Host.AddAppSettingsSecretsJson()
-                .UseAutofac()
-                .UseSerilog();
+            builder.Host.AddAppSettingsSecretsJson().UseAutofac().UseSerilog();
             await builder.AddApplicationAsync<EnkiProblemsHttpApiHostModule>();
             var app = builder.Build();
             await app.InitializeApplicationAsync();

@@ -1,6 +1,4 @@
 ﻿namespace EnkiProblems.MongoDB;
 
-public abstract class EnkiProblemsMongoDbTestBase : EnkiProblemsTestBase<EnkiProblemsMongoDbTestModule>
-{
-
-}
+public abstract class EnkiProblemsMongoDbTestBase
+    : EnkiProblemsTestBase<EnkiProblemsMongoDbTestModule> { }

@@ -4,7 +4,4 @@ using Xunit;
 namespace EnkiProblems;
 
 [CollectionDefinition(EnkiProblemsTestConsts.CollectionDefinitionName)]
-public class EnkiProblemsDomainCollection : EnkiProblemsMongoDbCollectionFixtureBase
-{
-
-}
+public class EnkiProblemsDomainCollection : EnkiProblemsMongoDbCollectionFixtureBase { }

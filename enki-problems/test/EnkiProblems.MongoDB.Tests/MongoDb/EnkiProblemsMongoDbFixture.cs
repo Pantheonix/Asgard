@@ -10,7 +10,10 @@ public class EnkiProblemsMongoDbFixture : IDisposable
 
     static EnkiProblemsMongoDbFixture()
     {
-        MongoDbRunner = MongoDbRunner.Start(singleNodeReplSet: true, singleNodeReplSetWaitTimeout: 20);
+        MongoDbRunner = MongoDbRunner.Start(
+            singleNodeReplSet: true,
+            singleNodeReplSetWaitTimeout: 20
+        );
         ConnectionString = MongoDbRunner.ConnectionString;
     }
 

@@ -1,6 +1,4 @@
 ﻿namespace EnkiProblems;
 
-public abstract class EnkiProblemsDomainTestBase : EnkiProblemsTestBase<EnkiProblemsDomainTestModule>
-{
-
-}
+public abstract class EnkiProblemsDomainTestBase
+    : EnkiProblemsTestBase<EnkiProblemsDomainTestModule> { }

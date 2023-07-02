@@ -1,2 +1,3 @@
 ﻿using System.Runtime.CompilerServices;
-[assembly:InternalsVisibleToAttribute("EnkiProblems.Application.Tests")]
+
+[assembly: InternalsVisibleToAttribute("EnkiProblems.Application.Tests")]

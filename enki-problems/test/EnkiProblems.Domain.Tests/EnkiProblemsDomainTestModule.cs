@@ -3,10 +3,5 @@ using Volo.Abp.Modularity;
 
 namespace EnkiProblems;
 
-[DependsOn(
-    typeof(EnkiProblemsMongoDbTestModule)
-    )]
-public class EnkiProblemsDomainTestModule : AbpModule
-{
-
-}
+[DependsOn(typeof(EnkiProblemsMongoDbTestModule))]
+public class EnkiProblemsDomainTestModule : AbpModule { }

@@ -3,7 +3,5 @@ using Xunit;
 
 namespace EnkiProblems.MongoDB;
 
-public class EnkiProblemsMongoDbCollectionFixtureBase : ICollectionFixture<EnkiProblemsMongoDbFixture>
-{
-
-}
+public class EnkiProblemsMongoDbCollectionFixtureBase
+    : ICollectionFixture<EnkiProblemsMongoDbFixture> { }

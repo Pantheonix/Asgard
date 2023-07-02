@@ -22,7 +22,7 @@ namespace EnkiProblems.MongoDB;
     typeof(AbpAuditLoggingMongoDbModule),
     typeof(AbpTenantManagementMongoDbModule),
     typeof(AbpFeatureManagementMongoDbModule)
-    )]
+)]
 public class EnkiProblemsMongoDbModule : AbpModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)
@@ -31,7 +31,7 @@ public class EnkiProblemsMongoDbModule : AbpModule
         {
             options.AddDefaultRepositories();
         });
-
+        
         Configure<AbpUnitOfWorkDefaultOptions>(options =>
         {
             options.TransactionBehavior = UnitOfWorkTransactionBehavior.Disabled;

@@ -18,7 +18,7 @@ namespace EnkiProblems;
     typeof(AbpTenantManagementApplicationModule),
     typeof(AbpFeatureManagementApplicationModule),
     typeof(AbpSettingManagementApplicationModule)
-    )]
+)]
 public class EnkiProblemsApplicationModule : AbpModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)

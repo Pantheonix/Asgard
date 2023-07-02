@@ -8,8 +8,5 @@ namespace EnkiProblems.DbMigrator;
     typeof(AbpAutofacModule),
     typeof(EnkiProblemsMongoDbModule),
     typeof(EnkiProblemsApplicationContractsModule)
-    )]
-public class EnkiProblemsDbMigratorModule : AbpModule
-{
-
-}
+)]
+public class EnkiProblemsDbMigratorModule : AbpModule { }

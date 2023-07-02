@@ -3,7 +3,4 @@
 namespace EnkiProblems.Localization;
 
 [LocalizationResourceName("EnkiProblems")]
-public class EnkiProblemsResource
-{
-
-}
+public class EnkiProblemsResource { }

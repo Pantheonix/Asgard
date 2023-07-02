@@ -19,7 +19,7 @@ namespace EnkiProblems;
     typeof(AbpTenantManagementHttpApiModule),
     typeof(AbpFeatureManagementHttpApiModule),
     typeof(AbpSettingManagementHttpApiModule)
-    )]
+)]
 public class EnkiProblemsHttpApiModule : AbpModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)
@@ -31,11 +31,7 @@ public class EnkiProblemsHttpApiModule : AbpModule
     {
         Configure<AbpLocalizationOptions>(options =>
         {
-            options.Resources
-                .Get<EnkiProblemsResource>()
-                .AddBaseTypes(
-                    typeof(AbpUiResource)
-                );
+            options.Resources.Get<EnkiProblemsResource>().AddBaseTypes(typeof(AbpUiResource));
         });
     }
 }

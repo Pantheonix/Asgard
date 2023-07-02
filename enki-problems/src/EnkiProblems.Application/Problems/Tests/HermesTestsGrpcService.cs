@@ -1,6 +1,3 @@
 namespace EnkiProblems.Problems.Tests;
 
-public class HermesTestsGrpcService
-{
-    
-}
+public class HermesTestsGrpcService { }

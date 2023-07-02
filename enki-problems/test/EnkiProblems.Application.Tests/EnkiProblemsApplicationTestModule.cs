@@ -2,11 +2,5 @@
 
 namespace EnkiProblems;
 
-[DependsOn(
-    typeof(EnkiProblemsApplicationModule),
-    typeof(EnkiProblemsDomainTestModule)
-    )]
-public class EnkiProblemsApplicationTestModule : AbpModule
-{
-
-}
+[DependsOn(typeof(EnkiProblemsApplicationModule), typeof(EnkiProblemsDomainTestModule))]
+public class EnkiProblemsApplicationTestModule : AbpModule { }
