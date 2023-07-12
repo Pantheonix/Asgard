@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using EnkiProblems.Problems;
 using Volo.Abp.Data;
@@ -13,7 +12,10 @@ public class EnkiProblemsTestDataSeedContributor : IDataSeedContributor, ITransi
     private readonly EnkiProblemsTestData _testData;
     private readonly IRepository<Problem, Guid> _problemRepository;
 
-    public EnkiProblemsTestDataSeedContributor(EnkiProblemsTestData testData, IRepository<Problem, Guid> problemRepository)
+    public EnkiProblemsTestDataSeedContributor(
+        EnkiProblemsTestData testData,
+        IRepository<Problem, Guid> problemRepository
+    )
     {
         _testData = testData;
         _problemRepository = problemRepository;
@@ -27,17 +29,18 @@ public class EnkiProblemsTestDataSeedContributor : IDataSeedContributor, ITransi
             new Problem(
                 _testData.ProblemId1,
                 _testData.ProblemName1,
-                "Problem Brief",
-                "Problem Description",
-                "Problem Source Name",
-                "Problem Author Name",
-                1,
-                1,
-                1,
-                IoTypeEnum.Standard,
-                DifficultyEnum.Easy,
-                3,
-                new List<ProgrammingLanguageEnum> { ProgrammingLanguageEnum.CSharp }
+                _testData.ProblemBrief1,
+                _testData.ProblemDescription1,
+                _testData.ProblemSourceName1,
+                _testData.ProblemAuthorName1,
+                _testData.ProblemProposerId1,
+                _testData.ProblemTimeLimit1,
+                _testData.ProblemTotalMemoryLimit1,
+                _testData.ProblemStackMemoryLimit1,
+                _testData.ProblemIoType1,
+                _testData.ProblemDifficulty1,
+                _testData.ProblemNumberOfTests1,
+                _testData.ProblemProgrammingLanguages1
             )
         );
     }

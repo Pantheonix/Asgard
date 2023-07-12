@@ -6,6 +6,10 @@ public static class EnkiProblemsConsts
 
     public const string DbSchema = null;
 
+    public const string ProposerRoleName = "Proposer";
+
+    public const string AdminRoleName = "Admin";
+
     public const int MaxNameLength = 128;
 
     public const int MinNameLength = 2;

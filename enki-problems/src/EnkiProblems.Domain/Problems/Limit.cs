@@ -21,8 +21,7 @@ public class Limit : ValueObject
     {
         ProblemId = problemId;
         SetTime(time);
-        SetTotalMemory(totalMemory);
-        SetStackMemory(stackMemory);
+        SetMemory(totalMemory, stackMemory);
     }
 
     internal Limit SetTime(decimal time)
@@ -36,25 +35,29 @@ public class Limit : ValueObject
         return this;
     }
 
-    internal Limit SetTotalMemory(decimal totalMemory)
+    internal Limit SetMemory(decimal totalMemory, decimal stackMemory)
     {
+        if (totalMemory < stackMemory)
+        {
+            throw new BusinessException(
+                EnkiProblemsDomainErrorCodes.TotalMemoryLessThanStackMemory
+            );
+        }
+
         TotalMemory = Check.Range(
             totalMemory,
             nameof(totalMemory),
             EnkiProblemsConsts.MinTotalMemoryLimit,
             EnkiProblemsConsts.MaxTotalMemoryLimit
         );
-        return this;
-    }
 
-    internal Limit SetStackMemory(decimal stackMemory)
-    {
         StackMemory = Check.Range(
             stackMemory,
             nameof(stackMemory),
             EnkiProblemsConsts.MinStackMemoryLimit,
             EnkiProblemsConsts.MaxStackMemoryLimit
         );
+
         return this;
     }
 

@@ -4,6 +4,8 @@
     "Menu:Home": "Home",
     "Welcome": "Welcome",
     "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io.",
-    "EnkiProblems:ProblemAlreadyExists": "A problem with the same name already exists."
+    "EnkiProblems:ProblemAlreadyExists": "A problem with the same name already exists.",
+    "EnkiProblems:TotalMemoryLessThanStackMemory": "Total memory must be greater than stack memory.",
+    "EnkiProblems:NotAllowedToCreateProblem": "You are not allowed to create a problem."
   }
 }

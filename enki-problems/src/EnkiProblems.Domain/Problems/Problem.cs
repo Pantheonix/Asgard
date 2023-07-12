@@ -18,6 +18,8 @@ public class Problem : FullAuditedAggregateRoot<Guid>
 
     public Origin Origin { get; private set; }
 
+    public Guid ProposerId { get; private set; }
+
     public Limit Limit { get; private set; }
 
     public DateTime CreationDate { get; private set; }
@@ -45,6 +47,7 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         string description,
         string sourceName,
         string authorName,
+        Guid proposerId,
         decimal timeLimit,
         decimal totalMemoryLimit,
         decimal stackMemoryLimit,
@@ -65,6 +68,7 @@ public class Problem : FullAuditedAggregateRoot<Guid>
 
         IoType = ioType;
         Difficulty = difficulty;
+        ProposerId = proposerId;
 
         IsPublished = false;
         CreationDate = DateTime.Now;

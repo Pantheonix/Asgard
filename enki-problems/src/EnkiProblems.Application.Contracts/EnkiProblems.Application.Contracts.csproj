@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EnkiProblems.Domain.Shared\EnkiProblems.Domain.Shared.csproj" />
+    <ProjectReference Include="..\EnkiProblems.Domain\EnkiProblems.Domain.csproj" />
   </ItemGroup>
   
   <ItemGroup>

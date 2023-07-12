@@ -31,7 +31,7 @@ public class EnkiProblemsMongoDbModule : AbpModule
         {
             options.AddDefaultRepositories();
         });
-        
+
         Configure<AbpUnitOfWorkDefaultOptions>(options =>
         {
             options.TransactionBehavior = UnitOfWorkTransactionBehavior.Disabled;

@@ -1,5 +1,4 @@
-﻿using EnkiProblems.MongoDB;
-using Xunit;
+﻿using Xunit;
 
 namespace EnkiProblems.MongoDB;
 

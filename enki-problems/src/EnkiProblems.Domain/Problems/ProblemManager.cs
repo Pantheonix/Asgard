@@ -7,11 +7,11 @@ using Volo.Abp.Domain.Services;
 
 namespace EnkiProblems.Problems;
 
-public class ProblemsManager : DomainService
+public class ProblemManager : DomainService
 {
     private readonly IRepository<Problem, Guid> _problemRepository;
 
-    public ProblemsManager(IRepository<Problem, Guid> problemRepository)
+    public ProblemManager(IRepository<Problem, Guid> problemRepository)
     {
         _problemRepository = problemRepository;
     }
@@ -22,6 +22,7 @@ public class ProblemsManager : DomainService
         string description,
         string sourceName,
         string authorName,
+        Guid proposerId,
         decimal timeLimit,
         decimal totalMemoryLimit,
         decimal stackMemoryLimit,
@@ -44,6 +45,7 @@ public class ProblemsManager : DomainService
             description,
             sourceName,
             authorName,
+            proposerId,
             timeLimit,
             totalMemoryLimit,
             stackMemoryLimit,
