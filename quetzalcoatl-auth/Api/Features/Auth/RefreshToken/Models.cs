@@ -1,6 +1,9 @@
-using FastEndpoints.Security;
-
 namespace Api.Features.Auth.RefreshToken;
+
+public class UserTokenRequest : TokenRequest
+{
+    public string AccessToken { get; set; } = default!;
+}
 
 public class UserTokenResponse : TokenResponse
 {

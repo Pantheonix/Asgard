@@ -10,22 +10,36 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
-    var jwtConfig = new JwtConfig();
-    builder.Configuration.Bind(nameof(jwtConfig), jwtConfig);
+    builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection(nameof(JwtConfig)));
+    builder.Services.Configure<AdminConfig>(builder.Configuration.GetSection(nameof(AdminConfig)));
+    
+    var jwtConfig = builder.Configuration.GetSection(nameof(JwtConfig)).Get<JwtConfig>();
+    var tokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig!.SecretKey)),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        RequireExpirationTime = false,
+        ValidateLifetime = true
+    };
+    var dsnConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-    var adminConfig = new AdminConfig();
-    builder.Configuration.Bind(nameof(adminConfig), adminConfig);
+    builder.Services.AddHealthChecks().AddSqlServer(dsnConnectionString!);
 
     builder.Host.UseSerilog(
         (context, services, configuration) =>
             configuration.ReadFrom.Configuration(context.Configuration).ReadFrom.Services(services)
     );
-
+    
     builder.Services
-        .AddDbContext<ApplicationDbContext>(
-            options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-        )
+        .AddDbContext<ApplicationDbContext>(options =>
+        {
+            options.UseSqlServer(dsnConnectionString);
+            options.UseTriggers(
+                triggerOptions => triggerOptions.AddTrigger<DeleteStaleRefreshTokens>()
+            );
+        })
         .AddScoped<IPictureRepository, PictureRepository>()
         .AddScoped<IRefreshTokenRepository, RefreshTokenRepository>()
         .AddIdentity<ApplicationUser, IdentityRole<Guid>>(identity =>
@@ -33,6 +47,11 @@ try
             identity.User.RequireUniqueEmail = true;
         })
         .AddEntityFrameworkStores<ApplicationDbContext>();
+
+    if (builder.Environment.IsDevelopment())
+    {
+        builder.Services.EnsureDbCreated<ApplicationDbContext>();
+    }
 
     builder.Services
         .AddFastEndpoints(options =>
@@ -44,8 +63,7 @@ try
                 typeof(IApplicationMarker).Assembly
             };
         })
-        .AddSingleton(jwtConfig)
-        .AddSingleton(adminConfig)
+        .AddSingleton(tokenValidationParameters)
         .AddJWTBearerAuth(jwtConfig.SecretKey)
         .AddAutoMapper(typeof(IApiMarker), typeof(IApplicationMarker))
         .AddSwaggerDoc(settings =>
@@ -55,8 +73,17 @@ try
         });
 
     var app = builder.Build();
+    
+    if (app.Environment.IsDevelopment())
+    {
+        await app.UseSeedData();
+    }
 
-    await app.UseSeedData();
+    app.MapHealthChecks(
+            "/_health",
+            new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse, }
+        )
+        .RequireHost("*:5210");
 
     app.UseSerilogRequestLogging()
         .UseDefaultExceptionHandler()

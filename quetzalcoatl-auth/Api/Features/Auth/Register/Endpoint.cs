@@ -8,13 +8,13 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, UserTokenRespo
     private readonly ILogger<RegisterUserEndpoint> _logger;
 
     public RegisterUserEndpoint(
-        JwtConfig jwtConfig,
+        IOptions<JwtConfig> jwtConfig,
         UserManager<ApplicationUser> userManager,
         IMapper mapper,
         ILogger<RegisterUserEndpoint> logger
     )
     {
-        _jwtConfig = jwtConfig ?? throw new ArgumentNullException(nameof(jwtConfig));
+        _jwtConfig = jwtConfig.Value ?? throw new ArgumentNullException(nameof(jwtConfig));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -54,7 +54,7 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, UserTokenRespo
                 HttpOnly = true,
                 SameSite = SameSiteMode.Strict,
                 Secure = true,
-                Expires = DateTimeOffset.UtcNow.AddHours(_jwtConfig.JwtAccessTokenLifetime)
+                Expires = DateTimeOffset.UtcNow.AddTicks(_jwtConfig.JwtAccessTokenLifetime.Ticks)
             }
         );
 
@@ -66,7 +66,7 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, UserTokenRespo
                 HttpOnly = true,
                 SameSite = SameSiteMode.Strict,
                 Secure = true,
-                Expires = DateTimeOffset.UtcNow.AddDays(_jwtConfig.JwtRefreshTokenLifetime)
+                Expires = DateTimeOffset.UtcNow.AddTicks(_jwtConfig.JwtRefreshTokenLifetime.Ticks)
             }
         );
 
