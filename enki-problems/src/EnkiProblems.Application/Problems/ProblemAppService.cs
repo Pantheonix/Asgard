@@ -6,6 +6,7 @@ using Volo.Abp.Authorization;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Application.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using Volo.Abp.Domain.Entities;
 
 namespace EnkiProblems.Problems;
 
@@ -26,6 +27,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     [Authorize]
     public async Task<ProblemDto> CreateAsync(CreateProblemDto input)
     {
+        // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
         {
             throw new AbpAuthorizationException(
@@ -49,11 +51,12 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             input.ProgrammingLanguages
         );
 
-        await _problemRepository.InsertAsync(problem);
+        await _problemRepository.InsertAsync(problem, true);
 
         return ObjectMapper.Map<Problem, ProblemDto>(problem);
     }
 
+    [AllowAnonymous]
     public async Task<PagedResultDto<ProblemDto>> GetListAsync(ProblemListFilterDto input)
     {
         var problemQueryable = await _problemRepository.GetQueryableAsync();
@@ -63,6 +66,11 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         if (!string.IsNullOrEmpty(input.Name))
         {
             problemQueryable = problemQueryable.Where(p => p.Name.Contains(input.Name));
+        }
+
+        if (input.ProposerId != null)
+        {
+            problemQueryable = problemQueryable.Where(p => p.ProposerId == input.ProposerId);
         }
 
         if (input.IoType != null)
@@ -91,5 +99,79 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             totalCount,
             ObjectMapper.Map<List<Problem>, List<ProblemDto>>(problems)
         );
+    }
+
+    [Authorize]
+    public async Task<PagedResultDto<ProblemDto>> GetUnpublishedProblemsByCurrentUserAsync()
+    {
+        // TODO: convert to permission
+        if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
+        {
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.NotAllowedToViewUnpublishedProblems
+            );
+        }
+
+        var problemQueryable = await _problemRepository.GetQueryableAsync();
+
+        problemQueryable = problemQueryable
+            .Where(p => !p.IsPublished && p.ProposerId == CurrentUser.Id)
+            .OrderBy(p => p.CreationDate);
+
+        var totalCount = await AsyncExecuter.CountAsync(problemQueryable);
+        var problems = await AsyncExecuter.ToListAsync(problemQueryable);
+
+        return new PagedResultDto<ProblemDto>(
+            totalCount,
+            ObjectMapper.Map<List<Problem>, List<ProblemDto>>(problems)
+        );
+    }
+
+    [AllowAnonymous]
+    public async Task<ProblemDto> GetByIdAsync(GetProblemByIdDto input)
+    {
+        var problem = await _problemRepository.GetAsync(input.ProblemId);
+
+        if (problem is null)
+        {
+            throw new EntityNotFoundException(typeof(Problem), input.ProblemId);
+        }
+
+        if (!problem.IsPublished)
+        {
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.NotAllowedToViewUnpublishedProblems
+            );
+        }
+
+        return ObjectMapper.Map<Problem, ProblemDto>(problem);
+    }
+
+    [Authorize]
+    public async Task<ProblemDto> GetByIdForProposerAsync(GetProblemByIdDto input)
+    {
+        var problem = await _problemRepository.GetAsync(input.ProblemId);
+       
+        // TODO: convert to permission
+        if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
+        {
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.NotAllowedToViewUnpublishedProblems
+            );
+        }
+        
+        if (problem is null)
+        {
+            throw new EntityNotFoundException(typeof(Problem), input.ProblemId);
+        }
+        
+        if (!problem.IsPublished && problem.ProposerId != CurrentUser.Id)
+        {
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.UnpublishedProblemNotBelongingToCurrentUser
+            );
+        }
+        
+        return ObjectMapper.Map<Problem, ProblemDto>(problem);
     }
 }

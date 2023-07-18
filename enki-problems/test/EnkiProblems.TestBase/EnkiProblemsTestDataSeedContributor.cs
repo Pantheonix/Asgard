@@ -43,5 +43,24 @@ public class EnkiProblemsTestDataSeedContributor : IDataSeedContributor, ITransi
                 _testData.ProblemProgrammingLanguages1
             )
         );
+
+        await _problemRepository.InsertAsync(
+            new Problem(
+                _testData.ProblemId3,
+                _testData.ProblemName3,
+                _testData.ProblemBrief3,
+                _testData.ProblemDescription3,
+                _testData.ProblemSourceName3,
+                _testData.ProblemAuthorName3,
+                _testData.ProblemProposerId3,
+                _testData.ProblemTimeLimit3,
+                _testData.ProblemTotalMemoryLimit3,
+                _testData.ProblemStackMemoryLimit3,
+                _testData.ProblemIoType3,
+                _testData.ProblemDifficulty3,
+                _testData.ProblemNumberOfTests3,
+                _testData.ProblemProgrammingLanguages3
+            )
+        );
     }
 }

@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Medallion.Threading;
 using Medallion.Threading.Redis;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using EnkiProblems.MongoDB;
 using EnkiProblems.MultiTenancy;
+using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 using Microsoft.OpenApi.Models;
 using Volo.Abp;
@@ -119,11 +120,22 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                options.Authority = configuration["AuthServer:Authority"];
-                options.RequireHttpsMetadata = Convert.ToBoolean(
-                    configuration["AuthServer:RequireHttpsMetadata"]
-                );
-                options.Audience = "EnkiProblems";
+                // options.Authority = configuration["AuthServer:Authority"];
+                // options.RequireHttpsMetadata = Convert.ToBoolean(
+                //     configuration["AuthServer:RequireHttpsMetadata"]
+                // );
+                // options.Audience = "EnkiProblems";
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(configuration["AuthServer:SecurityKey"]!)
+                    ),
+                    ValidateIssuerSigningKey = false,
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
             });
     }
 
@@ -132,19 +144,55 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         IConfiguration configuration
     )
     {
-        context.Services.AddAbpSwaggerGenWithOAuth(
-            configuration["AuthServer:Authority"],
-            new Dictionary<string, string> { { "EnkiProblems", "EnkiProblems API" } },
-            options =>
-            {
-                options.SwaggerDoc(
-                    "v1",
-                    new OpenApiInfo { Title = "EnkiProblems API", Version = "v1" }
-                );
-                options.DocInclusionPredicate((docName, description) => true);
-                options.CustomSchemaIds(type => type.FullName);
-            }
-        );
+        // context.Services.AddAbpSwaggerGenWithOAuth(
+        //     configuration["AuthServer:Authority"],
+        //     new Dictionary<string, string> { { "EnkiProblems", "EnkiProblems API" } },
+        //     options =>
+        //     {
+        //         options.SwaggerDoc(
+        //             "v1",
+        //             new OpenApiInfo { Title = "EnkiProblems API", Version = "v1" }
+        //         );
+        //         options.DocInclusionPredicate((docName, description) => true);
+        //         options.CustomSchemaIds(type => type.FullName);
+        //     }
+        // );
+        context.Services.AddAbpSwaggerGen(options =>
+        {
+            options.SwaggerDoc(
+                "v1",
+                new OpenApiInfo { Title = "EnkiProblems API", Version = "v1" }
+            );
+            options.DocInclusionPredicate((docName, description) => true);
+            options.CustomSchemaIds(type => type.FullName);
+            options.AddSecurityDefinition(
+                "Bearer",
+                new OpenApiSecurityScheme
+                {
+                    Description =
+                        "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey
+                }
+            );
+            options.AddSecurityRequirement(
+                new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                }
+            );
+        });
     }
 
     private void ConfigureDataProtection(

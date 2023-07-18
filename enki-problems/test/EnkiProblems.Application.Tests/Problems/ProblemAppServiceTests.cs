@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Shouldly;
 using Volo.Abp.Authorization;
+using Volo.Abp.Domain.Entities;
 using Volo.Abp.Users;
 using Xunit;
 
@@ -28,10 +29,11 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         services.AddSingleton(_currentUser);
     }
 
+    #region CreateAsyncTests
     [Fact]
     public async Task Should_Create_A_New_Valid_Problem_When_Current_User_Is_Proposer()
     {
-        Login(_testData.ProposerUserId, _testData.ProposerUserRoles);
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
 
         var problemDto = await _problemAppService.CreateAsync(
             new CreateProblemDto
@@ -95,14 +97,155 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
             );
         });
     }
+    #endregion
 
+    #region GetListAsyncTests
     [Fact]
     public async Task Should_Not_List_Unpublished_Problems_When_Current_User_Is_Anonymous()
     {
-        var problemListDto = await _problemAppService.GetListAsync(new ProblemListFilterDto {});
+        var problemListDto = await _problemAppService.GetListAsync(new ProblemListFilterDto { });
 
-        problemListDto.Items.Count.ShouldBe(0);
+        problemListDto.TotalCount.ShouldBe(0);
     }
+    #endregion
+
+    #region GetUnpublishedProblemsByCurrentUserAsyncTests
+    [Fact]
+    public async Task Should_List_Unpublished_Problems_Only_For_Current_User_When_Current_User_Is_Proposer()
+    {
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        var problemListDto = await _problemAppService.GetUnpublishedProblemsByCurrentUserAsync();
+
+        problemListDto.TotalCount.ShouldBe(1);
+        problemListDto.Items.ShouldContain(
+            p =>
+                p.Name == _testData.ProblemName1
+                && p.ProposerId == _testData.ProposerUserId1
+                && p.IsPublished == false
+        );
+    }
+
+    [Fact]
+    public async Task Should_Not_List_Unpublished_Problems_When_Current_User_Is_Not_Proposer()
+    {
+        Login(_testData.NormalUserId, _testData.NormalUserRoles);
+
+        await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
+        {
+            await _problemAppService.GetUnpublishedProblemsByCurrentUserAsync();
+        });
+    }
+    #endregion
+
+    #region GetByIdAsyncTests
+    // TODO: Run this test after implementing the PublishAsync method support
+    // [Fact]
+    // public async Task Should_Get_Published_Problem_When_Current_User_Is_Anonymous()
+    // {
+    //     var problemDto = await _problemAppService.GetByIdAsync(new GetProblemByIdDto
+    //     {
+    //         ProblemId = _testData.ProblemId1
+    //     });
+    //
+    //     problemDto.ShouldNotBeNull();
+    //     problemDto.Id.ShouldBe(_testData.ProblemId1);
+    //     problemDto.Name.ShouldBe(_testData.ProblemName1);
+    // }
+
+    [Fact]
+    public async Task Should_Not_Get_Unpublished_Problem_When_Current_User_Is_Anonymous()
+    {
+        await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
+        {
+            await _problemAppService.GetByIdAsync(
+                new GetProblemByIdDto { ProblemId = _testData.ProblemId1 }
+            );
+        });
+    }
+
+    [Fact]
+    public async Task Should_Not_Get_Not_Existing_Problem_When_Current_User_Is_Anonymous()
+    {
+        await Assert.ThrowsAsync<EntityNotFoundException>(async () =>
+        {
+            await _problemAppService.GetByIdAsync(
+                new GetProblemByIdDto { ProblemId = Guid.NewGuid() }
+            );
+        });
+    }
+    #endregion
+
+    #region GetByIdForProposerAsyncTests
+    // TODO: Run this test after implementing the PublishAsync method support
+    // [Fact]
+    // public async Task Should_Get_Published_Problem_When_Current_User_Is_Proposer()
+    // {
+    //     Login(_testData.ProposerUserId, _testData.ProposerUserRoles);
+    //
+    //     var problemDto = await _problemAppService.GetByIdForProposerAsync(new GetProblemByIdDto
+    //     {
+    //         ProblemId = _testData.ProblemId1
+    //     });
+    //
+    //     problemDto.ShouldNotBeNull();
+    //     problemDto.Id.ShouldBe(_testData.ProblemId1);
+    //     problemDto.Name.ShouldBe(_testData.ProblemName1);
+    // }
+
+    [Fact]
+    public async Task Should_Get_Unpublished_Problem_When_Current_User_Is_Proposer_And_The_Problem_Is_Proposed_By_Current_User()
+    {
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        var problemDto = await _problemAppService.GetByIdForProposerAsync(
+            new GetProblemByIdDto { ProblemId = _testData.ProblemId1 }
+        );
+
+        problemDto.ShouldNotBeNull();
+        problemDto.Id.ShouldBe(_testData.ProblemId1);
+        problemDto.Name.ShouldBe(_testData.ProblemName1);
+    }
+
+    [Fact]
+    public async Task Should_Not_Get_Unpublished_Problem_When_Current_User_Is_Proposer_And_The_Problem_Is_Not_Proposed_By_Current_User()
+    {
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
+        {
+            await _problemAppService.GetByIdForProposerAsync(
+                new GetProblemByIdDto { ProblemId = _testData.ProblemId3 }
+            );
+        });
+    }
+
+    [Fact]
+    public async Task Should_Not_Get_Not_Existing_Problem_When_Current_User_Is_Proposer()
+    {
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+        
+        await Assert.ThrowsAsync<EntityNotFoundException>(async () =>
+        {
+            await _problemAppService.GetByIdForProposerAsync(
+                new GetProblemByIdDto { ProblemId = Guid.NewGuid() }
+            );
+        });
+    }
+    
+    [Fact]
+    public async Task Should_Not_Get_Published_Problem_When_Current_User_Is_Anonymous()
+    {
+        Login(_testData.NormalUserId, _testData.NormalUserRoles);
+
+        await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
+        {
+            await _problemAppService.GetByIdForProposerAsync(
+                new GetProblemByIdDto { ProblemId = _testData.ProblemId1 }
+            );
+        });
+    }
+    #endregion
 
     private void Login(Guid userId, string[] userRoles)
     {

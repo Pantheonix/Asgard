@@ -19,7 +19,7 @@ public class EnkiProblemsTestData : ISingletonDependency
 
     public string ProblemAuthorName1 { get; } = "Problem Author Name 1";
 
-    public Guid ProblemProposerId1 { get; } = Guid.Parse("00000000-0000-0000-0000-000000000001");
+    public Guid ProblemProposerId1 { get; } = Guid.Parse("00000000-0000-0000-0000-000000000002");
 
     public int ProblemTimeLimit1 { get; } = 1;
 
@@ -65,12 +65,43 @@ public class EnkiProblemsTestData : ISingletonDependency
     public ProgrammingLanguageEnum[] ProblemProgrammingLanguages2 { get; } =
         { ProgrammingLanguageEnum.Rust };
 
+    public Guid ProblemId3 { get; } = Guid.Parse("00000000-0000-0000-0000-000000000003");
+
+    public string ProblemName3 { get; } = "Problem Name 3";
+
+    public string ProblemBrief3 { get; } = "Problem Brief 3";
+
+    public string ProblemDescription3 { get; } = "Problem Description 3";
+
+    public string ProblemSourceName3 { get; } = "Problem Source Name 3";
+
+    public string ProblemAuthorName3 { get; } = "Problem Author Name 3";
+
+    public Guid ProblemProposerId3 { get; } = Guid.Parse("00000000-0000-0000-0000-000000000003");
+
+    public int ProblemTimeLimit3 { get; } = 3;
+
+    public int ProblemStackMemoryLimit3 { get; } = 3;
+
+    public int ProblemTotalMemoryLimit3 { get; } = 3;
+
+    public int ProblemNumberOfTests3 { get; } = 3;
+
+    public IoTypeEnum ProblemIoType3 { get; } = IoTypeEnum.Standard;
+
+    public DifficultyEnum ProblemDifficulty3 { get; } = DifficultyEnum.Easy;
+
+    public ProgrammingLanguageEnum[] ProblemProgrammingLanguages3 { get; } =
+        { ProgrammingLanguageEnum.Rust, ProgrammingLanguageEnum.C };
+
     /* USERS */
     public Guid NormalUserId { get; } = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
-    public string[] NormalUserRoles { get; } = { "User" };
+    public string[] NormalUserRoles { get; } = { "" };
 
-    public Guid ProposerUserId { get; } = Guid.Parse("00000000-0000-0000-0000-000000000002");
+    public Guid ProposerUserId1 { get; } = Guid.Parse("00000000-0000-0000-0000-000000000002");
 
-    public string[] ProposerUserRoles { get; } = { "User", "Proposer" };
+    public Guid ProposerUserId2 { get; } = Guid.Parse("00000000-0000-0000-0000-000000000003");
+
+    public string[] ProposerUserRoles { get; } = { "", "Proposer" };
 }

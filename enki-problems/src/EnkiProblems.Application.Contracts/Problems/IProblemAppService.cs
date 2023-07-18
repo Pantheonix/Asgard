@@ -9,4 +9,10 @@ public interface IProblemAppService : IApplicationService
     Task<ProblemDto> CreateAsync(CreateProblemDto input);
 
     Task<PagedResultDto<ProblemDto>> GetListAsync(ProblemListFilterDto input);
+
+    Task<PagedResultDto<ProblemDto>> GetUnpublishedProblemsByCurrentUserAsync();
+
+    Task<ProblemDto> GetByIdAsync(GetProblemByIdDto input);
+
+    Task<ProblemDto> GetByIdForProposerAsync(GetProblemByIdDto input);
 }
