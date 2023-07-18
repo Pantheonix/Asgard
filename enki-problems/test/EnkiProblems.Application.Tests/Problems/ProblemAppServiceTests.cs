@@ -96,6 +96,14 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         });
     }
 
+    [Fact]
+    public async Task Should_Not_List_Unpublished_Problems_When_Current_User_Is_Anonymous()
+    {
+        var problemListDto = await _problemAppService.GetListAsync(new ProblemListFilterDto {});
+
+        problemListDto.Items.Count.ShouldBe(0);
+    }
+
     private void Login(Guid userId, string[] userRoles)
     {
         _currentUser.Id.Returns(userId);
