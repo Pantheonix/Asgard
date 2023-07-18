@@ -40,12 +40,12 @@ public static class WebApplicationExtensions
                 adminUser,
                 adminConfig.Value.Password
             );
-            var resultAddRole = await userManager.AddToRoleAsync(
+            var resultAddRoles = await userManager.AddToRolesAsync(
                 adminUser,
-                ApplicationRoles.Admin.ToString()
+                new[] { ApplicationRoles.Proposer.ToString(), ApplicationRoles.Admin.ToString() }
             );
 
-            if (!resultCreateUser.Succeeded || !resultAddRole.Succeeded)
+            if (!resultCreateUser.Succeeded || !resultAddRoles.Succeeded)
             {
                 throw new Exception("Failed to create admin user");
             }
