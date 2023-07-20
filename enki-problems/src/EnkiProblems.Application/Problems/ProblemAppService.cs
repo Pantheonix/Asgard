@@ -51,7 +51,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             input.ProgrammingLanguages
         );
 
-        await _problemRepository.InsertAsync(problem, true);
+        await _problemRepository.InsertAsync(problem);
 
         return ObjectMapper.Map<Problem, ProblemDto>(problem);
     }
@@ -68,22 +68,22 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             problemQueryable = problemQueryable.Where(p => p.Name.Contains(input.Name));
         }
 
-        if (input.ProposerId != null)
+        if (input.ProposerId is not null)
         {
             problemQueryable = problemQueryable.Where(p => p.ProposerId == input.ProposerId);
         }
 
-        if (input.IoType != null)
+        if (input.IoType is not null)
         {
             problemQueryable = problemQueryable.Where(p => p.IoType == input.IoType);
         }
 
-        if (input.Difficulty != null)
+        if (input.Difficulty is not null)
         {
             problemQueryable = problemQueryable.Where(p => p.Difficulty == input.Difficulty);
         }
 
-        if (input.ProgrammingLanguages != null)
+        if (input.ProgrammingLanguages is not null)
         {
             problemQueryable = problemQueryable.Where(
                 p => p.ProgrammingLanguages.Any(l => input.ProgrammingLanguages.Contains(l))
@@ -128,13 +128,13 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     }
 
     [AllowAnonymous]
-    public async Task<ProblemDto> GetByIdAsync(GetProblemByIdDto input)
+    public async Task<ProblemDto> GetByIdAsync(Guid id)
     {
-        var problem = await _problemRepository.GetAsync(input.ProblemId);
+        var problem = await _problemRepository.GetAsync(id);
 
         if (problem is null)
         {
-            throw new EntityNotFoundException(typeof(Problem), input.ProblemId);
+            throw new EntityNotFoundException(typeof(Problem), id);
         }
 
         if (!problem.IsPublished)
@@ -148,9 +148,9 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     }
 
     [Authorize]
-    public async Task<ProblemDto> GetByIdForProposerAsync(GetProblemByIdDto input)
+    public async Task<ProblemDto> GetByIdForProposerAsync(Guid id)
     {
-        var problem = await _problemRepository.GetAsync(input.ProblemId);
+        var problem = await _problemRepository.GetAsync(id);
        
         // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
@@ -162,7 +162,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         
         if (problem is null)
         {
-            throw new EntityNotFoundException(typeof(Problem), input.ProblemId);
+            throw new EntityNotFoundException(typeof(Problem), id);
         }
         
         if (!problem.IsPublished && problem.ProposerId != CurrentUser.Id)
@@ -173,5 +173,105 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         }
         
         return ObjectMapper.Map<Problem, ProblemDto>(problem);
+    }
+
+
+    [Authorize]
+    public async Task<ProblemDto> UpdateAsync(Guid id, UpdateProblemDto input)
+    {
+        var problem = await _problemRepository.GetAsync(id);
+
+         // TODO: convert to permission
+        if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
+        {
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.NotAllowedToEditProblem
+            );
+        }
+
+        if (problem is null)
+        {
+            throw new EntityNotFoundException(typeof(Problem), id);
+        }
+
+        if (problem.IsPublished)
+        {
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.NotAllowedToEditUnpublishedProblem
+            );
+        }
+
+        if (problem.ProposerId != CurrentUser.Id)
+        {
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.UnpublishedProblemNotBelongingToCurrentUser
+            );
+        }
+
+        if (input.Name is not null)
+        {
+            problem.SetName(input.Name);
+        }
+
+        if (input.Brief is not null)
+        {
+            problem.SetBrief(input.Brief);
+        }
+
+        if (input.Description is not null)
+        {
+            problem.SetDescription(input.Description);
+        }
+
+        if (input.SourceName is not null)
+        {
+            problem.SetSourceName(input.SourceName);
+        }
+
+        if (input.AuthorName is not null)
+        {
+            problem.SetAuthorName(input.AuthorName);
+        }
+
+        if (input.Time is not null)
+        {
+            problem.SetTime((decimal)input.Time);
+        }
+
+        if (input.TotalMemory is not null)
+        {
+            problem.SetTotalMemory((decimal)input.TotalMemory);
+        }
+
+        if (input.StackMemory is not null)
+        {
+            problem.SetStackMemory((decimal)input.StackMemory!);
+        }
+
+        if (input.IoType is not null)
+        {
+            problem.SetIoType((IoTypeEnum)input.IoType);
+        }
+
+        if (input.Difficulty is not null)
+        {
+            problem.SetDifficulty((DifficultyEnum)input.Difficulty);
+        }
+
+        // TODO: let number of tests to increase/decrease dynamically
+        // based on number of actual tests uploaded to hermes
+        if (input.NumberOfTests is not null)
+        {
+            problem.SetNumberOfTests((int)input.NumberOfTests);
+        }
+
+        if (input.ProgrammingLanguages is not null && input.ProgrammingLanguages.Any())
+        {
+            problem.SetProgrammingLanguages(input.ProgrammingLanguages);
+        }
+
+        return ObjectMapper.Map<Problem, ProblemDto>(
+            await _problemRepository.UpdateAsync(problem)
+        );
     }
 }

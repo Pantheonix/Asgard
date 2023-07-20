@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
@@ -12,7 +13,9 @@ public interface IProblemAppService : IApplicationService
 
     Task<PagedResultDto<ProblemDto>> GetUnpublishedProblemsByCurrentUserAsync();
 
-    Task<ProblemDto> GetByIdAsync(GetProblemByIdDto input);
+    Task<ProblemDto> GetByIdAsync(Guid id);
 
-    Task<ProblemDto> GetByIdForProposerAsync(GetProblemByIdDto input);
+    Task<ProblemDto> GetByIdForProposerAsync(Guid id);
+
+    Task<ProblemDto> UpdateAsync(Guid id, UpdateProblemDto input);
 }

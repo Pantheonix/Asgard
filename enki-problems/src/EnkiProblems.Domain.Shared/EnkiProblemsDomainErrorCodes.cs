@@ -12,6 +12,11 @@ public static class EnkiProblemsDomainErrorCodes
     public const string NotAllowedToViewUnpublishedProblems =
         "EnkiProblems:NotAllowedToViewUnpublishedProblems";
 
+    public const string NotAllowedToEditProblem = "EnkiProblems:NotAllowedToEditProblem";
+
+    public const string NotAllowedToEditUnpublishedProblem =
+        "EnkiProblems:NotAllowedToEditUnpublishedProblem";
+
     public const string UnpublishedProblemNotBelongingToCurrentUser =
         "EnkiProblems:UnpublishedProblemNotBelongingToCurrentUser";
 

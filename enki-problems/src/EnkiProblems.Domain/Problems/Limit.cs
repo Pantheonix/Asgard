@@ -61,6 +61,44 @@ public class Limit : ValueObject
         return this;
     }
 
+    internal Limit SetTotalMemory(decimal totalMemory)
+    {
+        if (totalMemory < StackMemory)
+        {
+            throw new BusinessException(
+                EnkiProblemsDomainErrorCodes.TotalMemoryLessThanStackMemory
+            );
+        }
+
+        TotalMemory = Check.Range(
+            totalMemory,
+            nameof(totalMemory),
+            EnkiProblemsConsts.MinTotalMemoryLimit,
+            EnkiProblemsConsts.MaxTotalMemoryLimit
+        );
+
+        return this;
+    }
+
+    internal Limit SetStackMemory(decimal stackMemory)
+    {
+        if (TotalMemory < stackMemory)
+        {
+            throw new BusinessException(
+                EnkiProblemsDomainErrorCodes.TotalMemoryLessThanStackMemory
+            );
+        }
+
+        StackMemory = Check.Range(
+            stackMemory,
+            nameof(stackMemory),
+            EnkiProblemsConsts.MinStackMemoryLimit,
+            EnkiProblemsConsts.MaxStackMemoryLimit
+        );
+
+        return this;
+    }
+
     protected override IEnumerable<object> GetAtomicValues()
     {
         yield return ProblemId;

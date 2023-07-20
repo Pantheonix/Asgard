@@ -158,9 +158,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     {
         await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
         {
-            await _problemAppService.GetByIdAsync(
-                new GetProblemByIdDto { ProblemId = _testData.ProblemId1 }
-            );
+            await _problemAppService.GetByIdAsync(_testData.ProblemId1);
         });
     }
 
@@ -169,9 +167,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     {
         await Assert.ThrowsAsync<EntityNotFoundException>(async () =>
         {
-            await _problemAppService.GetByIdAsync(
-                new GetProblemByIdDto { ProblemId = Guid.NewGuid() }
-            );
+            await _problemAppService.GetByIdAsync(Guid.NewGuid());
         });
     }
     #endregion
@@ -194,13 +190,11 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     // }
 
     [Fact]
-    public async Task Should_Get_Unpublished_Problem_When_Current_User_Is_Proposer_And_The_Problem_Is_Proposed_By_Current_User()
+    public async Task Should_Get_Unpublished_Problem_When_Current_User_Is_Proposer_And_Owner()
     {
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
 
-        var problemDto = await _problemAppService.GetByIdForProposerAsync(
-            new GetProblemByIdDto { ProblemId = _testData.ProblemId1 }
-        );
+        var problemDto = await _problemAppService.GetByIdForProposerAsync(_testData.ProblemId1);
 
         problemDto.ShouldNotBeNull();
         problemDto.Id.ShouldBe(_testData.ProblemId1);
@@ -208,15 +202,13 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     }
 
     [Fact]
-    public async Task Should_Not_Get_Unpublished_Problem_When_Current_User_Is_Proposer_And_The_Problem_Is_Not_Proposed_By_Current_User()
+    public async Task Should_Not_Get_Unpublished_Problem_When_Current_User_Is_Proposer_And_Not_Owner()
     {
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
 
         await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
         {
-            await _problemAppService.GetByIdForProposerAsync(
-                new GetProblemByIdDto { ProblemId = _testData.ProblemId3 }
-            );
+            await _problemAppService.GetByIdForProposerAsync(_testData.ProblemId3);
         });
     }
 
@@ -227,21 +219,145 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         
         await Assert.ThrowsAsync<EntityNotFoundException>(async () =>
         {
-            await _problemAppService.GetByIdForProposerAsync(
-                new GetProblemByIdDto { ProblemId = Guid.NewGuid() }
-            );
+            await _problemAppService.GetByIdForProposerAsync(Guid.NewGuid());
         });
     }
     
     [Fact]
-    public async Task Should_Not_Get_Published_Problem_When_Current_User_Is_Anonymous()
+    public async Task Should_Not_Get_Published_Problem_When_Current_User_Is_Not_Proposer()
     {
         Login(_testData.NormalUserId, _testData.NormalUserRoles);
 
         await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
         {
-            await _problemAppService.GetByIdForProposerAsync(
-                new GetProblemByIdDto { ProblemId = _testData.ProblemId1 }
+            await _problemAppService.GetByIdForProposerAsync(_testData.ProblemId1);
+        });
+    }
+    #endregion
+
+    #region UpdateAsync
+    [Fact]
+    public async Task Should_Update_Unpublished_Problem_When_Current_User_Is_Proposer_And_Owner()
+    {
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        var problemDto = await _problemAppService.UpdateAsync(
+            _testData.ProblemId1,
+            new UpdateProblemDto
+            {
+                Name = _testData.ProblemName2,
+                Brief = _testData.ProblemBrief2,
+                Description = _testData.ProblemDescription2,
+                SourceName = _testData.ProblemSourceName2,
+                AuthorName = _testData.ProblemAuthorName2,
+                Time = _testData.ProblemTimeLimit2,
+                StackMemory = _testData.ProblemStackMemoryLimit2,
+                TotalMemory = _testData.ProblemTotalMemoryLimit2,
+                IoType = _testData.ProblemIoType2,
+                Difficulty = _testData.ProblemDifficulty2,
+                NumberOfTests = _testData.ProblemNumberOfTests2,
+                ProgrammingLanguages = _testData.ProblemProgrammingLanguages2
+            }
+        );
+
+        problemDto.ShouldNotBeNull();
+        problemDto.Id.ShouldBe(_testData.ProblemId1);
+        problemDto.Name.ShouldBe(_testData.ProblemName2);
+        problemDto.Brief.ShouldBe(_testData.ProblemBrief2);
+        problemDto.Description.ShouldBe(_testData.ProblemDescription2);
+        problemDto.SourceName.ShouldBe(_testData.ProblemSourceName2);
+        problemDto.AuthorName.ShouldBe(_testData.ProblemAuthorName2);
+        problemDto.Time.ShouldBe(_testData.ProblemTimeLimit2);
+        problemDto.StackMemory.ShouldBe(_testData.ProblemStackMemoryLimit2);
+        problemDto.TotalMemory.ShouldBe(_testData.ProblemTotalMemoryLimit2);
+        problemDto.IoType.ShouldBe(_testData.ProblemIoType2);
+        problemDto.Difficulty.ShouldBe(_testData.ProblemDifficulty2);
+        problemDto.NumberOfTests.ShouldBe(_testData.ProblemNumberOfTests2);
+        problemDto.ProgrammingLanguages.ShouldBe(_testData.ProblemProgrammingLanguages2);
+        problemDto.IsPublished.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Should_Not_Update_Unpublished_Problem_When_Current_User_Is_Proposer_And_Not_Owner()
+    {
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
+        {
+            await _problemAppService.UpdateAsync(
+                _testData.ProblemId3,
+                new UpdateProblemDto
+                {
+                    Name = _testData.ProblemName2,
+                    Brief = _testData.ProblemBrief2,
+                    Description = _testData.ProblemDescription2,
+                    SourceName = _testData.ProblemSourceName2,
+                    AuthorName = _testData.ProblemAuthorName2,
+                    Time = _testData.ProblemTimeLimit2,
+                    StackMemory = _testData.ProblemStackMemoryLimit2,
+                    TotalMemory = _testData.ProblemTotalMemoryLimit2,
+                    IoType = _testData.ProblemIoType2,
+                    Difficulty = _testData.ProblemDifficulty2,
+                    NumberOfTests = _testData.ProblemNumberOfTests2,
+                    ProgrammingLanguages = _testData.ProblemProgrammingLanguages2
+                }
+            );
+        });
+    }
+
+    // TODO: Run this test after implementing the PublishAsync method support
+    // [Fact]
+    // public async Task Should_Not_Update_Published_Problem_When_Current_User_Is_Proposer()
+    // {
+    //     Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+    //     await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
+    //     {
+    //         await _problemAppService.UpdateAsync(
+    //             _testData.ProblemId1,
+    //             new UpdateProblemDto
+    //             {
+    //                 Name = _testData.ProblemName2,
+    //                 Brief = _testData.ProblemBrief2,
+    //                 Description = _testData.ProblemDescription2,
+    //                 SourceName = _testData.ProblemSourceName2,
+    //                 AuthorName = _testData.ProblemAuthorName2,
+    //                 Time = _testData.ProblemTimeLimit2,
+    //                 StackMemory = _testData.ProblemStackMemoryLimit2,
+    //                 TotalMemory = _testData.ProblemTotalMemoryLimit2,
+    //                 IoType = _testData.ProblemIoType2,
+    //                 Difficulty = _testData.ProblemDifficulty2,
+    //                 NumberOfTests = _testData.ProblemNumberOfTests2,
+    //                 ProgrammingLanguages = _testData.ProblemProgrammingLanguages2
+    //             }
+    //         );
+    //     });
+    // }
+
+    [Fact]
+    public async Task Should_Not_Update_Problem_When_Current_User_Is_Not_Proposer()
+    {
+        Login(_testData.NormalUserId, _testData.NormalUserRoles);
+
+        await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
+        {
+            await _problemAppService.UpdateAsync(
+                _testData.ProblemId1,
+                new UpdateProblemDto
+                {
+                    Name = _testData.ProblemName2,
+                    Brief = _testData.ProblemBrief2,
+                    Description = _testData.ProblemDescription2,
+                    SourceName = _testData.ProblemSourceName2,
+                    AuthorName = _testData.ProblemAuthorName2,
+                    Time = _testData.ProblemTimeLimit2,
+                    StackMemory = _testData.ProblemStackMemoryLimit2,
+                    TotalMemory = _testData.ProblemTotalMemoryLimit2,
+                    IoType = _testData.ProblemIoType2,
+                    Difficulty = _testData.ProblemDifficulty2,
+                    NumberOfTests = _testData.ProblemNumberOfTests2,
+                    ProgrammingLanguages = _testData.ProblemProgrammingLanguages2
+                }
             );
         });
     }
