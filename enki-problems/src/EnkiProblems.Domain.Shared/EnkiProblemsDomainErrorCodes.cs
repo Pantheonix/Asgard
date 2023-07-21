@@ -2,7 +2,7 @@
 
 public static class EnkiProblemsDomainErrorCodes
 {
-    public const string ProblemAlreadyExists = "EnkiProblems:ProblemAlreadyExists";
+    public const string ProblemNameAlreadyExists = "EnkiProblems:ProblemNameAlreadyExists";
 
     public const string TotalMemoryLessThanStackMemory =
         "EnkiProblems:TotalMemoryLessThanStackMemory";
@@ -14,8 +14,8 @@ public static class EnkiProblemsDomainErrorCodes
 
     public const string NotAllowedToEditProblem = "EnkiProblems:NotAllowedToEditProblem";
 
-    public const string NotAllowedToEditUnpublishedProblem =
-        "EnkiProblems:NotAllowedToEditUnpublishedProblem";
+    public const string NotAllowedToEditPublishedProblem =
+        "EnkiProblems:NotAllowedToEditPublishedProblem";
 
     public const string UnpublishedProblemNotBelongingToCurrentUser =
         "EnkiProblems:UnpublishedProblemNotBelongingToCurrentUser";

@@ -40,7 +40,7 @@ public class Problem : FullAuditedAggregateRoot<Guid>
 
     private Problem() { }
 
-    public Problem(
+    internal Problem(
         Guid id,
         string name,
         string brief,
@@ -77,7 +77,7 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         Labels = new Collection<ProblemLabel>();
     }
 
-    public Problem SetName(string name)
+    internal Problem SetName(string name)
     {
         Name = Check.NotNullOrWhiteSpace(
             name,
@@ -88,7 +88,7 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         return this;
     }
 
-    public Problem SetBrief(string brief)
+    internal Problem SetBrief(string brief)
     {
         Brief = Check.NotNullOrWhiteSpace(
             brief,
@@ -99,7 +99,7 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         return this;
     }
 
-    public Problem SetDescription(string description)
+    internal Problem SetDescription(string description)
     {
         Description = Check.NotNullOrWhiteSpace(
             description,
@@ -110,61 +110,61 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         return this;
     }
 
-    public Problem SetOrigin(string sourceName, string authorName)
+    internal Problem SetOrigin(string sourceName, string authorName)
     {
         Origin = new Origin(Id, sourceName, authorName);
         return this;
     }
 
-    public Problem SetSourceName(string sourceName)
+    internal Problem SetSourceName(string sourceName)
     {
         Origin.SetSourceName(sourceName);
         return this;
     }
 
-    public Problem SetAuthorName(string authorName)
+    internal Problem SetAuthorName(string authorName)
     {
         Origin.SetAuthorName(authorName);
         return this;
     }
 
-    public Problem SetLimit(decimal timeLimit, decimal totalMemoryLimit, decimal stackMemoryLimit)
+    internal Problem SetLimit(decimal timeLimit, decimal totalMemoryLimit, decimal stackMemoryLimit)
     {
         Limit = new Limit(Id, timeLimit, totalMemoryLimit, stackMemoryLimit);
         return this;
     }
 
-    public Problem SetTime(decimal timeLimit)
+    internal Problem SetTime(decimal timeLimit)
     {
         Limit.SetTime(timeLimit);
         return this;
     }
 
-    public Problem SetTotalMemory(decimal totalMemory)
+    internal Problem SetTotalMemory(decimal totalMemory)
     {
         Limit.SetTotalMemory(totalMemory);
         return this;
     }
 
-    public Problem SetStackMemory(decimal stackMemory)
+    internal Problem SetStackMemory(decimal stackMemory)
     {
         Limit.SetStackMemory(stackMemory);
         return this;
     }
 
-    public Problem SetIoType(IoTypeEnum ioType)
+    internal Problem SetIoType(IoTypeEnum ioType)
     {
         IoType = ioType;
         return this;
     }
 
-    public Problem SetDifficulty(DifficultyEnum difficulty)
+    internal Problem SetDifficulty(DifficultyEnum difficulty)
     {
         Difficulty = difficulty;
         return this;
     }
 
-    public Problem SetProgrammingLanguages(
+    internal Problem SetProgrammingLanguages(
         IEnumerable<ProgrammingLanguageEnum> programmingLanguageEnums
     )
     {
@@ -172,7 +172,7 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         return this;
     }
 
-    public Problem SetNumberOfTests(int numberOfTests)
+    internal Problem SetNumberOfTests(int numberOfTests)
     {
         NumberOfTests = Check.Range(
             numberOfTests,

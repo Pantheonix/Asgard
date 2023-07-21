@@ -197,7 +197,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         if (problem.IsPublished)
         {
             throw new AbpAuthorizationException(
-                EnkiProblemsDomainErrorCodes.NotAllowedToEditUnpublishedProblem
+                EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem
             );
         }
 
@@ -208,67 +208,21 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             );
         }
 
-        if (input.Name is not null)
-        {
-            problem.SetName(input.Name);
-        }
-
-        if (input.Brief is not null)
-        {
-            problem.SetBrief(input.Brief);
-        }
-
-        if (input.Description is not null)
-        {
-            problem.SetDescription(input.Description);
-        }
-
-        if (input.SourceName is not null)
-        {
-            problem.SetSourceName(input.SourceName);
-        }
-
-        if (input.AuthorName is not null)
-        {
-            problem.SetAuthorName(input.AuthorName);
-        }
-
-        if (input.Time is not null)
-        {
-            problem.SetTime((decimal)input.Time);
-        }
-
-        if (input.TotalMemory is not null)
-        {
-            problem.SetTotalMemory((decimal)input.TotalMemory);
-        }
-
-        if (input.StackMemory is not null)
-        {
-            problem.SetStackMemory((decimal)input.StackMemory!);
-        }
-
-        if (input.IoType is not null)
-        {
-            problem.SetIoType((IoTypeEnum)input.IoType);
-        }
-
-        if (input.Difficulty is not null)
-        {
-            problem.SetDifficulty((DifficultyEnum)input.Difficulty);
-        }
-
-        // TODO: let number of tests to increase/decrease dynamically
-        // based on number of actual tests uploaded to hermes
-        if (input.NumberOfTests is not null)
-        {
-            problem.SetNumberOfTests((int)input.NumberOfTests);
-        }
-
-        if (input.ProgrammingLanguages is not null && input.ProgrammingLanguages.Any())
-        {
-            problem.SetProgrammingLanguages(input.ProgrammingLanguages);
-        }
+        await _problemManager.UpdateAsync(
+            problem,
+            input.Name,
+            input.Brief,
+            input.Description,
+            input.SourceName,
+            input.AuthorName,
+            input.Time,
+            input.TotalMemory,
+            input.StackMemory,
+            input.IoType,
+            input.Difficulty,
+            input.NumberOfTests,
+            input.ProgrammingLanguages
+        );        
 
         return ObjectMapper.Map<Problem, ProblemDto>(
             await _problemRepository.UpdateAsync(problem)
