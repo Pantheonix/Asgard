@@ -4,6 +4,7 @@ import 'dart:io';
 class Config {
   late final Map<String, dynamic> _config;
 
+  // TODO: pass config using env vars provided via dapr key vault building block
   Config.fromJsonFile(String path) {
     _config = jsonDecode(
       File(path).readAsStringSync(),

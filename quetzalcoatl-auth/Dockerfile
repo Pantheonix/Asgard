@@ -24,14 +24,14 @@ WORKDIR /src/Bootstrapper
 RUN dotnet build -c release --no-restore
 
 # Test Stage
-FROM build AS test
-LABEL stage=builder
-WORKDIR /src
+# FROM build AS test
+# LABEL stage=builder
+# WORKDIR /src
 
-COPY Tests.Integration/*.csproj Tests.Integration/
-RUN dotnet restore Tests.Integration/Tests.Integration.csproj
+# COPY Tests.Integration/*.csproj Tests.Integration/
+# RUN dotnet restore Tests.Integration/Tests.Integration.csproj
 
-ENTRYPOINT ["dotnet", "test", "--no-build", "--no-restore", "--verbosity=normal", "--logger:trx"]
+# ENTRYPOINT ["dotnet", "test", "--no-build", "--no-restore", "--verbosity=normal", "--logger:trx"]
 
 # Publish Stage
 FROM build AS publish

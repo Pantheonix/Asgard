@@ -1,0 +1,13 @@
+.idea/
+test/
+.env
+src/*/bin/
+src/*/obj/
+src/*/Logs/
+*.md
+Dockerfile*
+Makefile
+.gitattributes
+.gitignore
+EnkiProblems.sln.DotSettings
+EnkiProblems.sln.DotSettings.user
