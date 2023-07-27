@@ -7,3 +7,4 @@
 QuetzalcoatlAuth.sln.DotSettings.user
 *.md
 Dockerfile*
+.dockerignore

@@ -6,6 +6,7 @@ src/*/obj/
 src/*/Logs/
 *.md
 Dockerfile*
+.dockerignore
 Makefile
 .gitattributes
 .gitignore

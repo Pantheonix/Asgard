@@ -27,7 +27,7 @@ COPY src/EnkiProblems.HttpApi.Host/ EnkiProblems.HttpApi.Host/
 COPY src/EnkiProblems.MongoDB/ EnkiProblems.MongoDB/
 
 WORKDIR /src/EnkiProblems.HttpApi.Host
-RUN dotnet build -c release --no-restore
+RUN dotnet build -c release
 
 # Publish Stage
 FROM build AS publish
