@@ -91,9 +91,7 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
     {
         await WithUnitOfWorkAsync(async () =>
         {
-            var problem = await _problemRepository.GetAsync(
-                _testData.ProblemId1
-            );
+            var problem = await _problemRepository.GetAsync(_testData.ProblemId1);
             await _problemManager.UpdateAsync(
                 problem,
                 _testData.ProblemName2,
@@ -112,9 +110,7 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
             await _problemRepository.UpdateAsync(problem);
         });
 
-        var problem = await _problemRepository.GetAsync(
-            _testData.ProblemId1
-        );
+        var problem = await _problemRepository.GetAsync(_testData.ProblemId1);
         problem.ShouldNotBeNull();
         problem.Name.ShouldBe(_testData.ProblemName2);
         problem.Brief.ShouldBe(_testData.ProblemBrief2);
@@ -137,9 +133,7 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
     {
         await WithUnitOfWorkAsync(async () =>
         {
-            var problem = await _problemRepository.GetAsync(
-                _testData.ProblemId1
-            );
+            var problem = await _problemRepository.GetAsync(_testData.ProblemId1);
             await Assert.ThrowsAsync<BusinessException>(async () =>
             {
                 await _problemManager.UpdateAsync(

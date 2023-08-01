@@ -12,7 +12,7 @@ try
 
     builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection(nameof(JwtConfig)));
     builder.Services.Configure<AdminConfig>(builder.Configuration.GetSection(nameof(AdminConfig)));
-    
+
     var jwtConfig = builder.Configuration.GetSection(nameof(JwtConfig)).Get<JwtConfig>();
     var tokenValidationParameters = new TokenValidationParameters
     {
@@ -31,7 +31,7 @@ try
         (context, services, configuration) =>
             configuration.ReadFrom.Configuration(context.Configuration).ReadFrom.Services(services)
     );
-    
+
     builder.Services
         .AddDbContext<ApplicationDbContext>(options =>
         {
@@ -73,7 +73,7 @@ try
         });
 
     var app = builder.Build();
-    
+
     if (app.Environment.IsDevelopment())
     {
         await app.UseSeedData();

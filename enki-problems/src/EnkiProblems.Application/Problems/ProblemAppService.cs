@@ -151,7 +151,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     public async Task<ProblemDto> GetByIdForProposerAsync(Guid id)
     {
         var problem = await _problemRepository.GetAsync(id);
-       
+
         // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
         {
@@ -159,29 +159,28 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
                 EnkiProblemsDomainErrorCodes.NotAllowedToViewUnpublishedProblems
             );
         }
-        
+
         if (problem is null)
         {
             throw new EntityNotFoundException(typeof(Problem), id);
         }
-        
+
         if (!problem.IsPublished && problem.ProposerId != CurrentUser.Id)
         {
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.UnpublishedProblemNotBelongingToCurrentUser
             );
         }
-        
+
         return ObjectMapper.Map<Problem, ProblemDto>(problem);
     }
-
 
     [Authorize]
     public async Task<ProblemDto> UpdateAsync(Guid id, UpdateProblemDto input)
     {
         var problem = await _problemRepository.GetAsync(id);
 
-         // TODO: convert to permission
+        // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
         {
             throw new AbpAuthorizationException(
@@ -222,10 +221,8 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             input.Difficulty,
             input.NumberOfTests,
             input.ProgrammingLanguages
-        );        
-
-        return ObjectMapper.Map<Problem, ProblemDto>(
-            await _problemRepository.UpdateAsync(problem)
         );
+
+        return ObjectMapper.Map<Problem, ProblemDto>(await _problemRepository.UpdateAsync(problem));
     }
 }

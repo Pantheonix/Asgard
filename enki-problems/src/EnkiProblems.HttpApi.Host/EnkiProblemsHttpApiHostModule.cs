@@ -52,7 +52,7 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         ConfigureConventionalControllers();
         ConfigureAuthentication(context, configuration);
         ConfigureCache(configuration);
-        ConfigureVirtualFileSystem(context);
+        // ConfigureVirtualFileSystem(context);
         ConfigureDataProtection(context, configuration, hostingEnvironment);
         ConfigureDistributedLocking(context, configuration);
         ConfigureCors(context, configuration);

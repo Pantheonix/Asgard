@@ -216,13 +216,13 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     public async Task Should_Not_Get_Not_Existing_Problem_When_Current_User_Is_Proposer()
     {
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
-        
+
         await Assert.ThrowsAsync<EntityNotFoundException>(async () =>
         {
             await _problemAppService.GetByIdForProposerAsync(Guid.NewGuid());
         });
     }
-    
+
     [Fact]
     public async Task Should_Not_Get_Published_Problem_When_Current_User_Is_Not_Proposer()
     {

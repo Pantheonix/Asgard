@@ -75,7 +75,9 @@ public class ProblemManager : DomainService
     {
         if (problem.IsPublished)
         {
-            throw new BusinessException(EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem);
+            throw new BusinessException(
+                EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem
+            );
         }
 
         var oldProblem = await _problemRepository.FirstOrDefaultAsync(p => p.Name == name);

@@ -1,6 +1,6 @@
 .idea/
 test/
-.env
+*.env
 src/*/bin/
 src/*/obj/
 src/*/Logs/

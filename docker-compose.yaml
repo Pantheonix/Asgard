@@ -1,0 +1,159 @@
+# Define services for Asgard
+version: "3.7"
+services:
+  ############ QUETZALCOATL ############
+
+  quetzalcoatl-auth-api:
+    container_name: quetzalcoatl-auth-api
+    image: quetzalcoatl-auth:1.0
+    build:
+      context: quetzalcoatl-auth
+      dockerfile: ../quetzalcoatl-auth/Dockerfile
+    ports:
+      - "5210:5210"
+    env_file:
+      - quetzalcoatl-auth/.env
+    depends_on:
+      quetzalcoatl-mssql-db:
+        condition: service_started
+
+  quetzalcoatl-auth-dapr:
+    container_name: quetzalcoatl-auth-dapr
+    image: daprio/daprd:1.9.5
+    command:
+      [
+        "./daprd",
+        "-app-id",
+        "quetzalcoatl-auth",
+        "-app-port",
+        "5210",
+        "-dapr-http-port",
+        "3500",
+        "-components-path",
+        "./components",
+      ]
+    ports:
+      - "3500:3500"
+    depends_on:
+      - quetzalcoatl-auth-api
+
+  quetzalcoatl-mssql-db:
+    container_name: quetzalcoatl-mssql-db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    user: root
+    ports:
+      - "1434:1433"
+    env_file:
+      - quetzalcoatl-auth/.env
+    volumes:
+      - quetzalcoatl-db:/var/opt/mssql/data
+
+  ############ ENKI ############
+
+  enki-problems-api:
+    container_name: enki-problems-api
+    image: enki-problems:1.0
+    build:
+      context: enki-problems
+      dockerfile: ../enki-problems/Dockerfile
+    ports:
+      - "5211:5211"
+    env_file:
+      - enki-problems/.env
+    depends_on:
+      enki-mongo-db:
+        condition: service_started
+      asgard-redis:
+        condition: service_started
+
+  enki-problems-dapr:
+    container_name: enki-problems-dapr
+    image: daprio/daprd:1.9.5
+    command:
+      [
+        "./daprd",
+        "-app-id",
+        "enki-problems",
+        "-app-port",
+        "5211",
+        "-dapr-http-port",
+        "3501",
+        "-dapr-grpc-port",
+        "50001",
+        "-components-path",
+        "./components",
+      ]
+    ports:
+      - "3501:3501"
+    depends_on:
+      - enki-problems-api
+
+  enki-mongo-db:
+    container_name: enki-mongo-db
+    image: mongo:6.0.8
+    ports:
+      - "27017:27017"
+    volumes:
+      - enki-db:/data/db
+
+  ############ HERMES ############
+
+  hermes-tests-api:
+    container_name: hermes-tests-api
+    image: hermes-tests:1.0
+    build:
+      context: hermes-tests
+      dockerfile: ../hermes-tests/Dockerfile
+    ports:
+      - "5212:5212"
+    env_file:
+      - hermes-tests/.env
+
+  hermes-tests-dapr:
+    container_name: hermes-tests-dapr
+    image: daprio/daprd:1.9.5
+    command:
+      [
+        "./daprd",
+        "-app-id",
+        "hermes-tests",
+        "-app-protocol",
+        "grpc",
+        "-app-port",
+        "5212",
+        "-dapr-http-port",
+        "3502",
+        "-components-path",
+        "./components",
+      ]
+    ports:
+      - "3502:3502"
+    depends_on:
+      - hermes-tests-api
+
+  ############ DAPR ############
+
+  asgard-dapr-placement:
+    container_name: asgard-dapr-placement
+    image: daprio/dapr:1.9.5
+    command: ["./placement", "-port", "50000", "-log-level", "debug"]
+    ports:
+      - "50000:50000"
+
+  asgard-redis:
+    container_name: asgard-redis
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  asgard-zipkin:
+    container_name: asgard-zipkin
+    image: openzipkin/zipkin:latest
+    ports:
+      - "9411:9411"
+
+  ############ VOLUMES ############
+
+volumes:
+  quetzalcoatl-db:
+  enki-db:
