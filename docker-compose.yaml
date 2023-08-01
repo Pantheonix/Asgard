@@ -1,4 +1,5 @@
 # Define services for Asgard
+# TODO: add health checks, restart policies and extract hardcoded ports/tags/etc. to .env files
 version: "3.7"
 services:
   ############ QUETZALCOATL ############
@@ -16,6 +17,8 @@ services:
     depends_on:
       quetzalcoatl-mssql-db:
         condition: service_started
+    networks:
+      - asgard-network
 
   quetzalcoatl-auth-dapr:
     container_name: quetzalcoatl-auth-dapr
@@ -36,6 +39,8 @@ services:
       - "3500:3500"
     depends_on:
       - quetzalcoatl-auth-api
+    networks:
+      - asgard-network
 
   quetzalcoatl-mssql-db:
     container_name: quetzalcoatl-mssql-db
@@ -47,6 +52,8 @@ services:
       - quetzalcoatl-auth/.env
     volumes:
       - quetzalcoatl-db:/var/opt/mssql/data
+    networks:
+      - asgard-network
 
   ############ ENKI ############
 
@@ -62,9 +69,11 @@ services:
       - enki-problems/.env
     depends_on:
       enki-mongo-db:
-        condition: service_started
+        condition: service_healthy
       asgard-redis:
         condition: service_started
+    networks:
+      - asgard-network
 
   enki-problems-dapr:
     container_name: enki-problems-dapr
@@ -87,14 +96,25 @@ services:
       - "3501:3501"
     depends_on:
       - enki-problems-api
+    networks:
+      - asgard-network
 
   enki-mongo-db:
+    image: mongo:5.0
     container_name: enki-mongo-db
-    image: mongo:6.0.8
-    ports:
-      - "27017:27017"
+    command: ["--replSet", "enki-rs", "--bind_ip_all", "--port", "30001"]
     volumes:
       - enki-db:/data/db
+    ports:
+      - 30001:30001
+    healthcheck:
+      test: test $(echo "rs.initiate({_id:'enki-rs',members:[{_id:0,host:\"enki-mongo-db:30001\"}]}).ok || rs.status().ok" | mongo --port 30001 --quiet) -eq 1
+      interval: 10s
+      start_period: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - asgard-network
 
   ############ HERMES ############
 
@@ -108,6 +128,8 @@ services:
       - "5212:5212"
     env_file:
       - hermes-tests/.env
+    networks:
+      - asgard-network
 
   hermes-tests-dapr:
     container_name: hermes-tests-dapr
@@ -121,7 +143,7 @@ services:
         "grpc",
         "-app-port",
         "5212",
-        "-dapr-http-port",
+        "-dapr-grpc-port",
         "3502",
         "-components-path",
         "./components",
@@ -130,6 +152,8 @@ services:
       - "3502:3502"
     depends_on:
       - hermes-tests-api
+    networks:
+      - asgard-network
 
   ############ DAPR ############
 
@@ -139,21 +163,34 @@ services:
     command: ["./placement", "-port", "50000", "-log-level", "debug"]
     ports:
       - "50000:50000"
+    networks:
+      - asgard-network
 
   asgard-redis:
     container_name: asgard-redis
     image: redis:alpine
     ports:
       - "6379:6379"
+    networks:
+      - asgard-network
 
   asgard-zipkin:
     container_name: asgard-zipkin
     image: openzipkin/zipkin:latest
     ports:
       - "9411:9411"
+    networks:
+      - asgard-network
 
   ############ VOLUMES ############
 
 volumes:
   quetzalcoatl-db:
   enki-db:
+
+  ############ NETWORKS ############
+
+networks:
+  asgard-network:
+    name: asgard-network
+    driver: bridge
