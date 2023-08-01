@@ -21,4 +21,6 @@ public static class EnkiProblemsDomainErrorCodes
         "EnkiProblems:UnpublishedProblemNotBelongingToCurrentUser";
 
     public const string ProblemNotFound = "EnkiProblems:ProblemNotFound";
+
+    public const string DownloadTestArchiveError = "EnkiProblems:DownloadTestArchiveError";
 }

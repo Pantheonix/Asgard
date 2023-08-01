@@ -11,6 +11,7 @@
     "EnkiProblems:NotAllowedToEditProblem": "You are not allowed to edit this problem.",
     "EnkiProblems:NotAllowedToEditPublishedProblem": "A published problem cannot be updated.",
     "EnkiProblems:UnpublishedProblemNotBelongingToCurrentUser": "You are not the proposer of this unpublished problem.",
-    "EnkiProblems:ProblemNotFound": "Problem not found."
+    "EnkiProblems:ProblemNotFound": "Problem not found.",
+    "EnkiProblems:DownloadTestArchiveError": "Download failed for test archive."
   }
 }
