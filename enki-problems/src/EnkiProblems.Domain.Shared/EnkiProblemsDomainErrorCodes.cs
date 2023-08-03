@@ -22,5 +22,15 @@ public static class EnkiProblemsDomainErrorCodes
 
     public const string ProblemNotFound = "EnkiProblems:ProblemNotFound";
 
+    public const string TestNotFound = "EnkiProblems:TestNotFound";
+
+    public const string NumberOfTestsExceedsLimit = "EnkiProblems:NumberOfTestsExceedsLimit";
+
+    public const string TestUploadFailed = "EnkiProblems:TestUploadFailed";
+
     public const string DownloadTestArchiveError = "EnkiProblems:DownloadTestArchiveError";
+
+    public const string TotalScoreExceeded = "EnkiProblems:TotalScoreExceeded";
+
+    public const string NumberOfTestsExceeded = "EnkiProblems:NumberOfTestsExceeded";
 }

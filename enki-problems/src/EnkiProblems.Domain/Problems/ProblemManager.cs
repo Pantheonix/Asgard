@@ -29,7 +29,6 @@ public class ProblemManager : DomainService
         decimal stackMemoryLimit,
         IoTypeEnum ioType,
         DifficultyEnum difficulty,
-        int numberOfTests,
         IEnumerable<ProgrammingLanguageEnum> programmingLanguages
     )
     {
@@ -52,12 +51,11 @@ public class ProblemManager : DomainService
             stackMemoryLimit,
             ioType,
             difficulty,
-            numberOfTests,
             programmingLanguages
         );
     }
 
-    public async Task UpdateAsync(
+    public async Task<Problem> UpdateAsync(
         Problem problem,
         string? name,
         string? brief,
@@ -69,7 +67,6 @@ public class ProblemManager : DomainService
         decimal? stackMemoryLimit,
         IoTypeEnum? ioType,
         DifficultyEnum? difficulty,
-        int? numberOfTests,
         IEnumerable<ProgrammingLanguageEnum>? programmingLanguages
     )
     {
@@ -136,16 +133,16 @@ public class ProblemManager : DomainService
             problem.SetDifficulty((DifficultyEnum)difficulty);
         }
 
-        // TODO: let number of tests to increase/decrease dynamically
-        // based on number of actual tests uploaded to hermes
-        if (numberOfTests is not null)
-        {
-            problem.SetNumberOfTests((int)numberOfTests);
-        }
-
         if (programmingLanguages is not null && programmingLanguages.Any())
         {
             problem.SetProgrammingLanguages(programmingLanguages);
         }
+
+        return problem;
+    }
+
+    public Problem AddTest(Problem problem, int testId, int testScore)
+    {
+        return problem.AddTest(testId, testScore);
     }
 }

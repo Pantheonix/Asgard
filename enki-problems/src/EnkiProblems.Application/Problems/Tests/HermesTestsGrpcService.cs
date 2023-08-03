@@ -7,7 +7,7 @@ using Volo.Abp;
 
 namespace EnkiProblems.Problems.Tests;
 
-public class HermesTestsGrpcService : ITestsService
+public class HermesTestsGrpcService : ITestService
 {
     private readonly HermesTestsService.HermesTestsServiceClient _grpcClient;
     private readonly DaprMetadata _metadata;

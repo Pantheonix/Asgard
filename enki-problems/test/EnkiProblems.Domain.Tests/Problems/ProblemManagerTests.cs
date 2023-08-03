@@ -1,5 +1,10 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Asgard.Hermes;
+using EnkiProblems.Problems.Tests;
+using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
 using Shouldly;
 using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
@@ -38,7 +43,6 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
                 _testData.ProblemStackMemoryLimit2,
                 _testData.ProblemIoType2,
                 _testData.ProblemDifficulty2,
-                _testData.ProblemNumberOfTests2,
                 _testData.ProblemProgrammingLanguages2
             );
 
@@ -54,7 +58,7 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
             problem.Limit.TotalMemory.ShouldBe(_testData.ProblemTotalMemoryLimit2);
             problem.IoType.ShouldBe(_testData.ProblemIoType2);
             problem.Difficulty.ShouldBe(_testData.ProblemDifficulty2);
-            problem.NumberOfTests.ShouldBe(_testData.ProblemNumberOfTests2);
+            problem.NumberOfTests.ShouldBe(0);
             problem.ProgrammingLanguages.ShouldBe(_testData.ProblemProgrammingLanguages2);
             problem.ProposerId.ShouldBe(_testData.ProblemProposerId2);
         });
@@ -79,7 +83,6 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
                     _testData.ProblemStackMemoryLimit2,
                     _testData.ProblemIoType2,
                     _testData.ProblemDifficulty2,
-                    _testData.ProblemNumberOfTests2,
                     _testData.ProblemProgrammingLanguages2
                 );
             });
@@ -92,7 +95,7 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
         await WithUnitOfWorkAsync(async () =>
         {
             var problem = await _problemRepository.GetAsync(_testData.ProblemId1);
-            await _problemManager.UpdateAsync(
+            var updatedProblem = await _problemManager.UpdateAsync(
                 problem,
                 _testData.ProblemName2,
                 _testData.ProblemBrief2,
@@ -104,10 +107,9 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
                 _testData.ProblemStackMemoryLimit2,
                 _testData.ProblemIoType2,
                 _testData.ProblemDifficulty2,
-                _testData.ProblemNumberOfTests2,
                 _testData.ProblemProgrammingLanguages2
             );
-            await _problemRepository.UpdateAsync(problem);
+            await _problemRepository.UpdateAsync(updatedProblem);
         });
 
         var problem = await _problemRepository.GetAsync(_testData.ProblemId1);
@@ -123,7 +125,7 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
         problem.Limit.TotalMemory.ShouldBe(_testData.ProblemTotalMemoryLimit2);
         problem.IoType.ShouldBe(_testData.ProblemIoType2);
         problem.Difficulty.ShouldBe(_testData.ProblemDifficulty2);
-        problem.NumberOfTests.ShouldBe(_testData.ProblemNumberOfTests2);
+        problem.NumberOfTests.ShouldBe(_testData.ProblemNumberOfTests1);
         problem.ProgrammingLanguages.ShouldBe(_testData.ProblemProgrammingLanguages2);
         problem.ProposerId.ShouldBe(_testData.ProblemProposerId2);
     }
@@ -148,7 +150,6 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
                     _testData.ProblemStackMemoryLimit2,
                     _testData.ProblemIoType2,
                     _testData.ProblemDifficulty2,
-                    _testData.ProblemNumberOfTests2,
                     _testData.ProblemProgrammingLanguages2
                 );
             });
@@ -185,4 +186,41 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
     //         });
     //     });
     // }
+
+    [Fact]
+    public async Task Should_Add_A_New_Valid_Test()
+    {
+        // Arrange
+        var problem = await _problemRepository.GetAsync(_testData.ProblemId3);
+
+        // Act
+        await WithUnitOfWorkAsync(async () =>
+        {
+            var updatedProblem = _problemManager.AddTest(
+                problem,
+                _testData.TestId1,
+                _testData.TestScore1
+            );
+            await _problemRepository.UpdateAsync(updatedProblem);
+        });
+
+        // Assert
+        var problemWithTests = await _problemRepository.GetAsync(_testData.ProblemId3);
+        problemWithTests.Tests.Count.ShouldBe(1);
+        problemWithTests.Tests.First().Id.ShouldBe(_testData.TestId1);
+        problemWithTests.Tests.First().Score.ShouldBe(_testData.TestScore1);
+    }
+
+    [Fact]
+    public async Task Should_Not_Add_A_Test_With_Limit_Exceeding_Score()
+    {
+        // Arrange
+        var problem = await _problemRepository.GetAsync(_testData.ProblemId1);
+
+        // Act & Assert
+        Assert.Throws<BusinessException>(() =>
+        {
+            _problemManager.AddTest(problem, _testData.TestId2, _testData.LimitExceedingTestScore);
+        });
+    }
 }

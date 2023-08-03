@@ -18,4 +18,6 @@ public interface IProblemAppService : IApplicationService
     Task<ProblemDto> GetByIdForProposerAsync(Guid id);
 
     Task<ProblemDto> UpdateAsync(Guid id, UpdateProblemDto input);
+
+    Task<ProblemWithTestsDto> AddTestAsync(Guid problemId, AddTestDto input);
 }

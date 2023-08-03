@@ -2,10 +2,14 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Asgard.Hermes;
+using EnkiProblems.Helpers;
+using EnkiProblems.Problems.Tests;
 using Volo.Abp.Authorization;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Application.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using Volo.Abp;
 using Volo.Abp.Domain.Entities;
 
 namespace EnkiProblems.Problems;
@@ -14,14 +18,17 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 {
     private readonly ProblemManager _problemManager;
     private readonly IRepository<Problem, Guid> _problemRepository;
+    private readonly ITestService _testService;
 
     public ProblemAppService(
         ProblemManager problemManager,
-        IRepository<Problem, Guid> problemRepository
+        IRepository<Problem, Guid> problemRepository,
+        ITestService testService
     )
     {
         _problemManager = problemManager;
         _problemRepository = problemRepository;
+        _testService = testService;
     }
 
     [Authorize]
@@ -47,7 +54,6 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             input.StackMemory,
             input.IoType,
             input.Difficulty,
-            input.NumberOfTests,
             input.ProgrammingLanguages
         );
 
@@ -132,11 +138,6 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     {
         var problem = await _problemRepository.GetAsync(id);
 
-        if (problem is null)
-        {
-            throw new EntityNotFoundException(typeof(Problem), id);
-        }
-
         if (!problem.IsPublished)
         {
             throw new AbpAuthorizationException(
@@ -158,11 +159,6 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToViewUnpublishedProblems
             );
-        }
-
-        if (problem is null)
-        {
-            throw new EntityNotFoundException(typeof(Problem), id);
         }
 
         if (!problem.IsPublished && problem.ProposerId != CurrentUser.Id)
@@ -188,10 +184,52 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             );
         }
 
-        if (problem is null)
+        if (problem.IsPublished)
         {
-            throw new EntityNotFoundException(typeof(Problem), id);
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem
+            );
         }
+
+        if (problem.ProposerId != CurrentUser.Id)
+        {
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.UnpublishedProblemNotBelongingToCurrentUser
+            );
+        }
+
+        var updatedProblem = await _problemManager.UpdateAsync(
+            problem,
+            input.Name,
+            input.Brief,
+            input.Description,
+            input.SourceName,
+            input.AuthorName,
+            input.Time,
+            input.TotalMemory,
+            input.StackMemory,
+            input.IoType,
+            input.Difficulty,
+            input.ProgrammingLanguages
+        );
+
+        return ObjectMapper.Map<Problem, ProblemDto>(
+            await _problemRepository.UpdateAsync(updatedProblem)
+        );
+    }
+
+    [Authorize]
+    public async Task<ProblemWithTestsDto> AddTestAsync(Guid problemId, AddTestDto input)
+    {
+        // TODO: convert to permission
+        if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
+        {
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.NotAllowedToEditProblem
+            );
+        }
+
+        var problem = await _problemRepository.GetAsync(problemId);
 
         if (problem.IsPublished)
         {
@@ -207,22 +245,43 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             );
         }
 
-        await _problemManager.UpdateAsync(
-            problem,
-            input.Name,
-            input.Brief,
-            input.Description,
-            input.SourceName,
-            input.AuthorName,
-            input.Time,
-            input.TotalMemory,
-            input.StackMemory,
-            input.IoType,
-            input.Difficulty,
-            input.NumberOfTests,
-            input.ProgrammingLanguages
+        CheckIfNumberOfTestsExceedsLimit(problem, out var testId);
+
+        var uploadResponse = await _testService.UploadTestAsync(
+            new UploadTestStreamDto
+            {
+                ProblemId = problemId.ToString(),
+                TestArchiveBytes = input.ArchiveFile.GetBytes(),
+                TestId = testId.ToString()
+            }
         );
 
-        return ObjectMapper.Map<Problem, ProblemDto>(await _problemRepository.UpdateAsync(problem));
+        if (uploadResponse.Status.Code != StatusCode.Ok)
+        {
+            throw new BusinessException(
+                EnkiProblemsDomainErrorCodes.TestUploadFailed,
+                $"Test upload failed with status code {uploadResponse.Status.Code}: {uploadResponse.Status.Message}."
+            )
+                .WithData("problemId", problem.Id)
+                .WithData("testId", testId);
+        }
+
+        var updatedProblem = _problemManager.AddTest(problem, testId, input.Score);
+        await _problemRepository.UpdateAsync(updatedProblem);
+
+        return ObjectMapper.Map<Problem, ProblemWithTestsDto>(updatedProblem);
+    }
+
+    private static void CheckIfNumberOfTestsExceedsLimit(Problem problem, out int numberOfTests)
+    {
+        numberOfTests = problem.Tests.Count + 1;
+
+        if (numberOfTests > EnkiProblemsConsts.MaxNumberOfTests)
+        {
+            throw new BusinessException(
+                EnkiProblemsDomainErrorCodes.NumberOfTestsExceedsLimit,
+                $"The number of tests exceeds the limit of {EnkiProblemsConsts.MaxNumberOfTests}."
+            ).WithData("problemId", problem.Id);
+        }
     }
 }

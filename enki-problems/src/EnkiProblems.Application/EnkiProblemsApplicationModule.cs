@@ -29,36 +29,9 @@ public class EnkiProblemsApplicationModule : AbpModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        var configuration = context.Services.GetConfiguration();
-
         Configure<AbpAutoMapperOptions>(options =>
         {
             options.AddMaps<EnkiProblemsApplicationModule>();
         });
-
-        ConfigureDapr(context, configuration);
-        ConfigureHermesTestsGrpcClient(context, configuration);
-    }
-
-    private void ConfigureDapr(ServiceConfigurationContext context, IConfiguration configuration)
-    {
-        var hermesAppId = configuration["Dapr:HermesAppId"];
-        context.Services.AddSingleton<DaprMetadata>(
-            _ => new() { HermesContext = new() { { "dapr-app-id", hermesAppId! } } }
-        );
-    }
-
-    private void ConfigureHermesTestsGrpcClient(
-        ServiceConfigurationContext context,
-        IConfiguration configuration
-    )
-    {
-        var address = configuration["Dapr:HermesAddress"];
-        var channel = GrpcChannel.ForAddress(address!);
-
-        context.Services.AddSingleton<HermesTestsService.HermesTestsServiceClient>(
-            _ => new(channel)
-        );
-        context.Services.AddScoped<ITestsService, HermesTestsGrpcService>();
     }
 }

@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\EnkiProblems.Application.Contracts\EnkiProblems.Application.Contracts.csproj" />
     <ProjectReference Include="..\EnkiProblems.MongoDB.Tests\EnkiProblems.MongoDB.Tests.csproj" />
   </ItemGroup>
 

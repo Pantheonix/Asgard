@@ -56,9 +56,5 @@ public class CreateProblemDto
     public DifficultyEnum Difficulty { get; set; }
 
     [Required]
-    [Range(EnkiProblemsConsts.MinNumberOfTests, EnkiProblemsConsts.MaxNumberOfTests)]
-    public int NumberOfTests { get; set; }
-
-    [Required]
     public IEnumerable<ProgrammingLanguageEnum> ProgrammingLanguages { get; set; }
 }

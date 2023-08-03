@@ -12,6 +12,11 @@
     "EnkiProblems:NotAllowedToEditPublishedProblem": "A published problem cannot be updated.",
     "EnkiProblems:UnpublishedProblemNotBelongingToCurrentUser": "You are not the proposer of this unpublished problem.",
     "EnkiProblems:ProblemNotFound": "Problem not found.",
-    "EnkiProblems:DownloadTestArchiveError": "Download failed for test archive."
+    "EnkiProblems:TestNotFound": "Test not found.",
+    "EnkiProblems:NumberOfTestsExceedsLimit": "The number of tests exceeds the allowed limit.",
+    "EnkiProblems:TestUploadFailed": "The uploading process for the current test failed.",
+    "EnkiProblems:DownloadTestArchiveError": "Download failed for test archive.",
+    "EnkiProblems:TotalScoreExceeded": "The total score of the problem tests cannot exceed the predefined limit.",
+    "EnkiProblems:NumberOfTestExceeded": "The number of tests cannot exceed the predefined limit."
   }
 }

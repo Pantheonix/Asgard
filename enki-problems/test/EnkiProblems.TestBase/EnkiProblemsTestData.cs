@@ -27,7 +27,7 @@ public class EnkiProblemsTestData : ISingletonDependency
 
     public int ProblemTotalMemoryLimit1 { get; } = 1;
 
-    public int ProblemNumberOfTests1 { get; } = 2;
+    public int ProblemNumberOfTests1 { get; } = 1;
 
     public IoTypeEnum ProblemIoType1 { get; } = IoTypeEnum.Standard;
 
@@ -104,4 +104,17 @@ public class EnkiProblemsTestData : ISingletonDependency
     public Guid ProposerUserId2 { get; } = Guid.Parse("00000000-0000-0000-0000-000000000003");
 
     public string[] ProposerUserRoles { get; } = { "", "Proposer" };
+
+    /* TESTS */
+    public int TestId1 { get; } = 1;
+
+    public int TestId2 { get; } = 2;
+
+    public int TestScore1 { get; } = 10;
+
+    public int LimitExceedingTestScore { get; } = 100;
+
+    public byte[] TestArchiveBytes1 { get; } = { 1, 2, 3 };
+
+    public int NotExistingTestId { get; } = 999;
 }

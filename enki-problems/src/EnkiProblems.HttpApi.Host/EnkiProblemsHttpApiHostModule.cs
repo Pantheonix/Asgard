@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Asgard.Hermes;
 using Medallion.Threading;
 using Medallion.Threading.Redis;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using EnkiProblems.MongoDB;
 using EnkiProblems.MultiTenancy;
+using EnkiProblems.Problems.Tests;
+using Grpc.Net.Client;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 using Microsoft.OpenApi.Models;
@@ -49,6 +52,8 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         var configuration = context.Services.GetConfiguration();
         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
+        ConfigureDapr(context, configuration);
+        ConfigureHermesTestsGrpcClient(context, configuration);
         ConfigureConventionalControllers();
         ConfigureAuthentication(context, configuration);
         ConfigureCache(configuration);
@@ -57,6 +62,28 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         ConfigureDistributedLocking(context, configuration);
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
+    }
+
+    private void ConfigureDapr(ServiceConfigurationContext context, IConfiguration configuration)
+    {
+        var hermesAppId = configuration["Dapr:HermesAppId"];
+        context.Services.AddSingleton<DaprMetadata>(
+            _ => new() { HermesContext = new() { { "dapr-app-id", hermesAppId! } } }
+        );
+    }
+
+    private void ConfigureHermesTestsGrpcClient(
+        ServiceConfigurationContext context,
+        IConfiguration configuration
+    )
+    {
+        var address = configuration["Dapr:HermesAddress"];
+        var channel = GrpcChannel.ForAddress(address!);
+
+        context.Services.AddSingleton<HermesTestsService.HermesTestsServiceClient>(
+            _ => new(channel)
+        );
+        context.Services.AddScoped<ITestService, HermesTestsGrpcService>();
     }
 
     private void ConfigureCache(IConfiguration configuration)

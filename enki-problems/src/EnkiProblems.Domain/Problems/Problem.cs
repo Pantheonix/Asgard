@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
@@ -53,7 +54,6 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         decimal stackMemoryLimit,
         IoTypeEnum ioType,
         DifficultyEnum difficulty,
-        int numberOfTests,
         IEnumerable<ProgrammingLanguageEnum> programmingLanguages
     )
         : base(id)
@@ -64,7 +64,7 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         SetOrigin(sourceName, authorName);
         SetLimit(timeLimit, totalMemoryLimit, stackMemoryLimit);
         SetProgrammingLanguages(programmingLanguages);
-        SetNumberOfTests(numberOfTests);
+        NumberOfTests = 0;
 
         IoType = ioType;
         Difficulty = difficulty;
@@ -74,6 +74,43 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         CreationDate = DateTime.Now;
 
         Tests = new Collection<Test>();
+        Labels = new Collection<ProblemLabel>();
+    }
+
+    internal Problem(
+        Guid id,
+        string name,
+        string brief,
+        string description,
+        string sourceName,
+        string authorName,
+        Guid proposerId,
+        decimal timeLimit,
+        decimal totalMemoryLimit,
+        decimal stackMemoryLimit,
+        IoTypeEnum ioType,
+        DifficultyEnum difficulty,
+        IEnumerable<ProgrammingLanguageEnum> programmingLanguages,
+        IEnumerable<Test> tests
+    )
+        : base(id)
+    {
+        SetName(name);
+        SetBrief(brief);
+        SetDescription(description);
+        SetOrigin(sourceName, authorName);
+        SetLimit(timeLimit, totalMemoryLimit, stackMemoryLimit);
+        SetProgrammingLanguages(programmingLanguages);
+        SetNumberOfTests(tests.Count());
+
+        IoType = ioType;
+        Difficulty = difficulty;
+        ProposerId = proposerId;
+
+        IsPublished = false;
+        CreationDate = DateTime.Now;
+
+        Tests = tests.ToList();
         Labels = new Collection<ProblemLabel>();
     }
 
@@ -180,6 +217,67 @@ public class Problem : FullAuditedAggregateRoot<Guid>
             EnkiProblemsConsts.MinNumberOfTests,
             EnkiProblemsConsts.MaxNumberOfTests
         );
+        return this;
+    }
+
+    internal Problem SetPublished(bool isPublished)
+    {
+        IsPublished = isPublished;
+        return this;
+    }
+
+    internal Problem AddTest(int testId, int score)
+    {
+        if (NumberOfTests + 1 > EnkiProblemsConsts.MaxNumberOfTests)
+        {
+            throw new BusinessException(EnkiProblemsDomainErrorCodes.NumberOfTestsExceeded)
+                .WithData("numberOfTests", NumberOfTests + 1)
+                .WithData("testId", testId)
+                .WithData("problemId", Id);
+        }
+
+        var currentTotalScore = Tests.Sum(t => t.Score);
+        if (currentTotalScore + score > EnkiProblemsConsts.MaxTotalScore)
+        {
+            throw new BusinessException(EnkiProblemsDomainErrorCodes.TotalScoreExceeded)
+                .WithData("totalScore", currentTotalScore + score)
+                .WithData("testId", testId)
+                .WithData("problemId", Id);
+        }
+
+        SetNumberOfTests(NumberOfTests + 1);
+        Tests.Add(new Test(testId, Id, score));
+        return this;
+    }
+
+    internal Problem RemoveTest(int testId)
+    {
+        var test = Tests.SingleOrDefault(t => t.Id == testId);
+        if (test is null)
+        {
+            throw new BusinessException(EnkiProblemsDomainErrorCodes.TestNotFound).WithData(
+                "testId",
+                testId
+            );
+        }
+
+        Tests.Remove(test);
+
+        return this;
+    }
+
+    internal Problem UpdateTest(int testId, int score)
+    {
+        var test = Tests.SingleOrDefault(t => t.Id == testId);
+        if (test is null)
+        {
+            throw new BusinessException(EnkiProblemsDomainErrorCodes.TestNotFound)
+                .WithData("testId", testId)
+                .WithData("problemId", Id);
+        }
+
+        test.SetScore(score);
+
         return this;
     }
 }

@@ -3,7 +3,7 @@ using Asgard.Hermes;
 
 namespace EnkiProblems.Problems.Tests;
 
-public interface ITestsService
+public interface ITestService
 {
     Task<UploadResponse> UploadTestAsync(UploadTestStreamDto input);
     Task<DownloadTestStreamDto> DownloadTestAsync(DownloadRequest input);

@@ -45,8 +45,5 @@ public class UpdateProblemDto
 
     public DifficultyEnum? Difficulty { get; set; }
 
-    [Range(EnkiProblemsConsts.MinNumberOfTests, EnkiProblemsConsts.MaxNumberOfTests)]
-    public int? NumberOfTests { get; set; }
-
     public IEnumerable<ProgrammingLanguageEnum>? ProgrammingLanguages { get; set; }
 }
