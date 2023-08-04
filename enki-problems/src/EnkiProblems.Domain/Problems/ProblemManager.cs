@@ -137,4 +137,9 @@ public class ProblemManager : DomainService
     {
         return problem.AddTest(testId, testScore);
     }
+
+    public Problem UpdateTest(Problem problem, int testId, int testScore)
+    {
+        return problem.UpdateTest(testId, testScore);
+    }
 }

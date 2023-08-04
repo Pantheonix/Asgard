@@ -209,7 +209,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     }
 
     [Authorize]
-    public async Task<ProblemWithTestsDto> AddTestAsync(Guid problemId, AddTestDto input)
+    public async Task<ProblemWithTestsDto> CreateTestAsync(Guid problemId, CreateTestDto input)
     {
         // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
@@ -235,8 +235,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             );
         }
 
-        CheckIfNumberOfTestsExceedsLimit(problem, out var testId);
-
+        var testId = problem.NumberOfTests + 1;
         var uploadResponse = await _testService.UploadTestAsync(
             new UploadTestStreamDto
             {
@@ -262,16 +261,65 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         return ObjectMapper.Map<Problem, ProblemWithTestsDto>(updatedProblem);
     }
 
-    private static void CheckIfNumberOfTestsExceedsLimit(Problem problem, out int numberOfTests)
+    public async Task<ProblemWithTestsDto> UpdateTestAsync(
+        Guid problemId,
+        int testId,
+        UpdateTestDto input
+    )
     {
-        numberOfTests = problem.Tests.Count + 1;
-
-        if (numberOfTests > EnkiProblemsConsts.MaxNumberOfTests)
+        // TODO: convert to permission
+        if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
         {
-            throw new BusinessException(
-                EnkiProblemsDomainErrorCodes.NumberOfTestsExceedsLimit,
-                $"The number of tests exceeds the limit of {EnkiProblemsConsts.MaxNumberOfTests}."
-            ).WithData("problemId", problem.Id);
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.NotAllowedToEditProblem
+            );
         }
+
+        var problem = await _problemRepository.GetAsync(problemId);
+
+        if (problem.IsPublished)
+        {
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem
+            );
+        }
+
+        if (problem.ProposerId != CurrentUser.Id)
+        {
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.UnpublishedProblemNotBelongingToCurrentUser
+            );
+        }
+
+        if (input.ArchiveFile is not null)
+        {
+            var uploadResponse = await _testService.UploadTestAsync(
+                new UploadTestStreamDto
+                {
+                    ProblemId = problemId.ToString(),
+                    TestArchiveBytes = input.ArchiveFile.GetBytes(),
+                    TestId = testId.ToString()
+                }
+            );
+
+            if (uploadResponse.Status.Code != StatusCode.Ok)
+            {
+                throw new BusinessException(
+                    EnkiProblemsDomainErrorCodes.TestUploadFailed,
+                    $"Test upload failed with status code {uploadResponse.Status.Code}: {uploadResponse.Status.Message}."
+                )
+                    .WithData("problemId", problem.Id)
+                    .WithData("testId", testId);
+            }
+        }
+
+        if (input.Score is not null)
+        {
+            _problemManager.UpdateTest(problem, testId, (int)input.Score);
+        }
+
+        await _problemRepository.UpdateAsync(problem);
+
+        return ObjectMapper.Map<Problem, ProblemWithTestsDto>(problem);
     }
 }

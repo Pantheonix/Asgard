@@ -19,5 +19,7 @@ public interface IProblemAppService : IApplicationService
 
     Task<ProblemDto> UpdateAsync(Guid id, UpdateProblemDto input);
 
-    Task<ProblemWithTestsDto> AddTestAsync(Guid problemId, AddTestDto input);
+    Task<ProblemWithTestsDto> CreateTestAsync(Guid problemId, CreateTestDto input);
+
+    Task<ProblemWithTestsDto> UpdateTestAsync(Guid problemId, int testId, UpdateTestDto input);
 }

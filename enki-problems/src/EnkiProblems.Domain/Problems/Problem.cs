@@ -214,14 +214,13 @@ public class Problem : FullAuditedAggregateRoot<Guid>
 
     internal Problem AddTest(int testId, int score)
     {
-        if (NumberOfTests + 1 > EnkiProblemsConsts.MaxNumberOfTests)
+        if (testId > EnkiProblemsConsts.MaxNumberOfTests)
         {
-            throw new BusinessException(EnkiProblemsDomainErrorCodes.NumberOfTestsExceeded)
-                .WithData("numberOfTests", NumberOfTests + 1)
-                .WithData("testId", testId)
-                .WithData("problemId", Id);
+            throw new BusinessException(
+                EnkiProblemsDomainErrorCodes.NumberOfTestsExceedsLimit,
+                $"The number of tests exceeds the limit of {EnkiProblemsConsts.MaxNumberOfTests}."
+            ).WithData("problemId", Id);
         }
-
         var currentTotalScore = Tests.Sum(t => t.Score);
         if (currentTotalScore + score > EnkiProblemsConsts.MaxTotalScore)
         {
@@ -233,6 +232,7 @@ public class Problem : FullAuditedAggregateRoot<Guid>
 
         SetNumberOfTests(NumberOfTests + 1);
         Tests.Add(new Test(testId, Id, score));
+
         return this;
     }
 
@@ -258,6 +258,15 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         if (test is null)
         {
             throw new BusinessException(EnkiProblemsDomainErrorCodes.TestNotFound)
+                .WithData("testId", testId)
+                .WithData("problemId", Id);
+        }
+
+        var currentTotalScore = Tests.Sum(t => t.Score);
+        if (currentTotalScore - test.Score + score > EnkiProblemsConsts.MaxTotalScore)
+        {
+            throw new BusinessException(EnkiProblemsDomainErrorCodes.TotalScoreExceeded)
+                .WithData("totalScore", currentTotalScore - test.Score + score)
                 .WithData("testId", testId)
                 .WithData("problemId", Id);
         }

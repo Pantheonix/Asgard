@@ -59,7 +59,7 @@ public class EnkiProblemsTestData : ISingletonDependency
 
     public DifficultyEnum ProblemDifficulty2 { get; } = DifficultyEnum.Medium;
 
-     public Guid ProblemId3 { get; } = Guid.Parse("00000000-0000-0000-0000-000000000003");
+    public Guid ProblemId3 { get; } = Guid.Parse("00000000-0000-0000-0000-000000000003");
 
     public string ProblemName3 { get; } = "Problem Name 3";
 
@@ -103,7 +103,9 @@ public class EnkiProblemsTestData : ISingletonDependency
 
     public int TestScore1 { get; } = 10;
 
-    public int LimitExceedingTestScore { get; } = 100;
+    public int TestScore2 { get; } = 20;
+
+    public int LimitExceedingTestScore { get; } = 200;
 
     public byte[] TestArchiveBytes1 { get; } = { 1, 2, 3 };
 

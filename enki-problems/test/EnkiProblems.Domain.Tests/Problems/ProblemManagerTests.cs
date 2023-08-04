@@ -213,4 +213,50 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
             _problemManager.AddTest(problem, _testData.TestId2, _testData.LimitExceedingTestScore);
         });
     }
+
+    [Fact]
+    public async Task Should_Update_An_Existing_Test()
+    {
+        // Arrange
+        var problem = await _problemRepository.GetAsync(_testData.ProblemId1);
+        var test = problem.Tests.First();
+
+        // Act
+        await WithUnitOfWorkAsync(async () =>
+        {
+            var updatedProblem = _problemManager.UpdateTest(problem, test.Id, _testData.TestScore2);
+            await _problemRepository.UpdateAsync(updatedProblem);
+        });
+
+        // Assert
+        var problemWithTests = await _problemRepository.GetAsync(_testData.ProblemId1);
+        problemWithTests.Tests.Count.ShouldBe(1);
+        problemWithTests.Tests.First().Id.ShouldBe(test.Id);
+        problemWithTests.Tests.First().Score.ShouldBe(_testData.TestScore2);
+    }
+
+    [Fact]
+    public async Task Should_Not_Update_Non_Existing_Test()
+    {
+        var problem = await _problemRepository.GetAsync(_testData.ProblemId1);
+
+        Assert.Throws<BusinessException>(() =>
+        {
+            _problemManager.UpdateTest(problem, _testData.TestId2, _testData.TestScore2);
+        });
+    }
+
+    [Fact]
+    public async Task Should_Not_Update_Test_With_Limit_Exceeding_Score()
+    {
+        // Arrange
+        var problem = await _problemRepository.GetAsync(_testData.ProblemId1);
+        var test = problem.Tests.First();
+
+        // Act & Assert
+        Assert.Throws<BusinessException>(() =>
+        {
+            _problemManager.UpdateTest(problem, test.Id, _testData.LimitExceedingTestScore);
+        });
+    }
 }

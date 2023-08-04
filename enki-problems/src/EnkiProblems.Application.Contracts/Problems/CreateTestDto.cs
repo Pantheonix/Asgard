@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace EnkiProblems.Problems;
 
-public class AddTestDto
+public class CreateTestDto
 {
     [Required]
     [Range(EnkiProblemsConsts.MinScore, EnkiProblemsConsts.MaxScore)]

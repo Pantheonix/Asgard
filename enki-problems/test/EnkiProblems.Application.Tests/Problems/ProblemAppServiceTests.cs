@@ -365,9 +365,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     }
     #endregion
 
-    #region AddTestAsync
+    #region CreateTestAsync
     [Fact]
-    public async Task Should_Add_Test_When_Current_User_Is_Proposer_And_Owner()
+    public async Task Should_Create_Test_When_Current_User_Is_Proposer_And_Owner()
     {
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
 
@@ -396,9 +396,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
             ContentType = "application/zip"
         };
 
-        var problem = await _problemAppService.AddTestAsync(
+        var problem = await _problemAppService.CreateTestAsync(
             _testData.ProblemId1,
-            new AddTestDto { Score = _testData.TestScore1, ArchiveFile = stubTestArchiveFile }
+            new CreateTestDto { Score = _testData.TestScore1, ArchiveFile = stubTestArchiveFile }
         );
 
         problem.ShouldNotBeNull();
@@ -407,7 +407,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     }
 
     [Fact]
-    public async Task Should_Not_Add_Test_When_User_Is_Anonymous()
+    public async Task Should_Not_Create_Test_When_User_Is_Anonymous()
     {
         Login(_testData.NormalUserId, _testData.NormalUserRoles);
 
@@ -438,15 +438,19 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
 
         await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
         {
-            await _problemAppService.AddTestAsync(
+            await _problemAppService.CreateTestAsync(
                 _testData.ProblemId1,
-                new AddTestDto { Score = _testData.TestScore1, ArchiveFile = stubTestArchiveFile }
+                new CreateTestDto
+                {
+                    Score = _testData.TestScore1,
+                    ArchiveFile = stubTestArchiveFile
+                }
             );
         });
     }
 
     [Fact]
-    public async Task Should_Not_Add_Test_When_User_Is_Not_Owner()
+    public async Task Should_Not_Create_Test_When_User_Is_Not_Owner()
     {
         Login(_testData.ProposerUserId2, _testData.ProposerUserRoles);
 
@@ -477,15 +481,19 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
 
         await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
         {
-            await _problemAppService.AddTestAsync(
+            await _problemAppService.CreateTestAsync(
                 _testData.ProblemId1,
-                new AddTestDto { Score = _testData.TestScore1, ArchiveFile = stubTestArchiveFile }
+                new CreateTestDto
+                {
+                    Score = _testData.TestScore1,
+                    ArchiveFile = stubTestArchiveFile
+                }
             );
         });
     }
 
     [Fact]
-    public async Task Should_Not_Add_Test_For_Non_Existing_Problem()
+    public async Task Should_Not_Create_Test_For_Non_Existing_Problem()
     {
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
 
@@ -516,16 +524,20 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
 
         await Assert.ThrowsAsync<EntityNotFoundException>(async () =>
         {
-            await _problemAppService.AddTestAsync(
+            await _problemAppService.CreateTestAsync(
                 Guid.NewGuid(),
-                new AddTestDto { Score = _testData.TestScore1, ArchiveFile = stubTestArchiveFile }
+                new CreateTestDto
+                {
+                    Score = _testData.TestScore1,
+                    ArchiveFile = stubTestArchiveFile
+                }
             );
         });
     }
 
     // TODO: run test when problem publishing is implemented
     // [Fact]
-    // public async Task Should_Not_Add_Test_For_Published_Problem()
+    // public async Task Should_Not_Create_Test_For_Published_Problem()
     // {
     //     Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
     //
@@ -558,9 +570,299 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     //
     //     await Assert.ThrowsAsync<Business>(async () =>
     //     {
-    //         await _problemAppService.AddTestAsync(
+    //         await _problemAppService.CreateTestAsync(
     //             _testData.ProblemId3,
-    //             new AddTestDto { Score = _testData.TestScore1, ArchiveFile = stubTestArchiveFile }
+    //             new CreateTestDto { Score = _testData.TestScore1, ArchiveFile = stubTestArchiveFile }
+    //         );
+    //     });
+    // }
+
+    [Fact]
+    public async Task Should_Not_Create_Test_When_Upload_Failed()
+    {
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        _testService
+            .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
+            .Returns(
+                new UploadResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Failed,
+                        Message = "Upload failed"
+                    }
+                }
+            );
+
+        var stubTestArchiveFile = new FormFile(
+            new MemoryStream(_testData.TestArchiveBytes1),
+            0,
+            0,
+            "Test archive file",
+            "Test archive file"
+        )
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = "application/zip"
+        };
+
+        await Assert.ThrowsAsync<BusinessException>(async () =>
+        {
+            await _problemAppService.CreateTestAsync(
+                _testData.ProblemId1,
+                new CreateTestDto
+                {
+                    Score = _testData.TestScore1,
+                    ArchiveFile = stubTestArchiveFile
+                }
+            );
+        });
+    }
+    #endregion
+
+    #region UpdateTestAsync
+    [Fact]
+    public async Task Should_Update_Test_When_Current_User_Is_Proposer_And_Owner()
+    {
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        _testService
+            .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
+            .Returns(
+                new UploadResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Ok,
+                        Message = "Successful upload"
+                    }
+                }
+            );
+
+        var stubTestArchiveFile = new FormFile(
+            new MemoryStream(_testData.TestArchiveBytes1),
+            0,
+            0,
+            "Test archive file",
+            "Test archive file"
+        )
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = "application/zip"
+        };
+
+        var problem = await _problemAppService.UpdateTestAsync(
+            _testData.ProblemId1,
+            _testData.TestId1,
+            new UpdateTestDto { Score = _testData.TestScore2, ArchiveFile = stubTestArchiveFile }
+        );
+
+        problem.ShouldNotBeNull();
+        problem.Tests.Count().ShouldBe(1);
+        problem.Tests.ShouldContain(t => t.Id == _testData.TestId1);
+        problem.Tests.First().Score.ShouldBe(_testData.TestScore2);
+    }
+
+    [Fact]
+    public async Task Should_Update_Test_When_Only_Score_Is_Provided()
+    {
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        var stubTestArchiveFile = new FormFile(
+            new MemoryStream(_testData.TestArchiveBytes1),
+            0,
+            0,
+            "Test archive file",
+            "Test archive file"
+        )
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = "application/zip"
+        };
+
+        var problem = await _problemAppService.UpdateTestAsync(
+            _testData.ProblemId1,
+            _testData.TestId1,
+            new UpdateTestDto { Score = _testData.TestScore2 }
+        );
+
+        problem.ShouldNotBeNull();
+        problem.Tests.Count().ShouldBe(1);
+        problem.Tests.ShouldContain(t => t.Id == _testData.TestId1);
+        problem.Tests.First().Score.ShouldBe(_testData.TestScore2);
+    }
+
+    [Fact]
+    public async Task Should_Not_Update_Test_When_User_Is_Anonymous()
+    {
+        Login(_testData.NormalUserId, _testData.NormalUserRoles);
+
+        _testService
+            .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
+            .Returns(
+                new UploadResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Ok,
+                        Message = "Successful upload"
+                    }
+                }
+            );
+
+        var stubTestArchiveFile = new FormFile(
+            new MemoryStream(_testData.TestArchiveBytes1),
+            0,
+            0,
+            "Test archive file",
+            "Test archive file"
+        )
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = "application/zip"
+        };
+
+        await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
+        {
+            await _problemAppService.UpdateTestAsync(
+                _testData.ProblemId1,
+                _testData.TestId1,
+                new UpdateTestDto
+                {
+                    Score = _testData.TestScore2,
+                    ArchiveFile = stubTestArchiveFile
+                }
+            );
+        });
+    }
+
+    [Fact]
+    public async Task Should_Not_Update_Test_When_User_Is_Not_Owner()
+    {
+        Login(_testData.ProposerUserId2, _testData.ProposerUserRoles);
+
+        _testService
+            .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
+            .Returns(
+                new UploadResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Ok,
+                        Message = "Successful upload"
+                    }
+                }
+            );
+
+        var stubTestArchiveFile = new FormFile(
+            new MemoryStream(_testData.TestArchiveBytes1),
+            0,
+            0,
+            "Test archive file",
+            "Test archive file"
+        )
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = "application/zip"
+        };
+
+        await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
+        {
+            await _problemAppService.UpdateTestAsync(
+                _testData.ProblemId1,
+                _testData.TestId1,
+                new UpdateTestDto
+                {
+                    Score = _testData.TestScore2,
+                    ArchiveFile = stubTestArchiveFile
+                }
+            );
+        });
+    }
+
+    [Fact]
+    public async Task Should_Not_Update_Test_For_Non_Existing_Problem()
+    {
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        _testService
+            .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
+            .Returns(
+                new UploadResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Ok,
+                        Message = "Successful upload"
+                    }
+                }
+            );
+
+        var stubTestArchiveFile = new FormFile(
+            new MemoryStream(_testData.TestArchiveBytes1),
+            0,
+            0,
+            "Test archive file",
+            "Test archive file"
+        )
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = "application/zip"
+        };
+
+        await Assert.ThrowsAsync<EntityNotFoundException>(async () =>
+        {
+            await _problemAppService.UpdateTestAsync(
+                Guid.NewGuid(),
+                _testData.TestId1,
+                new UpdateTestDto
+                {
+                    Score = _testData.TestScore2,
+                    ArchiveFile = stubTestArchiveFile
+                }
+            );
+        });
+    }
+
+    // TODO: run test when problem publishing is implemented
+    // [Fact]
+    // public async Task Should_Not_Update_Test_For_Published_Problem()
+    // {
+    //     Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+    //
+    //      _testService
+    //                 .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
+    //                 .Returns(
+    //                     new UploadResponse
+    //                     {
+    //                         Status = new StatusResponse
+    //                         {
+    //                             Code = StatusCode.Ok,
+    //                             Message = "Successful upload"
+    //                         }
+    //                     }
+    //                 );
+    //
+    //             var stubTestArchiveFile = new FormFile(
+    //                 new MemoryStream(_testData.TestArchiveBytes1),
+    //                 0,
+    //                 0,
+    //                 "Test archive file",
+    //                 "Test archive file"
+    //             )
+    //             {
+    //                 Headers = new HeaderDictionary(),
+    //                 ContentType = "application/zip"
+    //             };
+    //
+    //             // TODO: Publish problem
+    //
+    //     await Assert.ThrowsAsync<Business>(async () =>
+    //     {
+    //         await _problemAppService.UpdateTestAsync(
+    //             _testData.ProblemId3,
+    //             new UpdateTestDto { Score = _testData.TestScore1, ArchiveFile = stubTestArchiveFile }
     //         );
     //     });
     // }
@@ -597,9 +899,14 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
 
         await Assert.ThrowsAsync<BusinessException>(async () =>
         {
-            await _problemAppService.AddTestAsync(
+            await _problemAppService.UpdateTestAsync(
                 _testData.ProblemId1,
-                new AddTestDto { Score = _testData.TestScore1, ArchiveFile = stubTestArchiveFile }
+                _testData.TestId1,
+                new UpdateTestDto
+                {
+                    Score = _testData.TestScore2,
+                    ArchiveFile = stubTestArchiveFile
+                }
             );
         });
     }
