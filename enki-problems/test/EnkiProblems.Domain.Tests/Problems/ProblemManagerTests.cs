@@ -38,8 +38,7 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
                 _testData.ProblemTotalMemoryLimit2,
                 _testData.ProblemStackMemoryLimit2,
                 _testData.ProblemIoType2,
-                _testData.ProblemDifficulty2,
-                _testData.ProblemProgrammingLanguages2
+                _testData.ProblemDifficulty2
             );
 
             problem.ShouldNotBeNull();
@@ -55,7 +54,6 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
             problem.IoType.ShouldBe(_testData.ProblemIoType2);
             problem.Difficulty.ShouldBe(_testData.ProblemDifficulty2);
             problem.NumberOfTests.ShouldBe(0);
-            problem.ProgrammingLanguages.ShouldBe(_testData.ProblemProgrammingLanguages2);
             problem.ProposerId.ShouldBe(_testData.ProblemProposerId2);
         });
     }
@@ -78,8 +76,7 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
                     _testData.ProblemTotalMemoryLimit2,
                     _testData.ProblemStackMemoryLimit2,
                     _testData.ProblemIoType2,
-                    _testData.ProblemDifficulty2,
-                    _testData.ProblemProgrammingLanguages2
+                    _testData.ProblemDifficulty2
                 );
             });
         });
@@ -102,8 +99,7 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
                 _testData.ProblemTotalMemoryLimit2,
                 _testData.ProblemStackMemoryLimit2,
                 _testData.ProblemIoType2,
-                _testData.ProblemDifficulty2,
-                _testData.ProblemProgrammingLanguages2
+                _testData.ProblemDifficulty2
             );
             await _problemRepository.UpdateAsync(updatedProblem);
         });
@@ -122,7 +118,6 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
         problem.IoType.ShouldBe(_testData.ProblemIoType2);
         problem.Difficulty.ShouldBe(_testData.ProblemDifficulty2);
         problem.NumberOfTests.ShouldBe(_testData.ProblemNumberOfTests1);
-        problem.ProgrammingLanguages.ShouldBe(_testData.ProblemProgrammingLanguages2);
         problem.ProposerId.ShouldBe(_testData.ProblemProposerId2);
     }
 
@@ -145,8 +140,7 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
                     _testData.ProblemTotalMemoryLimit2,
                     _testData.ProblemStackMemoryLimit2,
                     _testData.ProblemIoType2,
-                    _testData.ProblemDifficulty2,
-                    _testData.ProblemProgrammingLanguages2
+                    _testData.ProblemDifficulty2
                 );
             });
         });

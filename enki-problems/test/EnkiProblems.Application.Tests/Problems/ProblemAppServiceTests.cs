@@ -62,7 +62,6 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                 TotalMemory = _testData.ProblemTotalMemoryLimit2,
                 IoType = _testData.ProblemIoType2,
                 Difficulty = _testData.ProblemDifficulty2,
-                ProgrammingLanguages = _testData.ProblemProgrammingLanguages2
             }
         );
 
@@ -79,7 +78,6 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         problemDto.IoType.ShouldBe(_testData.ProblemIoType2);
         problemDto.Difficulty.ShouldBe(_testData.ProblemDifficulty2);
         problemDto.NumberOfTests.ShouldBe(0);
-        problemDto.ProgrammingLanguages.ShouldBe(_testData.ProblemProgrammingLanguages2);
         problemDto.IsPublished.ShouldBeFalse();
         problemDto.CreationDate.ShouldBeGreaterThan(DateTime.Now.AddMinutes(-1));
     }
@@ -103,8 +101,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                     StackMemory = _testData.ProblemStackMemoryLimit2,
                     TotalMemory = _testData.ProblemTotalMemoryLimit2,
                     IoType = _testData.ProblemIoType2,
-                    Difficulty = _testData.ProblemDifficulty2,
-                    ProgrammingLanguages = _testData.ProblemProgrammingLanguages2
+                    Difficulty = _testData.ProblemDifficulty2
                 }
             );
         });
@@ -266,8 +263,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                 StackMemory = _testData.ProblemStackMemoryLimit2,
                 TotalMemory = _testData.ProblemTotalMemoryLimit2,
                 IoType = _testData.ProblemIoType2,
-                Difficulty = _testData.ProblemDifficulty2,
-                ProgrammingLanguages = _testData.ProblemProgrammingLanguages2
+                Difficulty = _testData.ProblemDifficulty2
             }
         );
 
@@ -284,7 +280,6 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         problemDto.IoType.ShouldBe(_testData.ProblemIoType2);
         problemDto.Difficulty.ShouldBe(_testData.ProblemDifficulty2);
         problemDto.NumberOfTests.ShouldBe(_testData.ProblemNumberOfTests1);
-        problemDto.ProgrammingLanguages.ShouldBe(_testData.ProblemProgrammingLanguages2);
         problemDto.IsPublished.ShouldBeFalse();
     }
 
@@ -308,8 +303,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                     StackMemory = _testData.ProblemStackMemoryLimit2,
                     TotalMemory = _testData.ProblemTotalMemoryLimit2,
                     IoType = _testData.ProblemIoType2,
-                    Difficulty = _testData.ProblemDifficulty2,
-                    ProgrammingLanguages = _testData.ProblemProgrammingLanguages2
+                    Difficulty = _testData.ProblemDifficulty2
                 }
             );
         });
@@ -364,8 +358,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                     StackMemory = _testData.ProblemStackMemoryLimit2,
                     TotalMemory = _testData.ProblemTotalMemoryLimit2,
                     IoType = _testData.ProblemIoType2,
-                    Difficulty = _testData.ProblemDifficulty2,
-                    ProgrammingLanguages = _testData.ProblemProgrammingLanguages2
+                    Difficulty = _testData.ProblemDifficulty2
                 }
             );
         });

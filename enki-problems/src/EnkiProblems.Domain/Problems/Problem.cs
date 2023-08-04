@@ -35,8 +35,6 @@ public class Problem : FullAuditedAggregateRoot<Guid>
 
     public ICollection<Test> Tests { get; private set; }
 
-    public ICollection<ProgrammingLanguageEnum> ProgrammingLanguages { get; private set; }
-
     public ICollection<ProblemLabel> Labels { get; private set; }
 
     private Problem() { }
@@ -53,8 +51,7 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         decimal totalMemoryLimit,
         decimal stackMemoryLimit,
         IoTypeEnum ioType,
-        DifficultyEnum difficulty,
-        IEnumerable<ProgrammingLanguageEnum> programmingLanguages
+        DifficultyEnum difficulty
     )
         : base(id)
     {
@@ -63,7 +60,6 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         SetDescription(description);
         SetOrigin(sourceName, authorName);
         SetLimit(timeLimit, totalMemoryLimit, stackMemoryLimit);
-        SetProgrammingLanguages(programmingLanguages);
         NumberOfTests = 0;
 
         IoType = ioType;
@@ -90,7 +86,6 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         decimal stackMemoryLimit,
         IoTypeEnum ioType,
         DifficultyEnum difficulty,
-        IEnumerable<ProgrammingLanguageEnum> programmingLanguages,
         IEnumerable<Test> tests
     )
         : base(id)
@@ -100,7 +95,6 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         SetDescription(description);
         SetOrigin(sourceName, authorName);
         SetLimit(timeLimit, totalMemoryLimit, stackMemoryLimit);
-        SetProgrammingLanguages(programmingLanguages);
         SetNumberOfTests(tests.Count());
 
         IoType = ioType;
@@ -198,14 +192,6 @@ public class Problem : FullAuditedAggregateRoot<Guid>
     internal Problem SetDifficulty(DifficultyEnum difficulty)
     {
         Difficulty = difficulty;
-        return this;
-    }
-
-    internal Problem SetProgrammingLanguages(
-        IEnumerable<ProgrammingLanguageEnum> programmingLanguageEnums
-    )
-    {
-        ProgrammingLanguages = new HashSet<ProgrammingLanguageEnum>(programmingLanguageEnums);
         return this;
     }
 

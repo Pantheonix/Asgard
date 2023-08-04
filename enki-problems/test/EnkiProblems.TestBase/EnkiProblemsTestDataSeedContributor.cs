@@ -39,7 +39,6 @@ public class EnkiProblemsTestDataSeedContributor : IDataSeedContributor, ITransi
                 _testData.ProblemStackMemoryLimit1,
                 _testData.ProblemIoType1,
                 _testData.ProblemDifficulty1,
-                _testData.ProblemProgrammingLanguages1,
                 new[] { new Test(_testData.TestId1, _testData.ProblemId1, _testData.TestScore1) }
             )
         );
@@ -57,8 +56,7 @@ public class EnkiProblemsTestDataSeedContributor : IDataSeedContributor, ITransi
                 _testData.ProblemTotalMemoryLimit3,
                 _testData.ProblemStackMemoryLimit3,
                 _testData.ProblemIoType3,
-                _testData.ProblemDifficulty3,
-                _testData.ProblemProgrammingLanguages3
+                _testData.ProblemDifficulty3
             )
         );
     }

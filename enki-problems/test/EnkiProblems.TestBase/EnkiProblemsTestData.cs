@@ -33,9 +33,6 @@ public class EnkiProblemsTestData : ISingletonDependency
 
     public DifficultyEnum ProblemDifficulty1 { get; } = DifficultyEnum.Easy;
 
-    public ProgrammingLanguageEnum[] ProblemProgrammingLanguages1 { get; } =
-        { ProgrammingLanguageEnum.CSharp };
-
     public Guid ProblemId2 { get; } = Guid.Parse("00000000-0000-0000-0000-000000000002");
 
     public string ProblemName2 { get; } = "Problem Name 2";
@@ -62,10 +59,7 @@ public class EnkiProblemsTestData : ISingletonDependency
 
     public DifficultyEnum ProblemDifficulty2 { get; } = DifficultyEnum.Medium;
 
-    public ProgrammingLanguageEnum[] ProblemProgrammingLanguages2 { get; } =
-        { ProgrammingLanguageEnum.Rust };
-
-    public Guid ProblemId3 { get; } = Guid.Parse("00000000-0000-0000-0000-000000000003");
+     public Guid ProblemId3 { get; } = Guid.Parse("00000000-0000-0000-0000-000000000003");
 
     public string ProblemName3 { get; } = "Problem Name 3";
 
@@ -90,9 +84,6 @@ public class EnkiProblemsTestData : ISingletonDependency
     public IoTypeEnum ProblemIoType3 { get; } = IoTypeEnum.Standard;
 
     public DifficultyEnum ProblemDifficulty3 { get; } = DifficultyEnum.Easy;
-
-    public ProgrammingLanguageEnum[] ProblemProgrammingLanguages3 { get; } =
-        { ProgrammingLanguageEnum.Rust, ProgrammingLanguageEnum.C };
 
     /* USERS */
     public Guid NormalUserId { get; } = Guid.Parse("00000000-0000-0000-0000-000000000001");

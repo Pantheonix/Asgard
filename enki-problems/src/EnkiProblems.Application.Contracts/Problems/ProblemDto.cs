@@ -35,6 +35,4 @@ public class ProblemDto : EntityDto<Guid>
     public DifficultyEnum Difficulty { get; set; }
 
     public int NumberOfTests { get; set; }
-
-    public IEnumerable<ProgrammingLanguageEnum> ProgrammingLanguages { get; set; }
 }

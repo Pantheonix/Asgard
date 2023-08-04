@@ -54,7 +54,4 @@ public class CreateProblemDto
 
     [Required]
     public DifficultyEnum Difficulty { get; set; }
-
-    [Required]
-    public IEnumerable<ProgrammingLanguageEnum> ProgrammingLanguages { get; set; }
 }

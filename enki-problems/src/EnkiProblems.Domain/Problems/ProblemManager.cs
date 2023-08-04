@@ -28,8 +28,7 @@ public class ProblemManager : DomainService
         decimal totalMemoryLimit,
         decimal stackMemoryLimit,
         IoTypeEnum ioType,
-        DifficultyEnum difficulty,
-        IEnumerable<ProgrammingLanguageEnum> programmingLanguages
+        DifficultyEnum difficulty
     )
     {
         var problem = await _problemRepository.FirstOrDefaultAsync(p => p.Name == name);
@@ -50,8 +49,7 @@ public class ProblemManager : DomainService
             totalMemoryLimit,
             stackMemoryLimit,
             ioType,
-            difficulty,
-            programmingLanguages
+            difficulty
         );
     }
 
@@ -66,8 +64,7 @@ public class ProblemManager : DomainService
         decimal? totalMemoryLimit,
         decimal? stackMemoryLimit,
         IoTypeEnum? ioType,
-        DifficultyEnum? difficulty,
-        IEnumerable<ProgrammingLanguageEnum>? programmingLanguages
+        DifficultyEnum? difficulty
     )
     {
         if (problem.IsPublished)
@@ -131,11 +128,6 @@ public class ProblemManager : DomainService
         if (difficulty is not null)
         {
             problem.SetDifficulty((DifficultyEnum)difficulty);
-        }
-
-        if (programmingLanguages is not null && programmingLanguages.Any())
-        {
-            problem.SetProgrammingLanguages(programmingLanguages);
         }
 
         return problem;

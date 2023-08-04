@@ -36,7 +36,5 @@ public class ProblemWithTestsDto : EntityDto<Guid>
 
     public int NumberOfTests { get; set; }
 
-    public IEnumerable<ProgrammingLanguageEnum> ProgrammingLanguages { get; set; }
-
     public IEnumerable<TestDto> Tests { get; set; }
 }

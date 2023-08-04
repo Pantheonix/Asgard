@@ -52,8 +52,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             input.TotalMemory,
             input.StackMemory,
             input.IoType,
-            input.Difficulty,
-            input.ProgrammingLanguages
+            input.Difficulty
         );
 
         await _problemRepository.InsertAsync(problem);
@@ -86,13 +85,6 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         if (input.Difficulty is not null)
         {
             problemQueryable = problemQueryable.Where(p => p.Difficulty == input.Difficulty);
-        }
-
-        if (input.ProgrammingLanguages is not null)
-        {
-            problemQueryable = problemQueryable.Where(
-                p => p.ProgrammingLanguages.Any(l => input.ProgrammingLanguages.Contains(l))
-            );
         }
 
         problemQueryable = problemQueryable.PageBy(input).OrderBy(p => p.CreationDate);
@@ -208,8 +200,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             input.TotalMemory,
             input.StackMemory,
             input.IoType,
-            input.Difficulty,
-            input.ProgrammingLanguages
+            input.Difficulty
         );
 
         return ObjectMapper.Map<Problem, ProblemDto>(

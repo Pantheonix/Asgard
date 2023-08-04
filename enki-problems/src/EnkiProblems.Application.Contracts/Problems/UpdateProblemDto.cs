@@ -44,6 +44,4 @@ public class UpdateProblemDto
     public IoTypeEnum? IoType { get; set; }
 
     public DifficultyEnum? Difficulty { get; set; }
-
-    public IEnumerable<ProgrammingLanguageEnum>? ProgrammingLanguages { get; set; }
 }
