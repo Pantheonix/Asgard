@@ -177,7 +177,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         if (problem.IsPublished)
         {
-            throw new AbpAuthorizationException(
+            throw new BusinessException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem
             );
         }
@@ -223,7 +223,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         if (problem.IsPublished)
         {
-            throw new AbpAuthorizationException(
+            throw new BusinessException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem
             );
         }
@@ -279,7 +279,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         if (problem.IsPublished)
         {
-            throw new AbpAuthorizationException(
+            throw new BusinessException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem
             );
         }
@@ -321,5 +321,53 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         await _problemRepository.UpdateAsync(problem);
 
         return ObjectMapper.Map<Problem, ProblemWithTestsDto>(problem);
+    }
+
+    [Authorize]
+    public async Task<ProblemWithTestsDto> DeleteTestAsync(Guid problemId, int testId)
+    {
+        // TODO: convert to permission
+        if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
+        {
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.NotAllowedToEditProblem
+            );
+        }
+
+        var problem = await _problemRepository.GetAsync(problemId);
+
+        if (problem.IsPublished)
+        {
+            throw new BusinessException(
+                EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem
+            );
+        }
+
+        if (problem.ProposerId != CurrentUser.Id)
+        {
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.UnpublishedProblemNotBelongingToCurrentUser
+            );
+        }
+
+        var deleteResponse = await _testService.DeleteTestAsync(
+            new DeleteTestRequest { ProblemId = problemId.ToString(), TestId = testId.ToString() }
+        );
+
+        if (deleteResponse.Status.Code != StatusCode.Ok)
+        {
+            throw new BusinessException(
+                EnkiProblemsDomainErrorCodes.TestDeleteFailed,
+                $"Test delete failed with status code {deleteResponse.Status.Code}: {deleteResponse.Status.Message}."
+            )
+                .WithData("problemId", problem.Id)
+                .WithData("testId", testId);
+        }
+
+        var updatedProblem = _problemManager.RemoveTest(problem, testId);
+
+        await _problemRepository.UpdateAsync(updatedProblem);
+
+        return ObjectMapper.Map<Problem, ProblemWithTestsDto>(updatedProblem);
     }
 }

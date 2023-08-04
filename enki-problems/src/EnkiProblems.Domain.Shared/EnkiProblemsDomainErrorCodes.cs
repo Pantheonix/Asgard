@@ -28,6 +28,8 @@ public static class EnkiProblemsDomainErrorCodes
 
     public const string TestUploadFailed = "EnkiProblems:TestUploadFailed";
 
+    public const string TestDeleteFailed = "EnkiProblems:TestDeleteFailed";
+
     public const string DownloadTestArchiveError = "EnkiProblems:DownloadTestArchiveError";
 
     public const string TotalScoreExceeded = "EnkiProblems:TotalScoreExceeded";

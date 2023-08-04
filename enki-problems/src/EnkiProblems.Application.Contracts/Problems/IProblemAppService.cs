@@ -22,4 +22,6 @@ public interface IProblemAppService : IApplicationService
     Task<ProblemWithTestsDto> CreateTestAsync(Guid problemId, CreateTestDto input);
 
     Task<ProblemWithTestsDto> UpdateTestAsync(Guid problemId, int testId, UpdateTestDto input);
+
+    Task<ProblemWithTestsDto> DeleteTestAsync(Guid problemId, int testId);
 }

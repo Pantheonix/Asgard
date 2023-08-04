@@ -912,6 +912,106 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     }
     #endregion
 
+    #region DeleteTestAsync
+    [Fact]
+    public async Task Should_Delete_Test_When_User_Is_Proposer_And_Owner()
+    {
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        _testService
+            .DeleteTestAsync(Arg.Any<DeleteTestRequest>())
+            .Returns(
+                new DeleteTestResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Ok,
+                        Message = "Successful delete"
+                    }
+                }
+            );
+
+        var problem = await _problemAppService.DeleteTestAsync(
+            _testData.ProblemId1,
+            _testData.TestId1
+        );
+
+        problem.ShouldNotBeNull();
+        problem.Tests.ShouldNotContain(t => t.Id == _testData.TestId1);
+    }
+
+    [Fact]
+    public async Task Should_Not_Delete_Test_When_User_Is_Anonymous()
+    {
+        Login(_testData.NormalUserId, _testData.NormalUserRoles);
+
+        await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
+        {
+            await _problemAppService.DeleteTestAsync(_testData.ProblemId1, _testData.TestId1);
+        });
+    }
+
+    [Fact]
+    public async Task Should_Not_Delete_Test_When_User_Is_Not_Owner()
+    {
+        Login(_testData.ProposerUserId2, _testData.ProposerUserRoles);
+
+        await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
+        {
+            await _problemAppService.DeleteTestAsync(_testData.ProblemId1, _testData.TestId1);
+        });
+    }
+
+    [Fact]
+    public async Task Should_Not_Delete_Test_When_Problem_Is_Not_Found()
+    {
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        await Assert.ThrowsAsync<EntityNotFoundException>(async () =>
+        {
+            await _problemAppService.DeleteTestAsync(Guid.NewGuid(), _testData.TestId1);
+        });
+    }
+
+    // TODO: run test when problem publishing is implemented
+    // [Fact]
+    // public async Task Should_Not_Delete_Test_When_Problem_Is_Published()
+    // {
+    //     Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+    //
+    //     // TODO: publish problem
+    //
+    //     await Assert.ThrowsAsync<BusinessException>(async () =>
+    //     {
+    //         await _problemAppService.DeleteTestAsync(_testData.ProblemId3, _testData.TestId1);
+    //     });
+    // }
+
+    [Fact]
+    public async Task Should_Not_Delete_Test_When_Deletion_Failed()
+    {
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        _testService
+            .DeleteTestAsync(Arg.Any<DeleteTestRequest>())
+            .Returns(
+                new DeleteTestResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Failed,
+                        Message = "Delete failed"
+                    }
+                }
+            );
+
+        await Assert.ThrowsAsync<BusinessException>(async () =>
+        {
+            await _problemAppService.DeleteTestAsync(_testData.ProblemId1, _testData.TestId1);
+        });
+    }
+    #endregion
+
     private void Login(Guid userId, string[] userRoles)
     {
         _currentUser.Id.Returns(userId);

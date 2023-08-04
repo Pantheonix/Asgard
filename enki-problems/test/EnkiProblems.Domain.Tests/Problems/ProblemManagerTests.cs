@@ -259,4 +259,34 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
             _problemManager.UpdateTest(problem, test.Id, _testData.LimitExceedingTestScore);
         });
     }
+
+    [Fact]
+    public async Task Should_Remove_An_Existing_Test()
+    {
+        // Arrange
+        var problem = await _problemRepository.GetAsync(_testData.ProblemId1);
+        var test = problem.Tests.First();
+
+        // Act
+        await WithUnitOfWorkAsync(async () =>
+        {
+            var updatedProblem = _problemManager.RemoveTest(problem, test.Id);
+            await _problemRepository.UpdateAsync(updatedProblem);
+        });
+
+        // Assert
+        var problemWithTests = await _problemRepository.GetAsync(_testData.ProblemId1);
+        problemWithTests.Tests.Count.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task Should_Not_Remove_Non_Existing_Test()
+    {
+        var problem = await _problemRepository.GetAsync(_testData.ProblemId1);
+
+        Assert.Throws<BusinessException>(() =>
+        {
+            _problemManager.RemoveTest(problem, _testData.TestId2);
+        });
+    }
 }

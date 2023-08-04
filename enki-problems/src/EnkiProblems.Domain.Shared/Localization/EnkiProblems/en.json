@@ -15,6 +15,7 @@
     "EnkiProblems:TestNotFound": "Test not found.",
     "EnkiProblems:NumberOfTestsExceedsLimit": "The number of tests exceeds the allowed limit.",
     "EnkiProblems:TestUploadFailed": "The uploading process for the current test failed.",
+    "EnkiProblems:TestDeleteFailed": "The deleting process for the current test failed.",
     "EnkiProblems:DownloadTestArchiveError": "Download failed for test archive.",
     "EnkiProblems:TotalScoreExceeded": "The total score of the problem tests cannot exceed the predefined limit.",
     "EnkiProblems:NumberOfTestExceeded": "The number of tests cannot exceed the predefined limit."

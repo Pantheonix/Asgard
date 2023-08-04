@@ -142,4 +142,9 @@ public class ProblemManager : DomainService
     {
         return problem.UpdateTest(testId, testScore);
     }
+
+    public Problem RemoveTest(Problem problem, int testId)
+    {
+        return problem.RemoveTest(testId);
+    }
 }
