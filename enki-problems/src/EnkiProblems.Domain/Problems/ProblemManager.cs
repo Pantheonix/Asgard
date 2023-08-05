@@ -131,14 +131,26 @@ public class ProblemManager : DomainService
         return problem;
     }
 
-    public Problem AddTest(Problem problem, int testId, int testScore)
+    public Problem AddTest(
+        Problem problem,
+        int testId,
+        int testScore,
+        string inputDownloadUrl,
+        string outputDownloadUrl
+    )
     {
-        return problem.AddTest(testId, testScore);
+        return problem.AddTest(testId, testScore, inputDownloadUrl, outputDownloadUrl);
     }
 
-    public Problem UpdateTest(Problem problem, int testId, int testScore)
+    public Problem UpdateTest(
+        Problem problem,
+        int testId,
+        int? testScore,
+        string? inputDownloadUrl,
+        string? outputDownloadUrl
+    )
     {
-        return problem.UpdateTest(testId, testScore);
+        return problem.UpdateTest(testId, testScore, inputDownloadUrl, outputDownloadUrl);
     }
 
     public Problem RemoveTest(Problem problem, int testId)

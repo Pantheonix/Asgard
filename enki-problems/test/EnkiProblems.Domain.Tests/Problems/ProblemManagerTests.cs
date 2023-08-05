@@ -189,7 +189,9 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
             var updatedProblem = _problemManager.AddTest(
                 problem,
                 _testData.TestId1,
-                _testData.TestScore1
+                _testData.TestScore1,
+                _testData.TestInputLink1,
+                _testData.TestOutputLink1
             );
             await _problemRepository.UpdateAsync(updatedProblem);
         });
@@ -210,7 +212,13 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
         // Act & Assert
         Assert.Throws<BusinessException>(() =>
         {
-            _problemManager.AddTest(problem, _testData.TestId2, _testData.LimitExceedingTestScore);
+            _problemManager.AddTest(
+                problem,
+                _testData.TestId2,
+                _testData.LimitExceedingTestScore,
+                _testData.TestInputLink1,
+                _testData.TestOutputLink1
+            );
         });
     }
 
@@ -224,7 +232,13 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
         // Act
         await WithUnitOfWorkAsync(async () =>
         {
-            var updatedProblem = _problemManager.UpdateTest(problem, test.Id, _testData.TestScore2);
+            var updatedProblem = _problemManager.UpdateTest(
+                problem,
+                test.Id,
+                _testData.TestScore2,
+                _testData.TestInputLink1,
+                _testData.TestOutputLink1
+            );
             await _problemRepository.UpdateAsync(updatedProblem);
         });
 
@@ -242,7 +256,13 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
 
         Assert.Throws<BusinessException>(() =>
         {
-            _problemManager.UpdateTest(problem, _testData.TestId2, _testData.TestScore2);
+            _problemManager.UpdateTest(
+                problem,
+                _testData.TestId2,
+                _testData.TestScore2,
+                _testData.TestInputLink1,
+                _testData.TestOutputLink1
+            );
         });
     }
 
@@ -256,7 +276,13 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
         // Act & Assert
         Assert.Throws<BusinessException>(() =>
         {
-            _problemManager.UpdateTest(problem, test.Id, _testData.LimitExceedingTestScore);
+            _problemManager.UpdateTest(
+                problem,
+                test.Id,
+                _testData.LimitExceedingTestScore,
+                _testData.TestInputLink1,
+                _testData.TestOutputLink1
+            );
         });
     }
 

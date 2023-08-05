@@ -109,5 +109,7 @@ public class EnkiProblemsTestData : ISingletonDependency
 
     public byte[] TestArchiveBytes1 { get; } = { 1, 2, 3 };
 
-    public int NotExistingTestId { get; } = 999;
+    public string TestInputLink1 { get; } = "https://download-link.com/input.in";
+
+    public string TestOutputLink1 { get; } = "https://download-link.com/output.out";
 }

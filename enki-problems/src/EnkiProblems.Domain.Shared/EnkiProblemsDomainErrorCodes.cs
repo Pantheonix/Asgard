@@ -35,4 +35,7 @@ public static class EnkiProblemsDomainErrorCodes
     public const string TotalScoreExceeded = "EnkiProblems:TotalScoreExceeded";
 
     public const string NumberOfTestsExceeded = "EnkiProblems:NumberOfTestsExceeded";
+
+    public const string TestDownloadUrlRetrievalFailed =
+        "EnkiProblems:TestDownloadUrlRetrievalFailed";
 }

@@ -255,7 +255,31 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
                 .WithData("testId", testId);
         }
 
-        var updatedProblem = _problemManager.AddTest(problem, testId, input.Score);
+        var getDownloadUrlsResponse = await _testService.GetDownloadLinkForTestAsync(
+            new GetDownloadLinkForTestRequest
+            {
+                TestId = testId.ToString(),
+                ProblemId = problemId.ToString()
+            }
+        );
+
+        if (getDownloadUrlsResponse.Status.Code != StatusCode.Ok)
+        {
+            throw new BusinessException(
+                EnkiProblemsDomainErrorCodes.TestDownloadUrlRetrievalFailed,
+                $"Test download url retrieval failed with status code {getDownloadUrlsResponse.Status.Code}: {getDownloadUrlsResponse.Status.Message}."
+            )
+                .WithData("problemId", problem.Id)
+                .WithData("testId", testId);
+        }
+
+        var updatedProblem = _problemManager.AddTest(
+            problem,
+            testId,
+            input.Score,
+            getDownloadUrlsResponse.InputLink,
+            getDownloadUrlsResponse.OutputLink
+        );
         await _problemRepository.UpdateAsync(updatedProblem);
 
         return ObjectMapper.Map<Problem, ProblemWithTestsDto>(updatedProblem);
@@ -313,10 +337,31 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             }
         }
 
-        if (input.Score is not null)
+        var getDownloadUrlsResponse = await _testService.GetDownloadLinkForTestAsync(
+            new GetDownloadLinkForTestRequest
+            {
+                TestId = testId.ToString(),
+                ProblemId = problemId.ToString()
+            }
+        );
+
+        if (getDownloadUrlsResponse.Status.Code != StatusCode.Ok)
         {
-            _problemManager.UpdateTest(problem, testId, (int)input.Score);
+            throw new BusinessException(
+                EnkiProblemsDomainErrorCodes.TestDownloadUrlRetrievalFailed,
+                $"Test download url retrieval failed with status code {getDownloadUrlsResponse.Status.Code}: {getDownloadUrlsResponse.Status.Message}."
+            )
+                .WithData("problemId", problem.Id)
+                .WithData("testId", testId);
         }
+
+        _problemManager.UpdateTest(
+            problem,
+            testId,
+            input.Score,
+            getDownloadUrlsResponse.InputLink,
+            getDownloadUrlsResponse.OutputLink
+        );
 
         await _problemRepository.UpdateAsync(problem);
 

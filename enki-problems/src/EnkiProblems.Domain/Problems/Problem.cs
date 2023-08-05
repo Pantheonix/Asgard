@@ -92,7 +92,7 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         SetDescription(description);
         SetOrigin(sourceName, authorName);
         SetLimit(timeLimit, totalMemoryLimit, stackMemoryLimit);
-        
+
         IoType = ioType;
         Difficulty = difficulty;
         ProposerId = proposerId;
@@ -197,7 +197,12 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         return this;
     }
 
-    internal Problem AddTest(int testId, int score)
+    internal Problem AddTest(
+        int testId,
+        int score,
+        string inputDownloadUrl,
+        string outputDownloadUrl
+    )
     {
         if (testId > EnkiProblemsConsts.MaxNumberOfTests)
         {
@@ -215,7 +220,7 @@ public class Problem : FullAuditedAggregateRoot<Guid>
                 .WithData("problemId", Id);
         }
 
-        Tests.Add(new Test(testId, Id, score));
+        Tests.Add(new Test(testId, Id, score, inputDownloadUrl, outputDownloadUrl));
 
         return this;
     }
@@ -236,7 +241,12 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         return this;
     }
 
-    internal Problem UpdateTest(int testId, int score)
+    internal Problem UpdateTest(
+        int testId,
+        int? score,
+        string? inputDownloadUrl,
+        string? outputDownloadUrl
+    )
     {
         var test = Tests.SingleOrDefault(t => t.Id == testId);
         if (test is null)
@@ -255,7 +265,15 @@ public class Problem : FullAuditedAggregateRoot<Guid>
                 .WithData("problemId", Id);
         }
 
-        test.SetScore(score);
+        if (score is not null)
+        {
+            test.SetScore((int)score);
+        }
+
+        if (inputDownloadUrl is not null && outputDownloadUrl is not null)
+        {
+            test.SetDownloadUrls(inputDownloadUrl, outputDownloadUrl);
+        }
 
         return this;
     }

@@ -43,7 +43,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         services.AddSingleton(_testService);
     }
 
-    #region CreateAsyncTests
+    #region CreateAsync
     [Fact]
     public async Task Should_Create_A_New_Valid_Problem_When_Current_User_Is_Proposer()
     {
@@ -107,7 +107,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     }
     #endregion
 
-    #region GetListAsyncTests
+    #region GetListAsync
     [Fact]
     public async Task Should_Not_List_Unpublished_Problems_When_Current_User_Is_Anonymous()
     {
@@ -146,7 +146,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     }
     #endregion
 
-    #region GetByIdAsyncTests
+    #region GetByIdAsync
     // TODO: Run this test after implementing the PublishAsync method support
     // [Fact]
     // public async Task Should_Get_Published_Problem_When_Current_User_Is_Anonymous()
@@ -180,7 +180,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     }
     #endregion
 
-    #region GetByIdForProposerAsyncTests
+    #region GetByIdForProposerAsync
     // TODO: Run this test after implementing the PublishAsync method support
     // [Fact]
     // public async Task Should_Get_Published_Problem_When_Current_User_Is_Proposer()
@@ -382,6 +382,21 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                 }
             );
 
+        _testService
+            .GetDownloadLinkForTestAsync(Arg.Any<GetDownloadLinkForTestRequest>())
+            .Returns(
+                new GetDownloadLinkForTestResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Ok,
+                        Message = "Successful download link retrieval"
+                    },
+                    InputLink = _testData.TestInputLink1,
+                    OutputLink = _testData.TestOutputLink1
+                }
+            );
+
         var stubTestArchiveFile = new FormFile(
             new MemoryStream(_testData.TestArchiveBytes1),
             0,
@@ -408,19 +423,6 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     public async Task Should_Not_Create_Test_When_User_Is_Anonymous()
     {
         Login(_testData.NormalUserId, _testData.NormalUserRoles);
-
-        _testService
-            .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
-            .Returns(
-                new UploadResponse
-                {
-                    Status = new StatusResponse
-                    {
-                        Code = StatusCode.Ok,
-                        Message = "Successful upload"
-                    }
-                }
-            );
 
         var stubTestArchiveFile = new FormFile(
             new MemoryStream(_testData.TestArchiveBytes1),
@@ -452,19 +454,6 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     {
         Login(_testData.ProposerUserId2, _testData.ProposerUserRoles);
 
-        _testService
-            .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
-            .Returns(
-                new UploadResponse
-                {
-                    Status = new StatusResponse
-                    {
-                        Code = StatusCode.Ok,
-                        Message = "Successful upload"
-                    }
-                }
-            );
-
         var stubTestArchiveFile = new FormFile(
             new MemoryStream(_testData.TestArchiveBytes1),
             0,
@@ -494,19 +483,6 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     public async Task Should_Not_Create_Test_For_Non_Existing_Problem()
     {
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
-
-        _testService
-            .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
-            .Returns(
-                new UploadResponse
-                {
-                    Status = new StatusResponse
-                    {
-                        Code = StatusCode.Ok,
-                        Message = "Successful upload"
-                    }
-                }
-            );
 
         var stubTestArchiveFile = new FormFile(
             new MemoryStream(_testData.TestArchiveBytes1),
@@ -617,6 +593,64 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
             );
         });
     }
+
+    [Fact]
+    public async Task Should_Not_Create_Test_When_Get_Download_Urls_Failed()
+    {
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        _testService
+            .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
+            .Returns(
+                new UploadResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Ok,
+                        Message = "Successful upload"
+                    }
+                }
+            );
+
+        _testService
+            .GetDownloadLinkForTestAsync(Arg.Any<GetDownloadLinkForTestRequest>())
+            .Returns(
+                new GetDownloadLinkForTestResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Failed,
+                        Message = "Download link retrieval failed"
+                    },
+                    InputLink = string.Empty,
+                    OutputLink = string.Empty
+                }
+            );
+
+        var stubTestArchiveFile = new FormFile(
+            new MemoryStream(_testData.TestArchiveBytes1),
+            0,
+            0,
+            "Test archive file",
+            "Test archive file"
+        )
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = "application/zip"
+        };
+
+        await Assert.ThrowsAsync<BusinessException>(async () =>
+        {
+            await _problemAppService.CreateTestAsync(
+                _testData.ProblemId1,
+                new CreateTestDto
+                {
+                    Score = _testData.TestScore1,
+                    ArchiveFile = stubTestArchiveFile
+                }
+            );
+        });
+    }
     #endregion
 
     #region UpdateTestAsync
@@ -635,6 +669,21 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                         Code = StatusCode.Ok,
                         Message = "Successful upload"
                     }
+                }
+            );
+
+        _testService
+            .GetDownloadLinkForTestAsync(Arg.Any<GetDownloadLinkForTestRequest>())
+            .Returns(
+                new GetDownloadLinkForTestResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Ok,
+                        Message = "Successful download link retrieval"
+                    },
+                    InputLink = _testData.TestInputLink1,
+                    OutputLink = _testData.TestOutputLink1
                 }
             );
 
@@ -666,19 +715,35 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     public async Task Should_Update_Test_When_Only_Score_Is_Provided()
     {
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+        
+        _testService
+            .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
+            .Returns(
+                new UploadResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Ok,
+                        Message = "Successful upload"
+                    }
+                }
+            );
 
-        var stubTestArchiveFile = new FormFile(
-            new MemoryStream(_testData.TestArchiveBytes1),
-            0,
-            0,
-            "Test archive file",
-            "Test archive file"
-        )
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = "application/zip"
-        };
-
+        _testService
+            .GetDownloadLinkForTestAsync(Arg.Any<GetDownloadLinkForTestRequest>())
+            .Returns(
+                new GetDownloadLinkForTestResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Ok,
+                        Message = "Successful download link retrieval"
+                    },
+                    InputLink = _testData.TestInputLink1,
+                    OutputLink = _testData.TestOutputLink1
+                }
+            );
+        
         var problem = await _problemAppService.UpdateTestAsync(
             _testData.ProblemId1,
             _testData.TestId1,
@@ -695,19 +760,6 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     public async Task Should_Not_Update_Test_When_User_Is_Anonymous()
     {
         Login(_testData.NormalUserId, _testData.NormalUserRoles);
-
-        _testService
-            .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
-            .Returns(
-                new UploadResponse
-                {
-                    Status = new StatusResponse
-                    {
-                        Code = StatusCode.Ok,
-                        Message = "Successful upload"
-                    }
-                }
-            );
 
         var stubTestArchiveFile = new FormFile(
             new MemoryStream(_testData.TestArchiveBytes1),
@@ -740,19 +792,6 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     {
         Login(_testData.ProposerUserId2, _testData.ProposerUserRoles);
 
-        _testService
-            .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
-            .Returns(
-                new UploadResponse
-                {
-                    Status = new StatusResponse
-                    {
-                        Code = StatusCode.Ok,
-                        Message = "Successful upload"
-                    }
-                }
-            );
-
         var stubTestArchiveFile = new FormFile(
             new MemoryStream(_testData.TestArchiveBytes1),
             0,
@@ -783,19 +822,6 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     public async Task Should_Not_Update_Test_For_Non_Existing_Problem()
     {
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
-
-        _testService
-            .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
-            .Returns(
-                new UploadResponse
-                {
-                    Status = new StatusResponse
-                    {
-                        Code = StatusCode.Ok,
-                        Message = "Successful upload"
-                    }
-                }
-            );
 
         var stubTestArchiveFile = new FormFile(
             new MemoryStream(_testData.TestArchiveBytes1),
@@ -880,6 +906,65 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                         Code = StatusCode.Failed,
                         Message = "Upload failed"
                     }
+                }
+            );
+
+        var stubTestArchiveFile = new FormFile(
+            new MemoryStream(_testData.TestArchiveBytes1),
+            0,
+            0,
+            "Test archive file",
+            "Test archive file"
+        )
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = "application/zip"
+        };
+
+        await Assert.ThrowsAsync<BusinessException>(async () =>
+        {
+            await _problemAppService.UpdateTestAsync(
+                _testData.ProblemId1,
+                _testData.TestId1,
+                new UpdateTestDto
+                {
+                    Score = _testData.TestScore2,
+                    ArchiveFile = stubTestArchiveFile
+                }
+            );
+        });
+    }
+
+    [Fact]
+    public async Task Should_Not_Update_Test_When_Get_Download_Urls_Failed()
+    {
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        _testService
+            .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
+            .Returns(
+                new UploadResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Ok,
+                        Message = "Successful upload"
+                    }
+                }
+            );
+
+        _testService
+            .GetDownloadLinkForTestAsync(Arg.Any<GetDownloadLinkForTestRequest>())
+            .Returns(
+                new GetDownloadLinkForTestResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Failed,
+                        Message = "Download link retrieval failed"
+                    },
+                    InputLink = string.Empty,
+                    OutputLink = string.Empty
                 }
             );
 
