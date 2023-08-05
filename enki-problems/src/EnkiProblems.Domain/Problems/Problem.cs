@@ -31,8 +31,6 @@ public class Problem : FullAuditedAggregateRoot<Guid>
 
     public DifficultyEnum Difficulty { get; private set; }
 
-    public int NumberOfTests { get; private set; }
-
     public ICollection<Test> Tests { get; private set; }
 
     public ICollection<ProblemLabel> Labels { get; private set; }
@@ -60,7 +58,6 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         SetDescription(description);
         SetOrigin(sourceName, authorName);
         SetLimit(timeLimit, totalMemoryLimit, stackMemoryLimit);
-        NumberOfTests = 0;
 
         IoType = ioType;
         Difficulty = difficulty;
@@ -95,8 +92,7 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         SetDescription(description);
         SetOrigin(sourceName, authorName);
         SetLimit(timeLimit, totalMemoryLimit, stackMemoryLimit);
-        SetNumberOfTests(tests.Count());
-
+        
         IoType = ioType;
         Difficulty = difficulty;
         ProposerId = proposerId;
@@ -195,17 +191,6 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         return this;
     }
 
-    internal Problem SetNumberOfTests(int numberOfTests)
-    {
-        NumberOfTests = Check.Range(
-            numberOfTests,
-            nameof(numberOfTests),
-            EnkiProblemsConsts.MinNumberOfTests,
-            EnkiProblemsConsts.MaxNumberOfTests
-        );
-        return this;
-    }
-
     internal Problem SetPublished(bool isPublished)
     {
         IsPublished = isPublished;
@@ -230,7 +215,6 @@ public class Problem : FullAuditedAggregateRoot<Guid>
                 .WithData("problemId", Id);
         }
 
-        SetNumberOfTests(NumberOfTests + 1);
         Tests.Add(new Test(testId, Id, score));
 
         return this;

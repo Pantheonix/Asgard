@@ -44,8 +44,6 @@ public static class EnkiProblemsConsts
 
     public const int MaxNumberOfTests = 20;
 
-    public const int MinNumberOfTests = 1;
-
     public const int MinScore = 0;
 
     public const int MaxScore = 100;

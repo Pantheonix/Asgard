@@ -77,7 +77,6 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         problemDto.TotalMemory.ShouldBe(_testData.ProblemTotalMemoryLimit2);
         problemDto.IoType.ShouldBe(_testData.ProblemIoType2);
         problemDto.Difficulty.ShouldBe(_testData.ProblemDifficulty2);
-        problemDto.NumberOfTests.ShouldBe(0);
         problemDto.IsPublished.ShouldBeFalse();
         problemDto.CreationDate.ShouldBeGreaterThan(DateTime.Now.AddMinutes(-1));
     }
@@ -279,7 +278,6 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         problemDto.TotalMemory.ShouldBe(_testData.ProblemTotalMemoryLimit2);
         problemDto.IoType.ShouldBe(_testData.ProblemIoType2);
         problemDto.Difficulty.ShouldBe(_testData.ProblemDifficulty2);
-        problemDto.NumberOfTests.ShouldBe(_testData.ProblemNumberOfTests1);
         problemDto.IsPublished.ShouldBeFalse();
     }
 

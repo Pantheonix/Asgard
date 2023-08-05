@@ -53,7 +53,7 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
             problem.Limit.TotalMemory.ShouldBe(_testData.ProblemTotalMemoryLimit2);
             problem.IoType.ShouldBe(_testData.ProblemIoType2);
             problem.Difficulty.ShouldBe(_testData.ProblemDifficulty2);
-            problem.NumberOfTests.ShouldBe(0);
+            problem.Tests.Count.ShouldBe(0);
             problem.ProposerId.ShouldBe(_testData.ProblemProposerId2);
         });
     }
@@ -117,7 +117,7 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
         problem.Limit.TotalMemory.ShouldBe(_testData.ProblemTotalMemoryLimit2);
         problem.IoType.ShouldBe(_testData.ProblemIoType2);
         problem.Difficulty.ShouldBe(_testData.ProblemDifficulty2);
-        problem.NumberOfTests.ShouldBe(_testData.ProblemNumberOfTests1);
+        problem.Tests.Count.ShouldBe(_testData.ProblemNumberOfTests1);
         problem.ProposerId.ShouldBe(_testData.ProblemProposerId2);
     }
 

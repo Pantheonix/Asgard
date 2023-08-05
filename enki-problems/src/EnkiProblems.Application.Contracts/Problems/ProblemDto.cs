@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Volo.Abp.Application.Dtos;
 
 namespace EnkiProblems.Problems;
@@ -33,6 +32,4 @@ public class ProblemDto : EntityDto<Guid>
     public IoTypeEnum IoType { get; set; }
 
     public DifficultyEnum Difficulty { get; set; }
-
-    public int NumberOfTests { get; set; }
 }

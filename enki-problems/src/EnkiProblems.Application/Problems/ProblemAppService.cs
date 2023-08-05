@@ -235,7 +235,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             );
         }
 
-        var testId = problem.NumberOfTests + 1;
+        var testId = problem.Tests.Count + 1;
         var uploadResponse = await _testService.UploadTestAsync(
             new UploadTestStreamDto
             {
