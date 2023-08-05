@@ -22,6 +22,7 @@ namespace EnkiProblems.Problems;
 public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
 {
     private readonly IProblemAppService _problemAppService;
+    private readonly ProblemManager _problemManager;
     private readonly IRepository<Problem, Guid> _problemRepository;
     private readonly EnkiProblemsTestData _testData;
     private ICurrentUser _currentUser;
@@ -30,6 +31,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     public ProblemAppServiceTests()
     {
         _problemAppService = GetRequiredService<IProblemAppService>();
+        _problemManager = GetRequiredService<ProblemManager>();
         _problemRepository = GetRequiredService<IRepository<Problem, Guid>>();
         _testData = GetRequiredService<EnkiProblemsTestData>();
     }
@@ -115,6 +117,22 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
 
         problemListDto.TotalCount.ShouldBe(0);
     }
+
+    [Fact]
+    public async Task Should_List_Published_Problems_When_Current_User_Is_Anonymous()
+    {
+        await PublishProblemAsync(_testData.ProblemId1);
+
+        var problemListDto = await _problemAppService.GetListAsync(new ProblemListFilterDto());
+
+        problemListDto.TotalCount.ShouldBe(1);
+        problemListDto.Items.ShouldContain(
+            p =>
+                p.Name == _testData.ProblemName1
+                && p.ProposerId == _testData.ProposerUserId1
+                && p.IsPublished == true
+        );
+    }
     #endregion
 
     #region GetUnpublishedProblemsByCurrentUserAsyncTests
@@ -147,19 +165,17 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     #endregion
 
     #region GetByIdAsync
-    // TODO: Run this test after implementing the PublishAsync method support
-    // [Fact]
-    // public async Task Should_Get_Published_Problem_When_Current_User_Is_Anonymous()
-    // {
-    //     var problemDto = await _problemAppService.GetByIdAsync(new GetProblemByIdDto
-    //     {
-    //         ProblemId = _testData.ProblemId1
-    //     });
-    //
-    //     problemDto.ShouldNotBeNull();
-    //     problemDto.Id.ShouldBe(_testData.ProblemId1);
-    //     problemDto.Name.ShouldBe(_testData.ProblemName1);
-    // }
+    [Fact]
+    public async Task Should_Get_Published_Problem_When_Current_User_Is_Anonymous()
+    {
+        await PublishProblemAsync(_testData.ProblemId1);
+
+        var problemDto = await _problemAppService.GetByIdAsync(_testData.ProblemId1);
+
+        problemDto.ShouldNotBeNull();
+        problemDto.Id.ShouldBe(_testData.ProblemId1);
+        problemDto.Name.ShouldBe(_testData.ProblemName1);
+    }
 
     [Fact]
     public async Task Should_Not_Get_Unpublished_Problem_When_Current_User_Is_Anonymous()
@@ -181,21 +197,19 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     #endregion
 
     #region GetByIdForProposerAsync
-    // TODO: Run this test after implementing the PublishAsync method support
-    // [Fact]
-    // public async Task Should_Get_Published_Problem_When_Current_User_Is_Proposer()
-    // {
-    //     Login(_testData.ProposerUserId, _testData.ProposerUserRoles);
-    //
-    //     var problemDto = await _problemAppService.GetByIdForProposerAsync(new GetProblemByIdDto
-    //     {
-    //         ProblemId = _testData.ProblemId1
-    //     });
-    //
-    //     problemDto.ShouldNotBeNull();
-    //     problemDto.Id.ShouldBe(_testData.ProblemId1);
-    //     problemDto.Name.ShouldBe(_testData.ProblemName1);
-    // }
+    [Fact]
+    public async Task Should_Get_Published_Problem_When_Current_User_Is_Proposer()
+    {
+        await PublishProblemAsync(_testData.ProblemId1);
+
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        var problemDto = await _problemAppService.GetByIdForProposerAsync(_testData.ProblemId1);
+
+        problemDto.ShouldNotBeNull();
+        problemDto.Id.ShouldBe(_testData.ProblemId1);
+        problemDto.Name.ShouldBe(_testData.ProblemName1);
+    }
 
     [Fact]
     public async Task Should_Get_Unpublished_Problem_When_Current_User_Is_Proposer_And_Owner()
@@ -307,34 +321,33 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         });
     }
 
-    // TODO: Run this test after implementing the PublishAsync method support
-    // [Fact]
-    // public async Task Should_Not_Update_Published_Problem_When_Current_User_Is_Proposer()
-    // {
-    //     Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+    [Fact]
+    public async Task Should_Not_Update_Published_Problem_When_Current_User_Is_Proposer()
+    {
+        await PublishProblemAsync(_testData.ProblemId1);
 
-    //     await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
-    //     {
-    //         await _problemAppService.UpdateAsync(
-    //             _testData.ProblemId1,
-    //             new UpdateProblemDto
-    //             {
-    //                 Name = _testData.ProblemName2,
-    //                 Brief = _testData.ProblemBrief2,
-    //                 Description = _testData.ProblemDescription2,
-    //                 SourceName = _testData.ProblemSourceName2,
-    //                 AuthorName = _testData.ProblemAuthorName2,
-    //                 Time = _testData.ProblemTimeLimit2,
-    //                 StackMemory = _testData.ProblemStackMemoryLimit2,
-    //                 TotalMemory = _testData.ProblemTotalMemoryLimit2,
-    //                 IoType = _testData.ProblemIoType2,
-    //                 Difficulty = _testData.ProblemDifficulty2,
-    //                 NumberOfTests = _testData.ProblemNumberOfTests2,
-    //                 ProgrammingLanguages = _testData.ProblemProgrammingLanguages2
-    //             }
-    //         );
-    //     });
-    // }
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        await Assert.ThrowsAsync<BusinessException>(async () =>
+        {
+            await _problemAppService.UpdateAsync(
+                _testData.ProblemId1,
+                new UpdateProblemDto
+                {
+                    Name = _testData.ProblemName2,
+                    Brief = _testData.ProblemBrief2,
+                    Description = _testData.ProblemDescription2,
+                    SourceName = _testData.ProblemSourceName2,
+                    AuthorName = _testData.ProblemAuthorName2,
+                    Time = _testData.ProblemTimeLimit2,
+                    StackMemory = _testData.ProblemStackMemoryLimit2,
+                    TotalMemory = _testData.ProblemTotalMemoryLimit2,
+                    IoType = _testData.ProblemIoType2,
+                    Difficulty = _testData.ProblemDifficulty2
+                }
+            );
+        });
+    }
 
     [Fact]
     public async Task Should_Not_Update_Problem_When_Current_User_Is_Not_Proposer()
@@ -509,47 +522,65 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         });
     }
 
-    // TODO: run test when problem publishing is implemented
-    // [Fact]
-    // public async Task Should_Not_Create_Test_For_Published_Problem()
-    // {
-    //     Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
-    //
-    //      _testService
-    //                 .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
-    //                 .Returns(
-    //                     new UploadResponse
-    //                     {
-    //                         Status = new StatusResponse
-    //                         {
-    //                             Code = StatusCode.Ok,
-    //                             Message = "Successful upload"
-    //                         }
-    //                     }
-    //                 );
-    //
-    //             var stubTestArchiveFile = new FormFile(
-    //                 new MemoryStream(_testData.TestArchiveBytes1),
-    //                 0,
-    //                 0,
-    //                 "Test archive file",
-    //                 "Test archive file"
-    //             )
-    //             {
-    //                 Headers = new HeaderDictionary(),
-    //                 ContentType = "application/zip"
-    //             };
-    //
-    //             // TODO: Publish problem
-    //
-    //     await Assert.ThrowsAsync<Business>(async () =>
-    //     {
-    //         await _problemAppService.CreateTestAsync(
-    //             _testData.ProblemId3,
-    //             new CreateTestDto { Score = _testData.TestScore1, ArchiveFile = stubTestArchiveFile }
-    //         );
-    //     });
-    // }
+    [Fact]
+    public async Task Should_Not_Create_Test_For_Published_Problem()
+    {
+        await PublishProblemAsync(_testData.ProblemId1);
+
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        _testService
+            .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
+            .Returns(
+                new UploadResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Ok,
+                        Message = "Successful upload"
+                    }
+                }
+            );
+
+        _testService
+            .GetDownloadLinkForTestAsync(Arg.Any<GetDownloadLinkForTestRequest>())
+            .Returns(
+                new GetDownloadLinkForTestResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Ok,
+                        Message = "Successful download link retrieval"
+                    },
+                    InputLink = _testData.TestInputLink1,
+                    OutputLink = _testData.TestOutputLink1
+                }
+            );
+
+        var stubTestArchiveFile = new FormFile(
+            new MemoryStream(_testData.TestArchiveBytes1),
+            0,
+            0,
+            "Test archive file",
+            "Test archive file"
+        )
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = "application/zip"
+        };
+
+        await Assert.ThrowsAsync<BusinessException>(async () =>
+        {
+            await _problemAppService.CreateTestAsync(
+                _testData.ProblemId1,
+                new CreateTestDto
+                {
+                    Score = _testData.TestScore1,
+                    ArchiveFile = stubTestArchiveFile
+                }
+            );
+        });
+    }
 
     [Fact]
     public async Task Should_Not_Create_Test_When_Upload_Failed()
@@ -715,7 +746,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     public async Task Should_Update_Test_When_Only_Score_Is_Provided()
     {
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
-        
+
         _testService
             .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
             .Returns(
@@ -743,7 +774,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                     OutputLink = _testData.TestOutputLink1
                 }
             );
-        
+
         var problem = await _problemAppService.UpdateTestAsync(
             _testData.ProblemId1,
             _testData.TestId1,
@@ -849,47 +880,66 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         });
     }
 
-    // TODO: run test when problem publishing is implemented
-    // [Fact]
-    // public async Task Should_Not_Update_Test_For_Published_Problem()
-    // {
-    //     Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
-    //
-    //      _testService
-    //                 .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
-    //                 .Returns(
-    //                     new UploadResponse
-    //                     {
-    //                         Status = new StatusResponse
-    //                         {
-    //                             Code = StatusCode.Ok,
-    //                             Message = "Successful upload"
-    //                         }
-    //                     }
-    //                 );
-    //
-    //             var stubTestArchiveFile = new FormFile(
-    //                 new MemoryStream(_testData.TestArchiveBytes1),
-    //                 0,
-    //                 0,
-    //                 "Test archive file",
-    //                 "Test archive file"
-    //             )
-    //             {
-    //                 Headers = new HeaderDictionary(),
-    //                 ContentType = "application/zip"
-    //             };
-    //
-    //             // TODO: Publish problem
-    //
-    //     await Assert.ThrowsAsync<Business>(async () =>
-    //     {
-    //         await _problemAppService.UpdateTestAsync(
-    //             _testData.ProblemId3,
-    //             new UpdateTestDto { Score = _testData.TestScore1, ArchiveFile = stubTestArchiveFile }
-    //         );
-    //     });
-    // }
+    [Fact]
+    public async Task Should_Not_Update_Test_For_Published_Problem()
+    {
+        await PublishProblemAsync(_testData.ProblemId1);
+        
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        _testService
+            .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
+            .Returns(
+                new UploadResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Ok,
+                        Message = "Successful upload"
+                    }
+                }
+            );
+
+        _testService
+            .GetDownloadLinkForTestAsync(Arg.Any<GetDownloadLinkForTestRequest>())
+            .Returns(
+                new GetDownloadLinkForTestResponse
+                {
+                    Status = new StatusResponse
+                    {
+                        Code = StatusCode.Ok,
+                        Message = "Successful download link retrieval"
+                    },
+                    InputLink = _testData.TestInputLink1,
+                    OutputLink = _testData.TestOutputLink1
+                }
+            );
+
+        var stubTestArchiveFile = new FormFile(
+            new MemoryStream(_testData.TestArchiveBytes1),
+            0,
+            0,
+            "Test archive file",
+            "Test archive file"
+        )
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = "application/zip"
+        };
+
+        await Assert.ThrowsAsync<BusinessException>(async () =>
+        {
+            await _problemAppService.UpdateTestAsync(
+                _testData.ProblemId1,
+                _testData.TestId1,
+                new UpdateTestDto
+                {
+                    Score = _testData.TestScore1,
+                    ArchiveFile = stubTestArchiveFile
+                }
+            );
+        });
+    }
 
     [Fact]
     public async Task Should_Not_Add_Test_When_Upload_Failed()
@@ -1056,19 +1106,18 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         });
     }
 
-    // TODO: run test when problem publishing is implemented
-    // [Fact]
-    // public async Task Should_Not_Delete_Test_When_Problem_Is_Published()
-    // {
-    //     Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
-    //
-    //     // TODO: publish problem
-    //
-    //     await Assert.ThrowsAsync<BusinessException>(async () =>
-    //     {
-    //         await _problemAppService.DeleteTestAsync(_testData.ProblemId3, _testData.TestId1);
-    //     });
-    // }
+    [Fact]
+    public async Task Should_Not_Delete_Test_When_Problem_Is_Published()
+    {
+        await PublishProblemAsync(_testData.ProblemId1);
+        
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+    
+        await Assert.ThrowsAsync<BusinessException>(async () =>
+        {
+            await _problemAppService.DeleteTestAsync(_testData.ProblemId1, _testData.TestId1);
+        });
+    }
 
     [Fact]
     public async Task Should_Not_Delete_Test_When_Deletion_Failed()
@@ -1100,5 +1149,12 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         _currentUser.Id.Returns(userId);
         _currentUser.Roles.Returns(userRoles);
         _currentUser.IsAuthenticated.Returns(true);
+    }
+
+    private async Task PublishProblemAsync(Guid problemId)
+    {
+        var problem = await _problemRepository.GetAsync(problemId);
+        _problemManager.Publish(problem);
+        await _problemRepository.UpdateAsync(problem);
     }
 }

@@ -99,7 +99,8 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
                 _testData.ProblemTotalMemoryLimit2,
                 _testData.ProblemStackMemoryLimit2,
                 _testData.ProblemIoType2,
-                _testData.ProblemDifficulty2
+                _testData.ProblemDifficulty2,
+                null
             );
             await _problemRepository.UpdateAsync(updatedProblem);
         });
@@ -140,42 +141,43 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
                     _testData.ProblemTotalMemoryLimit2,
                     _testData.ProblemStackMemoryLimit2,
                     _testData.ProblemIoType2,
-                    _testData.ProblemDifficulty2
+                    _testData.ProblemDifficulty2,
+                    null
                 );
             });
         });
     }
 
-    // TODO: Run this test after implementing the Publish method in the Problem entity
-    // [Fact]
-    // public async Task Should_Not_Update_A_Published_Problem()
-    // {
-    //     await WithUnitOfWorkAsync(async () =>
-    //     {
-    //         var problem = await _problemRepository.GetAsync(
-    //             _testData.ProblemId1
-    //         );
-    //         problem.Publish();
-    //         await Assert.ThrowsAsync<BusinessException>(async () =>
-    //         {
-    //             await _problemManager.UpdateAsync(
-    //                 problem,
-    //                 _testData.ProblemName2,
-    //                 _testData.ProblemBrief2,
-    //                 _testData.ProblemDescription2,
-    //                 _testData.ProblemSourceName2,
-    //                 _testData.ProblemAuthorName2,
-    //                 _testData.ProblemTimeLimit2,
-    //                 _testData.ProblemTotalMemoryLimit2,
-    //                 _testData.ProblemStackMemoryLimit2,
-    //                 _testData.ProblemIoType2,
-    //                 _testData.ProblemDifficulty2,
-    //                 _testData.ProblemNumberOfTests2,
-    //                 _testData.ProblemProgrammingLanguages2
-    //             );
-    //         });
-    //     });
-    // }
+    [Fact]
+    public async Task Should_Not_Update_A_Published_Problem()
+    {
+        await WithUnitOfWorkAsync(async () =>
+        {
+            var problem = await _problemRepository.GetAsync(
+                _testData.ProblemId1
+            );
+            
+            problem.Publish();
+            
+            await Assert.ThrowsAsync<BusinessException>(async () =>
+            {
+                await _problemManager.UpdateAsync(
+                    problem,
+                    _testData.ProblemName2,
+                    _testData.ProblemBrief2,
+                    _testData.ProblemDescription2,
+                    _testData.ProblemSourceName2,
+                    _testData.ProblemAuthorName2,
+                    _testData.ProblemTimeLimit2,
+                    _testData.ProblemTotalMemoryLimit2,
+                    _testData.ProblemStackMemoryLimit2,
+                    _testData.ProblemIoType2,
+                    _testData.ProblemDifficulty2,
+                    null
+                );
+            });
+        });
+    }
 
     [Fact]
     public async Task Should_Add_A_New_Valid_Test()
@@ -313,6 +315,32 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
         Assert.Throws<BusinessException>(() =>
         {
             _problemManager.RemoveTest(problem, _testData.TestId2);
+        });
+    }
+
+    [Fact]
+    public async Task Should_Publish_Valid_Problem()
+    {
+        var problem = await _problemRepository.GetAsync(_testData.ProblemId1);
+        
+        await WithUnitOfWorkAsync(async () =>
+        {
+            var updatedProblem = _problemManager.Publish(problem);
+            await _problemRepository.UpdateAsync(updatedProblem);
+        });
+        
+        var problemWithTests = await _problemRepository.GetAsync(_testData.ProblemId1);
+        problemWithTests.IsPublished.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task Should_Not_Publish_Invalid_Problem()
+    {
+        var problem = await _problemRepository.GetAsync(_testData.ProblemId3);
+        
+        Assert.Throws<BusinessException>(() =>
+        {
+            _problemManager.Publish(problem);
         });
     }
 }

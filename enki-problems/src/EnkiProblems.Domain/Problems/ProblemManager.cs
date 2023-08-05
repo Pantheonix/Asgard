@@ -62,7 +62,8 @@ public class ProblemManager : DomainService
         decimal? totalMemoryLimit,
         decimal? stackMemoryLimit,
         IoTypeEnum? ioType,
-        DifficultyEnum? difficulty
+        DifficultyEnum? difficulty,
+        bool? isPublished
     )
     {
         if (problem.IsPublished)
@@ -128,6 +129,18 @@ public class ProblemManager : DomainService
             problem.SetDifficulty((DifficultyEnum)difficulty);
         }
 
+        switch (isPublished)
+        {
+            case null:
+                return problem;
+            case true:
+                problem.Publish();
+                break;
+            default:
+                problem.Unpublish();
+                break;
+        }
+
         return problem;
     }
 
@@ -156,5 +169,10 @@ public class ProblemManager : DomainService
     public Problem RemoveTest(Problem problem, int testId)
     {
         return problem.RemoveTest(testId);
+    }
+    
+    public Problem Publish(Problem problem)
+    {
+        return problem.Publish();
     }
 }

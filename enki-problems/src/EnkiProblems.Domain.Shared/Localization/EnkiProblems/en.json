@@ -19,6 +19,7 @@
     "EnkiProblems:DownloadTestArchiveError": "Download failed for test archive.",
     "EnkiProblems:TotalScoreExceeded": "The total score of the problem tests cannot exceed the predefined limit.",
     "EnkiProblems:NumberOfTestExceeded": "The number of tests cannot exceed the predefined limit.",
-    "EnkiProblems:TestDownloadUrlRetrievalFailed": "The download URL for the current test could not be retrieved."
+    "EnkiProblems:TestDownloadUrlRetrievalFailed": "The download URL for the current test could not be retrieved.",
+    "EnkiProblems:ProblemCannotBePublished": "The problem cannot be published."
   }
 }

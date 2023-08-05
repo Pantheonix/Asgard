@@ -200,7 +200,8 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             input.TotalMemory,
             input.StackMemory,
             input.IoType,
-            input.Difficulty
+            input.Difficulty,
+            input.IsPublished
         );
 
         return ObjectMapper.Map<Problem, ProblemDto>(

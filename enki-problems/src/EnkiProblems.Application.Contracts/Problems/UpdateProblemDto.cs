@@ -43,4 +43,6 @@ public class UpdateProblemDto
     public IoTypeEnum? IoType { get; set; }
 
     public DifficultyEnum? Difficulty { get; set; }
+    
+    public bool? IsPublished { get; set; }
 }

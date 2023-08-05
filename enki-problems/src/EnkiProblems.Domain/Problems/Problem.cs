@@ -277,4 +277,27 @@ public class Problem : FullAuditedAggregateRoot<Guid>
 
         return this;
     }
+
+    internal Problem Publish()
+    {
+        if (!CanPublish())
+        {
+            throw new BusinessException(EnkiProblemsDomainErrorCodes.ProblemCannotBePublished)
+                .WithData("problemId", Id);
+        }
+        
+        IsPublished = true;
+        return this;
+    }
+    
+    internal Problem Unpublish()
+    {
+        IsPublished = false;
+        return this;
+    }
+    
+    private bool CanPublish()
+    {
+        return !IsPublished && Tests.Count > 0;
+    }
 }
