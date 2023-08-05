@@ -99,7 +99,9 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     }
 
     [Authorize]
-    public async Task<PagedResultDto<ProblemWithTestsDto>> GetUnpublishedProblemsByCurrentUserAsync()
+    public async Task<
+        PagedResultDto<ProblemWithTestsDto>
+    > GetUnpublishedProblemsByCurrentUserAsync()
     {
         // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
@@ -415,5 +417,19 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         await _problemRepository.UpdateAsync(updatedProblem);
 
         return ObjectMapper.Map<Problem, ProblemWithTestsDto>(updatedProblem);
+    }
+
+    public async Task<ProblemEvalMetadataDto> GetEvalMetadataAsync(Guid id)
+    {
+        var problem = await _problemRepository.GetAsync(id);
+
+        if (!problem.IsPublished)
+        {
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.NotAllowedToViewUnpublishedProblems
+            ).WithData("problemId", problem.Id);
+        }
+
+        return ObjectMapper.Map<Problem, ProblemEvalMetadataDto>(problem);
     }
 }

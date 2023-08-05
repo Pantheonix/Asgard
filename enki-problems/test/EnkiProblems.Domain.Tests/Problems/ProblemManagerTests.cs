@@ -153,12 +153,10 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
     {
         await WithUnitOfWorkAsync(async () =>
         {
-            var problem = await _problemRepository.GetAsync(
-                _testData.ProblemId1
-            );
-            
+            var problem = await _problemRepository.GetAsync(_testData.ProblemId1);
+
             problem.Publish();
-            
+
             await Assert.ThrowsAsync<BusinessException>(async () =>
             {
                 await _problemManager.UpdateAsync(
@@ -322,13 +320,13 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
     public async Task Should_Publish_Valid_Problem()
     {
         var problem = await _problemRepository.GetAsync(_testData.ProblemId1);
-        
+
         await WithUnitOfWorkAsync(async () =>
         {
             var updatedProblem = _problemManager.Publish(problem);
             await _problemRepository.UpdateAsync(updatedProblem);
         });
-        
+
         var problemWithTests = await _problemRepository.GetAsync(_testData.ProblemId1);
         problemWithTests.IsPublished.ShouldBeTrue();
     }
@@ -337,7 +335,7 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
     public async Task Should_Not_Publish_Invalid_Problem()
     {
         var problem = await _problemRepository.GetAsync(_testData.ProblemId3);
-        
+
         Assert.Throws<BusinessException>(() =>
         {
             _problemManager.Publish(problem);

@@ -1163,6 +1163,49 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     }
     #endregion
 
+    #region GetEvalMetadataAsync
+    [Fact]
+    public async Task Should_Get_Eval_Metadata_For_Valid_Problem()
+    {
+        await PublishProblemAsync(_testData.ProblemId1);
+
+        var evalMetadataDto = await _problemAppService.GetEvalMetadataAsync(_testData.ProblemId1);
+
+        evalMetadataDto.ShouldNotBeNull();
+        evalMetadataDto.Id.ShouldBe(_testData.ProblemId1);
+        evalMetadataDto.Name.ShouldBe(_testData.ProblemName1);
+        evalMetadataDto.Time.ShouldBe(_testData.ProblemTimeLimit1);
+        evalMetadataDto.TotalMemory.ShouldBe(_testData.ProblemTotalMemoryLimit1);
+        evalMetadataDto.StackMemory.ShouldBe(_testData.ProblemStackMemoryLimit1);
+        evalMetadataDto.IoType.ShouldBe(_testData.ProblemIoType1);
+        evalMetadataDto.Tests.Count().ShouldBe(1);
+        evalMetadataDto.Tests.ShouldContain(
+            t =>
+                t.Score == _testData.TestScore1
+                && t.InputDownloadUrl == _testData.TestInputLink1
+                && t.OutputDownloadUrl == _testData.TestOutputLink1
+        );
+    }
+
+    [Fact]
+    public async Task Should_Not_Get_Eval_Metadata_For_Non_Existing_Problem()
+    {
+        await Assert.ThrowsAsync<EntityNotFoundException>(async () =>
+        {
+            await _problemAppService.GetEvalMetadataAsync(Guid.NewGuid());
+        });
+    }
+
+    [Fact]
+    public async Task Should_Not_Get_Eval_Metadata_For_Unpublished_Problem()
+    {
+        await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
+        {
+            await _problemAppService.GetEvalMetadataAsync(_testData.ProblemId1);
+        });
+    }
+    #endregion
+
     private void Login(Guid userId, string[] userRoles)
     {
         _currentUser.Id.Returns(userId);

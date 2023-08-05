@@ -38,6 +38,6 @@ public static class EnkiProblemsDomainErrorCodes
 
     public const string TestDownloadUrlRetrievalFailed =
         "EnkiProblems:TestDownloadUrlRetrievalFailed";
-    
+
     public const string ProblemCannotBePublished = "EnkiProblems:ProblemCannotBePublished";
 }

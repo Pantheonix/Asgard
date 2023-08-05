@@ -282,20 +282,22 @@ public class Problem : FullAuditedAggregateRoot<Guid>
     {
         if (!CanPublish())
         {
-            throw new BusinessException(EnkiProblemsDomainErrorCodes.ProblemCannotBePublished)
-                .WithData("problemId", Id);
+            throw new BusinessException(
+                EnkiProblemsDomainErrorCodes.ProblemCannotBePublished
+            ).WithData("problemId", Id);
         }
-        
+
         IsPublished = true;
+        PublishingDate = DateTime.Now;
         return this;
     }
-    
+
     internal Problem Unpublish()
     {
         IsPublished = false;
         return this;
     }
-    
+
     private bool CanPublish()
     {
         return !IsPublished && Tests.Count > 0;
