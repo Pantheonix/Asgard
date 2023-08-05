@@ -135,7 +135,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     }
     #endregion
 
-    #region GetUnpublishedProblemsByCurrentUserAsyncTests
+    #region GetUnpublishedProblemsByCurrentUserAsync
     [Fact]
     public async Task Should_List_Unpublished_Problems_Only_For_Current_User_When_Current_User_Is_Proposer()
     {
@@ -149,6 +149,13 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                 p.Name == _testData.ProblemName1
                 && p.ProposerId == _testData.ProposerUserId1
                 && p.IsPublished == false
+        );
+
+        problemListDto.Items[0].Tests.ShouldContain(
+            t =>
+                t.Score == _testData.TestScore1
+                && t.InputDownloadUrl == _testData.TestInputLink1
+                && t.OutputDownloadUrl == _testData.TestOutputLink1
         );
     }
 
@@ -198,7 +205,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
 
     #region GetByIdForProposerAsync
     [Fact]
-    public async Task Should_Get_Published_Problem_When_Current_User_Is_Proposer()
+    public async Task Should_Get_Published_Problem_When_Current_User_Is_Proposer_And_Owner()
     {
         await PublishProblemAsync(_testData.ProblemId1);
 
@@ -209,6 +216,12 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         problemDto.ShouldNotBeNull();
         problemDto.Id.ShouldBe(_testData.ProblemId1);
         problemDto.Name.ShouldBe(_testData.ProblemName1);
+        problemDto.Tests.ShouldContain(
+            t =>
+                t.Score == _testData.TestScore1
+                && t.InputDownloadUrl == _testData.TestInputLink1
+                && t.OutputDownloadUrl == _testData.TestOutputLink1
+        );
     }
 
     [Fact]
@@ -221,6 +234,12 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         problemDto.ShouldNotBeNull();
         problemDto.Id.ShouldBe(_testData.ProblemId1);
         problemDto.Name.ShouldBe(_testData.ProblemName1);
+        problemDto.Tests.ShouldContain(
+            t =>
+                t.Score == _testData.TestScore1
+                && t.InputDownloadUrl == _testData.TestInputLink1
+                && t.OutputDownloadUrl == _testData.TestOutputLink1
+        );
     }
 
     [Fact]
@@ -884,7 +903,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     public async Task Should_Not_Update_Test_For_Published_Problem()
     {
         await PublishProblemAsync(_testData.ProblemId1);
-        
+
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
 
         _testService
@@ -1110,9 +1129,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     public async Task Should_Not_Delete_Test_When_Problem_Is_Published()
     {
         await PublishProblemAsync(_testData.ProblemId1);
-        
+
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
-    
+
         await Assert.ThrowsAsync<BusinessException>(async () =>
         {
             await _problemAppService.DeleteTestAsync(_testData.ProblemId1, _testData.TestId1);

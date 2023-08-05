@@ -99,7 +99,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     }
 
     [Authorize]
-    public async Task<PagedResultDto<ProblemDto>> GetUnpublishedProblemsByCurrentUserAsync()
+    public async Task<PagedResultDto<ProblemWithTestsDto>> GetUnpublishedProblemsByCurrentUserAsync()
     {
         // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
@@ -118,9 +118,9 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         var totalCount = await AsyncExecuter.CountAsync(problemQueryable);
         var problems = await AsyncExecuter.ToListAsync(problemQueryable);
 
-        return new PagedResultDto<ProblemDto>(
+        return new PagedResultDto<ProblemWithTestsDto>(
             totalCount,
-            ObjectMapper.Map<List<Problem>, List<ProblemDto>>(problems)
+            ObjectMapper.Map<List<Problem>, List<ProblemWithTestsDto>>(problems)
         );
     }
 
@@ -140,7 +140,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     }
 
     [Authorize]
-    public async Task<ProblemDto> GetByIdForProposerAsync(Guid id)
+    public async Task<ProblemWithTestsDto> GetByIdForProposerAsync(Guid id)
     {
         var problem = await _problemRepository.GetAsync(id);
 
@@ -159,7 +159,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             );
         }
 
-        return ObjectMapper.Map<Problem, ProblemDto>(problem);
+        return ObjectMapper.Map<Problem, ProblemWithTestsDto>(problem);
     }
 
     [Authorize]
