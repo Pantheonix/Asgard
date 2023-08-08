@@ -1,2 +1,2 @@
 drun:
-	dapr run --app-id enki-client --app-protocol grpc --dapr-grpc-port 50010 -- dotnet run --project src/EnkiProblems.GrpcClient/EnkiProblems.GrpcClient.csproj
+	dapr run --app-id enki-problems --app-port 5211 --dapr-http-port 30001 --dapr-grpc-port 50001 -- dotnet run --project src/EnkiProblems.HttpApi.Host/EnkiProblems.HttpApi.Host.csproj
