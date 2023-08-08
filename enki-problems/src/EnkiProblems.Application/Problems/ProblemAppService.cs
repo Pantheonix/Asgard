@@ -2,8 +2,8 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.IO;
 using Asgard.Hermes;
-using EnkiProblems.Helpers;
 using EnkiProblems.Problems.Tests;
 using Volo.Abp.Authorization;
 using Volo.Abp.Domain.Repositories;
@@ -176,14 +176,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
                 EnkiProblemsDomainErrorCodes.NotAllowedToEditProblem
             );
         }
-
-        if (problem.IsPublished)
-        {
-            throw new BusinessException(
-                EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem
-            );
-        }
-
+            
         if (problem.ProposerId != CurrentUser.Id)
         {
             throw new AbpAuthorizationException(
@@ -243,7 +236,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             new UploadTestStreamDto
             {
                 ProblemId = problemId.ToString(),
-                TestArchiveBytes = input.ArchiveFile.GetBytes(),
+                TestArchiveBytes = await input.ArchiveFile.GetStream().GetAllBytesAsync(),
                 TestId = testId.ToString()
             }
         );
@@ -324,7 +317,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
                 new UploadTestStreamDto
                 {
                     ProblemId = problemId.ToString(),
-                    TestArchiveBytes = input.ArchiveFile.GetBytes(),
+                    TestArchiveBytes = await input.ArchiveFile.GetStream().GetAllBytesAsync(),
                     TestId = testId.ToString()
                 }
             );

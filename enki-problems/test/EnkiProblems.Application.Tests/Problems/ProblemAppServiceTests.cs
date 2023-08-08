@@ -4,13 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Asgard.Hermes;
 using EnkiProblems.Problems.Tests;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Shouldly;
 using Volo.Abp;
 using Volo.Abp.Authorization;
+using Volo.Abp.Content;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Users;
@@ -369,7 +368,24 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     }
 
     [Fact]
-    public async Task Should_Not_Update_Problem_When_Current_User_Is_Not_Proposer()
+    public async Task Should_Update_Published_Problem_When_Current_User_Is_Proposer_And_Owner_And_Problem_Is_About_To_Be_Unpublished()
+    {
+        await PublishProblemAsync(_testData.ProblemId1);
+
+        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+
+        var problemDto = await _problemAppService.UpdateAsync(
+            _testData.ProblemId1,
+            new UpdateProblemDto { IsPublished = false }
+        );
+
+        problemDto.ShouldNotBeNull();
+        problemDto.Id.ShouldBe(_testData.ProblemId1);
+        problemDto.IsPublished.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Should_Not_Update_Unpublished_Problem_When_Current_User_Is_Not_Proposer()
     {
         Login(_testData.NormalUserId, _testData.NormalUserRoles);
 
@@ -429,17 +445,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                 }
             );
 
-        var stubTestArchiveFile = new FormFile(
-            new MemoryStream(_testData.TestArchiveBytes1),
-            0,
-            0,
-            "Test archive file",
-            "Test archive file"
-        )
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = "application/zip"
-        };
+        var stubTestArchiveFile = new RemoteStreamContent(
+            new MemoryStream(_testData.TestArchiveBytes1)
+        );
 
         var problem = await _problemAppService.CreateTestAsync(
             _testData.ProblemId1,
@@ -456,17 +464,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     {
         Login(_testData.NormalUserId, _testData.NormalUserRoles);
 
-        var stubTestArchiveFile = new FormFile(
-            new MemoryStream(_testData.TestArchiveBytes1),
-            0,
-            0,
-            "Test archive file",
-            "Test archive file"
-        )
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = "application/zip"
-        };
+        var stubTestArchiveFile = new RemoteStreamContent(
+            new MemoryStream(_testData.TestArchiveBytes1)
+        );
 
         await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
         {
@@ -486,17 +486,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     {
         Login(_testData.ProposerUserId2, _testData.ProposerUserRoles);
 
-        var stubTestArchiveFile = new FormFile(
-            new MemoryStream(_testData.TestArchiveBytes1),
-            0,
-            0,
-            "Test archive file",
-            "Test archive file"
-        )
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = "application/zip"
-        };
+        var stubTestArchiveFile = new RemoteStreamContent(
+            new MemoryStream(_testData.TestArchiveBytes1)
+        );
 
         await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
         {
@@ -516,17 +508,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     {
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
 
-        var stubTestArchiveFile = new FormFile(
-            new MemoryStream(_testData.TestArchiveBytes1),
-            0,
-            0,
-            "Test archive file",
-            "Test archive file"
-        )
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = "application/zip"
-        };
+        var stubTestArchiveFile = new RemoteStreamContent(
+            new MemoryStream(_testData.TestArchiveBytes1)
+        );
 
         await Assert.ThrowsAsync<EntityNotFoundException>(async () =>
         {
@@ -576,17 +560,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                 }
             );
 
-        var stubTestArchiveFile = new FormFile(
-            new MemoryStream(_testData.TestArchiveBytes1),
-            0,
-            0,
-            "Test archive file",
-            "Test archive file"
-        )
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = "application/zip"
-        };
+        var stubTestArchiveFile = new RemoteStreamContent(
+            new MemoryStream(_testData.TestArchiveBytes1)
+        );
 
         await Assert.ThrowsAsync<BusinessException>(async () =>
         {
@@ -619,17 +595,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                 }
             );
 
-        var stubTestArchiveFile = new FormFile(
-            new MemoryStream(_testData.TestArchiveBytes1),
-            0,
-            0,
-            "Test archive file",
-            "Test archive file"
-        )
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = "application/zip"
-        };
+        var stubTestArchiveFile = new RemoteStreamContent(
+            new MemoryStream(_testData.TestArchiveBytes1)
+        );
 
         await Assert.ThrowsAsync<BusinessException>(async () =>
         {
@@ -677,17 +645,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                 }
             );
 
-        var stubTestArchiveFile = new FormFile(
-            new MemoryStream(_testData.TestArchiveBytes1),
-            0,
-            0,
-            "Test archive file",
-            "Test archive file"
-        )
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = "application/zip"
-        };
+        var stubTestArchiveFile = new RemoteStreamContent(
+            new MemoryStream(_testData.TestArchiveBytes1)
+        );
 
         await Assert.ThrowsAsync<BusinessException>(async () =>
         {
@@ -737,17 +697,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                 }
             );
 
-        var stubTestArchiveFile = new FormFile(
-            new MemoryStream(_testData.TestArchiveBytes1),
-            0,
-            0,
-            "Test archive file",
-            "Test archive file"
-        )
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = "application/zip"
-        };
+        var stubTestArchiveFile = new RemoteStreamContent(
+            new MemoryStream(_testData.TestArchiveBytes1)
+        );
 
         var problem = await _problemAppService.UpdateTestAsync(
             _testData.ProblemId1,
@@ -811,17 +763,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     {
         Login(_testData.NormalUserId, _testData.NormalUserRoles);
 
-        var stubTestArchiveFile = new FormFile(
-            new MemoryStream(_testData.TestArchiveBytes1),
-            0,
-            0,
-            "Test archive file",
-            "Test archive file"
-        )
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = "application/zip"
-        };
+        var stubTestArchiveFile = new RemoteStreamContent(
+            new MemoryStream(_testData.TestArchiveBytes1)
+        );
 
         await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
         {
@@ -842,17 +786,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     {
         Login(_testData.ProposerUserId2, _testData.ProposerUserRoles);
 
-        var stubTestArchiveFile = new FormFile(
-            new MemoryStream(_testData.TestArchiveBytes1),
-            0,
-            0,
-            "Test archive file",
-            "Test archive file"
-        )
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = "application/zip"
-        };
+        var stubTestArchiveFile = new RemoteStreamContent(
+            new MemoryStream(_testData.TestArchiveBytes1)
+        );
 
         await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
         {
@@ -873,17 +809,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     {
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
 
-        var stubTestArchiveFile = new FormFile(
-            new MemoryStream(_testData.TestArchiveBytes1),
-            0,
-            0,
-            "Test archive file",
-            "Test archive file"
-        )
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = "application/zip"
-        };
+        var stubTestArchiveFile = new RemoteStreamContent(
+            new MemoryStream(_testData.TestArchiveBytes1)
+        );
 
         await Assert.ThrowsAsync<EntityNotFoundException>(async () =>
         {
@@ -934,17 +862,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                 }
             );
 
-        var stubTestArchiveFile = new FormFile(
-            new MemoryStream(_testData.TestArchiveBytes1),
-            0,
-            0,
-            "Test archive file",
-            "Test archive file"
-        )
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = "application/zip"
-        };
+        var stubTestArchiveFile = new RemoteStreamContent(
+            new MemoryStream(_testData.TestArchiveBytes1)
+        );
 
         await Assert.ThrowsAsync<BusinessException>(async () =>
         {
@@ -978,17 +898,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                 }
             );
 
-        var stubTestArchiveFile = new FormFile(
-            new MemoryStream(_testData.TestArchiveBytes1),
-            0,
-            0,
-            "Test archive file",
-            "Test archive file"
-        )
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = "application/zip"
-        };
+        var stubTestArchiveFile = new RemoteStreamContent(
+            new MemoryStream(_testData.TestArchiveBytes1)
+        );
 
         await Assert.ThrowsAsync<BusinessException>(async () =>
         {
@@ -1037,17 +949,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
                 }
             );
 
-        var stubTestArchiveFile = new FormFile(
-            new MemoryStream(_testData.TestArchiveBytes1),
-            0,
-            0,
-            "Test archive file",
-            "Test archive file"
-        )
-        {
-            Headers = new HeaderDictionary(),
-            ContentType = "application/zip"
-        };
+        var stubTestArchiveFile = new RemoteStreamContent(
+            new MemoryStream(_testData.TestArchiveBytes1)
+        );
 
         await Assert.ThrowsAsync<BusinessException>(async () =>
         {

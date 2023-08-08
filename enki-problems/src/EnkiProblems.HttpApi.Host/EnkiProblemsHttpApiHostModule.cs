@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using EnkiProblems.MongoDB;
 using EnkiProblems.MultiTenancy;
+using EnkiProblems.Problems;
 using EnkiProblems.Problems.Tests;
 using Grpc.Net.Client;
 using Microsoft.IdentityModel.Tokens;
@@ -134,6 +135,8 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
     {
         Configure<AbpAspNetCoreMvcOptions>(options =>
         {
+            options.ConventionalControllers.FormBodyBindingIgnoredTypes.Add(typeof(CreateTestDto));
+            options.ConventionalControllers.FormBodyBindingIgnoredTypes.Add(typeof(UpdateTestDto));
             options.ConventionalControllers.Create(typeof(EnkiProblemsApplicationModule).Assembly);
         });
     }
@@ -147,11 +150,6 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                // options.Authority = configuration["AuthServer:Authority"];
-                // options.RequireHttpsMetadata = Convert.ToBoolean(
-                //     configuration["AuthServer:RequireHttpsMetadata"]
-                // );
-                // options.Audience = "EnkiProblems";
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     IssuerSigningKey = new SymmetricSecurityKey(
@@ -171,19 +169,6 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         IConfiguration configuration
     )
     {
-        // context.Services.AddAbpSwaggerGenWithOAuth(
-        //     configuration["AuthServer:Authority"],
-        //     new Dictionary<string, string> { { "EnkiProblems", "EnkiProblems API" } },
-        //     options =>
-        //     {
-        //         options.SwaggerDoc(
-        //             "v1",
-        //             new OpenApiInfo { Title = "EnkiProblems API", Version = "v1" }
-        //         );
-        //         options.DocInclusionPredicate((docName, description) => true);
-        //         options.CustomSchemaIds(type => type.FullName);
-        //     }
-        // );
         context.Services.AddAbpSwaggerGen(options =>
         {
             options.SwaggerDoc(

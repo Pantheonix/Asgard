@@ -66,7 +66,7 @@ public class ProblemManager : DomainService
         bool? isPublished
     )
     {
-        if (problem.IsPublished)
+        if (problem.IsPublished && !(isPublished is not null && !isPublished.Value))
         {
             throw new BusinessException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem

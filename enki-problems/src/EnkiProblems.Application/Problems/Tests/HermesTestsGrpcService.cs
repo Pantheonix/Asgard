@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Asgard.Hermes;
@@ -34,7 +35,7 @@ public class HermesTestsGrpcService : ITestService
 
         await call.RequestStream.WriteAsync(new UploadRequest { Metadata = uploadMetadata });
 
-        foreach (var chunk in input.TestArchiveBytes)
+        foreach (var chunk in input.TestArchiveBytes.Chunk(EnkiProblemsConsts.TestChunkSize))
         {
             await call.RequestStream.WriteAsync(
                 new UploadRequest { Chunk = new() { Data = ByteString.CopyFrom(chunk) } }

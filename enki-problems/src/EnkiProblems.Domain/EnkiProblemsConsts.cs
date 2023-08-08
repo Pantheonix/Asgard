@@ -49,4 +49,6 @@ public static class EnkiProblemsConsts
     public const int MaxScore = 100;
 
     public const int MaxTotalScore = 100;
+
+    public const int TestChunkSize = 5000;
 }
