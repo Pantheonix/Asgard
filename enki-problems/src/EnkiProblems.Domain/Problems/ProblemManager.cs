@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Domain.Services;
@@ -9,10 +10,15 @@ namespace EnkiProblems.Problems;
 public class ProblemManager : DomainService
 {
     private readonly IRepository<Problem, Guid> _problemRepository;
+    private readonly ILogger _logger;
 
-    public ProblemManager(IRepository<Problem, Guid> problemRepository)
+    public ProblemManager(
+        IRepository<Problem, Guid> problemRepository,
+        ILogger<ProblemManager> logger
+    )
     {
         _problemRepository = problemRepository;
+        _logger = logger;
     }
 
     public async Task<Problem> CreateAsync(
@@ -29,9 +35,12 @@ public class ProblemManager : DomainService
         DifficultyEnum difficulty
     )
     {
+        _logger.LogInformation("Creating problem {Name}", name);
+
         var problem = await _problemRepository.FirstOrDefaultAsync(p => p.Name == name);
         if (problem is not null)
         {
+            _logger.LogError("Problem {Name} already exists", name);
             throw new BusinessException(EnkiProblemsDomainErrorCodes.ProblemNameAlreadyExists);
         }
 
@@ -66,8 +75,11 @@ public class ProblemManager : DomainService
         bool? isPublished
     )
     {
+        _logger.LogInformation("Updating problem {Name}", problem.Name);
+
         if (problem.IsPublished && !(isPublished is not null && !isPublished.Value))
         {
+            _logger.LogError("Problem {Name} is published and cannot be edited", problem.Name);
             throw new BusinessException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem
             );
@@ -76,6 +88,7 @@ public class ProblemManager : DomainService
         var oldProblem = await _problemRepository.FirstOrDefaultAsync(p => p.Name == name);
         if (oldProblem is not null)
         {
+            _logger.LogError("Problem {Name} already exists", name);
             throw new BusinessException(EnkiProblemsDomainErrorCodes.ProblemNameAlreadyExists);
         }
 
@@ -152,6 +165,7 @@ public class ProblemManager : DomainService
         string outputDownloadUrl
     )
     {
+        _logger.LogInformation("Adding test {TestId} to problem {Name}", testId, problem.Name);
         return problem.AddTest(testId, testScore, inputDownloadUrl, outputDownloadUrl);
     }
 
@@ -163,16 +177,19 @@ public class ProblemManager : DomainService
         string? outputDownloadUrl
     )
     {
+        _logger.LogInformation("Updating test {TestId} of problem {Name}", testId, problem.Name);
         return problem.UpdateTest(testId, testScore, inputDownloadUrl, outputDownloadUrl);
     }
 
     public Problem RemoveTest(Problem problem, int testId)
     {
+        _logger.LogInformation("Removing test {TestId} from problem {Name}", testId, problem.Name);
         return problem.RemoveTest(testId);
     }
 
     public Problem Publish(Problem problem)
     {
+        _logger.LogInformation("Publishing problem {Name}", problem.Name);
         return problem.Publish();
     }
 }

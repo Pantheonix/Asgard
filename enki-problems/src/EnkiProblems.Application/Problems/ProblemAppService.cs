@@ -9,6 +9,7 @@ using Volo.Abp.Authorization;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Application.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 using Volo.Abp;
 
 namespace EnkiProblems.Problems;
@@ -18,24 +19,30 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     private readonly ProblemManager _problemManager;
     private readonly IRepository<Problem, Guid> _problemRepository;
     private readonly ITestService _testService;
+    private readonly ILogger _logger;
 
     public ProblemAppService(
         ProblemManager problemManager,
         IRepository<Problem, Guid> problemRepository,
-        ITestService testService
+        ITestService testService,
+        ILogger<ProblemAppService> logger
     )
     {
         _problemManager = problemManager;
         _problemRepository = problemRepository;
         _testService = testService;
+        _logger = logger;
     }
 
     [Authorize]
     public async Task<ProblemDto> CreateAsync(CreateProblemDto input)
     {
+        _logger.LogInformation("Creating problem {Name}", input.Name);
+
         // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
         {
+            _logger.LogError("User {UserId} is not allowed to create problems", CurrentUser.Id);
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToCreateProblem
             );
@@ -63,6 +70,8 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     [AllowAnonymous]
     public async Task<PagedResultDto<ProblemDto>> GetListAsync(ProblemListFilterDto input)
     {
+        _logger.LogInformation("Getting problems list");
+
         var problemQueryable = await _problemRepository.GetQueryableAsync();
 
         problemQueryable = problemQueryable.Where(p => p.IsPublished);
@@ -103,9 +112,18 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         PagedResultDto<ProblemWithTestsDto>
     > GetUnpublishedProblemsByCurrentUserAsync()
     {
+        _logger.LogInformation(
+            "Getting unpublished problems list for user {UserId}",
+            CurrentUser.Id
+        );
+
         // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
         {
+            _logger.LogError(
+                "User {UserId} is not allowed to view unpublished problems",
+                CurrentUser.Id
+            );
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToViewUnpublishedProblems
             );
@@ -129,10 +147,13 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     [AllowAnonymous]
     public async Task<ProblemDto> GetByIdAsync(Guid id)
     {
+        _logger.LogInformation("Getting problem {ProblemId}", id);
+
         var problem = await _problemRepository.GetAsync(id);
 
         if (!problem.IsPublished)
         {
+            _logger.LogError("Problem {ProblemId} is not published", id);
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToViewUnpublishedProblems
             );
@@ -144,11 +165,17 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     [Authorize]
     public async Task<ProblemWithTestsDto> GetByIdForProposerAsync(Guid id)
     {
+        _logger.LogInformation("Getting problem {ProblemId} for user {UserId}", id, CurrentUser.Id);
+
         var problem = await _problemRepository.GetAsync(id);
 
         // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
         {
+            _logger.LogError(
+                "User {UserId} is not allowed to view unpublished problems",
+                CurrentUser.Id
+            );
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToViewUnpublishedProblems
             );
@@ -156,6 +183,11 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         if (!problem.IsPublished && problem.ProposerId != CurrentUser.Id)
         {
+            _logger.LogError(
+                "Problem {ProblemId} is not published and does not belong to user {UserId}",
+                id,
+                CurrentUser.Id
+            );
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.UnpublishedProblemNotBelongingToCurrentUser
             );
@@ -167,18 +199,26 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     [Authorize]
     public async Task<ProblemDto> UpdateAsync(Guid id, UpdateProblemDto input)
     {
+        _logger.LogInformation("Updating problem {ProblemId}", id);
+
         var problem = await _problemRepository.GetAsync(id);
 
         // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
         {
+            _logger.LogError("User {UserId} is not allowed to edit problems", CurrentUser.Id);
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToEditProblem
             );
         }
-            
+
         if (problem.ProposerId != CurrentUser.Id)
         {
+            _logger.LogError(
+                "Problem {ProblemId} does not belong to user {UserId}",
+                id,
+                CurrentUser.Id
+            );
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.UnpublishedProblemNotBelongingToCurrentUser
             );
@@ -207,9 +247,12 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     [Authorize]
     public async Task<ProblemWithTestsDto> CreateTestAsync(Guid problemId, CreateTestDto input)
     {
+        _logger.LogInformation("Creating test for problem {ProblemId}", problemId);
+
         // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
         {
+            _logger.LogError("User {UserId} is not allowed to edit problems", CurrentUser.Id);
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToEditProblem
             );
@@ -219,6 +262,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         if (problem.IsPublished)
         {
+            _logger.LogError("Problem {ProblemId} is published and cannot be edited", problemId);
             throw new BusinessException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem
             );
@@ -226,6 +270,11 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         if (problem.ProposerId != CurrentUser.Id)
         {
+            _logger.LogError(
+                "Problem {ProblemId} does not belong to user {UserId}",
+                problemId,
+                CurrentUser.Id
+            );
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.UnpublishedProblemNotBelongingToCurrentUser
             );
@@ -243,6 +292,11 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         if (uploadResponse.Status.Code != StatusCode.Ok)
         {
+            _logger.LogError(
+                "Test upload failed with status code {StatusCode}: {StatusMessage}",
+                uploadResponse.Status.Code,
+                uploadResponse.Status.Message
+            );
             throw new BusinessException(
                 EnkiProblemsDomainErrorCodes.TestUploadFailed,
                 $"Test upload failed with status code {uploadResponse.Status.Code}: {uploadResponse.Status.Message}."
@@ -261,6 +315,11 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         if (getDownloadUrlsResponse.Status.Code != StatusCode.Ok)
         {
+            _logger.LogError(
+                "Test download url retrieval failed with status code {StatusCode}: {StatusMessage}",
+                getDownloadUrlsResponse.Status.Code,
+                getDownloadUrlsResponse.Status.Message
+            );
             throw new BusinessException(
                 EnkiProblemsDomainErrorCodes.TestDownloadUrlRetrievalFailed,
                 $"Test download url retrieval failed with status code {getDownloadUrlsResponse.Status.Code}: {getDownloadUrlsResponse.Status.Message}."
@@ -287,9 +346,12 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         UpdateTestDto input
     )
     {
+        _logger.LogInformation("Updating test {TestId} for problem {ProblemId}", testId, problemId);
+
         // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
         {
+            _logger.LogError("User {UserId} is not allowed to edit problems", CurrentUser.Id);
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToEditProblem
             );
@@ -299,6 +361,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         if (problem.IsPublished)
         {
+            _logger.LogError("Problem {ProblemId} is published and cannot be edited", problemId);
             throw new BusinessException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem
             );
@@ -306,6 +369,11 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         if (problem.ProposerId != CurrentUser.Id)
         {
+            _logger.LogError(
+                "Problem {ProblemId} does not belong to user {UserId}",
+                problemId,
+                CurrentUser.Id
+            );
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.UnpublishedProblemNotBelongingToCurrentUser
             );
@@ -324,6 +392,11 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
             if (uploadResponse.Status.Code != StatusCode.Ok)
             {
+                _logger.LogError(
+                    "Test upload failed with status code {StatusCode}: {StatusMessage}",
+                    uploadResponse.Status.Code,
+                    uploadResponse.Status.Message
+                );
                 throw new BusinessException(
                     EnkiProblemsDomainErrorCodes.TestUploadFailed,
                     $"Test upload failed with status code {uploadResponse.Status.Code}: {uploadResponse.Status.Message}."
@@ -343,6 +416,11 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         if (getDownloadUrlsResponse.Status.Code != StatusCode.Ok)
         {
+            _logger.LogError(
+                "Test download url retrieval failed with status code {StatusCode}: {StatusMessage}",
+                getDownloadUrlsResponse.Status.Code,
+                getDownloadUrlsResponse.Status.Message
+            );
             throw new BusinessException(
                 EnkiProblemsDomainErrorCodes.TestDownloadUrlRetrievalFailed,
                 $"Test download url retrieval failed with status code {getDownloadUrlsResponse.Status.Code}: {getDownloadUrlsResponse.Status.Message}."
@@ -367,9 +445,12 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     [Authorize]
     public async Task<ProblemWithTestsDto> DeleteTestAsync(Guid problemId, int testId)
     {
+        _logger.LogInformation("Deleting test {TestId} for problem {ProblemId}", testId, problemId);
+
         // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
         {
+            _logger.LogError("User {UserId} is not allowed to edit problems", CurrentUser.Id);
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToEditProblem
             );
@@ -379,6 +460,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         if (problem.IsPublished)
         {
+            _logger.LogError("Problem {ProblemId} is published and cannot be edited", problemId);
             throw new BusinessException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem
             );
@@ -386,6 +468,11 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         if (problem.ProposerId != CurrentUser.Id)
         {
+            _logger.LogError(
+                "Problem {ProblemId} does not belong to user {UserId}",
+                problemId,
+                CurrentUser.Id
+            );
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.UnpublishedProblemNotBelongingToCurrentUser
             );
@@ -397,6 +484,11 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         if (deleteResponse.Status.Code != StatusCode.Ok)
         {
+            _logger.LogError(
+                "Test delete failed with status code {StatusCode}: {StatusMessage}",
+                deleteResponse.Status.Code,
+                deleteResponse.Status.Message
+            );
             throw new BusinessException(
                 EnkiProblemsDomainErrorCodes.TestDeleteFailed,
                 $"Test delete failed with status code {deleteResponse.Status.Code}: {deleteResponse.Status.Message}."
@@ -414,10 +506,16 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
     public async Task<ProblemEvalMetadataDto> GetEvalMetadataAsync(Guid id)
     {
+        _logger.LogInformation("Getting eval metadata for problem {ProblemId}", id);
+
         var problem = await _problemRepository.GetAsync(id);
 
         if (!problem.IsPublished)
         {
+            _logger.LogError(
+                "Problem {ProblemId} is not published and cannot be used as evaluation metadata",
+                id
+            );
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToViewUnpublishedProblems
             ).WithData("problemId", problem.Id);

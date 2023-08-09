@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Linq;
 using System.Text;
 using Asgard.Hermes;
@@ -18,6 +17,7 @@ using EnkiProblems.MultiTenancy;
 using EnkiProblems.Problems;
 using EnkiProblems.Problems.Tests;
 using Grpc.Net.Client;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 using Microsoft.OpenApi.Models;
@@ -31,7 +31,6 @@ using Volo.Abp.Caching.StackExchangeRedis;
 using Volo.Abp.DistributedLocking;
 using Volo.Abp.Modularity;
 using Volo.Abp.Swashbuckle;
-using Volo.Abp.VirtualFileSystem;
 
 namespace EnkiProblems;
 
@@ -53,16 +52,26 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         var configuration = context.Services.GetConfiguration();
         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
+        ConfigureLogger(context, configuration);
         ConfigureDapr(context, configuration);
         ConfigureHermesTestsGrpcClient(context, configuration);
         ConfigureConventionalControllers();
         ConfigureAuthentication(context, configuration);
         ConfigureCache(configuration);
-        // ConfigureVirtualFileSystem(context);
         ConfigureDataProtection(context, configuration, hostingEnvironment);
         ConfigureDistributedLocking(context, configuration);
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
+    }
+
+    private void ConfigureLogger(ServiceConfigurationContext context, IConfiguration configuration)
+    {
+        context.Services.AddLogging(config =>
+        {
+            config.AddConfiguration(configuration.GetSection("Logging"));
+            config.AddConsole();
+            config.AddDebug();
+        });
     }
 
     private void ConfigureDapr(ServiceConfigurationContext context, IConfiguration configuration)
@@ -93,42 +102,6 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         {
             options.KeyPrefix = "EnkiProblems:";
         });
-    }
-
-    private void ConfigureVirtualFileSystem(ServiceConfigurationContext context)
-    {
-        var hostingEnvironment = context.Services.GetHostingEnvironment();
-
-        if (hostingEnvironment.IsDevelopment())
-        {
-            Configure<AbpVirtualFileSystemOptions>(options =>
-            {
-                options.FileSets.ReplaceEmbeddedByPhysical<EnkiProblemsDomainSharedModule>(
-                    Path.Combine(
-                        hostingEnvironment.ContentRootPath,
-                        $"..{Path.DirectorySeparatorChar}EnkiProblems.Domain.Shared"
-                    )
-                );
-                options.FileSets.ReplaceEmbeddedByPhysical<EnkiProblemsDomainModule>(
-                    Path.Combine(
-                        hostingEnvironment.ContentRootPath,
-                        $"..{Path.DirectorySeparatorChar}EnkiProblems.Domain"
-                    )
-                );
-                options.FileSets.ReplaceEmbeddedByPhysical<EnkiProblemsApplicationContractsModule>(
-                    Path.Combine(
-                        hostingEnvironment.ContentRootPath,
-                        $"..{Path.DirectorySeparatorChar}EnkiProblems.Application.Contracts"
-                    )
-                );
-                options.FileSets.ReplaceEmbeddedByPhysical<EnkiProblemsApplicationModule>(
-                    Path.Combine(
-                        hostingEnvironment.ContentRootPath,
-                        $"..{Path.DirectorySeparatorChar}EnkiProblems.Application"
-                    )
-                );
-            });
-        }
     }
 
     private void ConfigureConventionalControllers()

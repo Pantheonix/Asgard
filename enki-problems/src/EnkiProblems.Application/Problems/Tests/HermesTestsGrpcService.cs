@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Asgard.Hermes;
 using Google.Protobuf;
+using Microsoft.Extensions.Logging;
 using Volo.Abp;
 
 namespace EnkiProblems.Problems.Tests;
@@ -12,18 +13,28 @@ public class HermesTestsGrpcService : ITestService
 {
     private readonly HermesTestsService.HermesTestsServiceClient _grpcClient;
     private readonly DaprMetadata _metadata;
+    private readonly ILogger _logger;
 
     public HermesTestsGrpcService(
         HermesTestsService.HermesTestsServiceClient grpcClient,
-        DaprMetadata metadata
+        DaprMetadata metadata,
+        ILogger<HermesTestsGrpcService> logger
     )
     {
         _grpcClient = grpcClient;
         _metadata = metadata;
+        _logger = logger;
     }
 
     public async Task<UploadResponse> UploadTestAsync(UploadTestStreamDto input)
     {
+        _logger.LogInformation(
+            "Uploading test {TestId} for problem {ProblemId} with size {TestSize}",
+            input.TestId,
+            input.ProblemId,
+            input.TestArchiveBytes.Length
+        );
+
         using var call = _grpcClient.UploadTest(_metadata.HermesContext);
 
         var uploadMetadata = new Metadata
@@ -48,6 +59,12 @@ public class HermesTestsGrpcService : ITestService
 
     public async Task<DownloadTestStreamDto> DownloadTestAsync(DownloadRequest input)
     {
+        _logger.LogInformation(
+            "Downloading test {TestId} for problem {ProblemId}",
+            input.TestId,
+            input.ProblemId
+        );
+
         using var call = _grpcClient.DownloadTest(input, _metadata.HermesContext);
 
         var metadata = new Metadata();
@@ -81,6 +98,12 @@ public class HermesTestsGrpcService : ITestService
                 case DownloadResponse.PacketOneofCase.None:
                     break;
                 default:
+                    _logger.LogError(
+                        "Unknown packet type: {PacketType} for test {TestId} of problem {ProblemId}",
+                        res.PacketCase,
+                        metadata.TestId,
+                        metadata.ProblemId
+                    );
                     throw new BusinessException(
                         EnkiProblemsDomainErrorCodes.DownloadTestArchiveError,
                         $"Unknown packet type: {res.PacketCase} for test {metadata.TestId} of problem {metadata.ProblemId}"
@@ -100,6 +123,11 @@ public class HermesTestsGrpcService : ITestService
 
     public async Task<DeleteTestResponse> DeleteTestAsync(DeleteTestRequest input)
     {
+        _logger.LogInformation(
+            "Deleting test {TestId} for problem {ProblemId}",
+            input.TestId,
+            input.ProblemId
+        );
         return await _grpcClient.DeleteTestAsync(input, _metadata.HermesContext);
     }
 
@@ -107,6 +135,11 @@ public class HermesTestsGrpcService : ITestService
         GetDownloadLinkForTestRequest input
     )
     {
+        _logger.LogInformation(
+            "Getting download link for test {TestId} for problem {ProblemId}",
+            input.TestId,
+            input.ProblemId
+        );
         return await _grpcClient.GetDownloadLinkForTestAsync(input, _metadata.HermesContext);
     }
 }
