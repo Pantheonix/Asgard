@@ -3,7 +3,6 @@ test/
 *.env
 src/*/bin/
 src/*/obj/
-src/*/Logs/
 *.md
 Dockerfile*
 .dockerignore
@@ -12,3 +11,4 @@ Makefile
 .gitignore
 EnkiProblems.sln.DotSettings
 EnkiProblems.sln.DotSettings.user
+src/EnkiProblems.HttpApi.Host/appsettings.json

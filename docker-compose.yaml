@@ -17,8 +17,8 @@ services:
     depends_on:
       quetzalcoatl-mssql-db:
         condition: service_started
-    networks:
-      - asgard-network
+    profiles:
+      - quetzalcoatl
 
   quetzalcoatl-auth-dapr:
     container_name: quetzalcoatl-auth-dapr
@@ -30,21 +30,27 @@ services:
         "quetzalcoatl-auth",
         "-app-port",
         "5210",
+        "-placement-host-address",
+        "asgard-dapr-placement:40000",
         "-dapr-http-port",
         "3500",
         "-components-path",
-        "./components",
+        "/components",
+        "-config",
+        "/config/config.yaml",
       ]
-    ports:
-      - "3500:3500"
+    volumes_from:
+      - asgard-dapr-config
     depends_on:
       - quetzalcoatl-auth-api
-    networks:
-      - asgard-network
+    network_mode: "service:quetzalcoatl-auth-api"
+    profiles:
+      - quetzalcoatl
 
   quetzalcoatl-mssql-db:
     container_name: quetzalcoatl-mssql-db
     image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: always
     user: root
     ports:
       - "1434:1433"
@@ -52,8 +58,8 @@ services:
       - quetzalcoatl-auth/.env
     volumes:
       - quetzalcoatl-db:/var/opt/mssql/data
-    networks:
-      - asgard-network
+    profiles:
+      - quetzalcoatl
 
   ############ ENKI ############
 
@@ -72,8 +78,12 @@ services:
         condition: service_healthy
       asgard-redis:
         condition: service_started
-    networks:
-      - asgard-network
+      hermes-tests-api:
+        condition: service_started
+      hermes-tests-dapr:
+        condition: service_started
+    profiles:
+      - enki
 
   enki-problems-dapr:
     container_name: enki-problems-dapr
@@ -85,23 +95,29 @@ services:
         "enki-problems",
         "-app-port",
         "5211",
+        "-placement-host-address",
+        "asgard-dapr-placement:40000",
         "-dapr-http-port",
         "3501",
         "-dapr-grpc-port",
         "50001",
         "-components-path",
-        "./components",
+        "/components",
+        "-config",
+        "/config/config.yaml",
       ]
-    ports:
-      - "3501:3501"
+    volumes_from:
+      - asgard-dapr-config
     depends_on:
       - enki-problems-api
-    networks:
-      - asgard-network
+    network_mode: "service:enki-problems-api"
+    profiles:
+      - enki
 
   enki-mongo-db:
-    image: mongo:5.0
     container_name: enki-mongo-db
+    image: mongo:5.0
+    restart: always
     command: ["--replSet", "enki-rs", "--bind_ip_all", "--port", "30001"]
     volumes:
       - enki-db:/data/db
@@ -113,8 +129,8 @@ services:
       start_period: 30s
       timeout: 5s
       retries: 3
-    networks:
-      - asgard-network
+    profiles:
+      - enki
 
   ############ HERMES ############
 
@@ -128,8 +144,8 @@ services:
       - "5212:5212"
     env_file:
       - hermes-tests/.env
-    networks:
-      - asgard-network
+    profiles:
+      - hermes
 
   hermes-tests-dapr:
     container_name: hermes-tests-dapr
@@ -139,58 +155,72 @@ services:
         "./daprd",
         "-app-id",
         "hermes-tests",
-        "-app-protocol",
-        "grpc",
         "-app-port",
         "5212",
+        "-placement-host-address",
+        "asgard-dapr-placement:40000",
         "-dapr-grpc-port",
-        "3502",
+        "50002",
         "-components-path",
-        "./components",
+        "/components",
+        "-config",
+        "/config/config.yaml",
       ]
-    ports:
-      - "3502:3502"
+    volumes_from:
+      - asgard-dapr-config
     depends_on:
       - hermes-tests-api
-    networks:
-      - asgard-network
+    network_mode: "service:hermes-tests-api"
+    profiles:
+      - hermes
 
   ############ DAPR ############
 
   asgard-dapr-placement:
     container_name: asgard-dapr-placement
-    image: daprio/dapr:1.9.5
-    command: ["./placement", "-port", "50000", "-log-level", "debug"]
+    image: daprio/placement:1.9.5
+    command: ["./placement", "-port", "40000", "-log-level", "debug"]
     ports:
-      - "50000:50000"
-    networks:
-      - asgard-network
+      - "40000"
+    profiles:
+      - dapr
 
   asgard-redis:
     container_name: asgard-redis
     image: redis:alpine
     ports:
-      - "6379:6379"
-    networks:
-      - asgard-network
+      - "6379"
+    profiles:
+      - dapr
 
   asgard-zipkin:
     container_name: asgard-zipkin
     image: openzipkin/zipkin:latest
     ports:
-      - "9411:9411"
-    networks:
-      - asgard-network
+      - "19411:9411"
+    profiles:
+      - dapr
+
+  asgard-dapr-config:
+    container_name: asgard-dapr-config
+    image: asgard-dapr-config:1.0
+    build:
+      context: ./dapr
+      dockerfile: Dockerfile
+    profiles:
+      - dapr
 
   ############ VOLUMES ############
 
 volumes:
   quetzalcoatl-db:
+    driver: local
   enki-db:
+    driver: local
 
   ############ NETWORKS ############
 
 networks:
-  asgard-network:
+  default:
     name: asgard-network
     driver: bridge
