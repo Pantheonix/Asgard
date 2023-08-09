@@ -22,6 +22,23 @@ Future<void> main(List<String> arguments) async {
 
     final config = getIt<ServerConfig>();
 
+    // create local folders/files if they don't exist
+    if (!await FileManager.localDirectoryExists(
+        config.tempLocalArchivedTestFolder)) {
+      await FileManager.createLocalDirectory(
+          config.tempLocalArchivedTestFolder);
+    }
+
+    if (!await FileManager.localDirectoryExists(
+        config.tempLocalUnarchivedTestFolder)) {
+      await FileManager.createLocalDirectory(
+          config.tempLocalUnarchivedTestFolder);
+    }
+
+    if (!await FileManager.localFileExists(config.logOutputFilePath)) {
+      await FileManager.createLocalFile(config.logOutputFilePath);
+    }
+
     // define a cron job which will delete all files
     // from temp local archived and unarchived folders
 
@@ -45,6 +62,7 @@ Future<void> main(List<String> arguments) async {
       logger,
     );
     await hermesServer.start();
+    print("Server started.");
   } catch (e) {
     print(e);
   } finally {

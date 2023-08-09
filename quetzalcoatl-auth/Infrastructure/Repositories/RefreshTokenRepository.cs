@@ -9,18 +9,45 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    public Task StoreRefreshTokenAsync(RefreshToken refreshToken, CancellationToken ct)
+    public async Task CreateRefreshTokenAsync(RefreshToken refreshToken, CancellationToken ct)
     {
-        _context.RefreshTokens.Add(refreshToken);
-        return _context.SaveChangesAsync(ct);
+        await _context.RefreshTokens.AddAsync(refreshToken, ct);
+        await _context.SaveChangesAsync(ct);
     }
 
-    public async Task<bool> IsTokenValidAsync(string userId, string token, CancellationToken ct)
+    public async Task UpdateRefreshTokenAsync(RefreshToken refreshToken, CancellationToken ct)
     {
-        var refreshToken = await _context.RefreshTokens.SingleOrDefaultAsync(
-            rt => rt.UserId == Guid.Parse(userId) && rt.Token == token && rt.ExpiryDate >= DateTime.Now,
-            ct
-        );
-        return refreshToken is not null;
+        _context.RefreshTokens.Update(refreshToken);
+        await _context.SaveChangesAsync(ct);
+    }
+
+    public Task DeleteRefreshTokenAsync(Expression<Func<RefreshToken, bool>>? filter = null)
+    {
+        if (filter is not null)
+        {
+            _context.RefreshTokens.RemoveRange(_context.RefreshTokens.Where(filter));
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public async Task<RefreshToken?> GetRefreshTokenAsync(
+        Expression<Func<RefreshToken, bool>>? filter,
+        Func<IQueryable<RefreshToken>, IOrderedQueryable<RefreshToken>>? orderBy
+    )
+    {
+        IQueryable<RefreshToken> query = _context.RefreshTokens;
+
+        if (filter is not null)
+        {
+            query = query.Where(filter);
+        }
+
+        if (orderBy is not null)
+        {
+            return await orderBy(query).FirstOrDefaultAsync();
+        }
+
+        return await query.FirstOrDefaultAsync();
     }
 }

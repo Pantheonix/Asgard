@@ -301,6 +301,254 @@ class DownloadResponse extends $pb.GeneratedMessage {
   StatusResponse ensureStatus() => $_ensure(2);
 }
 
+class GetDownloadLinkForTestRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GetDownloadLinkForTestRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'asgard.hermes'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'problemId')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'testId')
+    ..hasRequiredFields = false
+  ;
+
+  GetDownloadLinkForTestRequest._() : super();
+  factory GetDownloadLinkForTestRequest({
+    $core.String? problemId,
+    $core.String? testId,
+  }) {
+    final _result = create();
+    if (problemId != null) {
+      _result.problemId = problemId;
+    }
+    if (testId != null) {
+      _result.testId = testId;
+    }
+    return _result;
+  }
+  factory GetDownloadLinkForTestRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory GetDownloadLinkForTestRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  GetDownloadLinkForTestRequest clone() => GetDownloadLinkForTestRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  GetDownloadLinkForTestRequest copyWith(void Function(GetDownloadLinkForTestRequest) updates) => super.copyWith((message) => updates(message as GetDownloadLinkForTestRequest)) as GetDownloadLinkForTestRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static GetDownloadLinkForTestRequest create() => GetDownloadLinkForTestRequest._();
+  GetDownloadLinkForTestRequest createEmptyInstance() => create();
+  static $pb.PbList<GetDownloadLinkForTestRequest> createRepeated() => $pb.PbList<GetDownloadLinkForTestRequest>();
+  @$core.pragma('dart2js:noInline')
+  static GetDownloadLinkForTestRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GetDownloadLinkForTestRequest>(create);
+  static GetDownloadLinkForTestRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get problemId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set problemId($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasProblemId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearProblemId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get testId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set testId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasTestId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTestId() => clearField(2);
+}
+
+class GetDownloadLinkForTestResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GetDownloadLinkForTestResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'asgard.hermes'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'inputLink')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'outputLink')
+    ..aOM<StatusResponse>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status', subBuilder: StatusResponse.create)
+    ..hasRequiredFields = false
+  ;
+
+  GetDownloadLinkForTestResponse._() : super();
+  factory GetDownloadLinkForTestResponse({
+    $core.String? inputLink,
+    $core.String? outputLink,
+    StatusResponse? status,
+  }) {
+    final _result = create();
+    if (inputLink != null) {
+      _result.inputLink = inputLink;
+    }
+    if (outputLink != null) {
+      _result.outputLink = outputLink;
+    }
+    if (status != null) {
+      _result.status = status;
+    }
+    return _result;
+  }
+  factory GetDownloadLinkForTestResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory GetDownloadLinkForTestResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  GetDownloadLinkForTestResponse clone() => GetDownloadLinkForTestResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  GetDownloadLinkForTestResponse copyWith(void Function(GetDownloadLinkForTestResponse) updates) => super.copyWith((message) => updates(message as GetDownloadLinkForTestResponse)) as GetDownloadLinkForTestResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static GetDownloadLinkForTestResponse create() => GetDownloadLinkForTestResponse._();
+  GetDownloadLinkForTestResponse createEmptyInstance() => create();
+  static $pb.PbList<GetDownloadLinkForTestResponse> createRepeated() => $pb.PbList<GetDownloadLinkForTestResponse>();
+  @$core.pragma('dart2js:noInline')
+  static GetDownloadLinkForTestResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GetDownloadLinkForTestResponse>(create);
+  static GetDownloadLinkForTestResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get inputLink => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set inputLink($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasInputLink() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearInputLink() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get outputLink => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set outputLink($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasOutputLink() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearOutputLink() => clearField(2);
+
+  @$pb.TagNumber(3)
+  StatusResponse get status => $_getN(2);
+  @$pb.TagNumber(3)
+  set status(StatusResponse v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasStatus() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearStatus() => clearField(3);
+  @$pb.TagNumber(3)
+  StatusResponse ensureStatus() => $_ensure(2);
+}
+
+class DeleteTestRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DeleteTestRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'asgard.hermes'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'problemId')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'testId')
+    ..hasRequiredFields = false
+  ;
+
+  DeleteTestRequest._() : super();
+  factory DeleteTestRequest({
+    $core.String? problemId,
+    $core.String? testId,
+  }) {
+    final _result = create();
+    if (problemId != null) {
+      _result.problemId = problemId;
+    }
+    if (testId != null) {
+      _result.testId = testId;
+    }
+    return _result;
+  }
+  factory DeleteTestRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DeleteTestRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  DeleteTestRequest clone() => DeleteTestRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  DeleteTestRequest copyWith(void Function(DeleteTestRequest) updates) => super.copyWith((message) => updates(message as DeleteTestRequest)) as DeleteTestRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static DeleteTestRequest create() => DeleteTestRequest._();
+  DeleteTestRequest createEmptyInstance() => create();
+  static $pb.PbList<DeleteTestRequest> createRepeated() => $pb.PbList<DeleteTestRequest>();
+  @$core.pragma('dart2js:noInline')
+  static DeleteTestRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DeleteTestRequest>(create);
+  static DeleteTestRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get problemId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set problemId($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasProblemId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearProblemId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get testId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set testId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasTestId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTestId() => clearField(2);
+}
+
+class DeleteTestResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DeleteTestResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'asgard.hermes'), createEmptyInstance: create)
+    ..aOM<StatusResponse>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status', subBuilder: StatusResponse.create)
+    ..hasRequiredFields = false
+  ;
+
+  DeleteTestResponse._() : super();
+  factory DeleteTestResponse({
+    StatusResponse? status,
+  }) {
+    final _result = create();
+    if (status != null) {
+      _result.status = status;
+    }
+    return _result;
+  }
+  factory DeleteTestResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DeleteTestResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  DeleteTestResponse clone() => DeleteTestResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  DeleteTestResponse copyWith(void Function(DeleteTestResponse) updates) => super.copyWith((message) => updates(message as DeleteTestResponse)) as DeleteTestResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static DeleteTestResponse create() => DeleteTestResponse._();
+  DeleteTestResponse createEmptyInstance() => create();
+  static $pb.PbList<DeleteTestResponse> createRepeated() => $pb.PbList<DeleteTestResponse>();
+  @$core.pragma('dart2js:noInline')
+  static DeleteTestResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DeleteTestResponse>(create);
+  static DeleteTestResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  StatusResponse get status => $_getN(0);
+  @$pb.TagNumber(1)
+  set status(StatusResponse v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasStatus() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearStatus() => clearField(1);
+  @$pb.TagNumber(1)
+  StatusResponse ensureStatus() => $_ensure(0);
+}
+
 class Metadata extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Metadata', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'asgard.hermes'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'problemId')

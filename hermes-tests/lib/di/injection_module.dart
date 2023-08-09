@@ -6,7 +6,7 @@ import 'package:injectable/injectable.dart';
 @module
 abstract class InjectionModule {
   @lazySingleton
-  Config get config => Config.fromJsonFile('config.json');
+  Config get config => Config.fromEnv('HERMES_CONFIG');
 
   @lazySingleton
   FirebaseConfig get firebaseConfig => FirebaseConfig.fromJson(config.firebase);

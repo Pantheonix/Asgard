@@ -124,6 +124,16 @@ class HermesGrpcClient {
     );
   }
 
+  Future<hermes.DeleteTestResponse> deleteTest(
+      hermes.DeleteTestRequest request) async {
+    return await _client.deleteTest(request);
+  }
+
+  Future<hermes.GetDownloadLinkForTestResponse> getDownloadLinkForTest(
+      hermes.GetDownloadLinkForTestRequest request) async {
+    return await _client.getDownloadLinkForTest(request);
+  }
+
   Future<void> close() async {
     await _channel.shutdown();
   }

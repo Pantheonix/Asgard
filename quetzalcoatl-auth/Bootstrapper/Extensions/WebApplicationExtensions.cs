@@ -24,25 +24,28 @@ public static class WebApplicationExtensions
         }
 
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-        var adminConfig = services.GetRequiredService<AdminConfig>();
+        var adminConfig = services.GetRequiredService<IOptions<AdminConfig>>();
 
         var adminUser = new ApplicationUser
         {
-            UserName = adminConfig.UserName,
-            Email = adminConfig.Email
+            UserName = adminConfig.Value.UserName,
+            Email = adminConfig.Value.Email
         };
 
-        var adminUserExists = await userManager.FindByEmailAsync(adminConfig.Email);
+        var adminUserExists = await userManager.FindByEmailAsync(adminConfig.Value.Email);
 
         if (adminUserExists is null)
         {
-            var resultCreateUser = await userManager.CreateAsync(adminUser, adminConfig.Password);
-            var resultAddRole = await userManager.AddToRoleAsync(
+            var resultCreateUser = await userManager.CreateAsync(
                 adminUser,
-                ApplicationRoles.Admin.ToString()
+                adminConfig.Value.Password
+            );
+            var resultAddRoles = await userManager.AddToRolesAsync(
+                adminUser,
+                new[] { ApplicationRoles.Proposer.ToString(), ApplicationRoles.Admin.ToString() }
             );
 
-            if (!resultCreateUser.Succeeded || !resultAddRole.Succeeded)
+            if (!resultCreateUser.Succeeded || !resultAddRoles.Succeeded)
             {
                 throw new Exception("Failed to create admin user");
             }

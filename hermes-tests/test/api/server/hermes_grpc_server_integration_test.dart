@@ -126,5 +126,55 @@ void main() {
 
       client.close();
     });
+
+    test(
+        'Given grpc client requests to delete given test, '
+        'When delete rpc service method is called on the server-side, '
+        'Then the test is deleted from the remote firebase cloud storage',
+        () async {
+      // Arrange
+      final String testPath = 'temp/test/archived/marsx/1-valid.zip';
+      final Metadata testMetadata = Metadata()
+        ..problemId = 'marsx'
+        ..testId = '10'
+        ..testSize = File(testPath).lengthSync();
+
+      await client.uploadTest(
+        testPath,
+        testMetadata,
+      );
+
+      final DeleteTestRequest request = DeleteTestRequest()
+        ..problemId = testMetadata.problemId
+        ..testId = testMetadata.testId;
+
+      // Act
+      final DeleteTestResponse response = await client.deleteTest(request);
+
+      // Assert
+      expect(response.status.code, StatusCode.Ok);
+
+      client.close();
+    });
+
+    test(
+        'Given grpc client requests to retrieve the download link for a given test, '
+        'When getDownloadLink rpc service method is called on the server-side, '
+        'Then the download link is successfully retrieved', () async {
+      // Arrange
+      final request = GetDownloadLinkForTestRequest()
+        ..problemId = 'marsx'
+        ..testId = '9';
+
+      // Act
+      final response = await client.getDownloadLinkForTest(request);
+
+      // Assert
+      expect(response.status.code, StatusCode.Ok);
+      expect(response.inputLink, isNotNull);
+      expect(response.outputLink, isNotNull);
+
+      client.close();
+    });
   });
 }

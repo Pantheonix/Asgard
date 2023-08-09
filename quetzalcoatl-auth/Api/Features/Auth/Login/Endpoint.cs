@@ -8,13 +8,13 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
     private readonly ILogger<LoginUserEndpoint> _logger;
 
     public LoginUserEndpoint(
-        JwtConfig jwtConfig,
+        IOptions<JwtConfig> jwtConfig,
         UserManager<ApplicationUser> userManager,
         IMapper mapper,
         ILogger<LoginUserEndpoint> logger
     )
     {
-        _jwtConfig = jwtConfig ?? throw new ArgumentNullException(nameof(jwtConfig));
+        _jwtConfig = jwtConfig.Value ?? throw new ArgumentNullException(nameof(jwtConfig));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -53,7 +53,7 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
                 HttpOnly = true,
                 SameSite = SameSiteMode.Strict,
                 Secure = true,
-                Expires = DateTimeOffset.UtcNow.AddHours(_jwtConfig.JwtAccessTokenLifetime)
+                Expires = DateTimeOffset.UtcNow.AddTicks(_jwtConfig.JwtAccessTokenLifetime.Ticks)
             }
         );
 
@@ -65,7 +65,7 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
                 HttpOnly = true,
                 SameSite = SameSiteMode.Strict,
                 Secure = true,
-                Expires = DateTimeOffset.UtcNow.AddDays(_jwtConfig.JwtRefreshTokenLifetime)
+                Expires = DateTimeOffset.UtcNow.AddTicks(_jwtConfig.JwtRefreshTokenLifetime.Ticks)
             }
         );
 
@@ -81,7 +81,7 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
                     ProfilePictureConstants.BaseUrl,
                     ProfilePictureConstants.EndpointUrl,
                     ProfilePictureConstants.Extension
-                ),
+                )
             },
             cancellation: ct
         );
