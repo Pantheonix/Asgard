@@ -1,12 +1,14 @@
 apiVersion: dapr.io/v2alpha1
 kind: Subscription
 metadata:
-  name: pending-submission
-  namespace: asgard
+  name: anubis-subscription
 spec:
   topic: pending-submissions-topic
   routes: 
     default: /evaluate
-  pubsubname: snssqs-pubsub
+  pubsubname: redis-pubsub
+  # metadata:
+  #   rawPayload: "true"
 scopes:
 - anubis-eval
+- thor-submissions

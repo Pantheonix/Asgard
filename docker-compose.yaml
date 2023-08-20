@@ -22,7 +22,7 @@ services:
 
   quetzalcoatl-auth-dapr:
     container_name: quetzalcoatl-auth-dapr
-    image: daprio/daprd:1.9.5
+    image: daprio/daprd:1.11.2
     command:
       [
         "./daprd",
@@ -87,7 +87,7 @@ services:
 
   enki-problems-dapr:
     container_name: enki-problems-dapr
-    image: daprio/daprd:1.9.5
+    image: daprio/daprd:1.11.2
     command:
       [
         "./daprd",
@@ -149,7 +149,7 @@ services:
 
   hermes-tests-dapr:
     container_name: hermes-tests-dapr
-    image: daprio/daprd:1.9.5
+    image: daprio/daprd:1.11.2
     command:
       [
         "./daprd",
@@ -178,7 +178,7 @@ services:
 
   asgard-dapr-placement:
     container_name: asgard-dapr-placement
-    image: daprio/placement:1.9.5
+    image: daprio/placement:1.11.2
     command: ["./placement", "-port", "40000", "-log-level", "debug"]
     ports:
       - "40000"
