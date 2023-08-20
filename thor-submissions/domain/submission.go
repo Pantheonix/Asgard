@@ -1,8 +1,6 @@
 package domain
 
 import (
-	"fmt"
-
 	"github.com/google/uuid"
 )
 
@@ -18,21 +16,22 @@ const (
 	Dart   ProgrammingLanguage = "Dart"
 )
 
+type SubmissionStatus string
+
+const (
+	Pending   SubmissionStatus = "Pending"
+	Evaluated SubmissionStatus = "Evaluated"
+)
+
 type Submission struct {
 	SubmissionId        uuid.UUID           `json:"submissionId"`
 	UserId              uuid.UUID           `json:"userId"`
 	ProblemId           uuid.UUID           `json:"problemId"`
 	ProgrammingLanguage ProgrammingLanguage `json:"programmingLanguage"`
 	SourceCode          string              `json:"srcCode"`
-}
-
-func (s Submission) String() string {
-	return fmt.Sprintf(
-		"{submissionId: %s, userId: %s, problemId: %s, programmingLanguage: %s, srcCode: %s}",
-		s.SubmissionId,
-		s.UserId,
-		s.ProblemId,
-		s.ProgrammingLanguage,
-		s.SourceCode,
-	)
+	Status              SubmissionStatus    `json:"status"`
+	Time                int                 `json:"time"`
+	Memory              int                 `json:"memory"`
+	Grade               int                 `json:"grade"`
+	Errors              []string            `json:"errors"`
 }
