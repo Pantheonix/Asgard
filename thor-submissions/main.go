@@ -1,38 +1,24 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"strconv"
-	"time"
+	"thor-submissions/api"
 
 	dapr "github.com/dapr/go-sdk/client"
-)
-
-const (
-	pubsubComponentName = "redis-pubsub"
-	pubsubTopic         = "pending-submissions-topic"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	// Create a new client for Dapr using the SDK
-	client, err := dapr.NewClient()
+	daprClient, err := dapr.NewClient()
 	if err != nil {
 		panic(err)
 	}
-	defer client.Close()
+	ginEngine := gin.Default()
 
-	// Publish events using Dapr pubsub
-	for i := 1; i <= 10; i++ {
-		submission := `{"submissionId":` + strconv.Itoa(i) + `}`
+	server := api.NewServer(ginEngine, &daprClient)
+	server.RegisterRoutes()
+	defer server.Stop()
 
-		err := client.PublishEvent(context.Background(), pubsubComponentName, pubsubTopic, []byte(submission))
-		if err != nil {
-			panic(err)
-		}
-
-		fmt.Println("Published data:", submission)
-
-		time.Sleep(1000)
+	if err := server.Start(":5214"); err != nil {
+		panic(err)
 	}
 }
