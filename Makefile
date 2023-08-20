@@ -8,4 +8,7 @@ hdrun:
 	cd hermes-tests && export $$(cat .env | xargs) && echo $$HERMES_CONFIG && dapr run --app-id hermes --app-port 5212 --dapr-grpc-port 50002 --config ../dapr/config/config.yaml -- dart run bin/hermes_tests.dart
 
 adrun:
-	dapr run --app-id anubis-eval --app-port 5213 --app-protocol http --dapr-http-port 35003 --components-path dapr/components --config dapr/config/config.yaml -- cargo run --manifest-path anubis-eval/Cargo.toml
+	cd anubis-eval && dapr run --app-id anubis-eval --app-port 5213 --app-protocol http --dapr-http-port 35003 --components-path ../dapr/components --config ../dapr/config/config.yaml -- cargo run
+
+tdrun:
+	cd thor-submissions && dapr run --app-id thor-submissions --app-port 5214 --app-protocol http --dapr-http-port 35004 --components-path ../dapr/components --config ../dapr/config/config.yaml -- go run main.go

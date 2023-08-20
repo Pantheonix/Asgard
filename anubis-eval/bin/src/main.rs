@@ -1,15 +1,5 @@
-use serde::{Deserialize, Serialize};
+use cloudevents::binding::warp::filter;
 use warp::Filter;
-
-#[derive(Serialize, Deserialize, Debug)]
-struct PubSubEndpoint {
-    #[serde(rename = "pubsubName")]
-    pubsub_name: String,
-    #[serde(rename = "topic")]
-    topic_name: String,
-    #[serde(rename = "route")]
-    route_name: String,
-}
 
 #[tokio::main]
 async fn main() {
@@ -21,10 +11,11 @@ async fn main() {
     // POST /evaluate => 200 OK and print body
     let evaluate = warp::path!("evaluate")
         .and(warp::post())
-        .and(warp::body::json())
-        .map(|body: serde_json::Value| {
-            println!("Received body: {:?}", body);
-            warp::reply::json(&body)
+        .and(filter::to_event())
+        .map(|event: cloudevents::Event| {
+            let payload = event.data().unwrap();
+            println!("Received event: {:?}", payload);
+            warp::reply::with_status(payload.to_string(), warp::http::StatusCode::OK)
         });
 
     let routes = healthcheck.or(evaluate);
