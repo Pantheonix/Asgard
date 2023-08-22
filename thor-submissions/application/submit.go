@@ -1,4 +1,4 @@
-package api
+package application
 
 import (
 	"context"
@@ -79,7 +79,7 @@ func Submit(c *gin.Context, daprClient *dapr.Client) {
 		context.Background(),
 		domain.PUBSUB_COMPONENT_NAME,
 		domain.PUBSUB_TOPIC,
-		[]byte(queuedSubmissionDto.String()),
+		queuedSubmissionDto,
 	); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return

@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	app "thor-submissions/application"
 
 	dapr "github.com/dapr/go-sdk/client"
 	"github.com/gin-gonic/gin"
@@ -21,7 +22,11 @@ func NewServer(ginEngine *gin.Engine, daprClient *dapr.Client) *Server {
 
 func (s *Server) RegisterRoutes() {
 	s.ginEngine.POST("/submit", func(c *gin.Context) {
-		Submit(c, s.daprClient)
+		app.Submit(c, s.daprClient)
+	})
+
+	s.ginEngine.POST("/receive", func(c *gin.Context) {
+		app.Receive(c, s.daprClient)
 	})
 }
 
