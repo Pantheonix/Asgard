@@ -1,0 +1,52 @@
+[programming_languages]
+[programming_languages.C]
+name = "C"
+main_file = "main.c"
+compile_command = "gcc -o myprogram main.c"
+execute_command = "./myprogram"
+pre_compilation_commands = []
+
+[programming_languages.Cpp]
+name = "C++"
+main_file = "main.cpp"
+compile_command = "g++ -o myprogram main.cpp"
+execute_command = "./myprogram"
+pre_compilation_commands = []
+
+[programming_languages.Dart]
+name = "Dart"
+main_file = "main.dart"
+compile_command = "dart2aot main.dart main.aot"
+execute_command = "dartaotruntime main.aot"
+pre_compilation_commands = []
+
+[programming_languages.Go]
+name = "Go"
+main_file = "main.go"
+compile_command = "go build main.go"
+execute_command = "./main"
+pre_compilation_commands = []
+
+[programming_languages.Java]
+name = "Java (GraalVM AOT)"
+main_file = "Main.java"
+compile_command = "$GRAALVM_HOME/bin/native-image -jar your-app.jar"
+execute_command = "./Main"
+pre_compilation_commands = []
+
+[programming_languages.Rust]
+name = "Rust"
+main_file = "main.rs"
+compile_command = "rustc -o myprogram main.rs"
+execute_command = "./myprogram"
+pre_compilation_commands = []
+
+[programming_languages.CSharp]
+name = ".NET Core (AOT)"
+main_file = "Program.cs"
+compile_command = "dotnet publish -c Release -r net7.0"
+execute_command = "dotnet <published-directory>/Main.dll"
+pre_compilation_commands = [
+  "touch Program.csproj",
+  "echo '<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net7.0</TargetFramework><PublishTrimmed>true</PublishTrimmed></PropertyGroup></Project>' > Program.csproj",
+]
