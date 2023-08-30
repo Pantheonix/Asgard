@@ -1,6 +1,14 @@
 # Define services for Asgard
 # TODO: add health checks, restart policies and extract hardcoded ports/tags/etc. to .env files
 version: "3.7"
+
+x-logging:
+  &default-logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 100m
+
 services:
   ############ QUETZALCOATL ############
 
@@ -174,6 +182,55 @@ services:
     profiles:
       - hermes
 
+  ############ ANUBIS ############
+
+  server:
+    image: judge0/judge0:1.13.0
+    volumes:
+      - ./asgard.conf:/judge0.conf:ro
+    ports:
+      - "2358:2358"
+    privileged: true
+    <<: *default-logging
+    restart: always
+    profiles:
+      - anubis
+
+  workers:
+    image: judge0/judge0:1.13.0
+    command: ["./scripts/workers"]
+    volumes:
+      - ./asgard.conf:/judge0.conf:ro
+    privileged: true
+    <<: *default-logging
+    restart: always
+    profiles:
+      - anubis
+
+  db:
+    image: postgres:13.0
+    env_file: asgard.conf
+    volumes:
+      - judge0-db:/var/lib/postgresql/data/
+    <<: *default-logging
+    restart: always
+    profiles:
+      - anubis
+
+  redis:
+    image: redis:6.0
+    command: [
+      "bash", "-c",
+      'docker-entrypoint.sh --appendonly yes --requirepass "$$REDIS_PASSWORD"'
+    ]
+    env_file: asgard.conf
+    volumes:
+      - redis-data:/data
+    <<: *default-logging
+    restart: always
+    profiles:
+      - anubis
+
   ############ DAPR ############
 
   asgard-dapr-placement:
@@ -216,6 +273,10 @@ volumes:
   quetzalcoatl-db:
     driver: local
   enki-db:
+    driver: local
+  judge0-db:
+    driver: local
+  redis-data:
     driver: local
 
   ############ NETWORKS ############
