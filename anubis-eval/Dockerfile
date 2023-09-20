@@ -16,8 +16,5 @@ RUN cargo install --path . --locked
 
 FROM debian:buster-slim
 
-ENV ROCKET_ADDRESS=0.0.0.0
-ENV ROCKET_PORT=8000
-
 COPY --from=build /usr/local/cargo/bin/anubis-eval /usr/local/bin/anubis-eval
 CMD ["anubis-eval"]

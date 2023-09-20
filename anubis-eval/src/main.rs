@@ -7,6 +7,7 @@ mod application;
 mod config;
 mod domain;
 mod infrastructure;
+mod schema;
 
 #[launch]
 fn rocket() -> _ {
