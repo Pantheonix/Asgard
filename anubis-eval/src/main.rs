@@ -14,5 +14,11 @@ fn rocket() -> _ {
     // init_logger();
     info!("Starting rocket...");
 
-    rocket::build().mount("/", routes![api::health_check_endpoint::health_check,])
+    rocket::build().mount(
+        "/api",
+        routes![
+            api::health_check_endpoint::health_check,
+            api::create_submission_endpoint::create_submission,
+        ],
+    )
 }
