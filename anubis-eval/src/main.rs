@@ -11,7 +11,7 @@ mod schema;
 
 #[launch]
 fn rocket() -> _ {
-    // init_logger();
+    init_logger();
     info!("Starting rocket...");
 
     rocket::build().mount(

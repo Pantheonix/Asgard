@@ -131,6 +131,11 @@ services:
     ports:
       - 30001:30001
     healthcheck:
+      # test:
+      #   [
+      #     "CMD-SHELL",
+      #     'mongo --port 30001 --quiet --eval "rs.initiate({_id:''enki-rs'',members:[{_id:0,host:"enki-mongo-db:30001"}]}).ok || rs.status().ok"',
+      #   ]
       test: test $(echo "rs.initiate({_id:'enki-rs',members:[{_id:0,host:\"enki-mongo-db:30001\"}]}).ok || rs.status().ok" | mongo --port 30001 --quiet) -eq 1
       interval: 10s
       start_period: 30s
@@ -193,6 +198,35 @@ services:
       - "5213:5213"
     env_file:
       - anubis-eval/.env
+    # profiles:
+    #   - anubis
+
+  anubis-eval-dapr:
+    container_name: anubis-eval-dapr
+    image: daprio/daprd:1.11.2
+    command:
+      [
+        "./daprd",
+        "-app-id",
+        "hermes-tests",
+        "-app-port",
+        "5213",
+        "-placement-host-address",
+        "asgard-dapr-placement:40000",
+        "-dapr-http-port",
+        "3503",
+        "-dapr-grpc-port",
+        "50003",
+        "-components-path",
+        "/components",
+        "-config",
+        "/config/config.yaml",
+      ]
+    volumes_from:
+      - asgard-dapr-config
+    # depends_on:
+    #   - anubis-eval-api
+    # network_mode: "service:anubis-eval-api"
     profiles:
       - anubis
 

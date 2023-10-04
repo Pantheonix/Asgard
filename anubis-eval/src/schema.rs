@@ -1,30 +1,35 @@
-use diesel::{allow_tables_to_appear_in_same_query, table};
-
+use diesel::{allow_tables_to_appear_in_same_query, joinable, table};
 table! {
     submissions (id) {
-        id -> Int4,
-        user_id -> Int4,
-        problem_id -> Int4,
         language -> Varchar,
         source_code -> Text,
         status -> Varchar,
         score -> Int4,
         created_at -> Timestamp,
+        id -> Text,
+        user_id -> Text,
+        problem_id -> Text,
     }
 }
 
 table! {
     submissions_testcases (token) {
-        token -> Int4,
-        submission_id -> Int4,
         status -> Varchar,
-        time -> Numeric,
-        memory -> Numeric,
+        time -> Float4,
+        memory -> Float4,
         score -> Int4,
-        answer -> Text,
         eval_message -> Nullable<Text>,
-        compile_output -> Nullable<Text>,
+        stdout -> Nullable<Text>,
+        stderr -> Nullable<Text>,
+        token -> Text,
+        submission_id -> Text,
+        testcase_id -> Int4,
     }
 }
 
-allow_tables_to_appear_in_same_query!(submissions, submissions_testcases,);
+joinable!(submissions_testcases -> submissions (submission_id));
+
+allow_tables_to_appear_in_same_query!(
+    submissions,
+    submissions_testcases,
+);

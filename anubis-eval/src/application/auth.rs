@@ -15,12 +15,12 @@ pub struct Claims {
 }
 
 #[derive(Debug)]
-pub struct JWT {
+pub struct JwtGuard {
     pub claims: Claims,
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for JWT {
+impl<'r> FromRequest<'r> for JwtGuard {
     type Error = NetworkResponse;
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, NetworkResponse> {
@@ -34,7 +34,7 @@ impl<'r> FromRequest<'r> for JWT {
                 Outcome::Failure((Status::BadRequest, NetworkResponse::BadRequest(response)))
             }
             Some(key) => match is_valid(key) {
-                Ok(claims) => Outcome::Success(JWT { claims }),
+                Ok(claims) => Outcome::Success(JwtGuard { claims }),
                 Err(err) => match &err.kind() {
                     ErrorKind::ExpiredSignature => {
                         let response = String::from("Error validating JWT token - Expired Token");
