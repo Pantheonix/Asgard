@@ -1,13 +1,13 @@
-use std::time::SystemTime;
-use diesel::{Insertable, Queryable};
-use uuid::Uuid;
 use crate::domain::submission::{Submission, TestCase};
 use crate::schema::submissions;
 use crate::schema::submissions_testcases;
+use diesel::{Insertable, Queryable};
+use std::time::SystemTime;
+use uuid::Uuid;
 
 #[derive(Queryable, Insertable)]
 #[table_name = "submissions"]
-pub(crate) struct NewSubmission {
+pub(in crate::infrastructure) struct NewSubmission {
     id: String,
     user_id: String,
     problem_id: String,
@@ -51,7 +51,7 @@ impl From<NewSubmission> for Submission {
 
 #[derive(Queryable, Insertable)]
 #[table_name = "submissions_testcases"]
-pub(crate) struct NewTestCase {
+pub(in crate::infrastructure) struct NewTestCase {
     token: String,
     submission_id: String,
     testcase_id: i32,

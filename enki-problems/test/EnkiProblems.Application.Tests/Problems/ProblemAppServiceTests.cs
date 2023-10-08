@@ -1078,6 +1078,8 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         evalMetadataDto.ShouldNotBeNull();
         evalMetadataDto.Id.ShouldBe(_testData.ProblemId1);
         evalMetadataDto.Name.ShouldBe(_testData.ProblemName1);
+        evalMetadataDto.ProposerId.ShouldBe(_testData.ProblemProposerId1);
+        evalMetadataDto.IsPublished.ShouldBeTrue();
         evalMetadataDto.Time.ShouldBe(_testData.ProblemTimeLimit1);
         evalMetadataDto.TotalMemory.ShouldBe(_testData.ProblemTotalMemoryLimit1);
         evalMetadataDto.StackMemory.ShouldBe(_testData.ProblemStackMemoryLimit1);

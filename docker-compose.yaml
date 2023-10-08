@@ -224,6 +224,8 @@ services:
       ]
     volumes_from:
       - asgard-dapr-config
+    ports:
+      - "3503:3503"
     # depends_on:
     #   - anubis-eval-api
     # network_mode: "service:anubis-eval-api"
@@ -251,6 +253,35 @@ services:
     privileged: true
     <<: *default-logging
     restart: always
+    profiles:
+      - anubis
+
+  judge0-server-dapr:
+    container_name: judge0-server-dapr
+    image: daprio/daprd:1.11.2
+    command:
+      [
+        "./daprd",
+        "-app-id",
+        "judge0-server",
+        "-app-port",
+        "2358",
+        "-placement-host-address",
+        "asgard-dapr-placement:40000",
+        "-dapr-http-port",
+        "3504",
+        "-dapr-grpc-port",
+        "50004",
+        "-components-path",
+        "/components",
+        "-config",
+        "/config/config.yaml",
+      ]
+    volumes_from:
+      - asgard-dapr-config
+    depends_on:
+      - server
+    network_mode: "service:server"
     profiles:
       - anubis
 

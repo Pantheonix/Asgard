@@ -1,12 +1,11 @@
+use crate::config::di::CONFIG;
 use crate::domain::network_response::NetworkResponse;
-use dotenvy::dotenv;
 use jsonwebtoken::errors::{Error, ErrorKind};
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use rocket::http::Status;
 use rocket::request::{FromRequest, Outcome};
 use rocket::serde::{Deserialize, Serialize};
 use rocket::Request;
-use std::env;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Claims {
@@ -15,12 +14,12 @@ pub struct Claims {
 }
 
 #[derive(Debug)]
-pub struct JwtGuard {
+pub struct JwtContext {
     pub claims: Claims,
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for JwtGuard {
+impl<'r> FromRequest<'r> for JwtContext {
     type Error = NetworkResponse;
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, NetworkResponse> {
@@ -34,7 +33,7 @@ impl<'r> FromRequest<'r> for JwtGuard {
                 Outcome::Failure((Status::BadRequest, NetworkResponse::BadRequest(response)))
             }
             Some(key) => match is_valid(key) {
-                Ok(claims) => Outcome::Success(JwtGuard { claims }),
+                Ok(claims) => Outcome::Success(JwtContext { claims }),
                 Err(err) => match &err.kind() {
                     ErrorKind::ExpiredSignature => {
                         let response = String::from("Error validating JWT token - Expired Token");
@@ -65,9 +64,7 @@ impl<'r> FromRequest<'r> for JwtGuard {
 }
 
 fn decode_jwt(token: String) -> Result<Claims, ErrorKind> {
-    dotenv().ok();
-
-    let secret = env::var("JWT_SECRET_KEY").expect("JWT_SECRET_KEY must be set.");
+    let secret = CONFIG.clone().jwt_secret_key;
     let token = token.trim_start_matches("Bearer").trim();
 
     match decode::<Claims>(

@@ -29,7 +29,4 @@ table! {
 
 joinable!(submissions_testcases -> submissions (submission_id));
 
-allow_tables_to_appear_in_same_query!(
-    submissions,
-    submissions_testcases,
-);
+allow_tables_to_appear_in_same_query!(submissions, submissions_testcases,);

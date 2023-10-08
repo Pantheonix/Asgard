@@ -1,6 +1,7 @@
 use rocket::Responder;
 
 #[derive(Responder, Debug)]
+#[response(content_type = "json")]
 pub enum NetworkResponse {
     #[response(status = 201)]
     Created(String),
