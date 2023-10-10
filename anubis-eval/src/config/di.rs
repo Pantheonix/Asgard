@@ -6,6 +6,7 @@ pub struct Config {
     pub jwt_secret_key: String,
     pub dapr_http_port: u16,
     pub dapr_eval_metadata_endpoint: String,
+    pub dapr_judge_endpoint: String,
 }
 
 lazy_static! {

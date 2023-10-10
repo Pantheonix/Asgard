@@ -208,7 +208,7 @@ services:
       [
         "./daprd",
         "-app-id",
-        "hermes-tests",
+        "anubis-eval",
         "-app-port",
         "5213",
         "-placement-host-address",

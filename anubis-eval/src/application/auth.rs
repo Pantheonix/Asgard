@@ -7,15 +7,15 @@ use rocket::request::{FromRequest, Outcome};
 use rocket::serde::{Deserialize, Serialize};
 use rocket::Request;
 
+#[derive(Debug)]
+pub struct JwtContext {
+    pub claims: Claims,
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Claims {
     pub sub: String,
     exp: usize,
-}
-
-#[derive(Debug)]
-pub struct JwtContext {
-    pub claims: Claims,
 }
 
 #[rocket::async_trait]
