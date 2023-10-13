@@ -2,6 +2,8 @@ use crate::application::auth::JwtContext;
 use crate::application::dapr_client::DaprClient;
 use crate::application::dapr_dtos::{CreateSubmissionBatchDto, CreateSubmissionTestCaseDto};
 use crate::domain::network_response::NetworkResponse;
+use crate::domain::submission::{Submission, SubmissionStatus, TestCase, TestCaseStatus};
+use crate::infrastructure::db::Db;
 use rocket::futures::future::join_all;
 use rocket::serde::json::Json;
 use rocket::{post, Responder};
@@ -29,6 +31,7 @@ pub async fn create_submission(
     submission: Validated<Json<CreateSubmissionRequest>>,
     user_ctx: JwtContext,
     dapr_client: DaprClient,
+    db: Db,
 ) -> NetworkResponse {
     let submission = submission.into_inner();
     let user_id = Uuid::from_str(user_ctx.claims.sub.as_str()).unwrap();
@@ -40,23 +43,25 @@ pub async fn create_submission(
         .unwrap();
 
     // FIREBASE - Get Problem Test Contents
-    let test_cases = join_all(eval_metadata.tests.iter().map(|test| async {
+    let mut test_cases = join_all(eval_metadata.tests.iter().map(|test| async {
         let (input, output) =
             DaprClient::get_input_and_output_for_test((test.input.clone(), test.output.clone()))
                 .await
                 .unwrap();
 
         CreateSubmissionTestCaseDto {
+            testcase_id: test.test_id,
             source_code: submission.source_code.to_string(),
             language: submission.language.parse().unwrap(),
             stdin: input,
             time: eval_metadata.time,
-            memory_limit: eval_metadata.total_memory * 1000,
-            stack_limit: eval_metadata.stack_memory * 1000,
+            memory_limit: eval_metadata.total_memory * 1000_f32,
+            stack_limit: eval_metadata.stack_memory * 1000_f32,
             expected_output: output,
         }
     }))
     .await;
+    test_cases.sort_by(|a, b| a.testcase_id.cmp(&b.testcase_id));
 
     let submission_batch = CreateSubmissionBatchDto {
         submissions: test_cases,
@@ -67,12 +72,44 @@ pub async fn create_submission(
         .create_submission_batch(&submission_batch)
         .await
         .unwrap();
-    println!("{:?}", submission_tokens);
 
-    // JUDGE0 - Get Submission Results
+    // POSTGRES - Create Submission and mark it as pending
+    let submission_id = Uuid::new_v4();
+    let test_cases = submission_tokens
+        .iter()
+        .zip(eval_metadata.tests.iter())
+        .map(|(token_dto, test_dto)| TestCase {
+            token: Uuid::from_str(token_dto.token.as_str()).unwrap(),
+            submission_id,
+            testcase_id: test_dto.test_id as i32,
+            status: TestCaseStatus::Pending,
+            time: 0_f32,
+            memory: 0_f32,
+            score: 0,
+            eval_message: None,
+            stdout: None,
+            stderr: None,
+        })
+        .collect::<Vec<TestCase>>();
 
-    // POSTGRES - Create Submission
-    let submission_id = Uuid::new_v4().to_string();
+    let submission = Submission {
+        id: submission_id,
+        user_id,
+        problem_id: submission.problem_id,
+        language: submission.language.parse().unwrap(),
+        source_code: submission.source_code.clone(),
+        status: SubmissionStatus::Evaluating,
+        score: 0,
+        created_at: std::time::SystemTime::now(),
+        test_cases,
+    };
 
-    NetworkResponse::Created(submission_id)
+    db.run(move |conn| match submission.insert(conn) {
+        true => NetworkResponse::Created(submission_id.to_string()),
+        false => {
+            let response = String::from("Error creating submission");
+            return NetworkResponse::BadRequest(response);
+        }
+    })
+    .await
 }

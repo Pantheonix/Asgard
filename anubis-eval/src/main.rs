@@ -1,4 +1,6 @@
 use crate::config::logger::init_logger;
+use crate::infrastructure::db::{run_migrations, Db};
+use rocket::fairing::AdHoc;
 use rocket::log::private::info;
 use rocket::{catchers, launch, routes};
 
@@ -18,6 +20,8 @@ fn rocket() -> _ {
 
     rocket::build()
         .manage(reqwest_client)
+        .attach(Db::fairing())
+        .attach(AdHoc::on_ignite("Diesel Migrations", run_migrations))
         .mount(
             "/api",
             routes![

@@ -7,6 +7,7 @@ pub struct Config {
     pub dapr_http_port: u16,
     pub dapr_eval_metadata_endpoint: String,
     pub dapr_judge_endpoint: String,
+    pub dapr_get_submission_batch_endpoint: String,
 }
 
 lazy_static! {

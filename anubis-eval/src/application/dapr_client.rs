@@ -1,6 +1,10 @@
-use crate::application::dapr_dtos::{CreateSubmissionBatchDto, GetEvalMetadataForProblemDto, TestCaseTokenDto};
+use crate::application::dapr_dtos::{
+    CreateSubmissionBatchDto, EvaluatedSubmissionBatchDto, GetEvalMetadataForProblemDto,
+    TestCaseTokenDto,
+};
 use crate::config::di::CONFIG;
 use rocket::request::{FromRequest, Outcome};
+use serde_json::Value;
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -40,15 +44,43 @@ impl DaprClient {
         Ok((input, output))
     }
 
-    pub async fn create_submission_batch(&self, submission_batch: &CreateSubmissionBatchDto) -> Result<Vec<TestCaseTokenDto>, reqwest::Error> {
+    pub async fn create_submission_batch(
+        &self,
+        submission_batch: &CreateSubmissionBatchDto,
+    ) -> Result<Vec<TestCaseTokenDto>, reqwest::Error> {
         let url = CONFIG.dapr_judge_endpoint.to_owned();
 
-        let response = self.reqwest_client
+        let response = self
+            .reqwest_client
             .post(&url)
             .json(&submission_batch)
             .send()
             .await?
             .json::<Vec<TestCaseTokenDto>>()
+            .await?;
+
+        Ok(response)
+    }
+
+    pub async fn get_submission_batch(
+        &self,
+        submission_tokens: &Vec<TestCaseTokenDto>,
+    ) -> Result<EvaluatedSubmissionBatchDto, reqwest::Error> {
+        let url = CONFIG.dapr_get_submission_batch_endpoint.to_owned();
+        let tokens = submission_tokens
+            .iter()
+            .map(|token_dto| token_dto.token.clone())
+            .collect::<Vec<String>>()
+            .join(",");
+
+        let url = url.replace("{tokens}", tokens.as_str());
+
+        let response = self
+            .reqwest_client
+            .get(&url)
+            .send()
+            .await?
+            .json::<EvaluatedSubmissionBatchDto>()
             .await?;
 
         Ok(response)
