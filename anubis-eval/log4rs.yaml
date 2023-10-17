@@ -5,15 +5,21 @@ appenders:
     path: "logs/anubis.logs"
     encoder:
       pattern: "{d(%Y-%m-%d %H:%M:%S%.3f)} {h({l})} {M} - {m}{n}"
+  console_appender:
+    kind: console
+    encoder:
+      pattern: "{d(%Y-%m-%d %H:%M:%S%.3f)} {h({l})} {M} - {m}{n}"
 
 root:
   level: debug
   appenders:
     - file_appender
+    - console_appender
 
 loggers:
   anubis:
     level: debug
     appenders:
       - file_appender
+      - console_appender
     additive: false
