@@ -302,4 +302,21 @@ public class Problem : FullAuditedAggregateRoot<Guid>
     {
         return !IsPublished && Tests.Count > 0;
     }
+
+    public int GetFirstAvailableTestId()
+    {
+        var testIds = Tests.Select(t => t.Id).ToList();
+        for (var i = 1; i <= EnkiProblemsConsts.MaxNumberOfTests; i++)
+        {
+            if (!testIds.Contains(i))
+            {
+                return i;
+            }
+        }
+
+        throw new BusinessException(
+            EnkiProblemsDomainErrorCodes.NumberOfTestsExceedsLimit,
+            $"The number of tests exceeds the limit of {EnkiProblemsConsts.MaxNumberOfTests}."
+        ).WithData("problemId", Id);
+    }
 }

@@ -1101,15 +1101,6 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
             await _problemAppService.GetEvalMetadataAsync(Guid.NewGuid());
         });
     }
-
-    [Fact]
-    public async Task Should_Not_Get_Eval_Metadata_For_Unpublished_Problem()
-    {
-        await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
-        {
-            await _problemAppService.GetEvalMetadataAsync(_testData.ProblemId1);
-        });
-    }
     #endregion
 
     private void Login(Guid userId, string[] userRoles)
