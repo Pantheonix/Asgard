@@ -105,9 +105,9 @@ pub async fn create_submission(
     };
 
     db.run(move |conn| match submission.insert(conn) {
-        true => NetworkResponse::Created(submission_id.to_string()),
-        false => {
-            let response = String::from("Error creating submission");
+        Ok(_) => NetworkResponse::Created(submission_id.to_string()),
+        Err(err) => {
+            let response = format!("Error saving submission to database: {:?}", err);
             return NetworkResponse::BadRequest(response);
         }
     })

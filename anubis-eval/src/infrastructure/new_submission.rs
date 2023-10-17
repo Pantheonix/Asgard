@@ -5,17 +5,17 @@ use diesel::{Insertable, Queryable};
 use std::time::SystemTime;
 use uuid::Uuid;
 
-#[derive(Queryable, Insertable)]
+#[derive(Debug, Clone, Queryable, Insertable)]
 #[table_name = "submissions"]
 pub(in crate::infrastructure) struct NewSubmission {
-    id: String,
-    user_id: String,
-    problem_id: String,
-    language: String,
-    source_code: String,
-    status: String,
-    score: i32,
-    created_at: SystemTime,
+    pub(in crate::infrastructure) id: String,
+    pub(in crate::infrastructure) user_id: String,
+    pub(in crate::infrastructure) problem_id: String,
+    pub(in crate::infrastructure) language: String,
+    pub(in crate::infrastructure) source_code: String,
+    pub(in crate::infrastructure) status: String,
+    pub(in crate::infrastructure) score: i32,
+    pub(in crate::infrastructure) created_at: SystemTime,
 }
 
 impl From<Submission> for NewSubmission {
@@ -49,19 +49,19 @@ impl From<NewSubmission> for Submission {
     }
 }
 
-#[derive(Queryable, Insertable)]
+#[derive(Debug, Clone, Queryable, Insertable)]
 #[table_name = "submissions_testcases"]
 pub(in crate::infrastructure) struct NewTestCase {
-    token: String,
-    submission_id: String,
-    testcase_id: i32,
-    status: String,
-    time: f32,
-    memory: f32,
-    score: i32,
-    eval_message: Option<String>,
-    stdout: Option<String>,
-    stderr: Option<String>,
+    pub(in crate::infrastructure) token: String,
+    pub(in crate::infrastructure) submission_id: String,
+    pub(in crate::infrastructure) testcase_id: i32,
+    pub(in crate::infrastructure) status: String,
+    pub(in crate::infrastructure) time: f32,
+    pub(in crate::infrastructure) memory: f32,
+    pub(in crate::infrastructure) score: i32,
+    pub(in crate::infrastructure) eval_message: Option<String>,
+    pub(in crate::infrastructure) stdout: Option<String>,
+    pub(in crate::infrastructure) stderr: Option<String>,
 }
 
 impl From<TestCase> for NewTestCase {
