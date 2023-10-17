@@ -29,5 +29,11 @@ fn rocket() -> _ {
                 api::create_submission_endpoint::create_submission,
             ],
         )
-        .register("/", catchers![rocket_validation::validation_catcher,])
+        .register(
+            "/api",
+            catchers![
+                rocket_validation::validation_catcher,
+                api::catchers::unauthorized_catcher,
+            ],
+        )
 }

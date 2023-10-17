@@ -1,5 +1,5 @@
 use crate::config::di::CONFIG;
-use crate::domain::network_response::NetworkResponse;
+use crate::domain::application_error::ApplicationError;
 use jsonwebtoken::errors::{Error, ErrorKind};
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use rocket::http::Status;
@@ -20,9 +20,9 @@ pub struct Claims {
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for JwtContext {
-    type Error = NetworkResponse;
+    type Error = ApplicationError;
 
-    async fn from_request(req: &'r Request<'_>) -> Outcome<Self, NetworkResponse> {
+    async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         fn is_valid(key: &str) -> Result<Claims, Error> {
             Ok(decode_jwt(String::from(key))?)
         }
@@ -30,7 +30,7 @@ impl<'r> FromRequest<'r> for JwtContext {
         match req.headers().get_one("authorization") {
             None => {
                 let response = String::from("Error validating JWT token - No token provided");
-                Outcome::Failure((Status::BadRequest, NetworkResponse::BadRequest(response)))
+                Outcome::Failure((Status::Unauthorized, ApplicationError::AuthError(response)))
             }
             Some(key) => match is_valid(key) {
                 Ok(claims) => Outcome::Success(JwtContext { claims }),
@@ -38,23 +38,23 @@ impl<'r> FromRequest<'r> for JwtContext {
                     ErrorKind::ExpiredSignature => {
                         let response = String::from("Error validating JWT token - Expired Token");
                         Outcome::Failure((
-                            Status::BadRequest,
-                            NetworkResponse::BadRequest(response),
+                            Status::Unauthorized,
+                            ApplicationError::AuthError(response),
                         ))
                     }
                     ErrorKind::InvalidToken => {
                         let response = String::from("Error validating JWT token - Invalid Token");
                         Outcome::Failure((
-                            Status::BadRequest,
-                            NetworkResponse::BadRequest(response),
+                            Status::Unauthorized,
+                            ApplicationError::AuthError(response),
                         ))
                     }
                     _ => {
                         let response =
                             String::from(format!("Error validating JWT token - {}", err));
                         Outcome::Failure((
-                            Status::BadRequest,
-                            NetworkResponse::BadRequest(response),
+                            Status::Unauthorized,
+                            ApplicationError::AuthError(response),
                         ))
                     }
                 },

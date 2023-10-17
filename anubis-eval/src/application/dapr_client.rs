@@ -3,8 +3,8 @@ use crate::application::dapr_dtos::{
     TestCaseTokenDto,
 };
 use crate::config::di::CONFIG;
+use crate::domain::application_error::ApplicationError;
 use rocket::request::{FromRequest, Outcome};
-use serde_json::Value;
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -89,16 +89,22 @@ impl DaprClient {
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for DaprClient {
-    type Error = ();
+    type Error = ApplicationError;
 
     async fn from_request(req: &'r rocket::Request<'_>) -> Outcome<Self, Self::Error> {
-        let reqwest_client = req
-            .rocket()
-            .state::<reqwest::Client>()
-            .expect("Expected reqwest client to be managed by rocket");
+        let reqwest_client = req.rocket().state::<reqwest::Client>();
 
-        Outcome::Success(DaprClient {
-            reqwest_client: reqwest_client.clone(),
-        })
+        match reqwest_client {
+            None => {
+                let response = String::from("Error getting reqwest client");
+                Outcome::Failure((
+                    rocket::http::Status::InternalServerError,
+                    ApplicationError::Unknown(response),
+                ))
+            }
+            Some(reqwest_client) => Outcome::Success(DaprClient {
+                reqwest_client: reqwest_client.clone(),
+            }),
+        }
     }
 }
