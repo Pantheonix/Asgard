@@ -24,6 +24,7 @@ pub struct TestCase {
     pub time: f32,
     pub memory: f32,
     pub score: i32,
+    pub expected_score: i32,
     pub eval_message: Option<String>,
     pub stdout: Option<String>,
     pub stderr: Option<String>,

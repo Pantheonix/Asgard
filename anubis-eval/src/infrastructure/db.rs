@@ -1,8 +1,9 @@
+use diesel::PgConnection;
 use rocket::{Build, Rocket};
 use rocket_sync_db_pools::database;
 
 #[database("anubis-submissions")]
-pub struct Db(diesel::PgConnection);
+pub struct Db(PgConnection);
 
 pub async fn run_migrations(rocket: Rocket<Build>) -> Rocket<Build> {
     use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};

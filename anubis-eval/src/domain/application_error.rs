@@ -10,10 +10,20 @@ pub enum ApplicationError {
         #[source]
         source: diesel::result::Error,
     },
+    #[error("Error finding submissions")]
+    SubmissionFindError {
+        #[source]
+        source: diesel::result::Error,
+    },
     #[error("Error saving testcase {testcase_id:?} for submission {submission_id:?} to database")]
     TestCaseSaveError {
         testcase_id: String,
         submission_id: String,
+        #[source]
+        source: diesel::result::Error,
+    },
+    #[error("Error finding testcases")]
+    TestCaseFindError {
         #[source]
         source: diesel::result::Error,
     },
@@ -40,6 +50,11 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
                 )
                 .respond_to(request)
             }
+            ApplicationError::SubmissionFindError { .. } => rocket::response::status::Custom(
+                rocket::http::Status::InternalServerError,
+                format!("Error finding submissions"),
+            )
+            .respond_to(request),
             ApplicationError::TestCaseSaveError {
                 testcase_id,
                 submission_id,
@@ -50,6 +65,11 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
                     "Error saving testcase {} for submission {} to database",
                     testcase_id, submission_id
                 ),
+            )
+            .respond_to(request),
+            ApplicationError::TestCaseFindError { .. } => rocket::response::status::Custom(
+                rocket::http::Status::InternalServerError,
+                format!("Error finding testcases"),
             )
             .respond_to(request),
             ApplicationError::HttpError { .. } => rocket::response::status::Custom(

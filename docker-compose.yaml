@@ -1,6 +1,6 @@
 # Define services for Asgard
 # TODO: add health checks, restart policies and extract hardcoded ports/tags/etc. to .env files
-version: "3.7"
+version: "3.8"
 
 x-logging: &default-logging
   logging:
@@ -82,7 +82,7 @@ services:
       - enki-problems/.env
     depends_on:
       enki-mongo-db:
-        condition: service_healthy
+        condition: service_started
       asgard-redis:
         condition: service_started
       hermes-tests-api:
@@ -131,12 +131,12 @@ services:
     ports:
       - 30001:30001
     healthcheck:
-      # test:
-      #   [
-      #     "CMD-SHELL",
-      #     'mongo --port 30001 --quiet --eval "rs.initiate({_id:''enki-rs'',members:[{_id:0,host:"enki-mongo-db:30001"}]}).ok || rs.status().ok"',
-      #   ]
-      test: test $(echo "rs.initiate({_id:'enki-rs',members:[{_id:0,host:\"enki-mongo-db:30001\"}]}).ok || rs.status().ok" | mongo --port 30001 --quiet) -eq 1
+      test:
+        [
+          "CMD-SHELL",
+          'mongo --port 30001 --quiet --eval "rs.initiate({_id:''enki-rs'',members:[{_id:0,host:"enki-mongo-db:30001"}]}).ok || rs.status().ok"',
+        ]
+      # test: test $(echo "rs.initiate({_id:'enki-rs',members:[{_id:0,host:\"enki-mongo-db:30001\"}]}).ok || rs.status().ok" | mongo --port 30001 --quiet) -eq 1
       interval: 10s
       start_period: 30s
       timeout: 5s

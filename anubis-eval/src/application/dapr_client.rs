@@ -7,9 +7,9 @@ use crate::domain::application_error::ApplicationError;
 use rocket::request::{FromRequest, Outcome};
 use uuid::Uuid;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DaprClient {
-    reqwest_client: reqwest::Client,
+    pub reqwest_client: reqwest::Client,
 }
 
 impl DaprClient {
@@ -64,7 +64,7 @@ impl DaprClient {
 
     pub async fn get_submission_batch(
         &self,
-        submission_tokens: &Vec<TestCaseTokenDto>,
+        submission_tokens: &[TestCaseTokenDto],
     ) -> Result<EvaluatedSubmissionBatchDto, reqwest::Error> {
         let url = CONFIG.dapr_get_submission_batch_endpoint.to_owned();
         let tokens = submission_tokens

@@ -42,7 +42,7 @@ pub async fn create_submission(
         .await?;
 
     // FIREBASE - Get Problem Test Contents
-    let mut test_cases = join_all(eval_metadata.tests.iter().map(|test| async {
+    let test_cases = join_all(eval_metadata.tests.iter().map(|test| async {
         let (input, output) =
             DaprClient::get_input_and_output_for_test((test.input.clone(), test.output.clone()))
                 .await?;
@@ -89,6 +89,7 @@ pub async fn create_submission(
             time: 0_f32,
             memory: 0_f32,
             score: 0,
+            expected_score: test_dto.score as i32,
             eval_message: None,
             stdout: None,
             stderr: None,

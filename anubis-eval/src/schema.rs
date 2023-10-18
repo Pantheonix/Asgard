@@ -24,9 +24,13 @@ table! {
         token -> Text,
         submission_id -> Text,
         testcase_id -> Int4,
+        expected_score -> Int4,
     }
 }
 
 joinable!(submissions_testcases -> submissions (submission_id));
 
-allow_tables_to_appear_in_same_query!(submissions, submissions_testcases,);
+allow_tables_to_appear_in_same_query!(
+    submissions,
+    submissions_testcases,
+);
