@@ -15,7 +15,6 @@ COPY . .
 RUN touch src/main.rs
 RUN cargo install --path . --locked
 
-
 FROM debian:buster-slim
 
 RUN apt-get update && apt-get install -y libpq-dev libsqlite3-dev libmariadbclient-dev-compat pkg-config libssl1.1 libssl-dev && apt-get clean && rm -rf /var/lib/apt/lists/*
