@@ -233,6 +233,7 @@ services:
       - anubis
 
   anubis-psql-db:
+    container_name: anubis-psql-db
     image: postgres:14.1
     volumes:
       - anubis-db:/var/lib/postgresql/data/
