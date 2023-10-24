@@ -52,7 +52,7 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
             }
             ApplicationError::SubmissionFindError { .. } => rocket::response::status::Custom(
                 rocket::http::Status::InternalServerError,
-                format!("Error finding submissions"),
+                "Error finding submissions".to_string(),
             )
             .respond_to(request),
             ApplicationError::TestCaseSaveError {
@@ -69,12 +69,12 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
             .respond_to(request),
             ApplicationError::TestCaseFindError { .. } => rocket::response::status::Custom(
                 rocket::http::Status::InternalServerError,
-                format!("Error finding testcases"),
+                "Error finding testcases".to_string(),
             )
             .respond_to(request),
             ApplicationError::HttpError { .. } => rocket::response::status::Custom(
                 rocket::http::Status::InternalServerError,
-                format!("Error invoking external services"),
+                "Error invoking external services".to_string(),
             )
             .respond_to(request),
             ApplicationError::AuthError(message) => rocket::response::status::Custom(

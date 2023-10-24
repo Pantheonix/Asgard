@@ -2,7 +2,7 @@ use crate::application::auth::JwtContext;
 use crate::application::dapr_client::DaprClient;
 use crate::application::dapr_dtos::{CreateSubmissionBatchDto, CreateSubmissionTestCaseDto};
 use crate::domain::application_error::ApplicationError;
-use crate::domain::submission::{Submission, SubmissionStatus, TestCase, TestCaseStatus};
+use crate::domain::submission::{Language, Submission, TestCase, TestCaseStatus};
 use crate::infrastructure::db::Db;
 use rocket::futures::future::join_all;
 use rocket::serde::json::Json;
@@ -35,6 +35,7 @@ pub async fn create_submission(
 ) -> Result<CreateSubmissionResponse, ApplicationError> {
     let submission = submission.into_inner();
     let user_id = Uuid::from_str(user_ctx.claims.sub.as_str()).unwrap();
+    let language: Language = submission.language.clone().into();
 
     // ENKI - Get Eval Metadata for Problem
     let eval_metadata = dapr_client
@@ -50,7 +51,7 @@ pub async fn create_submission(
         Ok(CreateSubmissionTestCaseDto {
             testcase_id: test.test_id,
             source_code: submission.source_code.to_string(),
-            language: submission.language.parse().unwrap(),
+            language: language.clone().into(),
             stdin: input,
             time: eval_metadata.time,
             memory_limit: eval_metadata.total_memory * 1000_f32,
@@ -76,41 +77,40 @@ pub async fn create_submission(
         .create_submission_batch(&submission_batch)
         .await?;
 
-    // POSTGRES - Create Submission and mark it as pending
+    // POSTGRES - Create Submission and mark it as pending alongside its test cases
     let submission_id = Uuid::new_v4();
     let test_cases = submission_tokens
         .iter()
         .zip(eval_metadata.tests.iter())
-        .map(|(token_dto, test_dto)| TestCase {
-            token: Uuid::from_str(token_dto.token.as_str()).unwrap(),
-            submission_id,
-            testcase_id: test_dto.test_id as i32,
-            status: TestCaseStatus::Pending,
-            time: 0_f32,
-            memory: 0_f32,
-            score: 0,
-            expected_score: test_dto.score as i32,
-            eval_message: None,
-            stdout: None,
-            stderr: None,
+        .map(|(token_dto, test_dto)| {
+            TestCase::new(
+                Uuid::from_str(&token_dto.token).unwrap(),
+                submission_id,
+                test_dto.test_id as i32,
+                TestCaseStatus::Pending,
+                0_f32,
+                0_f32,
+                test_dto.score as i32,
+                None,
+                None,
+                None,
+                None,
+            )
         })
         .collect::<Vec<TestCase>>();
 
-    let submission = Submission {
-        id: submission_id,
+    let submission = Submission::new_with_test_cases(
+        submission_id,
         user_id,
-        problem_id: submission.problem_id,
-        language: submission.language.parse().unwrap(),
-        source_code: submission.source_code.clone(),
-        status: SubmissionStatus::Evaluating,
-        score: 0,
-        created_at: std::time::SystemTime::now(),
+        submission.problem_id,
+        language,
+        submission.source_code.clone(),
         test_cases,
-    };
+    );
 
     db.run(move |conn| match submission.insert(conn) {
         Ok(_) => Ok(CreateSubmissionResponse {
-            id: submission.id.to_string(),
+            id: submission.id().to_string(),
         }),
         Err(e) => Err(e),
     })

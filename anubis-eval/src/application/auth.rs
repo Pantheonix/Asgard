@@ -50,8 +50,7 @@ impl<'r> FromRequest<'r> for JwtContext {
                         ))
                     }
                     _ => {
-                        let response =
-                            String::from(format!("Error validating JWT token - {}", err));
+                        let response = format!("Error validating JWT token - {}", err);
                         Outcome::Failure((
                             Status::Unauthorized,
                             ApplicationError::AuthError(response),

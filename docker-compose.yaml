@@ -21,6 +21,7 @@ services:
       - "5210:5210"
     env_file:
       - quetzalcoatl-auth/.env
+    restart: always
     depends_on:
       quetzalcoatl-mssql-db:
         condition: service_started
@@ -80,6 +81,7 @@ services:
       - "5211:5211"
     env_file:
       - enki-problems/.env
+    restart: always
     depends_on:
       enki-mongo-db:
         condition: service_started
@@ -156,6 +158,7 @@ services:
       - "5212:5212"
     env_file:
       - hermes-tests/.env
+    restart: always
     profiles:
       - hermes
 
@@ -198,6 +201,7 @@ services:
       - "5213:5213"
     env_file:
       - anubis-eval/.env
+    restart: always
     # profiles:
     #   - anubis
 

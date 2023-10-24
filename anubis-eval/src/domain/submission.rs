@@ -4,30 +4,291 @@ use uuid::Uuid;
 
 #[derive(Debug, Clone)]
 pub struct Submission {
-    pub id: Uuid,
-    pub user_id: Uuid,
-    pub problem_id: Uuid,
-    pub language: Language,
-    pub source_code: String,
-    pub status: SubmissionStatus,
-    pub score: i32,
-    pub created_at: SystemTime,
-    pub test_cases: Vec<TestCase>,
+    id: Uuid,
+    user_id: Uuid,
+    problem_id: Uuid,
+    language: Language,
+    source_code: String,
+    status: SubmissionStatus,
+    score: i32,
+    created_at: SystemTime,
+    avg_time: Option<f32>,
+    avg_memory: Option<f32>,
+    test_cases: Vec<TestCase>,
+}
+
+impl Submission {
+    pub fn new(
+        id: Uuid,
+        user_id: Uuid,
+        problem_id: Uuid,
+        language: Language,
+        source_code: String,
+        status: SubmissionStatus,
+        score: i32,
+        created_at: SystemTime,
+        avg_time: Option<f32>,
+        avg_memory: Option<f32>,
+    ) -> Self {
+        Self {
+            id,
+            user_id,
+            problem_id,
+            language,
+            source_code,
+            status,
+            score,
+            created_at,
+            avg_time,
+            avg_memory,
+            test_cases: vec![],
+        }
+    }
+
+    pub fn new_empty(
+        id: Uuid,
+        user_id: Uuid,
+        problem_id: Uuid,
+        language: Language,
+        source_code: String,
+    ) -> Self {
+        Self {
+            id,
+            user_id,
+            problem_id,
+            language,
+            source_code,
+            status: SubmissionStatus::Evaluating,
+            score: 0,
+            created_at: SystemTime::now(),
+            avg_time: None,
+            avg_memory: None,
+            test_cases: vec![],
+        }
+    }
+
+    pub fn new_with_test_cases(
+        id: Uuid,
+        user_id: Uuid,
+        problem_id: Uuid,
+        language: Language,
+        source_code: String,
+        test_cases: Vec<TestCase>,
+    ) -> Self {
+        Self {
+            id,
+            user_id,
+            problem_id,
+            language,
+            source_code,
+            status: SubmissionStatus::Evaluating,
+            score: 0,
+            created_at: SystemTime::now(),
+            avg_time: None,
+            avg_memory: None,
+            test_cases,
+        }
+    }
+
+    pub fn new_with_metadata(
+        id: Uuid,
+        status: SubmissionStatus,
+        score: i32,
+        avg_time: Option<f32>,
+        avg_memory: Option<f32>,
+    ) -> Self {
+        Self {
+            id,
+            user_id: Uuid::nil(),
+            problem_id: Uuid::nil(),
+            language: Language::Unknown,
+            source_code: "".to_string(),
+            status,
+            score,
+            created_at: SystemTime::now(),
+            avg_time,
+            avg_memory,
+            test_cases: vec![],
+        }
+    }
+
+    pub fn id(&self) -> Uuid {
+        self.id
+    }
+
+    pub fn user_id(&self) -> Uuid {
+        self.user_id
+    }
+
+    pub fn problem_id(&self) -> Uuid {
+        self.problem_id
+    }
+
+    pub fn language(&self) -> Language {
+        self.language.clone()
+    }
+
+    pub fn source_code(&self) -> &String {
+        &self.source_code
+    }
+
+    pub fn status(&self) -> SubmissionStatus {
+        self.status.clone()
+    }
+
+    pub fn set_status(&mut self, status: SubmissionStatus) {
+        self.status = status;
+    }
+
+    pub fn score(&self) -> i32 {
+        self.score
+    }
+
+    pub fn set_score(&mut self, score: i32) {
+        self.score = score;
+    }
+
+    pub fn created_at(&self) -> SystemTime {
+        self.created_at
+    }
+
+    pub fn avg_time(&self) -> Option<f32> {
+        self.avg_time
+    }
+
+    pub fn set_avg_time(&mut self, avg_time: Option<f32>) {
+        self.avg_time = avg_time;
+    }
+
+    pub fn avg_memory(&self) -> Option<f32> {
+        self.avg_memory
+    }
+
+    pub fn set_avg_memory(&mut self, avg_memory: Option<f32>) {
+        self.avg_memory = avg_memory;
+    }
+
+    pub fn test_cases(&self) -> Vec<TestCase> {
+        self.test_cases.clone()
+    }
+
+    pub fn set_test_cases(&mut self, test_cases: Vec<TestCase>) {
+        self.test_cases = test_cases;
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct TestCase {
-    pub token: Uuid,
-    pub submission_id: Uuid,
-    pub testcase_id: i32,
-    pub status: TestCaseStatus,
-    pub time: f32,
-    pub memory: f32,
-    pub score: i32,
-    pub expected_score: i32,
-    pub eval_message: Option<String>,
-    pub stdout: Option<String>,
-    pub stderr: Option<String>,
+    token: Uuid,
+    submission_id: Uuid,
+    testcase_id: i32,
+    status: TestCaseStatus,
+    time: f32,
+    memory: f32,
+    expected_score: i32,
+    eval_message: Option<String>,
+    compile_output: Option<String>,
+    stdout: Option<String>,
+    stderr: Option<String>,
+}
+
+impl TestCase {
+    pub fn new(
+        token: Uuid,
+        submission_id: Uuid,
+        testcase_id: i32,
+        status: TestCaseStatus,
+        time: f32,
+        memory: f32,
+        expected_score: i32,
+        eval_message: Option<String>,
+        compile_output: Option<String>,
+        stdout: Option<String>,
+        stderr: Option<String>,
+    ) -> Self {
+        Self {
+            token,
+            submission_id,
+            testcase_id,
+            status,
+            time,
+            memory,
+            expected_score,
+            eval_message,
+            compile_output,
+            stdout,
+            stderr,
+        }
+    }
+
+    pub fn new_for_update(
+        token: Uuid,
+        eval_message: Option<String>,
+        compile_output: Option<String>,
+        status: TestCaseStatus,
+        time: f32,
+        memory: f32,
+        stdout: Option<String>,
+        stderr: Option<String>,
+    ) -> Self {
+        Self {
+            token,
+            submission_id: Uuid::nil(),
+            testcase_id: 0,
+            status,
+            time,
+            memory,
+            expected_score: 0,
+            eval_message,
+            compile_output,
+            stdout,
+            stderr,
+        }
+    }
+
+    pub fn token(&self) -> Uuid {
+        self.token
+    }
+
+    pub fn submission_id(&self) -> Uuid {
+        self.submission_id
+    }
+
+    pub fn testcase_id(&self) -> i32 {
+        self.testcase_id
+    }
+
+    pub fn status(&self) -> TestCaseStatus {
+        self.status.clone()
+    }
+
+    pub fn time(&self) -> f32 {
+        self.time
+    }
+
+    pub fn memory(&self) -> f32 {
+        self.memory
+    }
+
+    pub fn expected_score(&self) -> i32 {
+        self.expected_score
+    }
+
+    pub fn eval_message(&self) -> Option<String> {
+        self.eval_message.clone()
+    }
+    
+    pub fn compile_output(&self) -> Option<String> {
+        self.compile_output.clone()
+    }
+
+    pub fn stdout(&self) -> Option<String> {
+        self.stdout.clone()
+    }
+
+    pub fn stderr(&self) -> Option<String> {
+        self.stderr.clone()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -39,16 +300,26 @@ pub enum SubmissionStatus {
     Unknown,
 }
 
-impl std::str::FromStr for SubmissionStatus {
-    type Err = ();
+impl From<String> for SubmissionStatus {
+    fn from(value: String) -> Self {
+        match value.as_str() {
+            "Evaluating" => SubmissionStatus::Evaluating,
+            "Accepted" => SubmissionStatus::Accepted,
+            "Rejected" => SubmissionStatus::Rejected,
+            "Internal Error" => SubmissionStatus::InternalError,
+            _ => SubmissionStatus::Unknown,
+        }
+    }
+}
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "Evaluating" => Ok(SubmissionStatus::Evaluating),
-            "Accepted" => Ok(SubmissionStatus::Accepted),
-            "Rejected" => Ok(SubmissionStatus::Rejected),
-            "Internal Error" => Ok(SubmissionStatus::InternalError),
-            _ => Err(()),
+impl From<SubmissionStatus> for String {
+    fn from(value: SubmissionStatus) -> Self {
+        match value {
+            SubmissionStatus::Evaluating => "Evaluating".to_string(),
+            SubmissionStatus::Accepted => "Accepted".to_string(),
+            SubmissionStatus::Rejected => "Rejected".to_string(),
+            SubmissionStatus::InternalError => "Internal Error".to_string(),
+            SubmissionStatus::Unknown => "Unknown".to_string(),
         }
     }
 }
@@ -77,24 +348,77 @@ pub enum Language {
     CSharp,
     Haskell,
     Javascript,
+    Unknown,
 }
 
-impl std::str::FromStr for Language {
-    type Err = ();
+impl From<usize> for Language {
+    fn from(value: usize) -> Self {
+        match value {
+            49 => Language::C,
+            54 => Language::Cpp,
+            62 => Language::Java,
+            78 => Language::Kotlin,
+            71 => Language::Python,
+            73 => Language::Rust,
+            60 => Language::Go,
+            51 => Language::CSharp,
+            61 => Language::Haskell,
+            63 => Language::Javascript,
+            _ => Language::Unknown,
+        }
+    }
+}
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "49" => Ok(Language::C),
-            "54" => Ok(Language::Cpp),
-            "62" => Ok(Language::Java),
-            "78" => Ok(Language::Kotlin),
-            "71" => Ok(Language::Python),
-            "73" => Ok(Language::Rust),
-            "60" => Ok(Language::Go),
-            "51" => Ok(Language::CSharp),
-            "61" => Ok(Language::Haskell),
-            "63" => Ok(Language::Javascript),
-            _ => Err(()),
+impl From<Language> for usize {
+    fn from(value: Language) -> Self {
+        match value {
+            Language::C => 49,
+            Language::Cpp => 54,
+            Language::Java => 62,
+            Language::Kotlin => 78,
+            Language::Python => 71,
+            Language::Rust => 73,
+            Language::Go => 60,
+            Language::CSharp => 51,
+            Language::Haskell => 61,
+            Language::Javascript => 63,
+            Language::Unknown => 0,
+        }
+    }
+}
+
+impl From<String> for Language {
+    fn from(value: String) -> Self {
+        match value.as_str() {
+            "C" => Language::C,
+            "C++" => Language::Cpp,
+            "Java" => Language::Java,
+            "Kotlin" => Language::Kotlin,
+            "Python" => Language::Python,
+            "Rust" => Language::Rust,
+            "Go" => Language::Go,
+            "C#" => Language::CSharp,
+            "Haskell" => Language::Haskell,
+            "Javascript" => Language::Javascript,
+            _ => Language::Unknown,
+        }
+    }
+}
+
+impl From<Language> for String {
+    fn from(value: Language) -> Self {
+        match value {
+            Language::C => "C".to_string(),
+            Language::Cpp => "C++".to_string(),
+            Language::Java => "Java".to_string(),
+            Language::Kotlin => "Kotlin".to_string(),
+            Language::Python => "Python".to_string(),
+            Language::Rust => "Rust".to_string(),
+            Language::Go => "Go".to_string(),
+            Language::CSharp => "C#".to_string(),
+            Language::Haskell => "Haskell".to_string(),
+            Language::Javascript => "Javascript".to_string(),
+            Language::Unknown => "Unknown".to_string(),
         }
     }
 }
@@ -112,6 +436,7 @@ impl fmt::Display for Language {
             Language::CSharp => write!(f, "C#"),
             Language::Haskell => write!(f, "Haskell"),
             Language::Javascript => write!(f, "Javascript"),
+            Language::Unknown => write!(f, "Unknown"),
         }
     }
 }
@@ -135,26 +460,68 @@ pub enum TestCaseStatus {
     Unknown,
 }
 
-impl std::str::FromStr for TestCaseStatus {
-    type Err = ();
+impl From<usize> for TestCaseStatus {
+    fn from(value: usize) -> Self {
+        match value {
+            1 => TestCaseStatus::Pending,
+            2 => TestCaseStatus::Running,
+            3 => TestCaseStatus::Accepted,
+            4 => TestCaseStatus::WrongAnswer,
+            5 => TestCaseStatus::TimeLimitExceeded,
+            6 => TestCaseStatus::CompilationError,
+            7 => TestCaseStatus::SIGSEGV,
+            8 => TestCaseStatus::SIGXFSZ,
+            9 => TestCaseStatus::SIGFPE,
+            10 => TestCaseStatus::SIGABRT,
+            11 => TestCaseStatus::NZEC,
+            12 => TestCaseStatus::RuntimeError,
+            13 => TestCaseStatus::InternalError,
+            14 => TestCaseStatus::ExecFormatError,
+            _ => TestCaseStatus::Unknown,
+        }
+    }
+}
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "Pending" => Ok(TestCaseStatus::Pending),
-            "Running" => Ok(TestCaseStatus::Running),
-            "Accepted" => Ok(TestCaseStatus::Accepted),
-            "Wrong Answer" => Ok(TestCaseStatus::WrongAnswer),
-            "SIGSEGV" => Ok(TestCaseStatus::SIGSEGV),
-            "SIGXFSZ" => Ok(TestCaseStatus::SIGXFSZ),
-            "SIGFPE" => Ok(TestCaseStatus::SIGFPE),
-            "SIGABRT" => Ok(TestCaseStatus::SIGABRT),
-            "NZEC" => Ok(TestCaseStatus::NZEC),
-            "Internal Error" => Ok(TestCaseStatus::InternalError),
-            "Exec Format Error" => Ok(TestCaseStatus::ExecFormatError),
-            "Runtime Error" => Ok(TestCaseStatus::RuntimeError),
-            "Compilation Error" => Ok(TestCaseStatus::CompilationError),
-            "Time Limit Exceeded" => Ok(TestCaseStatus::TimeLimitExceeded),
-            _ => Err(()),
+impl From<String> for TestCaseStatus {
+    fn from(value: String) -> Self {
+        match value.as_str() {
+            "Pending" => TestCaseStatus::Pending,
+            "Running" => TestCaseStatus::Running,
+            "Accepted" => TestCaseStatus::Accepted,
+            "Wrong Answer" => TestCaseStatus::WrongAnswer,
+            "SIGSEGV" => TestCaseStatus::SIGSEGV,
+            "SIGXFSZ" => TestCaseStatus::SIGXFSZ,
+            "SIGFPE" => TestCaseStatus::SIGFPE,
+            "SIGABRT" => TestCaseStatus::SIGABRT,
+            "NZEC" => TestCaseStatus::NZEC,
+            "Internal Error" => TestCaseStatus::InternalError,
+            "Exec Format Error" => TestCaseStatus::ExecFormatError,
+            "Runtime Error" => TestCaseStatus::RuntimeError,
+            "Compilation Error" => TestCaseStatus::CompilationError,
+            "Time Limit Exceeded" => TestCaseStatus::TimeLimitExceeded,
+            _ => TestCaseStatus::Unknown,
+        }
+    }
+}
+
+impl From<TestCaseStatus> for String {
+    fn from(value: TestCaseStatus) -> Self {
+        match value {
+            TestCaseStatus::Pending => "Pending".to_string(),
+            TestCaseStatus::Running => "Running".to_string(),
+            TestCaseStatus::Accepted => "Accepted".to_string(),
+            TestCaseStatus::WrongAnswer => "Wrong Answer".to_string(),
+            TestCaseStatus::SIGSEGV => "SIGSEGV".to_string(),
+            TestCaseStatus::SIGXFSZ => "SIGXFSZ".to_string(),
+            TestCaseStatus::SIGFPE => "SIGFPE".to_string(),
+            TestCaseStatus::SIGABRT => "SIGABRT".to_string(),
+            TestCaseStatus::NZEC => "NZEC".to_string(),
+            TestCaseStatus::InternalError => "Internal Error".to_string(),
+            TestCaseStatus::ExecFormatError => "Exec Format Error".to_string(),
+            TestCaseStatus::RuntimeError => "Runtime Error".to_string(),
+            TestCaseStatus::CompilationError => "Compilation Error".to_string(),
+            TestCaseStatus::TimeLimitExceeded => "Time Limit Exceeded".to_string(),
+            TestCaseStatus::Unknown => "Unknown".to_string(),
         }
     }
 }

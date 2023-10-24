@@ -9,6 +9,8 @@ table! {
         id -> Text,
         user_id -> Text,
         problem_id -> Text,
+        avg_time -> Nullable<Float4>,
+        avg_memory -> Nullable<Float4>,
     }
 }
 
@@ -17,8 +19,8 @@ table! {
         status -> Varchar,
         time -> Float4,
         memory -> Float4,
-        score -> Int4,
         eval_message -> Nullable<Text>,
+        compile_output -> Nullable<Text>,
         stdout -> Nullable<Text>,
         stderr -> Nullable<Text>,
         token -> Text,

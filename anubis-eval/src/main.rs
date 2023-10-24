@@ -4,7 +4,6 @@ use crate::infrastructure::db::{run_migrations, Db};
 use rocket::fairing::AdHoc;
 use rocket::log::private::info;
 use rocket::{catchers, error, launch, routes};
-use std::ops::DerefMut;
 use tokio_cron_scheduler::{Job, JobScheduler};
 
 mod api;
