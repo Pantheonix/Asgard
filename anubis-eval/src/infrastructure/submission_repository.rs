@@ -3,8 +3,9 @@ use crate::domain::submission::{Submission, SubmissionStatus, TestCase, TestCase
 use crate::infrastructure::submission_model::{SubmissionModel, TestCaseModel};
 use crate::schema::submissions::dsl::submissions as all_submissions;
 use crate::schema::submissions_testcases::dsl::submissions_testcases as all_testcases;
-use diesel::ExpressionMethods;
+use diesel::{ExpressionMethods, SelectableHelper};
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
+use uuid::Uuid;
 
 impl Submission {
     pub fn insert(&self, conn: &mut PgConnection) -> Result<(), ApplicationError> {
@@ -26,6 +27,37 @@ impl Submission {
             .collect::<Result<Vec<_>, _>>()?;
 
         Ok(())
+    }
+    
+    pub fn find_by_id(
+        id: &String,
+        conn: &mut PgConnection,
+    ) -> Result<Submission, ApplicationError> {
+        all_submissions
+            .find(id.to_string())
+            .inner_join(all_testcases)
+            .select((
+                SubmissionModel::as_select(),
+                TestCaseModel::as_select(),
+            ))
+            .load::<(SubmissionModel, TestCaseModel)>(conn)
+            .map_err(|source| ApplicationError::SubmissionFindError { source })
+            .map(|submission_testcases| {
+                let submission = submission_testcases[0].0.clone();
+                let testcases = submission_testcases
+                    .into_iter()
+                    .map(|(_, testcase)| testcase.into())
+                    .collect::<Vec<_>>();
+
+                Submission::new_with_test_cases(
+                    Uuid::parse_str(&submission.id).unwrap(),
+                    Uuid::parse_str(&submission.user_id).unwrap(),
+                    Uuid::parse_str(&submission.problem_id).unwrap(),
+                    submission.language.into(),
+                    submission.source_code,
+                    testcases,
+                )
+            })
     }
 
     pub fn find_by_status(
