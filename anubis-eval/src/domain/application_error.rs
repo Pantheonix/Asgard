@@ -45,13 +45,13 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
         match self {
             ApplicationError::SubmissionSaveError { submission_id, .. } => {
                 rocket::response::status::Custom(
-                    rocket::http::Status::InternalServerError,
+                    rocket::http::Status::BadRequest,
                     format!("Error saving submission {} to database", submission_id),
                 )
                 .respond_to(request)
             }
             ApplicationError::SubmissionFindError { .. } => rocket::response::status::Custom(
-                rocket::http::Status::InternalServerError,
+                rocket::http::Status::NotFound,
                 "Error finding submissions".to_string(),
             )
             .respond_to(request),
@@ -60,7 +60,7 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
                 submission_id,
                 ..
             } => rocket::response::status::Custom(
-                rocket::http::Status::InternalServerError,
+                rocket::http::Status::BadRequest,
                 format!(
                     "Error saving testcase {} for submission {} to database",
                     testcase_id, submission_id
@@ -68,7 +68,7 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
             )
             .respond_to(request),
             ApplicationError::TestCaseFindError { .. } => rocket::response::status::Custom(
-                rocket::http::Status::InternalServerError,
+                rocket::http::Status::NotFound,
                 "Error finding testcases".to_string(),
             )
             .respond_to(request),

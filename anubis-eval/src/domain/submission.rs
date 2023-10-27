@@ -29,6 +29,34 @@ impl Submission {
         created_at: SystemTime,
         avg_time: Option<f32>,
         avg_memory: Option<f32>,
+        test_cases: Vec<TestCase>,
+    ) -> Self {
+        Self {
+            id,
+            user_id,
+            problem_id,
+            language,
+            source_code,
+            status,
+            score,
+            created_at,
+            avg_time,
+            avg_memory,
+            test_cases,
+        }
+    }
+
+    pub fn new_without_test_cases(
+        id: Uuid,
+        user_id: Uuid,
+        problem_id: Uuid,
+        language: Language,
+        source_code: String,
+        status: SubmissionStatus,
+        score: i32,
+        created_at: SystemTime,
+        avg_time: Option<f32>,
+        avg_memory: Option<f32>,
     ) -> Self {
         Self {
             id,
@@ -45,29 +73,7 @@ impl Submission {
         }
     }
 
-    pub fn new_empty(
-        id: Uuid,
-        user_id: Uuid,
-        problem_id: Uuid,
-        language: Language,
-        source_code: String,
-    ) -> Self {
-        Self {
-            id,
-            user_id,
-            problem_id,
-            language,
-            source_code,
-            status: SubmissionStatus::Evaluating,
-            score: 0,
-            created_at: SystemTime::now(),
-            avg_time: None,
-            avg_memory: None,
-            test_cases: vec![],
-        }
-    }
-
-    pub fn new_with_test_cases(
+    pub fn new_in_pending(
         id: Uuid,
         user_id: Uuid,
         problem_id: Uuid,
@@ -277,7 +283,7 @@ impl TestCase {
     pub fn eval_message(&self) -> Option<String> {
         self.eval_message.clone()
     }
-    
+
     pub fn compile_output(&self) -> Option<String> {
         self.compile_output.clone()
     }

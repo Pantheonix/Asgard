@@ -28,7 +28,7 @@ impl Submission {
 
         Ok(())
     }
-    
+
     pub fn find_by_id(
         id: &String,
         conn: &mut PgConnection,
@@ -36,10 +36,7 @@ impl Submission {
         all_submissions
             .find(id.to_string())
             .inner_join(all_testcases)
-            .select((
-                SubmissionModel::as_select(),
-                TestCaseModel::as_select(),
-            ))
+            .select((SubmissionModel::as_select(), TestCaseModel::as_select()))
             .load::<(SubmissionModel, TestCaseModel)>(conn)
             .map_err(|source| ApplicationError::SubmissionFindError { source })
             .map(|submission_testcases| {
@@ -49,12 +46,17 @@ impl Submission {
                     .map(|(_, testcase)| testcase.into())
                     .collect::<Vec<_>>();
 
-                Submission::new_with_test_cases(
+                Submission::new(
                     Uuid::parse_str(&submission.id).unwrap(),
                     Uuid::parse_str(&submission.user_id).unwrap(),
                     Uuid::parse_str(&submission.problem_id).unwrap(),
                     submission.language.into(),
                     submission.source_code,
+                    submission.status.into(),
+                    submission.score,
+                    submission.created_at,
+                    submission.avg_time,
+                    submission.avg_memory,
                     testcases,
                 )
             })
@@ -144,7 +146,7 @@ impl TestCase {
 
     fn update(&self, conn: &mut PgConnection) -> Result<(), ApplicationError> {
         use crate::schema::submissions_testcases::{
-            eval_message, compile_output, memory, status, stderr, stdout, time,
+            compile_output, eval_message, memory, status, stderr, stdout, time,
         };
 
         let testcase: TestCaseModel = self.clone().into();

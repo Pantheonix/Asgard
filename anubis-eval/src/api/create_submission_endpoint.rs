@@ -8,6 +8,7 @@ use rocket::futures::future::join_all;
 use rocket::serde::json::Json;
 use rocket::{post, Responder};
 use rocket_validation::{Validate, Validated};
+use serde::Serialize;
 use std::str::FromStr;
 use uuid::Uuid;
 
@@ -23,7 +24,7 @@ pub struct CreateSubmissionRequest {
 #[derive(Responder)]
 #[response(status = 201, content_type = "json")]
 pub struct CreateSubmissionResponse {
-    id: String,
+    dto: CreateSubmissionResponseDto,
 }
 
 #[post("/submission", format = "json", data = "<submission>")]
@@ -99,7 +100,7 @@ pub async fn create_submission(
         })
         .collect::<Vec<TestCase>>();
 
-    let submission = Submission::new_with_test_cases(
+    let submission = Submission::new_in_pending(
         submission_id,
         user_id,
         submission.problem_id,
@@ -110,9 +111,30 @@ pub async fn create_submission(
 
     db.run(move |conn| match submission.insert(conn) {
         Ok(_) => Ok(CreateSubmissionResponse {
-            id: submission.id().to_string(),
+            dto: CreateSubmissionResponseDto {
+                id: submission.id().to_string(),
+            },
         }),
         Err(e) => Err(e),
     })
     .await
+}
+
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+pub struct CreateSubmissionResponseDto {
+    id: String,
+}
+
+#[rocket::async_trait]
+impl<'r> rocket::response::Responder<'r, 'static> for CreateSubmissionResponseDto {
+    fn respond_to(self, _: &'r rocket::Request<'_>) -> rocket::response::Result<'static> {
+        let json =
+            serde_json::to_string(&self).unwrap_or("Failed to serialize response".to_string());
+
+        rocket::Response::build()
+            .header(rocket::http::ContentType::JSON)
+            .sized_body(json.len(), std::io::Cursor::new(json))
+            .ok()
+    }
 }

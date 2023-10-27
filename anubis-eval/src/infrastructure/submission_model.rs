@@ -39,7 +39,7 @@ impl From<Submission> for SubmissionModel {
 
 impl From<SubmissionModel> for Submission {
     fn from(submission: SubmissionModel) -> Self {
-        Submission::new(
+        Submission::new_without_test_cases(
             Uuid::parse_str(&submission.id).unwrap(),
             Uuid::parse_str(&submission.user_id).unwrap(),
             Uuid::parse_str(&submission.problem_id).unwrap(),
@@ -54,7 +54,17 @@ impl From<SubmissionModel> for Submission {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Queryable, Insertable, Identifiable, AsChangeset, Selectable, Associations)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Queryable,
+    Insertable,
+    Identifiable,
+    AsChangeset,
+    Selectable,
+    Associations,
+)]
 #[diesel(belongs_to(SubmissionModel, foreign_key = submission_id))]
 #[diesel(table_name = submissions_testcases)]
 #[diesel(primary_key(token))]

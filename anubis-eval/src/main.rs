@@ -53,6 +53,7 @@ async fn rocket() -> _ {
             routes![
                 api::health_check_endpoint::health_check,
                 api::create_submission_endpoint::create_submission,
+                api::get_submission_endpoint::get_submission,
             ],
         )
         .register(

@@ -92,7 +92,7 @@ impl From<EvaluatedSubmissionTestCaseDto> for TestCase {
             Some(time) => time.parse::<f32>().unwrap(),
             None => 0.0,
         };
-        
+
         TestCase::new_for_update(
             Uuid::from_str(&value.token).unwrap(),
             value.message,

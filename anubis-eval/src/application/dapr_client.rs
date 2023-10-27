@@ -82,7 +82,7 @@ impl DaprClient {
             .await?
             .json::<EvaluatedSubmissionBatchDto>()
             .await?;
-        
+
         Ok(response)
     }
 }
