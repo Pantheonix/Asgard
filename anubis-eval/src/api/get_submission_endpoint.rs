@@ -2,9 +2,9 @@ use crate::application::auth::JwtContext;
 use crate::domain::application_error::ApplicationError;
 use crate::domain::submission::Submission;
 use crate::infrastructure::db::Db;
+use chrono::{DateTime, Utc};
 use rocket::{get, Responder};
 use serde::Serialize;
-use chrono::{DateTime, Utc};
 
 #[derive(Responder)]
 #[response(status = 200, content_type = "json")]

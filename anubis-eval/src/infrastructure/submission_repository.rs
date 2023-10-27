@@ -39,27 +39,34 @@ impl Submission {
             .select((SubmissionModel::as_select(), TestCaseModel::as_select()))
             .load::<(SubmissionModel, TestCaseModel)>(conn)
             .map_err(|source| ApplicationError::SubmissionFindError { source })
-            .map(|submission_testcases| {
-                let submission = submission_testcases[0].0.clone();
-                let testcases = submission_testcases
-                    .into_iter()
-                    .map(|(_, testcase)| testcase.into())
-                    .collect::<Vec<_>>();
+            .map(
+                |submission_and_testcases| match submission_and_testcases.is_empty() {
+                    true => Err(ApplicationError::SubmissionNotFoundError {
+                        submission_id: id.to_string(),
+                    }),
+                    false => {
+                        let submission = submission_and_testcases[0].0.clone();
+                        let testcases = submission_and_testcases
+                            .into_iter()
+                            .map(|(_, testcase)| testcase.into())
+                            .collect::<Vec<_>>();
 
-                Submission::new(
-                    Uuid::parse_str(&submission.id).unwrap(),
-                    Uuid::parse_str(&submission.user_id).unwrap(),
-                    Uuid::parse_str(&submission.problem_id).unwrap(),
-                    submission.language.into(),
-                    submission.source_code,
-                    submission.status.into(),
-                    submission.score,
-                    submission.created_at,
-                    submission.avg_time,
-                    submission.avg_memory,
-                    testcases,
-                )
-            })
+                        Ok(Submission::new(
+                            Uuid::parse_str(&submission.id).unwrap(),
+                            Uuid::parse_str(&submission.user_id).unwrap(),
+                            Uuid::parse_str(&submission.problem_id).unwrap(),
+                            submission.language.into(),
+                            submission.source_code,
+                            submission.status.into(),
+                            submission.score,
+                            submission.created_at,
+                            submission.avg_time,
+                            submission.avg_memory,
+                            testcases,
+                        ))
+                    }
+                },
+            )?
     }
 
     pub fn find_by_status(

@@ -15,6 +15,8 @@ pub enum ApplicationError {
         #[source]
         source: diesel::result::Error,
     },
+    #[error("Error finding submission {submission_id:?}")]
+    SubmissionNotFoundError { submission_id: String },
     #[error("Error saving testcase {testcase_id:?} for submission {submission_id:?} to database")]
     TestCaseSaveError {
         testcase_id: String,
@@ -50,8 +52,15 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
                 )
                 .respond_to(request)
             }
+            ApplicationError::SubmissionNotFoundError { submission_id } => {
+                rocket::response::status::Custom(
+                    rocket::http::Status::NotFound,
+                    format!("Submission {} not found", submission_id),
+                )
+                .respond_to(request)
+            }
             ApplicationError::SubmissionFindError { .. } => rocket::response::status::Custom(
-                rocket::http::Status::NotFound,
+                rocket::http::Status::InternalServerError,
                 "Error finding submissions".to_string(),
             )
             .respond_to(request),
