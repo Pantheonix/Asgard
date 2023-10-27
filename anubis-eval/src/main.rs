@@ -54,6 +54,7 @@ async fn rocket() -> _ {
                 api::health_check_endpoint::health_check,
                 api::create_submission_endpoint::create_submission,
                 api::get_submission_endpoint::get_submission,
+                api::get_submissions_endpoint::get_submissions,
             ],
         )
         .register(

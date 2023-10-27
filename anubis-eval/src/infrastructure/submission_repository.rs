@@ -80,6 +80,19 @@ impl Submission {
             .map_err(|source| ApplicationError::SubmissionFindError { source })
     }
 
+    pub fn find_all(conn: &mut PgConnection) -> Result<Vec<Submission>, ApplicationError> {
+        all_submissions
+            .select(SubmissionModel::as_select())
+            .load::<SubmissionModel>(conn)
+            .map_err(|source| ApplicationError::SubmissionFindError { source })
+            .map(|submissions| {
+                submissions
+                    .into_iter()
+                    .map(|submission| submission.into())
+                    .collect::<Vec<_>>()
+            })
+    }
+
     pub fn update_evaluation_metadata(
         &self,
         conn: &mut PgConnection,
