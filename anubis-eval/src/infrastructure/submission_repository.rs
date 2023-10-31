@@ -1,5 +1,8 @@
+use crate::api::get_submissions_endpoint::FspSubmissionDto;
+use crate::application::fsp_dtos::SortDiscriminant;
 use crate::domain::application_error::ApplicationError;
 use crate::domain::submission::{Submission, SubmissionStatus, TestCase, TestCaseStatus};
+use crate::infrastructure::pagination::Paginate;
 use crate::infrastructure::submission_model::{SubmissionModel, TestCaseModel};
 use crate::schema::submissions::dsl::submissions as all_submissions;
 use crate::schema::submissions_testcases::dsl::submissions_testcases as all_testcases;
@@ -80,16 +83,60 @@ impl Submission {
             .map_err(|source| ApplicationError::SubmissionFindError { source })
     }
 
-    pub fn find_all(conn: &mut PgConnection) -> Result<Vec<Submission>, ApplicationError> {
-        all_submissions
+    pub fn find_all(
+        fsp_dto: FspSubmissionDto,
+        conn: &mut PgConnection,
+    ) -> Result<(Vec<Submission>, usize), ApplicationError> {
+        let mut query = all_submissions
             .select(SubmissionModel::as_select())
-            .load::<SubmissionModel>(conn)
+            .into_boxed();
+
+        if let Some(sort_by) = fsp_dto.sort_by {
+            query = match sort_by {
+                SortDiscriminant::ScoreAsc => {
+                    query.order(crate::schema::submissions::dsl::score.asc())
+                }
+                SortDiscriminant::ScoreDesc => {
+                    query.order(crate::schema::submissions::dsl::score.desc())
+                }
+                SortDiscriminant::CreatedAtAsc => {
+                    query.order(crate::schema::submissions::dsl::created_at.asc())
+                }
+                SortDiscriminant::CreatedAtDesc => {
+                    query.order(crate::schema::submissions::dsl::created_at.desc())
+                }
+                SortDiscriminant::AvgTimeAsc => {
+                    query.order(crate::schema::submissions::dsl::avg_time.asc())
+                }
+                SortDiscriminant::AvgTimeDesc => {
+                    query.order(crate::schema::submissions::dsl::avg_time.desc())
+                }
+                SortDiscriminant::AvgMemoryAsc => {
+                    query.order(crate::schema::submissions::dsl::avg_memory.asc())
+                }
+                SortDiscriminant::AvgMemoryDesc => {
+                    query.order(crate::schema::submissions::dsl::avg_memory.desc())
+                }
+            };
+        }
+
+        let mut query = query.paginate(fsp_dto.page.unwrap_or(1));
+
+        if let Some(per_page) = fsp_dto.per_page {
+            query = query.per_page(per_page);
+        }
+
+        query
+            .load_and_count_pages::<SubmissionModel>(conn)
             .map_err(|source| ApplicationError::SubmissionFindError { source })
-            .map(|submissions| {
-                submissions
-                    .into_iter()
-                    .map(|submission| submission.into())
-                    .collect::<Vec<_>>()
+            .map(|(submissions, total_pages)| {
+                (
+                    submissions
+                        .into_iter()
+                        .map(|submission| submission.into())
+                        .collect::<Vec<_>>(),
+                    total_pages as usize,
+                )
             })
     }
 

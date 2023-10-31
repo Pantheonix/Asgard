@@ -1,9 +1,10 @@
 use crate::application::auth::JwtContext;
+use crate::application::fsp_dtos::SortDiscriminant;
 use crate::domain::application_error::ApplicationError;
 use crate::domain::submission::Submission;
 use crate::infrastructure::db::Db;
 use chrono::{DateTime, Utc};
-use rocket::{get, Responder};
+use rocket::{get, FromForm, Responder};
 use serde::Serialize;
 
 #[derive(Responder)]
@@ -12,12 +13,13 @@ pub struct GetSubmissionsResponse {
     dto: GetSubmissionsDto,
 }
 
-#[get("/submissions")]
+#[get("/submissions?<fsp_dto..>")]
 pub async fn get_submissions(
+    fsp_dto: FspSubmissionDto,
     user_ctx: JwtContext,
     db: Db,
 ) -> Result<GetSubmissionsResponse, ApplicationError> {
-    db.run(move |conn| match Submission::find_all(conn) {
+    db.run(move |conn| match Submission::find_all(fsp_dto, conn) {
         Ok(submissions) => Ok(GetSubmissionsResponse {
             dto: submissions.into(),
         }),
@@ -26,10 +28,19 @@ pub async fn get_submissions(
     .await
 }
 
+// FSP stands for Filter, Sort, Paginate
+#[derive(Debug, PartialEq, FromForm)]
+pub struct FspSubmissionDto {
+    pub sort_by: Option<SortDiscriminant>,
+    pub page: Option<i64>,
+    pub per_page: Option<i64>,
+}
+
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
 pub struct GetSubmissionsDto {
     submissions: Vec<GetSubmissionDto>,
+    total_pages: usize,
 }
 
 #[rocket::async_trait]
@@ -45,13 +56,14 @@ impl<'r> rocket::response::Responder<'r, 'static> for GetSubmissionsDto {
     }
 }
 
-impl From<Vec<Submission>> for GetSubmissionsDto {
-    fn from(submissions: Vec<Submission>) -> Self {
+impl From<(Vec<Submission>, usize)> for GetSubmissionsDto {
+    fn from((submissions, total_pages): (Vec<Submission>, usize)) -> Self {
         Self {
             submissions: submissions
                 .into_iter()
                 .map(|submission| submission.into())
                 .collect::<Vec<_>>(),
+            total_pages,
         }
     }
 }
