@@ -1,7 +1,8 @@
 use crate::application::auth::JwtContext;
 use crate::application::fsp_dtos::SortDiscriminant;
+use crate::domain;
 use crate::domain::application_error::ApplicationError;
-use crate::domain::submission::Submission;
+use crate::domain::submission::{Languages, Submission, SubmissionStatuses, Uuids};
 use crate::infrastructure::db::Db;
 use chrono::{DateTime, Utc};
 use rocket::{get, FromForm, Responder};
@@ -31,6 +32,18 @@ pub async fn get_submissions(
 // FSP stands for Filter, Sort, Paginate
 #[derive(Debug, PartialEq, FromForm)]
 pub struct FspSubmissionDto {
+    pub user_id: Option<Uuids>,
+    pub problem_id: Option<Uuids>,
+    pub language: Option<Languages>,
+    pub status: Option<SubmissionStatuses>,
+    pub lt_score: Option<usize>,
+    pub gt_score: Option<usize>,
+    pub lt_avg_time: Option<f32>,
+    pub gt_avg_time: Option<f32>,
+    pub lt_avg_memory: Option<f32>,
+    pub gt_avg_memory: Option<f32>,
+    pub start_date: Option<domain::submission::DateTime>,
+    pub end_date: Option<domain::submission::DateTime>,
     pub sort_by: Option<SortDiscriminant>,
     pub page: Option<i64>,
     pub per_page: Option<i64>,
@@ -40,6 +53,7 @@ pub struct FspSubmissionDto {
 #[serde(crate = "rocket::serde")]
 pub struct GetSubmissionsDto {
     submissions: Vec<GetSubmissionDto>,
+    items: usize,
     total_pages: usize,
 }
 
@@ -56,13 +70,14 @@ impl<'r> rocket::response::Responder<'r, 'static> for GetSubmissionsDto {
     }
 }
 
-impl From<(Vec<Submission>, usize)> for GetSubmissionsDto {
-    fn from((submissions, total_pages): (Vec<Submission>, usize)) -> Self {
+impl From<(Vec<Submission>, usize, usize)> for GetSubmissionsDto {
+    fn from((submissions, items, total_pages): (Vec<Submission>, usize, usize)) -> Self {
         Self {
             submissions: submissions
                 .into_iter()
                 .map(|submission| submission.into())
                 .collect::<Vec<_>>(),
+            items,
             total_pages,
         }
     }

@@ -1,13 +1,16 @@
 use crate::api::get_submissions_endpoint::FspSubmissionDto;
 use crate::application::fsp_dtos::SortDiscriminant;
 use crate::domain::application_error::ApplicationError;
-use crate::domain::submission::{Submission, SubmissionStatus, TestCase, TestCaseStatus};
+use crate::domain::submission::{
+    Languages, Submission, SubmissionStatus, SubmissionStatuses, TestCase, TestCaseStatus, Uuids,
+};
 use crate::infrastructure::pagination::Paginate;
 use crate::infrastructure::submission_model::{SubmissionModel, TestCaseModel};
 use crate::schema::submissions::dsl::submissions as all_submissions;
 use crate::schema::submissions_testcases::dsl::submissions_testcases as all_testcases;
 use diesel::{ExpressionMethods, SelectableHelper};
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
+use std::time::SystemTime;
 use uuid::Uuid;
 
 impl Submission {
@@ -86,10 +89,84 @@ impl Submission {
     pub fn find_all(
         fsp_dto: FspSubmissionDto,
         conn: &mut PgConnection,
-    ) -> Result<(Vec<Submission>, usize), ApplicationError> {
+    ) -> Result<(Vec<Submission>, usize, usize), ApplicationError> {
+        use crate::domain::submission;
+
         let mut query = all_submissions
             .select(SubmissionModel::as_select())
             .into_boxed();
+
+        if let Some(Uuids { uuids: user_ids }) = fsp_dto.user_id {
+            let user_ids = user_ids
+                .into_iter()
+                .map(|user_id| user_id.to_string())
+                .collect::<Vec<_>>();
+            query = query.filter(crate::schema::submissions::dsl::user_id.eq_any(user_ids));
+        }
+
+        if let Some(Uuids { uuids: problem_ids }) = fsp_dto.problem_id {
+            let problem_ids = problem_ids
+                .into_iter()
+                .map(|problem_id| problem_id.to_string())
+                .collect::<Vec<_>>();
+            query = query.filter(crate::schema::submissions::dsl::problem_id.eq_any(problem_ids));
+        }
+
+        if let Some(Languages { languages }) = fsp_dto.language {
+            let languages = languages
+                .into_iter()
+                .map(|language| language.to_string())
+                .collect::<Vec<_>>();
+            query = query.filter(crate::schema::submissions::dsl::language.eq_any(languages));
+        }
+
+        if let Some(SubmissionStatuses { statuses }) = fsp_dto.status {
+            let statuses = statuses
+                .into_iter()
+                .map(|status| status.to_string())
+                .collect::<Vec<_>>();
+            query = query.filter(crate::schema::submissions::dsl::status.eq_any(statuses));
+        }
+
+        if let Some(lt_score) = fsp_dto.lt_score {
+            query = query.filter(crate::schema::submissions::dsl::score.lt(lt_score as i32));
+        }
+
+        if let Some(gt_score) = fsp_dto.gt_score {
+            query = query.filter(crate::schema::submissions::dsl::score.gt(gt_score as i32));
+        }
+
+        if let Some(lt_avg_time) = fsp_dto.lt_avg_time {
+            query = query.filter(crate::schema::submissions::dsl::avg_time.lt(lt_avg_time));
+        }
+
+        if let Some(gt_avg_time) = fsp_dto.gt_avg_time {
+            query = query.filter(crate::schema::submissions::dsl::avg_time.gt(gt_avg_time));
+        }
+
+        if let Some(lt_avg_memory) = fsp_dto.lt_avg_memory {
+            query = query.filter(crate::schema::submissions::dsl::avg_memory.lt(lt_avg_memory));
+        }
+
+        if let Some(gt_avg_memory) = fsp_dto.gt_avg_memory {
+            query = query.filter(crate::schema::submissions::dsl::avg_memory.gt(gt_avg_memory));
+        }
+
+        if let Some(submission::DateTime {
+            date_time: start_date,
+        }) = fsp_dto.start_date
+        {
+            let start_date = SystemTime::from(start_date);
+            query = query.filter(crate::schema::submissions::dsl::created_at.gt(start_date));
+        }
+
+        if let Some(submission::DateTime {
+            date_time: end_date,
+        }) = fsp_dto.end_date
+        {
+            let end_date = SystemTime::from(end_date);
+            query = query.filter(crate::schema::submissions::dsl::created_at.lt(end_date));
+        }
 
         if let Some(sort_by) = fsp_dto.sort_by {
             query = match sort_by {
@@ -130,13 +207,12 @@ impl Submission {
             .load_and_count_pages::<SubmissionModel>(conn)
             .map_err(|source| ApplicationError::SubmissionFindError { source })
             .map(|(submissions, total_pages)| {
-                (
-                    submissions
-                        .into_iter()
-                        .map(|submission| submission.into())
-                        .collect::<Vec<_>>(),
-                    total_pages as usize,
-                )
+                let submissions = submissions
+                    .into_iter()
+                    .map(|submission| submission.into())
+                    .collect::<Vec<_>>();
+                let items = submissions.len();
+                (submissions, items, total_pages as usize)
             })
     }
 
