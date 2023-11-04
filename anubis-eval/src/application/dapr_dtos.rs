@@ -5,6 +5,20 @@ use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct CacheSetItemDto {
+    pub key: String,
+    pub value: serde_json::Value,
+    pub metadata: Option<CacheMetadata>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CacheMetadata {
+    pub ttl_in_seconds: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GetEvalMetadataForProblemDto {
     #[serde(rename = "id")]
     pub problem_id: Uuid,

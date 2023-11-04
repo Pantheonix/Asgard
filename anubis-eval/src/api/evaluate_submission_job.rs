@@ -62,17 +62,17 @@ async fn evaluate_submission(
         db.deref_mut(),
     )?;
 
-    let test_cases_tokens = pending_test_cases_tokens
+    let pending_test_cases_tokens = pending_test_cases_tokens
         .into_iter()
         .chain(running_test_cases_tokens.into_iter())
         .map(|token| TestCaseTokenDto { token })
         .collect::<Vec<_>>();
     debug!(
         "Pending test cases for submission {:?}: {:?}",
-        submission_id, test_cases_tokens
+        submission_id, pending_test_cases_tokens
     );
 
-    if test_cases_tokens.is_empty() {
+    if pending_test_cases_tokens.is_empty() {
         // decide if submission is accepted or rejected
         let testcases = TestCase::find_by_submission_id(submission_id, db.deref_mut())?;
 
@@ -122,7 +122,9 @@ async fn evaluate_submission(
         submission.update_evaluation_metadata(db.deref_mut())?;
     } else {
         // JUDGE0 - get test case results
-        let test_cases_results = dapr_client.get_submission_batch(&test_cases_tokens).await?;
+        let test_cases_results = dapr_client
+            .get_submission_batch(&pending_test_cases_tokens)
+            .await?;
         debug!(
             "Test case results for submission {:?}: {:?}",
             submission_id, test_cases_results

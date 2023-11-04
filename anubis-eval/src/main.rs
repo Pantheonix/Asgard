@@ -26,7 +26,7 @@ async fn rocket() -> _ {
         .add(
             Job::new_async(config.eval_cron_schedule.as_str(), |_, _| {
                 Box::pin(async {
-                    let response = api::evaluate_job::evaluate_pending_submissions(
+                    let response = api::evaluate_submission_job::evaluate_pending_submissions(
                         DAPR_CLIENT.clone(),
                         DB_CONN.clone(),
                     )

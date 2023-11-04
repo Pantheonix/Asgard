@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+url = "2.2.2"
 tokio-cron-scheduler = "0.9.4"
 thiserror = "1.0.49"
 diesel = { version = "2.1.1", features = ["postgres", "chrono", "r2d2", "uuid", "numeric"] }

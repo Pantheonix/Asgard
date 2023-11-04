@@ -67,6 +67,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tokio-cron-scheduler",
+ "url",
  "uuid",
  "validator",
 ]

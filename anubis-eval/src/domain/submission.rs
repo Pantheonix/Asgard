@@ -1,5 +1,3 @@
-use chrono::{FixedOffset, Utc};
-use rocket::form::FromFormField;
 use std::fmt;
 use std::time::SystemTime;
 use uuid::Uuid;
@@ -300,69 +298,12 @@ impl TestCase {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct DateTime {
-    pub date_time: chrono::DateTime<Utc>,
-}
-
-impl<'v> FromFormField<'v> for DateTime {
-    fn from_value(field: rocket::form::ValueField<'v>) -> rocket::form::Result<'v, Self> {
-        let date_time =
-            chrono::DateTime::<Utc>::from_timestamp(field.value.parse::<i64>().unwrap_or(0), 0)
-                .unwrap();
-
-        Ok(DateTime {
-            date_time: date_time.into(),
-        })
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Uuids {
-    pub uuids: Vec<Uuid>,
-}
-
-impl<'v> FromFormField<'v> for Uuids {
-    fn from_value(field: rocket::form::ValueField<'v>) -> rocket::form::Result<'v, Self> {
-        let uuids = field
-            .value
-            .split(',')
-            .map(|s| Uuid::parse_str(s).unwrap_or(Uuid::nil()))
-            .collect();
-
-        Ok(Uuids { uuids })
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum SubmissionStatus {
     Evaluating,
     Accepted,
     Rejected,
     InternalError,
     Unknown,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct SubmissionStatuses {
-    pub statuses: Vec<SubmissionStatus>,
-}
-
-impl<'v> FromFormField<'v> for SubmissionStatuses {
-    fn from_value(field: rocket::form::ValueField<'v>) -> rocket::form::Result<'v, Self> {
-        let statuses = field
-            .value
-            .split(',')
-            .map(|s| match s {
-                "evaluating" => SubmissionStatus::Evaluating,
-                "accepted" => SubmissionStatus::Accepted,
-                "rejected" => SubmissionStatus::Rejected,
-                "internal_error" => SubmissionStatus::InternalError,
-                _ => SubmissionStatus::Unknown,
-            })
-            .collect();
-
-        Ok(SubmissionStatuses { statuses })
-    }
 }
 
 impl From<String> for SubmissionStatus {
@@ -414,35 +355,6 @@ pub enum Language {
     Haskell,
     Javascript,
     Unknown,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Languages {
-    pub languages: Vec<Language>,
-}
-
-impl<'v> FromFormField<'v> for Languages {
-    fn from_value(field: rocket::form::ValueField<'v>) -> rocket::form::Result<'v, Self> {
-        let languages = field
-            .value
-            .split(',')
-            .map(|s| match s {
-                "c" => Language::C,
-                "cpp" => Language::Cpp,
-                "java" => Language::Java,
-                "kotlin" => Language::Kotlin,
-                "python" => Language::Python,
-                "rust" => Language::Rust,
-                "go" => Language::Go,
-                "csharp" => Language::CSharp,
-                "haskell" => Language::Haskell,
-                "javascript" => Language::Javascript,
-                _ => Language::Unknown,
-            })
-            .collect();
-
-        Ok(Languages { languages })
-    }
 }
 
 impl From<usize> for Language {

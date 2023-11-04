@@ -1,9 +1,7 @@
-use crate::api::get_submissions_endpoint::FspSubmissionDto;
-use crate::application::fsp_dtos::SortDiscriminant;
+use crate::application::fsp_dtos::FspSubmissionDto;
+use crate::application::fsp_dtos::{Languages, SortDiscriminant, SubmissionStatuses, Uuids};
 use crate::domain::application_error::ApplicationError;
-use crate::domain::submission::{
-    Languages, Submission, SubmissionStatus, SubmissionStatuses, TestCase, TestCaseStatus, Uuids,
-};
+use crate::domain::submission::{Submission, SubmissionStatus, TestCase, TestCaseStatus};
 use crate::infrastructure::pagination::Paginate;
 use crate::infrastructure::submission_model::{SubmissionModel, TestCaseModel};
 use crate::schema::submissions::dsl::submissions as all_submissions;
@@ -90,7 +88,7 @@ impl Submission {
         fsp_dto: FspSubmissionDto,
         conn: &mut PgConnection,
     ) -> Result<(Vec<Submission>, usize, usize), ApplicationError> {
-        use crate::domain::submission;
+        use crate::application::fsp_dtos;
 
         let mut query = all_submissions
             .select(SubmissionModel::as_select())
@@ -152,7 +150,7 @@ impl Submission {
             query = query.filter(crate::schema::submissions::dsl::avg_memory.gt(gt_avg_memory));
         }
 
-        if let Some(submission::DateTime {
+        if let Some(fsp_dtos::DateTime {
             date_time: start_date,
         }) = fsp_dto.start_date
         {
@@ -160,7 +158,7 @@ impl Submission {
             query = query.filter(crate::schema::submissions::dsl::created_at.gt(start_date));
         }
 
-        if let Some(submission::DateTime {
+        if let Some(fsp_dtos::DateTime {
             date_time: end_date,
         }) = fsp_dto.end_date
         {

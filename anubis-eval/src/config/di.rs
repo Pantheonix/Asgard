@@ -13,8 +13,11 @@ pub struct Config {
     pub dapr_eval_metadata_endpoint: String,
     pub dapr_judge_endpoint: String,
     pub dapr_get_submission_batch_endpoint: String,
+    pub dapr_state_store_post_endpoint: String,
+    pub dapr_state_store_get_endpoint: String,
     pub eval_cron_schedule: String,
     pub default_no_submissions_per_page: u16,
+    pub default_cache_ttl_seconds: u64,
 }
 
 pub type Atomic<T> = Arc<Mutex<T>>;

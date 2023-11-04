@@ -1,10 +1,12 @@
 use crate::application::dapr_dtos::{
-    CreateSubmissionBatchDto, EvaluatedSubmissionBatchDto, GetEvalMetadataForProblemDto,
-    TestCaseTokenDto,
+    CacheMetadata, CacheSetItemDto, CreateSubmissionBatchDto, EvaluatedSubmissionBatchDto,
+    GetEvalMetadataForProblemDto, TestCaseTokenDto,
 };
 use crate::config::di::CONFIG;
 use crate::domain::application_error::ApplicationError;
+use rocket::debug;
 use rocket::request::{FromRequest, Outcome};
+use serde_json::Value;
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]
@@ -16,7 +18,7 @@ impl DaprClient {
     pub async fn get_eval_metadata_for_problem(
         &self,
         problem_id: &Uuid,
-    ) -> Result<GetEvalMetadataForProblemDto, reqwest::Error> {
+    ) -> Result<GetEvalMetadataForProblemDto, ApplicationError> {
         let problem_id = problem_id.to_string();
 
         let url = CONFIG
@@ -24,22 +26,111 @@ impl DaprClient {
             .to_owned()
             .replace("{problem_id}", problem_id.as_str());
 
-        let response = self
-            .reqwest_client
-            .get(&url)
-            .send()
-            .await?
-            .json::<GetEvalMetadataForProblemDto>()
-            .await?;
+        let cache_response = self.get_item_from_cache(problem_id.as_str()).await?;
 
-        Ok(response)
+        match cache_response {
+            Some(cache_response) => {
+                let response =
+                    serde_json::from_value::<GetEvalMetadataForProblemDto>(cache_response)
+                        .map_err(|e| ApplicationError::JsonDeserializationError(e.to_string()))?;
+                Ok(response)
+            }
+            None => {
+                let response = self
+                    .reqwest_client
+                    .get(&url)
+                    .send()
+                    .await
+                    .map_err(|e| ApplicationError::EvalMetadataError {
+                        problem_id: problem_id.clone(),
+                        source: e,
+                    })?
+                    .json::<GetEvalMetadataForProblemDto>()
+                    .await
+                    .map_err(|e| ApplicationError::Unknown(e.to_string()))?;
+
+                let cache_set_item = CacheSetItemDto {
+                    key: problem_id,
+                    value: serde_json::to_value(&response)
+                        .map_err(|e| ApplicationError::JsonSerializationError(e.to_string()))?,
+                    metadata: Some(CacheMetadata {
+                        ttl_in_seconds: CONFIG.default_cache_ttl_seconds.to_string(),
+                    }),
+                };
+                self.set_items_in_cache(vec![cache_set_item]).await?;
+
+                Ok(response)
+            }
+        }
     }
 
     pub async fn get_input_and_output_for_test(
+        &self,
+        test_id: usize,
+        problem_id: Uuid,
         (input_url, output_url): (String, String),
-    ) -> Result<(String, String), reqwest::Error> {
-        let input = reqwest::get(input_url).await?.text().await?;
-        let output = reqwest::get(output_url).await?.text().await?;
+    ) -> Result<(String, String), ApplicationError> {
+        let input_key = format!("{}-{}-input", problem_id, test_id);
+
+        let cache_response = self.get_item_from_cache(input_key.as_str()).await?;
+        let input = match cache_response {
+            Some(input) => serde_json::from_value::<String>(input)
+                .map_err(|e| ApplicationError::JsonDeserializationError(e.to_string()))?,
+            None => {
+                let input = reqwest::get(input_url.clone())
+                    .await
+                    .map_err(|e| ApplicationError::TestInputOutputError {
+                        problem_id: problem_id.to_string(),
+                        test_id: test_id.to_string(),
+                        source: e,
+                    })?
+                    .text()
+                    .await
+                    .map_err(|e| ApplicationError::Unknown(e.to_string()))?;
+
+                let cache_set_item = CacheSetItemDto {
+                    key: input_key,
+                    value: Value::String(input.clone()),
+                    metadata: Some(CacheMetadata {
+                        ttl_in_seconds: CONFIG.default_cache_ttl_seconds.to_string(),
+                    }),
+                };
+                self.set_items_in_cache(vec![cache_set_item]).await?;
+
+                input
+            }
+        };
+
+        let output_key = format!("{}-{}-output", problem_id, test_id);
+
+        let cache_response = self.get_item_from_cache(output_key.as_str()).await?;
+        let output = match cache_response {
+            Some(output) => serde_json::from_value::<String>(output)
+                .map_err(|e| ApplicationError::JsonDeserializationError(e.to_string()))?,
+            None => {
+                let output = reqwest::get(output_url.clone())
+                    .await
+                    .map_err(|e| ApplicationError::TestInputOutputError {
+                        problem_id: problem_id.to_string(),
+                        test_id: test_id.to_string(),
+                        source: e,
+                    })?
+                    .text()
+                    .await
+                    .map_err(|e| ApplicationError::Unknown(e.to_string()))?;
+
+                let cache_set_item = CacheSetItemDto {
+                    key: output_key,
+                    value: Value::String(output.clone()),
+                    metadata: Some(CacheMetadata {
+                        ttl_in_seconds: CONFIG.default_cache_ttl_seconds.to_string(),
+                    }),
+                };
+                self.set_items_in_cache(vec![cache_set_item]).await?;
+
+                output
+            }
+        };
 
         Ok((input, output))
     }
@@ -47,7 +138,7 @@ impl DaprClient {
     pub async fn create_submission_batch(
         &self,
         submission_batch: &CreateSubmissionBatchDto,
-    ) -> Result<Vec<TestCaseTokenDto>, reqwest::Error> {
+    ) -> Result<Vec<TestCaseTokenDto>, ApplicationError> {
         let url = CONFIG.dapr_judge_endpoint.to_owned();
 
         let response = self
@@ -55,9 +146,11 @@ impl DaprClient {
             .post(&url)
             .json(&submission_batch)
             .send()
-            .await?
+            .await
+            .map_err(|e| ApplicationError::HttpError { source: e })?
             .json::<Vec<TestCaseTokenDto>>()
-            .await?;
+            .await
+            .map_err(|e| ApplicationError::Unknown(e.to_string()))?;
 
         Ok(response)
     }
@@ -65,7 +158,7 @@ impl DaprClient {
     pub async fn get_submission_batch(
         &self,
         submission_tokens: &[TestCaseTokenDto],
-    ) -> Result<EvaluatedSubmissionBatchDto, reqwest::Error> {
+    ) -> Result<EvaluatedSubmissionBatchDto, ApplicationError> {
         let url = CONFIG.dapr_get_submission_batch_endpoint.to_owned();
         let tokens = submission_tokens
             .iter()
@@ -79,11 +172,69 @@ impl DaprClient {
             .reqwest_client
             .get(&url)
             .send()
-            .await?
+            .await
+            .map_err(|e| ApplicationError::HttpError { source: e })?
             .json::<EvaluatedSubmissionBatchDto>()
-            .await?;
+            .await
+            .map_err(|e| ApplicationError::Unknown(e.to_string()))?;
 
         Ok(response)
+    }
+
+    async fn get_item_from_cache(&self, key: &str) -> Result<Option<Value>, ApplicationError> {
+        let url = CONFIG.dapr_state_store_get_endpoint.to_owned();
+        let url = url.replace("{key}", key);
+
+        let response = self.reqwest_client.get(&url).send().await.map_err(|e| {
+            ApplicationError::CacheGetError {
+                key: key.to_string(),
+                source: e,
+            }
+        })?;
+
+        let response = match response.status() {
+            reqwest::StatusCode::OK => {
+                let response = response
+                    .json::<Value>()
+                    .await
+                    .map_err(|e| ApplicationError::JsonDeserializationError(e.to_string()))?;
+                Some(response)
+            }
+            _ => None,
+        };
+
+        debug!("Cache response: {:?}", response);
+
+        Ok(response)
+    }
+
+    async fn set_items_in_cache(
+        &self,
+        items: Vec<CacheSetItemDto>,
+    ) -> Result<(), ApplicationError> {
+        let url = CONFIG.dapr_state_store_post_endpoint.to_owned();
+
+        debug!("Cache request: {:?}", items);
+
+        let response = self
+            .reqwest_client
+            .post(&url)
+            .json(&items)
+            .send()
+            .await
+            .map_err(|e| ApplicationError::CacheSetError {
+                key: items
+                    .iter()
+                    .map(|item| item.key.clone())
+                    .collect::<Vec<String>>()
+                    .join(","),
+                source: e,
+            })?;
+
+        let status = response.status();
+        debug!("Cache response status: {:?}", status);
+
+        Ok(())
     }
 }
 

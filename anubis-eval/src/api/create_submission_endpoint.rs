@@ -44,28 +44,30 @@ pub async fn create_submission(
         .await?;
 
     // FIREBASE - Get Problem Test Contents
-    let test_cases = join_all(eval_metadata.tests.iter().map(|test| async {
-        let (input, output) =
-            DaprClient::get_input_and_output_for_test((test.input.clone(), test.output.clone()))
+    let test_cases: Vec<Result<CreateSubmissionTestCaseDto, ApplicationError>> =
+        join_all(eval_metadata.tests.iter().map(|test| async {
+            let (input, output) = dapr_client
+                .get_input_and_output_for_test(
+                    test.test_id,
+                    eval_metadata.problem_id,
+                    (test.input.clone(), test.output.clone()),
+                )
                 .await?;
 
-        Ok(CreateSubmissionTestCaseDto {
-            testcase_id: test.test_id,
-            source_code: submission.source_code.to_string(),
-            language: language.clone().into(),
-            stdin: input,
-            time: eval_metadata.time,
-            memory_limit: eval_metadata.total_memory * 1000_f32,
-            stack_limit: eval_metadata.stack_memory * 1000_f32,
-            expected_output: output,
-        })
-    }))
-    .await;
+            Ok(CreateSubmissionTestCaseDto {
+                testcase_id: test.test_id,
+                source_code: submission.source_code.to_string(),
+                language: language.clone().into(),
+                stdin: input,
+                time: eval_metadata.time,
+                memory_limit: eval_metadata.total_memory * 1000_f32,
+                stack_limit: eval_metadata.stack_memory * 1000_f32,
+                expected_output: output,
+            })
+        }))
+        .await;
 
-    let mut test_cases = test_cases
-        .into_iter()
-        .map(|test| test.map_err(|e| ApplicationError::HttpError { source: e }))
-        .collect::<Result<Vec<_>, _>>()?;
+    let mut test_cases = test_cases.into_iter().collect::<Result<Vec<_>, _>>()?;
 
     test_cases.sort_by(|a, b| a.testcase_id.cmp(&b.testcase_id));
 

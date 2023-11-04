@@ -34,6 +34,35 @@ pub enum ApplicationError {
         #[from]
         source: reqwest::Error,
     },
+    #[error("Error retrieving eval metadata for problem")]
+    EvalMetadataError {
+        problem_id: String,
+        #[source]
+        source: reqwest::Error,
+    },
+    #[error("Error retrieving input and output for test")]
+    TestInputOutputError {
+        problem_id: String,
+        test_id: String,
+        #[source]
+        source: reqwest::Error,
+    },
+    #[error("Error setting items in cache")]
+    CacheSetError {
+        key: String,
+        #[source]
+        source: reqwest::Error,
+    },
+    #[error("Error getting item from cache")]
+    CacheGetError {
+        key: String,
+        #[source]
+        source: reqwest::Error,
+    },
+    #[error("Error serializing json")]
+    JsonSerializationError(String),
+    #[error("Error deserializing json")]
+    JsonDeserializationError(String),
     #[error("Error authenticating user")]
     AuthError(String),
     #[error("Unknown error")]
@@ -84,6 +113,45 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
             ApplicationError::HttpError { .. } => rocket::response::status::Custom(
                 rocket::http::Status::InternalServerError,
                 "Error invoking external services".to_string(),
+            )
+            .respond_to(request),
+            ApplicationError::EvalMetadataError { problem_id, .. } => {
+                rocket::response::status::Custom(
+                    rocket::http::Status::InternalServerError,
+                    format!("Error retrieving eval metadata for problem {}", problem_id),
+                )
+                .respond_to(request)
+            }
+            ApplicationError::TestInputOutputError {
+                problem_id,
+                test_id,
+                ..
+            } => rocket::response::status::Custom(
+                rocket::http::Status::InternalServerError,
+                format!(
+                    "Error retrieving input and output for test {} of problem {}",
+                    test_id, problem_id
+                ),
+            )
+            .respond_to(request),
+            ApplicationError::CacheSetError { key, .. } => rocket::response::status::Custom(
+                rocket::http::Status::InternalServerError,
+                format!("Error setting items in cache for key {}", key),
+            )
+            .respond_to(request),
+            ApplicationError::CacheGetError { key, .. } => rocket::response::status::Custom(
+                rocket::http::Status::InternalServerError,
+                format!("Error getting item from cache for key {}", key),
+            )
+            .respond_to(request),
+            ApplicationError::JsonSerializationError { .. } => rocket::response::status::Custom(
+                rocket::http::Status::InternalServerError,
+                "Error serializing json".to_string(),
+            )
+            .respond_to(request),
+            ApplicationError::JsonDeserializationError { .. } => rocket::response::status::Custom(
+                rocket::http::Status::InternalServerError,
+                "Error deserializing json".to_string(),
             )
             .respond_to(request),
             ApplicationError::AuthError(message) => rocket::response::status::Custom(

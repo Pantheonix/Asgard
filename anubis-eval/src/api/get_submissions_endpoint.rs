@@ -1,11 +1,10 @@
 use crate::application::auth::JwtContext;
-use crate::application::fsp_dtos::SortDiscriminant;
-use crate::domain;
+use crate::application::fsp_dtos::FspSubmissionDto;
 use crate::domain::application_error::ApplicationError;
-use crate::domain::submission::{Languages, Submission, SubmissionStatuses, Uuids};
+use crate::domain::submission::Submission;
 use crate::infrastructure::db::Db;
 use chrono::{DateTime, Utc};
-use rocket::{get, FromForm, Responder};
+use rocket::{get, Responder};
 use serde::Serialize;
 
 #[derive(Responder)]
@@ -27,26 +26,6 @@ pub async fn get_submissions(
         Err(e) => Err(e),
     })
     .await
-}
-
-// FSP stands for Filter, Sort, Paginate
-#[derive(Debug, PartialEq, FromForm)]
-pub struct FspSubmissionDto {
-    pub user_id: Option<Uuids>,
-    pub problem_id: Option<Uuids>,
-    pub language: Option<Languages>,
-    pub status: Option<SubmissionStatuses>,
-    pub lt_score: Option<usize>,
-    pub gt_score: Option<usize>,
-    pub lt_avg_time: Option<f32>,
-    pub gt_avg_time: Option<f32>,
-    pub lt_avg_memory: Option<f32>,
-    pub gt_avg_memory: Option<f32>,
-    pub start_date: Option<domain::submission::DateTime>,
-    pub end_date: Option<domain::submission::DateTime>,
-    pub sort_by: Option<SortDiscriminant>,
-    pub page: Option<i64>,
-    pub per_page: Option<i64>,
 }
 
 #[derive(Serialize)]
