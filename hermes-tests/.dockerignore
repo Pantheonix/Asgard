@@ -8,5 +8,5 @@ config-template.json
 config.json
 .dockerignore
 Dockerfile*
-*.env
+.env*
 Makefile
