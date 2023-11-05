@@ -62,7 +62,7 @@ impl DaprClient {
                     .map_err(|e| ApplicationError::Unknown(e.to_string()))?;
 
                 let cache_set_item = CacheSetItemDto {
-                    key: problem_id,
+                    key: problem_id.clone(),
                     value: serde_json::to_value(&response)
                         .map_err(|e| ApplicationError::JsonSerializationError(e.to_string()))?,
                     metadata: Some(CacheMetadata {
@@ -103,7 +103,10 @@ impl DaprClient {
             Some(input) => serde_json::from_value::<String>(input)
                 .map_err(|e| ApplicationError::JsonDeserializationError(e.to_string()))?,
             None => {
-                let input = reqwest::get(input_url.clone())
+                let input = self
+                    .reqwest_client
+                    .get(input_url.clone())
+                    .send()
                     .await
                     .map_err(|e| ApplicationError::TestInputOutputError {
                         problem_id: problem_id.to_string(),
@@ -136,7 +139,10 @@ impl DaprClient {
             Some(output) => serde_json::from_value::<String>(output)
                 .map_err(|e| ApplicationError::JsonDeserializationError(e.to_string()))?,
             None => {
-                let output = reqwest::get(output_url.clone())
+                let output = self
+                    .reqwest_client
+                    .get(output_url.clone())
+                    .send()
                     .await
                     .map_err(|e| ApplicationError::TestInputOutputError {
                         problem_id: problem_id.to_string(),

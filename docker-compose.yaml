@@ -202,8 +202,8 @@ services:
     env_file:
       - anubis-eval/.env
     restart: always
-    # profiles:
-    #   - anubis
+    profiles:
+      - anubis
 
   anubis-eval-dapr:
     container_name: anubis-eval-dapr
@@ -228,11 +228,9 @@ services:
       ]
     volumes_from:
       - asgard-dapr-config
-    ports:
-      - "3503:3503"
-    # depends_on:
-    #   - anubis-eval-api
-    # network_mode: "service:anubis-eval-api"
+    depends_on:
+      - anubis-eval-api
+    network_mode: "service:anubis-eval-api"
     profiles:
       - anubis
 

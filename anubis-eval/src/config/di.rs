@@ -30,7 +30,11 @@ lazy_static! {
             .from_env::<Config>()
             .expect("Failed to load configuration")
     };
-    pub static ref REQWEST_CLIENT: reqwest::Client = reqwest::Client::new();
+    pub static ref REQWEST_CLIENT: reqwest::Client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(10))
+        .danger_accept_invalid_certs(true)
+        .build()
+        .expect("Failed to create reqwest client");
     pub static ref DAPR_CLIENT: Atomic<DaprClient> = {
         Atomic::new(Mutex::new(DaprClient {
             reqwest_client: reqwest::Client::new(),
