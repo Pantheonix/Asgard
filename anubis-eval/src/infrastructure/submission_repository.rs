@@ -4,10 +4,12 @@ use crate::domain::application_error::ApplicationError;
 use crate::domain::submission::{Submission, SubmissionStatus, TestCase, TestCaseStatus};
 use crate::infrastructure::pagination::Paginate;
 use crate::infrastructure::submission_model::{SubmissionModel, TestCaseModel};
+use crate::schema::problems::dsl::problems as all_problems;
 use crate::schema::submissions::dsl::submissions as all_submissions;
 use crate::schema::submissions_testcases::dsl::submissions_testcases as all_testcases;
-use diesel::{ExpressionMethods, SelectableHelper};
+use diesel::{BoolExpressionMethods, ExpressionMethods, SelectableHelper};
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
+use rocket::error;
 use std::time::SystemTime;
 use uuid::Uuid;
 
@@ -86,20 +88,37 @@ impl Submission {
 
     pub fn find_all(
         fsp_dto: FspSubmissionDto,
+        user_id: &Uuid,
         conn: &mut PgConnection,
     ) -> Result<(Vec<Submission>, usize, usize), ApplicationError> {
         use crate::application::fsp_dtos;
+        use crate::schema::{problems, submissions};
 
         let mut query = all_submissions
             .select(SubmissionModel::as_select())
             .into_boxed();
+
+        // filter out submissions which should not be visible for current user,
+        // i.e. keep only submissions for which the problem is published or
+        // the user is the submitter or the user is the proposer
+        query = query.filter(
+            submissions::dsl::problem_id
+                .eq_any(
+                    all_problems.select(problems::dsl::id).filter(
+                        problems::dsl::is_published
+                            .eq(true)
+                            .or(problems::dsl::proposer_id.eq(user_id.to_string())),
+                    ),
+                )
+                .or(submissions::dsl::user_id.eq(user_id.to_string())),
+        );
 
         if let Some(Uuids { uuids: user_ids }) = fsp_dto.user_id {
             let user_ids = user_ids
                 .into_iter()
                 .map(|user_id| user_id.to_string())
                 .collect::<Vec<_>>();
-            query = query.filter(crate::schema::submissions::dsl::user_id.eq_any(user_ids));
+            query = query.filter(submissions::dsl::user_id.eq_any(user_ids));
         }
 
         if let Some(Uuids { uuids: problem_ids }) = fsp_dto.problem_id {
@@ -107,7 +126,7 @@ impl Submission {
                 .into_iter()
                 .map(|problem_id| problem_id.to_string())
                 .collect::<Vec<_>>();
-            query = query.filter(crate::schema::submissions::dsl::problem_id.eq_any(problem_ids));
+            query = query.filter(submissions::dsl::problem_id.eq_any(problem_ids));
         }
 
         if let Some(Languages { languages }) = fsp_dto.language {
@@ -115,7 +134,7 @@ impl Submission {
                 .into_iter()
                 .map(|language| language.to_string())
                 .collect::<Vec<_>>();
-            query = query.filter(crate::schema::submissions::dsl::language.eq_any(languages));
+            query = query.filter(submissions::dsl::language.eq_any(languages));
         }
 
         if let Some(SubmissionStatuses { statuses }) = fsp_dto.status {
@@ -123,31 +142,31 @@ impl Submission {
                 .into_iter()
                 .map(|status| status.to_string())
                 .collect::<Vec<_>>();
-            query = query.filter(crate::schema::submissions::dsl::status.eq_any(statuses));
+            query = query.filter(submissions::dsl::status.eq_any(statuses));
         }
 
         if let Some(lt_score) = fsp_dto.lt_score {
-            query = query.filter(crate::schema::submissions::dsl::score.lt(lt_score as i32));
+            query = query.filter(submissions::dsl::score.lt(lt_score as i32));
         }
 
         if let Some(gt_score) = fsp_dto.gt_score {
-            query = query.filter(crate::schema::submissions::dsl::score.gt(gt_score as i32));
+            query = query.filter(submissions::dsl::score.gt(gt_score as i32));
         }
 
         if let Some(lt_avg_time) = fsp_dto.lt_avg_time {
-            query = query.filter(crate::schema::submissions::dsl::avg_time.lt(lt_avg_time));
+            query = query.filter(submissions::dsl::avg_time.lt(lt_avg_time));
         }
 
         if let Some(gt_avg_time) = fsp_dto.gt_avg_time {
-            query = query.filter(crate::schema::submissions::dsl::avg_time.gt(gt_avg_time));
+            query = query.filter(submissions::dsl::avg_time.gt(gt_avg_time));
         }
 
         if let Some(lt_avg_memory) = fsp_dto.lt_avg_memory {
-            query = query.filter(crate::schema::submissions::dsl::avg_memory.lt(lt_avg_memory));
+            query = query.filter(submissions::dsl::avg_memory.lt(lt_avg_memory));
         }
 
         if let Some(gt_avg_memory) = fsp_dto.gt_avg_memory {
-            query = query.filter(crate::schema::submissions::dsl::avg_memory.gt(gt_avg_memory));
+            query = query.filter(submissions::dsl::avg_memory.gt(gt_avg_memory));
         }
 
         if let Some(fsp_dtos::DateTime {
@@ -155,7 +174,7 @@ impl Submission {
         }) = fsp_dto.start_date
         {
             let start_date = SystemTime::from(start_date);
-            query = query.filter(crate::schema::submissions::dsl::created_at.gt(start_date));
+            query = query.filter(submissions::dsl::created_at.gt(start_date));
         }
 
         if let Some(fsp_dtos::DateTime {
@@ -163,35 +182,19 @@ impl Submission {
         }) = fsp_dto.end_date
         {
             let end_date = SystemTime::from(end_date);
-            query = query.filter(crate::schema::submissions::dsl::created_at.lt(end_date));
+            query = query.filter(submissions::dsl::created_at.lt(end_date));
         }
 
         if let Some(sort_by) = fsp_dto.sort_by {
             query = match sort_by {
-                SortDiscriminant::ScoreAsc => {
-                    query.order(crate::schema::submissions::dsl::score.asc())
-                }
-                SortDiscriminant::ScoreDesc => {
-                    query.order(crate::schema::submissions::dsl::score.desc())
-                }
-                SortDiscriminant::CreatedAtAsc => {
-                    query.order(crate::schema::submissions::dsl::created_at.asc())
-                }
-                SortDiscriminant::CreatedAtDesc => {
-                    query.order(crate::schema::submissions::dsl::created_at.desc())
-                }
-                SortDiscriminant::AvgTimeAsc => {
-                    query.order(crate::schema::submissions::dsl::avg_time.asc())
-                }
-                SortDiscriminant::AvgTimeDesc => {
-                    query.order(crate::schema::submissions::dsl::avg_time.desc())
-                }
-                SortDiscriminant::AvgMemoryAsc => {
-                    query.order(crate::schema::submissions::dsl::avg_memory.asc())
-                }
-                SortDiscriminant::AvgMemoryDesc => {
-                    query.order(crate::schema::submissions::dsl::avg_memory.desc())
-                }
+                SortDiscriminant::ScoreAsc => query.order(submissions::dsl::score.asc()),
+                SortDiscriminant::ScoreDesc => query.order(submissions::dsl::score.desc()),
+                SortDiscriminant::CreatedAtAsc => query.order(submissions::dsl::created_at.asc()),
+                SortDiscriminant::CreatedAtDesc => query.order(submissions::dsl::created_at.desc()),
+                SortDiscriminant::AvgTimeAsc => query.order(submissions::dsl::avg_time.asc()),
+                SortDiscriminant::AvgTimeDesc => query.order(submissions::dsl::avg_time.desc()),
+                SortDiscriminant::AvgMemoryAsc => query.order(submissions::dsl::avg_memory.asc()),
+                SortDiscriminant::AvgMemoryDesc => query.order(submissions::dsl::avg_memory.desc()),
             };
         }
 
@@ -236,6 +239,48 @@ impl Submission {
             })?;
 
         Ok(())
+    }
+
+    pub fn get_problems_solved_by_user(
+        user_id: &String,
+        conn: &mut PgConnection,
+    ) -> Result<Vec<String>, ApplicationError> {
+        use crate::schema::submissions::dsl::{
+            problem_id as problem_id_column, status as status_column, user_id as user_id_column,
+        };
+
+        all_submissions
+            .filter(user_id_column.eq(user_id.to_string()))
+            .filter(status_column.eq(SubmissionStatus::Accepted.to_string()))
+            .select(problem_id_column)
+            .distinct()
+            .load::<String>(conn)
+            .map_err(|source| ApplicationError::SubmissionFindError { source })
+    }
+
+    pub fn is_problem_solved_by_user(
+        user_id: &String,
+        problem_id: String,
+        conn: &mut PgConnection,
+    ) -> bool {
+        use crate::schema::submissions::dsl::{
+            problem_id as problem_id_column, status as status_column, user_id as user_id_column,
+        };
+
+        all_submissions
+            .filter(user_id_column.eq(user_id.to_string()))
+            .filter(problem_id_column.eq(problem_id.to_string()))
+            .filter(status_column.eq(SubmissionStatus::Accepted.to_string()))
+            .select(problem_id_column)
+            .distinct()
+            .first::<String>(conn)
+            .map_or_else(
+                |error| {
+                    error!("Error checking if problem is solved by user: {:?}", error);
+                    false
+                },
+                |_| true,
+            )
     }
 }
 

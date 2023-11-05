@@ -1,10 +1,14 @@
 use crate::application::auth::JwtContext;
+use crate::application::dapr_client::DaprClient;
 use crate::domain::application_error::ApplicationError;
 use crate::domain::submission::Submission;
 use crate::infrastructure::db::Db;
 use chrono::{DateTime, Utc};
 use rocket::{get, Responder};
 use serde::Serialize;
+use std::str::FromStr;
+use tokio::runtime::Handle;
+use uuid::Uuid;
 
 #[derive(Responder)]
 #[response(status = 200, content_type = "json")]
@@ -16,16 +20,48 @@ pub struct GetSubmissionResponse {
 pub async fn get_submission(
     submission_id: String,
     user_ctx: JwtContext,
+    dapr_client: DaprClient,
     db: Db,
 ) -> Result<GetSubmissionResponse, ApplicationError> {
-    db.run(
-        move |conn| match Submission::find_by_id(&submission_id, conn) {
-            Ok(submission) => Ok(GetSubmissionResponse {
-                dto: submission.into(),
-            }),
+    let user_id = Uuid::from_str(user_ctx.claims.sub.as_str()).map_err(|_| {
+        ApplicationError::AuthError("Failed to parse user id from token".to_string())
+    })?;
+
+    db.run(move |conn| {
+        match Submission::find_by_id(&submission_id, conn) {
+            Ok(submission) => {
+                // Check if the user is allowed to view the submission
+                let handle = Handle::current();
+                let _ = handle.enter();
+
+                let eval_metadata = futures::executor::block_on(
+                    dapr_client.get_eval_metadata_for_problem(&submission.problem_id()),
+                )?;
+
+                if !eval_metadata.is_published
+                    && eval_metadata.proposer_id != user_id
+                    && submission.user_id() != user_id
+                {
+                    return Err(ApplicationError::CannotViewSubmissionsForUnpublishedProblemError);
+                }
+
+                // Remove the source code from the submission if the user is not allowed to view it
+                let submission = match submission.user_is_allowed_to_view_source_code(
+                    &user_id,
+                    &eval_metadata.proposer_id,
+                    conn,
+                ) {
+                    false => submission.without_source_code(),
+                    true => submission,
+                };
+
+                Ok(GetSubmissionResponse {
+                    dto: submission.into(),
+                })
+            }
             Err(e) => Err(e),
-        },
-    )
+        }
+    })
     .await
 }
 
@@ -58,7 +94,10 @@ impl From<Submission> for GetSubmissionWithTestCasesDto {
                 problem_id: submission.problem_id().to_string(),
                 user_id: submission.user_id().to_string(),
                 language: submission.language().to_string(),
-                source_code: submission.source_code().to_string(),
+                source_code: match submission.source_code().to_string().is_empty() {
+                    true => None,
+                    false => Some(submission.source_code().to_string()),
+                },
                 status: submission.status().to_string(),
                 score: submission.score() as usize,
                 created_at: DateTime::<Utc>::from(submission.created_at()),
@@ -91,7 +130,7 @@ pub struct GetSubmissionDto {
     problem_id: String,
     user_id: String,
     language: String,
-    source_code: String,
+    source_code: Option<String>,
     status: String,
     score: usize,
     #[serde(with = "chrono::serde::ts_seconds")]

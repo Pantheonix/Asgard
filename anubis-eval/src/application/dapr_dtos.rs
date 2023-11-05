@@ -17,7 +17,7 @@ pub struct CacheMetadata {
     pub ttl_in_seconds: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GetEvalMetadataForProblemDto {
     #[serde(rename = "id")]
@@ -31,7 +31,7 @@ pub struct GetEvalMetadataForProblemDto {
     pub tests: Vec<TestDto>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TestDto {
     #[serde(rename = "id")]
     pub test_id: usize,

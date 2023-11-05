@@ -6,6 +6,7 @@ use std::time::SystemTime;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Queryable, Insertable, Identifiable, AsChangeset, Selectable)]
+#[diesel(belongs_to(ProblemModel, foreign_key = problem_id))]
 #[diesel(table_name = submissions)]
 pub(in crate::infrastructure) struct SubmissionModel {
     pub(in crate::infrastructure) language: String,
@@ -73,13 +74,13 @@ pub(in crate::infrastructure) struct TestCaseModel {
     pub(in crate::infrastructure) time: f32,
     pub(in crate::infrastructure) memory: f32,
     pub(in crate::infrastructure) eval_message: Option<String>,
-    pub(in crate::infrastructure) compile_output: Option<String>,
     pub(in crate::infrastructure) stdout: Option<String>,
     pub(in crate::infrastructure) stderr: Option<String>,
     pub(in crate::infrastructure) token: String,
     pub(in crate::infrastructure) submission_id: String,
     pub(in crate::infrastructure) testcase_id: i32,
     pub(in crate::infrastructure) expected_score: i32,
+    pub(in crate::infrastructure) compile_output: Option<String>,
 }
 
 impl From<TestCase> for TestCaseModel {

@@ -6,6 +6,8 @@ use crate::infrastructure::db::Db;
 use chrono::{DateTime, Utc};
 use rocket::{get, Responder};
 use serde::Serialize;
+use std::str::FromStr;
+use uuid::Uuid;
 
 #[derive(Responder)]
 #[response(status = 200, content_type = "json")]
@@ -19,12 +21,19 @@ pub async fn get_submissions(
     user_ctx: JwtContext,
     db: Db,
 ) -> Result<GetSubmissionsResponse, ApplicationError> {
-    db.run(move |conn| match Submission::find_all(fsp_dto, conn) {
-        Ok(submissions) => Ok(GetSubmissionsResponse {
-            dto: submissions.into(),
-        }),
-        Err(e) => Err(e),
-    })
+    let user_id = Uuid::from_str(user_ctx.claims.sub.as_str()).map_err(|_| {
+        ApplicationError::AuthError("Failed to parse user id from token".to_string())
+    })?;
+
+    // Filter out submissions which should not be visible to the user
+    db.run(
+        move |conn| match Submission::find_all(fsp_dto, &user_id, conn) {
+            Ok(submissions) => Ok(GetSubmissionsResponse {
+                dto: submissions.into(),
+            }),
+            Err(e) => Err(e),
+        },
+    )
     .await
 }
 

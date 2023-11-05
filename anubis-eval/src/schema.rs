@@ -1,5 +1,17 @@
 use diesel::{allow_tables_to_appear_in_same_query, joinable, table};
 table! {
+    problems (id) {
+        id -> Text,
+        name -> Text,
+        proposer_id -> Text,
+        is_published -> Bool,
+        time -> Nullable<Float4>,
+        stack_memory -> Nullable<Float4>,
+        total_memory -> Nullable<Float4>,
+    }
+}
+
+table! {
     submissions (id) {
         language -> Varchar,
         source_code -> Text,
@@ -20,16 +32,17 @@ table! {
         time -> Float4,
         memory -> Float4,
         eval_message -> Nullable<Text>,
-        compile_output -> Nullable<Text>,
         stdout -> Nullable<Text>,
         stderr -> Nullable<Text>,
         token -> Text,
         submission_id -> Text,
         testcase_id -> Int4,
         expected_score -> Int4,
+        compile_output -> Nullable<Text>,
     }
 }
 
+joinable!(submissions -> problems (problem_id));
 joinable!(submissions_testcases -> submissions (submission_id));
 
-allow_tables_to_appear_in_same_query!(submissions, submissions_testcases,);
+allow_tables_to_appear_in_same_query!(problems, submissions, submissions_testcases,);

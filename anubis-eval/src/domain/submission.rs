@@ -1,3 +1,4 @@
+use diesel::PgConnection;
 use std::fmt;
 use std::time::SystemTime;
 use uuid::Uuid;
@@ -116,6 +117,37 @@ impl Submission {
             avg_memory,
             test_cases: vec![],
         }
+    }
+
+    pub fn without_source_code(&self) -> Submission {
+        Submission {
+            id: self.id,
+            user_id: self.user_id,
+            problem_id: self.problem_id,
+            language: self.language.clone(),
+            source_code: "".to_string(),
+            status: self.status.clone(),
+            score: self.score,
+            created_at: self.created_at,
+            avg_time: self.avg_time,
+            avg_memory: self.avg_memory,
+            test_cases: self.test_cases.clone(),
+        }
+    }
+
+    pub fn user_is_allowed_to_view_source_code(
+        &self,
+        user_id: &Uuid,
+        proposer_id: &Uuid,
+        conn: &mut PgConnection,
+    ) -> bool {
+        // user has solved the problem or is submission owner or is problem proposer
+        let user_has_solved_problem = Submission::is_problem_solved_by_user(
+            &user_id.to_string(),
+            self.problem_id.to_string(),
+            conn,
+        );
+        user_has_solved_problem || self.user_id == *user_id || self.user_id == *proposer_id
     }
 
     pub fn id(&self) -> Uuid {

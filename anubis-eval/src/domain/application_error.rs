@@ -29,6 +29,12 @@ pub enum ApplicationError {
         #[source]
         source: diesel::result::Error,
     },
+    #[error("Error saving problem eval metadata")]
+    ProblemSaveError {
+        problem_id: String,
+        #[source]
+        source: diesel::result::Error,
+    },
     #[error("Error invoking external services")]
     HttpError {
         #[from]
@@ -65,6 +71,14 @@ pub enum ApplicationError {
     JsonDeserializationError(String),
     #[error("Error authenticating user")]
     AuthError(String),
+    #[error(
+        "Sending submissions for unpublished problems is not allowed unless you are the proposer"
+    )]
+    CannotSubmitForUnpublishedProblemError,
+    #[error(
+        "Viewing submissions for unpublished problems is not allowed unless you are the proposer"
+    )]
+    CannotViewSubmissionsForUnpublishedProblemError,
     #[error("Unknown error")]
     Unknown(String),
 }
@@ -110,6 +124,13 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
                 "Error finding testcases".to_string(),
             )
             .respond_to(request),
+            ApplicationError::ProblemSaveError { problem_id, .. } => {
+                rocket::response::status::Custom(
+                    rocket::http::Status::BadRequest,
+                    format!("Error saving problem eval metadata for problem {}", problem_id),
+                )
+                .respond_to(request)
+            }
             ApplicationError::HttpError { .. } => rocket::response::status::Custom(
                 rocket::http::Status::InternalServerError,
                 "Error invoking external services".to_string(),
@@ -157,6 +178,16 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
             ApplicationError::AuthError(message) => rocket::response::status::Custom(
                 rocket::http::Status::Unauthorized,
                 format!("Error authenticating user: {}", message),
+            )
+            .respond_to(request),
+            ApplicationError::CannotSubmitForUnpublishedProblemError => rocket::response::status::Custom(
+                rocket::http::Status::Forbidden,
+                "Sending submissions for unpublished problems is not allowed unless you are the proposer".to_string(),
+            )
+            .respond_to(request),
+            ApplicationError::CannotViewSubmissionsForUnpublishedProblemError => rocket::response::status::Custom(
+                rocket::http::Status::Forbidden,
+                "Viewing submissions for unpublished problems is not allowed unless you are the proposer".to_string(),
             )
             .respond_to(request),
             ApplicationError::Unknown(message) => rocket::response::status::Custom(

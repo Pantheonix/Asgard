@@ -6,7 +6,7 @@ use crate::domain::submission::{Language, Submission, TestCase, TestCaseStatus};
 use crate::infrastructure::db::Db;
 use rocket::futures::future::join_all;
 use rocket::serde::json::Json;
-use rocket::{post, Responder};
+use rocket::{debug, post, Responder};
 use rocket_validation::{Validate, Validated};
 use serde::Serialize;
 use std::str::FromStr;
@@ -35,13 +35,25 @@ pub async fn create_submission(
     db: Db,
 ) -> Result<CreateSubmissionResponse, ApplicationError> {
     let submission = submission.into_inner();
-    let user_id = Uuid::from_str(user_ctx.claims.sub.as_str()).unwrap();
+    let user_id = Uuid::from_str(user_ctx.claims.sub.as_str()).map_err(|_| {
+        ApplicationError::AuthError("Failed to parse user id from token".to_string())
+    })?;
     let language: Language = submission.language.clone().into();
 
     // ENKI - Get Eval Metadata for Problem
     let eval_metadata = dapr_client
         .get_eval_metadata_for_problem(&submission.problem_id)
         .await?;
+
+    // Check if the submission is allowed to be sent for the problem
+    debug!(
+        "is_published: {}, proposer_id: {}, user_id: {}",
+        eval_metadata.is_published, eval_metadata.proposer_id, user_id
+    );
+
+    if !eval_metadata.is_published && eval_metadata.proposer_id != user_id {
+        return Err(ApplicationError::CannotSubmitForUnpublishedProblemError);
+    }
 
     // FIREBASE - Get Problem Test Contents
     let test_cases: Vec<Result<CreateSubmissionTestCaseDto, ApplicationError>> =

@@ -2,11 +2,13 @@ use crate::application::dapr_dtos::{
     CacheMetadata, CacheSetItemDto, CreateSubmissionBatchDto, EvaluatedSubmissionBatchDto,
     GetEvalMetadataForProblemDto, TestCaseTokenDto,
 };
-use crate::config::di::CONFIG;
+use crate::config::di::{CONFIG, DB_CONN};
 use crate::domain::application_error::ApplicationError;
+use crate::domain::problem::Problem;
 use rocket::debug;
 use rocket::request::{FromRequest, Outcome};
 use serde_json::Value;
+use std::ops::DerefMut;
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]
@@ -58,6 +60,11 @@ impl DaprClient {
                     }),
                 };
                 self.set_items_in_cache(vec![cache_set_item]).await?;
+
+                let problem: Problem = response.clone().into();
+                let db = DB_CONN.clone();
+                let mut db = db.lock().await;
+                problem.upsert(db.deref_mut())?;
 
                 Ok(response)
             }
