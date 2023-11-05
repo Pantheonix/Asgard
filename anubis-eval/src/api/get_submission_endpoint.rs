@@ -4,7 +4,7 @@ use crate::domain::application_error::ApplicationError;
 use crate::domain::submission::Submission;
 use crate::infrastructure::db::Db;
 use chrono::{DateTime, Utc};
-use rocket::{get, Responder};
+use rocket::{error, get, info, Responder};
 use serde::Serialize;
 use std::str::FromStr;
 use tokio::runtime::Handle;
@@ -27,6 +27,8 @@ pub async fn get_submission(
         ApplicationError::AuthError("Failed to parse user id from token".to_string())
     })?;
 
+    info!("Get Submission Request: {:?}", submission_id);
+
     db.run(move |conn| {
         match Submission::find_by_id(&submission_id, conn) {
             Ok(submission) => {
@@ -38,10 +40,13 @@ pub async fn get_submission(
                     dapr_client.get_eval_metadata_for_problem(&submission.problem_id()),
                 )?;
 
+                info!("Eval Metadata retrieved: {:?}", eval_metadata);
+
                 if !eval_metadata.is_published
                     && eval_metadata.proposer_id != user_id
                     && submission.user_id() != user_id
                 {
+                    error!("Cannot view submission for unpublished problem");
                     return Err(ApplicationError::CannotViewSubmissionsForUnpublishedProblemError);
                 }
 
@@ -51,15 +56,25 @@ pub async fn get_submission(
                     &eval_metadata.proposer_id,
                     conn,
                 ) {
-                    false => submission.without_source_code(),
-                    true => submission,
+                    false => {
+                        info!("User is not allowed to view source code for submission");
+                        submission.without_source_code()
+                    }
+                    true => {
+                        info!("User is allowed to view source code for submission");
+                        submission
+                    }
                 };
 
+                info!("Submission retrieved: {:?}", submission);
                 Ok(GetSubmissionResponse {
                     dto: submission.into(),
                 })
             }
-            Err(e) => Err(e),
+            Err(e) => {
+                error!("Error retrieving submission: {:?}", e);
+                Err(e)
+            }
         }
     })
     .await

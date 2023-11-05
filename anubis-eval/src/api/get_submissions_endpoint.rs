@@ -4,7 +4,7 @@ use crate::domain::application_error::ApplicationError;
 use crate::domain::submission::Submission;
 use crate::infrastructure::db::Db;
 use chrono::{DateTime, Utc};
-use rocket::{get, Responder};
+use rocket::{error, get, info, Responder};
 use serde::Serialize;
 use std::str::FromStr;
 use uuid::Uuid;
@@ -25,13 +25,21 @@ pub async fn get_submissions(
         ApplicationError::AuthError("Failed to parse user id from token".to_string())
     })?;
 
+    info!("Get Submissions Request: {:?}", fsp_dto);
+
     // Filter out submissions which should not be visible to the user
     db.run(
         move |conn| match Submission::find_all(fsp_dto, &user_id, conn) {
-            Ok(submissions) => Ok(GetSubmissionsResponse {
-                dto: submissions.into(),
-            }),
-            Err(e) => Err(e),
+            Ok(submissions) => {
+                info!("Submissions retrieved: {:?}", submissions);
+                Ok(GetSubmissionsResponse {
+                    dto: submissions.into(),
+                })
+            }
+            Err(e) => {
+                error!("Failed to get submissions: {:?}", e);
+                Err(e)
+            }
         },
     )
     .await

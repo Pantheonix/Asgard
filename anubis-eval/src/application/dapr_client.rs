@@ -5,8 +5,8 @@ use crate::application::dapr_dtos::{
 use crate::config::di::{CONFIG, DB_CONN};
 use crate::domain::application_error::ApplicationError;
 use crate::domain::problem::Problem;
-use rocket::debug;
 use rocket::request::{FromRequest, Outcome};
+use rocket::{debug, info};
 use serde_json::Value;
 use std::ops::DerefMut;
 use uuid::Uuid;
@@ -28,16 +28,26 @@ impl DaprClient {
             .to_owned()
             .replace("{problem_id}", problem_id.as_str());
 
+        info!("Get Eval Metadata for Problem {} from cache", problem_id);
+
         let cache_response = self.get_item_from_cache(problem_id.as_str()).await?;
 
         match cache_response {
             Some(cache_response) => {
+                info!(
+                    "Eval Metadata for Problem {} retrieved from cache",
+                    problem_id
+                );
                 let response =
                     serde_json::from_value::<GetEvalMetadataForProblemDto>(cache_response)
                         .map_err(|e| ApplicationError::JsonDeserializationError(e.to_string()))?;
                 Ok(response)
             }
             None => {
+                info!(
+                    "Eval Metadata for Problem {} not found in cache",
+                    problem_id
+                );
                 let response = self
                     .reqwest_client
                     .get(&url)
@@ -59,11 +69,18 @@ impl DaprClient {
                         ttl_in_seconds: CONFIG.default_cache_ttl_seconds.to_string(),
                     }),
                 };
+
+                info!("Set Eval Metadata for Problem {} in cache", problem_id);
                 self.set_items_in_cache(vec![cache_set_item]).await?;
 
                 let problem: Problem = response.clone().into();
                 let db = DB_CONN.clone();
                 let mut db = db.lock().await;
+
+                info!(
+                    "Upserting Eval Metadata for Problem {} in database",
+                    problem_id
+                );
                 problem.upsert(db.deref_mut())?;
 
                 Ok(response)
@@ -78,6 +95,8 @@ impl DaprClient {
         (input_url, output_url): (String, String),
     ) -> Result<(String, String), ApplicationError> {
         let input_key = format!("{}-{}-input", problem_id, test_id);
+
+        info!("Get Input for Test {} from cache", test_id);
 
         let cache_response = self.get_item_from_cache(input_key.as_str()).await?;
         let input = match cache_response {
@@ -109,6 +128,8 @@ impl DaprClient {
         };
 
         let output_key = format!("{}-{}-output", problem_id, test_id);
+
+        info!("Get Output for Test {} from cache", test_id);
 
         let cache_response = self.get_item_from_cache(output_key.as_str()).await?;
         let output = match cache_response {

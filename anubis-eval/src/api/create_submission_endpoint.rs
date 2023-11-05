@@ -6,7 +6,7 @@ use crate::domain::submission::{Language, Submission, TestCase, TestCaseStatus};
 use crate::infrastructure::db::Db;
 use rocket::futures::future::join_all;
 use rocket::serde::json::Json;
-use rocket::{debug, post, Responder};
+use rocket::{debug, error, info, post, Responder};
 use rocket_validation::{Validate, Validated};
 use serde::Serialize;
 use std::str::FromStr;
@@ -34,6 +34,8 @@ pub async fn create_submission(
     dapr_client: DaprClient,
     db: Db,
 ) -> Result<CreateSubmissionResponse, ApplicationError> {
+    info!("Create Submission Request: {:?}", submission);
+
     let submission = submission.into_inner();
     let user_id = Uuid::from_str(user_ctx.claims.sub.as_str()).map_err(|_| {
         ApplicationError::AuthError("Failed to parse user id from token".to_string())
@@ -45,6 +47,8 @@ pub async fn create_submission(
         .get_eval_metadata_for_problem(&submission.problem_id)
         .await?;
 
+    info!("Eval Metadata retrieved: {:?}", eval_metadata);
+
     // Check if the submission is allowed to be sent for the problem
     debug!(
         "is_published: {}, proposer_id: {}, user_id: {}",
@@ -52,6 +56,7 @@ pub async fn create_submission(
     );
 
     if !eval_metadata.is_published && eval_metadata.proposer_id != user_id {
+        error!("Cannot submit for unpublished problem");
         return Err(ApplicationError::CannotSubmitForUnpublishedProblemError);
     }
 
@@ -87,10 +92,17 @@ pub async fn create_submission(
         submissions: test_cases,
     };
 
+    info!("Creating Submission Batch: {:?}", submission_batch);
+
     // JUDGE0 - Create Submission Batch
     let submission_tokens = dapr_client
         .create_submission_batch(&submission_batch)
         .await?;
+
+    info!(
+        "Submission Tokens received from Judge0 Evaluator: {:?}",
+        submission_tokens
+    );
 
     // POSTGRES - Create Submission and mark it as pending alongside its test cases
     let submission_id = Uuid::new_v4();
@@ -123,13 +135,21 @@ pub async fn create_submission(
         test_cases,
     );
 
+    info!("Saving Submission to database: {:?}", submission);
+
     db.run(move |conn| match submission.insert(conn) {
-        Ok(_) => Ok(CreateSubmissionResponse {
-            dto: CreateSubmissionResponseDto {
-                id: submission.id().to_string(),
-            },
-        }),
-        Err(e) => Err(e),
+        Ok(_) => {
+            info!("Submission saved to database");
+            Ok(CreateSubmissionResponse {
+                dto: CreateSubmissionResponseDto {
+                    id: submission.id().to_string(),
+                },
+            })
+        }
+        Err(e) => {
+            error!("Error saving submission to database: {:?}", e);
+            Err(e)
+        }
     })
     .await
 }
