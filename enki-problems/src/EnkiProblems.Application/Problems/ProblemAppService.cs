@@ -110,7 +110,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     [Authorize]
     public async Task<
         PagedResultDto<ProblemWithTestsDto>
-    > GetUnpublishedProblemsByCurrentUserAsync()
+    > GetListUnpublishedAsync()
     {
         _logger.LogInformation(
             "Getting unpublished problems list for user {UserId}",
@@ -145,7 +145,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     }
 
     [AllowAnonymous]
-    public async Task<ProblemDto> GetByIdAsync(Guid id)
+    public async Task<ProblemDto> GetAsync(Guid id)
     {
         _logger.LogInformation("Getting problem {ProblemId}", id);
 
@@ -163,7 +163,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     }
 
     [Authorize]
-    public async Task<ProblemWithTestsDto> GetByIdForProposerAsync(Guid id)
+    public async Task<ProblemWithTestsDto> GetUnpublishedAsync(Guid id)
     {
         _logger.LogInformation("Getting problem {ProblemId} for user {UserId}", id, CurrentUser.Id);
 
@@ -245,9 +245,9 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     }
 
     [Authorize]
-    public async Task<ProblemWithTestsDto> CreateTestAsync(Guid problemId, CreateTestDto input)
+    public async Task<ProblemWithTestsDto> CreateTestAsync(Guid id, CreateTestDto input)
     {
-        _logger.LogInformation("Creating test for problem {ProblemId}", problemId);
+        _logger.LogInformation("Creating test for problem {ProblemId}", id);
 
         // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
@@ -258,11 +258,11 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             );
         }
 
-        var problem = await _problemRepository.GetAsync(problemId);
+        var problem = await _problemRepository.GetAsync(id);
 
         if (problem.IsPublished)
         {
-            _logger.LogError("Problem {ProblemId} is published and cannot be edited", problemId);
+            _logger.LogError("Problem {ProblemId} is published and cannot be edited", id);
             throw new BusinessException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem
             );
@@ -272,7 +272,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         {
             _logger.LogError(
                 "Problem {ProblemId} does not belong to user {UserId}",
-                problemId,
+                id,
                 CurrentUser.Id
             );
             throw new AbpAuthorizationException(
@@ -284,7 +284,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         var uploadResponse = await _testService.UploadTestAsync(
             new UploadTestStreamDto
             {
-                ProblemId = problemId.ToString(),
+                ProblemId = id.ToString(),
                 TestArchiveBytes = await input.ArchiveFile.GetStream().GetAllBytesAsync(),
                 TestId = testId.ToString()
             }
@@ -301,7 +301,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
                 EnkiProblemsDomainErrorCodes.TestUploadFailed,
                 $"Test upload failed with status code {uploadResponse.Status.Code}: {uploadResponse.Status.Message}."
             )
-                .WithData("problemId", problem.Id)
+                .WithData("id", problem.Id)
                 .WithData("testId", testId);
         }
 
@@ -309,7 +309,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             new GetDownloadLinkForTestRequest
             {
                 TestId = testId.ToString(),
-                ProblemId = problemId.ToString()
+                ProblemId = id.ToString()
             }
         );
 
@@ -324,7 +324,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
                 EnkiProblemsDomainErrorCodes.TestDownloadUrlRetrievalFailed,
                 $"Test download url retrieval failed with status code {getDownloadUrlsResponse.Status.Code}: {getDownloadUrlsResponse.Status.Message}."
             )
-                .WithData("problemId", problem.Id)
+                .WithData("id", problem.Id)
                 .WithData("testId", testId);
         }
 
@@ -340,13 +340,14 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         return ObjectMapper.Map<Problem, ProblemWithTestsDto>(updatedProblem);
     }
 
+    [Authorize]
     public async Task<ProblemWithTestsDto> UpdateTestAsync(
-        Guid problemId,
+        Guid id,
         int testId,
         UpdateTestDto input
     )
     {
-        _logger.LogInformation("Updating test {TestId} for problem {ProblemId}", testId, problemId);
+        _logger.LogInformation("Updating test {TestId} for problem {ProblemId}", testId, id);
 
         // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
@@ -357,11 +358,11 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             );
         }
 
-        var problem = await _problemRepository.GetAsync(problemId);
+        var problem = await _problemRepository.GetAsync(id);
 
         if (problem.IsPublished)
         {
-            _logger.LogError("Problem {ProblemId} is published and cannot be edited", problemId);
+            _logger.LogError("Problem {ProblemId} is published and cannot be edited", id);
             throw new BusinessException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem
             );
@@ -371,7 +372,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         {
             _logger.LogError(
                 "Problem {ProblemId} does not belong to user {UserId}",
-                problemId,
+                id,
                 CurrentUser.Id
             );
             throw new AbpAuthorizationException(
@@ -384,7 +385,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             var uploadResponse = await _testService.UploadTestAsync(
                 new UploadTestStreamDto
                 {
-                    ProblemId = problemId.ToString(),
+                    ProblemId = id.ToString(),
                     TestArchiveBytes = await input.ArchiveFile.GetStream().GetAllBytesAsync(),
                     TestId = testId.ToString()
                 }
@@ -401,7 +402,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
                     EnkiProblemsDomainErrorCodes.TestUploadFailed,
                     $"Test upload failed with status code {uploadResponse.Status.Code}: {uploadResponse.Status.Message}."
                 )
-                    .WithData("problemId", problem.Id)
+                    .WithData("id", problem.Id)
                     .WithData("testId", testId);
             }
         }
@@ -410,7 +411,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             new GetDownloadLinkForTestRequest
             {
                 TestId = testId.ToString(),
-                ProblemId = problemId.ToString()
+                ProblemId = id.ToString()
             }
         );
 
@@ -425,7 +426,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
                 EnkiProblemsDomainErrorCodes.TestDownloadUrlRetrievalFailed,
                 $"Test download url retrieval failed with status code {getDownloadUrlsResponse.Status.Code}: {getDownloadUrlsResponse.Status.Message}."
             )
-                .WithData("problemId", problem.Id)
+                .WithData("id", problem.Id)
                 .WithData("testId", testId);
         }
 
@@ -443,9 +444,9 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     }
 
     [Authorize]
-    public async Task<ProblemWithTestsDto> DeleteTestAsync(Guid problemId, int testId)
+    public async Task<ProblemWithTestsDto> DeleteTestAsync(Guid id, int testId)
     {
-        _logger.LogInformation("Deleting test {TestId} for problem {ProblemId}", testId, problemId);
+        _logger.LogInformation("Deleting test {TestId} for problem {ProblemId}", testId, id);
 
         // TODO: convert to permission
         if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.ProposerRoleName))
@@ -456,11 +457,11 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             );
         }
 
-        var problem = await _problemRepository.GetAsync(problemId);
+        var problem = await _problemRepository.GetAsync(id);
 
         if (problem.IsPublished)
         {
-            _logger.LogError("Problem {ProblemId} is published and cannot be edited", problemId);
+            _logger.LogError("Problem {ProblemId} is published and cannot be edited", id);
             throw new BusinessException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToEditPublishedProblem
             );
@@ -470,7 +471,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         {
             _logger.LogError(
                 "Problem {ProblemId} does not belong to user {UserId}",
-                problemId,
+                id,
                 CurrentUser.Id
             );
             throw new AbpAuthorizationException(
@@ -479,7 +480,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         }
 
         var deleteResponse = await _testService.DeleteTestAsync(
-            new DeleteTestRequest { ProblemId = problemId.ToString(), TestId = testId.ToString() }
+            new DeleteTestRequest { ProblemId = id.ToString(), TestId = testId.ToString() }
         );
 
         if (deleteResponse.Status.Code != StatusCode.Ok)
@@ -493,7 +494,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
                 EnkiProblemsDomainErrorCodes.TestDeleteFailed,
                 $"Test delete failed with status code {deleteResponse.Status.Code}: {deleteResponse.Status.Message}."
             )
-                .WithData("problemId", problem.Id)
+                .WithData("id", problem.Id)
                 .WithData("testId", testId);
         }
 
