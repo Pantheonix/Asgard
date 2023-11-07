@@ -300,7 +300,9 @@ public class Problem : FullAuditedAggregateRoot<Guid>
 
     private bool CanPublish()
     {
-        return !IsPublished && Tests.Count > 0;
+        return !IsPublished
+            && Tests.Count > 0
+            && Tests.Sum(t => t.Score) == EnkiProblemsConsts.MaxTotalScore;
     }
 
     public int GetFirstAvailableTestId()

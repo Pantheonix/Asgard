@@ -101,9 +101,9 @@ public class EnkiProblemsTestData : ISingletonDependency
 
     public int TestId2 { get; } = 2;
 
-    public int TestScore1 { get; } = 10;
+    public int TestScore1 { get; } = 100;
 
-    public int TestScore2 { get; } = 20;
+    public int TestScore2 { get; } = 100;
 
     public int LimitExceedingTestScore { get; } = 200;
 

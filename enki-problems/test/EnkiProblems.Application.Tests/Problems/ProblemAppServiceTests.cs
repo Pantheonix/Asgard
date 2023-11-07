@@ -415,7 +415,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     [Fact]
     public async Task Should_Create_Test_When_Current_User_Is_Proposer_And_Owner()
     {
-        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+        Login(_testData.ProblemProposerId3, _testData.ProposerUserRoles);
 
         _testService
             .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
@@ -450,12 +450,12 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         );
 
         var problem = await _problemAppService.CreateTestAsync(
-            _testData.ProblemId1,
+            _testData.ProblemId3,
             new CreateTestDto { Score = _testData.TestScore1, ArchiveFile = stubTestArchiveFile }
         );
 
         problem.ShouldNotBeNull();
-        problem.Tests.Count().ShouldBe(2);
+        problem.Tests.Count().ShouldBe(1);
         problem.Tests.ShouldContain(t => t.Id == _testData.TestId1);
     }
 
