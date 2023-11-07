@@ -280,7 +280,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             );
         }
 
-        var testId = problem.Tests.Count + 1;
+        var testId = problem.GetFirstAvailableTestId();
         var uploadResponse = await _testService.UploadTestAsync(
             new UploadTestStreamDto
             {
@@ -509,17 +509,6 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         _logger.LogInformation("Getting eval metadata for problem {ProblemId}", id);
 
         var problem = await _problemRepository.GetAsync(id);
-
-        if (!problem.IsPublished)
-        {
-            _logger.LogError(
-                "Problem {ProblemId} is not published and cannot be used as evaluation metadata",
-                id
-            );
-            throw new AbpAuthorizationException(
-                EnkiProblemsDomainErrorCodes.NotAllowedToViewUnpublishedProblems
-            ).WithData("problemId", problem.Id);
-        }
 
         return ObjectMapper.Map<Problem, ProblemEvalMetadataDto>(problem);
     }

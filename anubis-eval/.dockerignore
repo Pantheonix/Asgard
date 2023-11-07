@@ -1,0 +1,9 @@
+.dockerignore
+Dockerfile
+README.md
+.vscode/
+.idea/
+target/
+logs/
+.env*
+.gitignore

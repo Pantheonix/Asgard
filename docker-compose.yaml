@@ -1,6 +1,13 @@
 # Define services for Asgard
 # TODO: add health checks, restart policies and extract hardcoded ports/tags/etc. to .env files
-version: "3.7"
+version: "3.8"
+
+x-logging: &default-logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 100m
+
 services:
   ############ QUETZALCOATL ############
 
@@ -14,6 +21,7 @@ services:
       - "5210:5210"
     env_file:
       - quetzalcoatl-auth/.env
+    restart: always
     depends_on:
       quetzalcoatl-mssql-db:
         condition: service_started
@@ -22,7 +30,7 @@ services:
 
   quetzalcoatl-auth-dapr:
     container_name: quetzalcoatl-auth-dapr
-    image: daprio/daprd:1.9.5
+    image: daprio/daprd:1.11.2
     command:
       [
         "./daprd",
@@ -73,9 +81,10 @@ services:
       - "5211:5211"
     env_file:
       - enki-problems/.env
+    restart: always
     depends_on:
       enki-mongo-db:
-        condition: service_healthy
+        condition: service_started
       asgard-redis:
         condition: service_started
       hermes-tests-api:
@@ -87,7 +96,7 @@ services:
 
   enki-problems-dapr:
     container_name: enki-problems-dapr
-    image: daprio/daprd:1.9.5
+    image: daprio/daprd:1.11.2
     command:
       [
         "./daprd",
@@ -124,7 +133,12 @@ services:
     ports:
       - 30001:30001
     healthcheck:
-      test: test $(echo "rs.initiate({_id:'enki-rs',members:[{_id:0,host:\"enki-mongo-db:30001\"}]}).ok || rs.status().ok" | mongo --port 30001 --quiet) -eq 1
+      test:
+        [
+          "CMD-SHELL",
+          'mongo --port 30001 --quiet --eval "rs.initiate({_id:''enki-rs'',members:[{_id:0,host:"enki-mongo-db:30001"}]}).ok || rs.status().ok"',
+        ]
+      # test: test $(echo "rs.initiate({_id:'enki-rs',members:[{_id:0,host:\"enki-mongo-db:30001\"}]}).ok || rs.status().ok" | mongo --port 30001 --quiet) -eq 1
       interval: 10s
       start_period: 30s
       timeout: 5s
@@ -144,12 +158,13 @@ services:
       - "5212:5212"
     env_file:
       - hermes-tests/.env
+    restart: always
     profiles:
       - hermes
 
   hermes-tests-dapr:
     container_name: hermes-tests-dapr
-    image: daprio/daprd:1.9.5
+    image: daprio/daprd:1.11.2
     command:
       [
         "./daprd",
@@ -174,11 +189,147 @@ services:
     profiles:
       - hermes
 
+  ############ ANUBIS ############
+
+  anubis-eval-api:
+    container_name: anubis-eval-api
+    image: anubis-eval:1.0
+    build:
+      context: anubis-eval
+      dockerfile: ../anubis-eval/Dockerfile
+    ports:
+      - "5213:5213"
+    env_file:
+      - anubis-eval/.env
+    restart: always
+    profiles:
+      - anubis
+
+  anubis-eval-dapr:
+    container_name: anubis-eval-dapr
+    image: daprio/daprd:1.11.2
+    command:
+      [
+        "./daprd",
+        "-app-id",
+        "anubis-eval",
+        "-app-port",
+        "5213",
+        "-placement-host-address",
+        "asgard-dapr-placement:40000",
+        "-dapr-http-port",
+        "3503",
+        "-dapr-grpc-port",
+        "50003",
+        "-components-path",
+        "/components",
+        "-config",
+        "/config/config.yaml",
+      ]
+    volumes_from:
+      - asgard-dapr-config
+    depends_on:
+      - anubis-eval-api
+    network_mode: "service:anubis-eval-api"
+    profiles:
+      - anubis
+
+  anubis-psql-db:
+    container_name: anubis-psql-db
+    image: postgres:14.1
+    volumes:
+      - anubis-db:/var/lib/postgresql/data/
+    restart: always
+    ports:
+      - "5435:5432"
+    env_file:
+      - anubis-eval/.env
+    profiles:
+      - anubis
+
+  server:
+    image: judge0/judge0:1.13.0
+    volumes:
+      - ./anubis-eval/.env.judge0:/judge0.conf:ro
+    ports:
+      - "2358:2358"
+    privileged: true
+    <<: *default-logging
+    restart: always
+    profiles:
+      - anubis
+
+  judge0-server-dapr:
+    container_name: judge0-server-dapr
+    image: daprio/daprd:1.11.2
+    command:
+      [
+        "./daprd",
+        "-app-id",
+        "judge0-server",
+        "-app-port",
+        "2358",
+        "-placement-host-address",
+        "asgard-dapr-placement:40000",
+        "-dapr-http-port",
+        "3504",
+        "-dapr-grpc-port",
+        "50004",
+        "-components-path",
+        "/components",
+        "-config",
+        "/config/config.yaml",
+      ]
+    volumes_from:
+      - asgard-dapr-config
+    depends_on:
+      - server
+    network_mode: "service:server"
+    profiles:
+      - anubis
+
+  workers:
+    image: judge0/judge0:1.13.0
+    command: ["./scripts/workers"]
+    volumes:
+      - ./anubis-eval/.env.judge0:/judge0.conf:ro
+    privileged: true
+    <<: *default-logging
+    restart: always
+    profiles:
+      - anubis
+
+  db:
+    image: postgres:13.0
+    env_file: ./anubis-eval/.env.judge0
+    volumes:
+      - judge0-db:/var/lib/postgresql/data/
+    <<: *default-logging
+    restart: always
+    profiles:
+      - anubis
+
+  redis:
+    image: redis:6.0
+    command:
+      [
+        "bash",
+        "-c",
+        'docker-entrypoint.sh --appendonly yes --requirepass "$$REDIS_PASSWORD"',
+      ]
+    env_file: ./anubis-eval/.env.judge0
+    volumes:
+      - redis-data:/data
+    <<: *default-logging
+    restart: always
+    profiles:
+      - anubis
+
   ############ DAPR ############
 
   asgard-dapr-placement:
     container_name: asgard-dapr-placement
-    image: daprio/placement:1.9.5
+    image: daprio/placement:1.11.2
     command: ["./placement", "-port", "40000", "-log-level", "debug"]
     ports:
       - "40000"
@@ -216,6 +367,12 @@ volumes:
   quetzalcoatl-db:
     driver: local
   enki-db:
+    driver: local
+  anubis-db:
+    driver: local
+  judge0-db:
+    driver: local
+  redis-data:
     driver: local
 
   ############ NETWORKS ############

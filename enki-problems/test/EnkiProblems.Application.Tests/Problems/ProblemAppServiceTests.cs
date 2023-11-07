@@ -1078,6 +1078,8 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         evalMetadataDto.ShouldNotBeNull();
         evalMetadataDto.Id.ShouldBe(_testData.ProblemId1);
         evalMetadataDto.Name.ShouldBe(_testData.ProblemName1);
+        evalMetadataDto.ProposerId.ShouldBe(_testData.ProblemProposerId1);
+        evalMetadataDto.IsPublished.ShouldBeTrue();
         evalMetadataDto.Time.ShouldBe(_testData.ProblemTimeLimit1);
         evalMetadataDto.TotalMemory.ShouldBe(_testData.ProblemTotalMemoryLimit1);
         evalMetadataDto.StackMemory.ShouldBe(_testData.ProblemStackMemoryLimit1);
@@ -1097,15 +1099,6 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         await Assert.ThrowsAsync<EntityNotFoundException>(async () =>
         {
             await _problemAppService.GetEvalMetadataAsync(Guid.NewGuid());
-        });
-    }
-
-    [Fact]
-    public async Task Should_Not_Get_Eval_Metadata_For_Unpublished_Problem()
-    {
-        await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
-        {
-            await _problemAppService.GetEvalMetadataAsync(_testData.ProblemId1);
         });
     }
     #endregion
