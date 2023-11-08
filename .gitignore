@@ -1,3 +1,4 @@
 .vscode
 .idea
 dapr/components/secrets.json
+envs/
