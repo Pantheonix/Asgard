@@ -90,6 +90,16 @@ static_resources:
                   prefix_rewrite: "/api"
                   cluster: anubis
           http_filters:
+          - name: envoy.filters.http.lua
+            config:
+              inline_code: |
+                function envoy_on_request(request_handle)
+                  local path = request_handle:headers():get(":path")
+                  if string.match(path, "^/api/problems/[^/]+/eval%-metadata$") then
+                      request_handle:logWarn("Request to eval-metadata should be denied for external clients")
+                      request_handle:respond({ [":status"] = "404" }, "Not Found")
+                  end
+                end
           - name: envoy.filters.http.router
       tls_context:
         common_tls_context:
