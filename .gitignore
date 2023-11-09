@@ -2,3 +2,5 @@
 .idea
 dapr/components/secrets.json
 envs/
+odin-gateway/https/*.pem
+odin-gateway/https/*.crt

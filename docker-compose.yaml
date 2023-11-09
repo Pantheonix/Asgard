@@ -21,13 +21,20 @@ services:
       - envs/.env.odin
     ports:
       - "5200:5200"
+      - "5201:5201"
     restart: always
     depends_on:
       quetzalcoatl-auth-api:
         condition: service_started
+      quetzalcoatl-auth-dapr:
+        condition: service_started
       enki-problems-api:
         condition: service_started
+      enki-problems-dapr:
+        condition: service_started
       anubis-eval-api:
+        condition: service_started
+      anubis-eval-dapr:
         condition: service_started
     profiles:
       - odin
