@@ -216,11 +216,13 @@ services:
     ports:
       - 30001:30001
     healthcheck:
+      # for docker-compose
       test:
         [
           "CMD-SHELL",
-          'mongo --port 30001 --quiet --eval "rs.initiate({_id:''enki-rs'',members:[{_id:0,host:"enki-mongo-db:30001"}]}).ok || rs.status().ok"',
+          'mongo --port 27017 --quiet --eval ''rs.initiate({_id:"enki-rs",members:[{_id:0,host:"mongo:27017"}]}).ok || rs.status().ok''',
         ]
+      # for docker compose
       # test: test $(echo "rs.initiate({_id:'enki-rs',members:[{_id:0,host:\"enki-mongo-db:30001\"}]}).ok || rs.status().ok" | mongo --port 30001 --quiet) -eq 1
       interval: 10s
       start_period: 30s
