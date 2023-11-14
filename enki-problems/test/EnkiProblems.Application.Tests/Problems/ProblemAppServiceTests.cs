@@ -134,13 +134,13 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     }
     #endregion
 
-    #region GetUnpublishedProblemsByCurrentUserAsync
+    #region GetListUnpublishedAsync
     [Fact]
     public async Task Should_List_Unpublished_Problems_Only_For_Current_User_When_Current_User_Is_Proposer()
     {
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
 
-        var problemListDto = await _problemAppService.GetUnpublishedProblemsByCurrentUserAsync();
+        var problemListDto = await _problemAppService.GetListUnpublishedAsync();
 
         problemListDto.TotalCount.ShouldBe(1);
         problemListDto.Items.ShouldContain(
@@ -165,18 +165,18 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
 
         await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
         {
-            await _problemAppService.GetUnpublishedProblemsByCurrentUserAsync();
+            await _problemAppService.GetListUnpublishedAsync();
         });
     }
     #endregion
 
-    #region GetByIdAsync
+    #region GetAsync
     [Fact]
     public async Task Should_Get_Published_Problem_When_Current_User_Is_Anonymous()
     {
         await PublishProblemAsync(_testData.ProblemId1);
 
-        var problemDto = await _problemAppService.GetByIdAsync(_testData.ProblemId1);
+        var problemDto = await _problemAppService.GetAsync(_testData.ProblemId1);
 
         problemDto.ShouldNotBeNull();
         problemDto.Id.ShouldBe(_testData.ProblemId1);
@@ -188,7 +188,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     {
         await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
         {
-            await _problemAppService.GetByIdAsync(_testData.ProblemId1);
+            await _problemAppService.GetAsync(_testData.ProblemId1);
         });
     }
 
@@ -197,12 +197,12 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     {
         await Assert.ThrowsAsync<EntityNotFoundException>(async () =>
         {
-            await _problemAppService.GetByIdAsync(Guid.NewGuid());
+            await _problemAppService.GetAsync(Guid.NewGuid());
         });
     }
     #endregion
 
-    #region GetByIdForProposerAsync
+    #region GetUnpublishedAsync
     [Fact]
     public async Task Should_Get_Published_Problem_When_Current_User_Is_Proposer_And_Owner()
     {
@@ -210,7 +210,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
 
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
 
-        var problemDto = await _problemAppService.GetByIdForProposerAsync(_testData.ProblemId1);
+        var problemDto = await _problemAppService.GetUnpublishedAsync(_testData.ProblemId1);
 
         problemDto.ShouldNotBeNull();
         problemDto.Id.ShouldBe(_testData.ProblemId1);
@@ -228,7 +228,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     {
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
 
-        var problemDto = await _problemAppService.GetByIdForProposerAsync(_testData.ProblemId1);
+        var problemDto = await _problemAppService.GetUnpublishedAsync(_testData.ProblemId1);
 
         problemDto.ShouldNotBeNull();
         problemDto.Id.ShouldBe(_testData.ProblemId1);
@@ -248,7 +248,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
 
         await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
         {
-            await _problemAppService.GetByIdForProposerAsync(_testData.ProblemId3);
+            await _problemAppService.GetUnpublishedAsync(_testData.ProblemId3);
         });
     }
 
@@ -259,7 +259,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
 
         await Assert.ThrowsAsync<EntityNotFoundException>(async () =>
         {
-            await _problemAppService.GetByIdForProposerAsync(Guid.NewGuid());
+            await _problemAppService.GetUnpublishedAsync(Guid.NewGuid());
         });
     }
 
@@ -270,7 +270,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
 
         await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
         {
-            await _problemAppService.GetByIdForProposerAsync(_testData.ProblemId1);
+            await _problemAppService.GetUnpublishedAsync(_testData.ProblemId1);
         });
     }
     #endregion
@@ -415,7 +415,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     [Fact]
     public async Task Should_Create_Test_When_Current_User_Is_Proposer_And_Owner()
     {
-        Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
+        Login(_testData.ProblemProposerId3, _testData.ProposerUserRoles);
 
         _testService
             .UploadTestAsync(Arg.Any<UploadTestStreamDto>())
@@ -450,12 +450,12 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         );
 
         var problem = await _problemAppService.CreateTestAsync(
-            _testData.ProblemId1,
+            _testData.ProblemId3,
             new CreateTestDto { Score = _testData.TestScore1, ArchiveFile = stubTestArchiveFile }
         );
 
         problem.ShouldNotBeNull();
-        problem.Tests.Count().ShouldBe(2);
+        problem.Tests.Count().ShouldBe(1);
         problem.Tests.ShouldContain(t => t.Id == _testData.TestId1);
     }
 

@@ -11,19 +11,19 @@ public interface IProblemAppService : IApplicationService
 
     Task<PagedResultDto<ProblemDto>> GetListAsync(ProblemListFilterDto input);
 
-    Task<PagedResultDto<ProblemWithTestsDto>> GetUnpublishedProblemsByCurrentUserAsync();
+    Task<PagedResultDto<ProblemWithTestsDto>> GetListUnpublishedAsync();
 
-    Task<ProblemDto> GetByIdAsync(Guid id);
+    Task<ProblemDto> GetAsync(Guid id);
 
-    Task<ProblemWithTestsDto> GetByIdForProposerAsync(Guid id);
+    Task<ProblemWithTestsDto> GetUnpublishedAsync(Guid id);
 
     Task<ProblemDto> UpdateAsync(Guid id, UpdateProblemDto input);
 
-    Task<ProblemWithTestsDto> CreateTestAsync(Guid problemId, CreateTestDto input);
+    Task<ProblemWithTestsDto> CreateTestAsync(Guid id, CreateTestDto input);
 
-    Task<ProblemWithTestsDto> UpdateTestAsync(Guid problemId, int testId, UpdateTestDto input);
+    Task<ProblemWithTestsDto> UpdateTestAsync(Guid id, int testId, UpdateTestDto input);
 
-    Task<ProblemWithTestsDto> DeleteTestAsync(Guid problemId, int testId);
+    Task<ProblemWithTestsDto> DeleteTestAsync(Guid id, int testId);
 
     Task<ProblemEvalMetadataDto> GetEvalMetadataAsync(Guid id);
 }

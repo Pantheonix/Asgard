@@ -18,10 +18,8 @@ COPY common.props ../
 COPY NuGet.Config ../
 COPY src/EnkiProblems.Application/ EnkiProblems.Application/
 COPY src/EnkiProblems.Application.Contracts/ EnkiProblems.Application.Contracts/
-COPY src/EnkiProblems.DbMigrator/ EnkiProblems.DbMigrator/
 COPY src/EnkiProblems.Domain/ EnkiProblems.Domain/
 COPY src/EnkiProblems.Domain.Shared/ EnkiProblems.Domain.Shared/
-COPY src/EnkiProblems.GrpcClient/ EnkiProblems.GrpcClient/
 COPY src/EnkiProblems.HttpApi/ EnkiProblems.HttpApi/
 COPY src/EnkiProblems.HttpApi.Host/ EnkiProblems.HttpApi.Host/
 COPY src/EnkiProblems.MongoDB/ EnkiProblems.MongoDB/

@@ -110,7 +110,13 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         {
             options.ConventionalControllers.FormBodyBindingIgnoredTypes.Add(typeof(CreateTestDto));
             options.ConventionalControllers.FormBodyBindingIgnoredTypes.Add(typeof(UpdateTestDto));
-            options.ConventionalControllers.Create(typeof(EnkiProblemsApplicationModule).Assembly);
+            options.ConventionalControllers.Create(
+                typeof(EnkiProblemsApplicationModule).Assembly,
+                opts =>
+                {
+                    opts.RootPath = "enki";
+                }
+            );
         });
     }
 

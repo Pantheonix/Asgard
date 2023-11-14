@@ -9,18 +9,82 @@ x-logging: &default-logging
       max-size: 100m
 
 services:
+  ############ ODIN ############
+
+  odin-api-gateway:
+    container_name: odin-api-gateway
+    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/odin-api-gateway:${TAG:-latest}
+    build:
+      context: odin-gateway
+      dockerfile: ../odin-gateway/Dockerfile
+    env_file:
+      - envs/.env.odin
+    ports:
+      - "5200:5200"
+      - "5201:5201"
+    restart: always
+    depends_on:
+      quetzalcoatl-auth-api:
+        condition: service_started
+      quetzalcoatl-auth-dapr:
+        condition: service_started
+      enki-problems-api:
+        condition: service_started
+      enki-problems-dapr:
+        condition: service_started
+      anubis-eval-api:
+        condition: service_started
+      anubis-eval-dapr:
+        condition: service_started
+    profiles:
+      - odin
+
+  odin-api-gateway-dapr:
+    container_name: odin-api-gateway-dapr
+    image: daprio/daprd:1.11.2
+    command:
+      [
+        "./daprd",
+        "-app-id",
+        "odin-api-gateway",
+        "-app-port",
+        "5200",
+        "-placement-host-address",
+        "asgard-dapr-placement:40000",
+        "-dapr-http-port",
+        "3400",
+        "-dapr-grpc-port",
+        "30000",
+        "-components-path",
+        "/components",
+        "-config",
+        "/config/config.yaml",
+      ]
+    volumes_from:
+      - asgard-dapr-config
+    depends_on:
+      odin-api-gateway:
+        condition: service_started
+      asgard-dapr-placement:
+        condition: service_started
+      asgard-dapr-config:
+        condition: service_started
+    network_mode: "service:odin-api-gateway"
+    profiles:
+      - odin
+
   ############ QUETZALCOATL ############
 
   quetzalcoatl-auth-api:
     container_name: quetzalcoatl-auth-api
-    image: quetzalcoatl-auth:1.0
+    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/quetzalcoatl-auth:${TAG:-latest}
     build:
       context: quetzalcoatl-auth
       dockerfile: ../quetzalcoatl-auth/Dockerfile
     ports:
       - "5210:5210"
     env_file:
-      - quetzalcoatl-auth/.env
+      - envs/.env.quetzalcoatl
     restart: always
     depends_on:
       quetzalcoatl-mssql-db:
@@ -42,6 +106,8 @@ services:
         "asgard-dapr-placement:40000",
         "-dapr-http-port",
         "3500",
+        "-dapr-grpc-port",
+        "50000",
         "-components-path",
         "/components",
         "-config",
@@ -50,7 +116,12 @@ services:
     volumes_from:
       - asgard-dapr-config
     depends_on:
-      - quetzalcoatl-auth-api
+      quetzalcoatl-auth-api:
+        condition: service_started
+      asgard-dapr-placement:
+        condition: service_started
+      asgard-dapr-config:
+        condition: service_started
     network_mode: "service:quetzalcoatl-auth-api"
     profiles:
       - quetzalcoatl
@@ -63,7 +134,7 @@ services:
     ports:
       - "1434:1433"
     env_file:
-      - quetzalcoatl-auth/.env
+      - envs/.env.quetzalcoatl
     volumes:
       - quetzalcoatl-db:/var/opt/mssql/data
     profiles:
@@ -73,14 +144,14 @@ services:
 
   enki-problems-api:
     container_name: enki-problems-api
-    image: enki-problems:1.0
+    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/enki-problems:${TAG:-latest}
     build:
       context: enki-problems
       dockerfile: ../enki-problems/Dockerfile
     ports:
       - "5211:5211"
     env_file:
-      - enki-problems/.env
+      - envs/.env.enki
     restart: always
     depends_on:
       enki-mongo-db:
@@ -118,7 +189,12 @@ services:
     volumes_from:
       - asgard-dapr-config
     depends_on:
-      - enki-problems-api
+      enki-problems-api:
+        condition: service_started
+      asgard-dapr-placement:
+        condition: service_started
+      asgard-dapr-config:
+        condition: service_started
     network_mode: "service:enki-problems-api"
     profiles:
       - enki
@@ -150,14 +226,14 @@ services:
 
   hermes-tests-api:
     container_name: hermes-tests-api
-    image: hermes-tests:1.0
+    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/hermes-tests:${TAG:-latest}
     build:
       context: hermes-tests
       dockerfile: ../hermes-tests/Dockerfile
     ports:
       - "5212:5212"
     env_file:
-      - hermes-tests/.env
+      - envs/.env.hermes
     restart: always
     profiles:
       - hermes
@@ -184,7 +260,12 @@ services:
     volumes_from:
       - asgard-dapr-config
     depends_on:
-      - hermes-tests-api
+      hermes-tests-api:
+        condition: service_started
+      asgard-dapr-placement:
+        condition: service_started
+      asgard-dapr-config:
+        condition: service_started
     network_mode: "service:hermes-tests-api"
     profiles:
       - hermes
@@ -193,15 +274,22 @@ services:
 
   anubis-eval-api:
     container_name: anubis-eval-api
-    image: anubis-eval:1.0
+    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/anubis-eval:${TAG:-latest}
     build:
       context: anubis-eval
       dockerfile: ../anubis-eval/Dockerfile
     ports:
       - "5213:5213"
     env_file:
-      - anubis-eval/.env
+      - envs/.env.anubis
     restart: always
+    depends_on:
+      server:
+        condition: service_started
+      judge0-server-dapr:
+        condition: service_started
+      anubis-psql-db:
+        condition: service_started
     profiles:
       - anubis
 
@@ -229,7 +317,12 @@ services:
     volumes_from:
       - asgard-dapr-config
     depends_on:
-      - anubis-eval-api
+      anubis-eval-api:
+        condition: service_started
+      asgard-dapr-placement:
+        condition: service_started
+      asgard-dapr-config:
+        condition: service_started
     network_mode: "service:anubis-eval-api"
     profiles:
       - anubis
@@ -243,19 +336,26 @@ services:
     ports:
       - "5435:5432"
     env_file:
-      - anubis-eval/.env
+      - envs/.env.anubis
     profiles:
       - anubis
 
   server:
     image: judge0/judge0:1.13.0
     volumes:
-      - ./anubis-eval/.env.judge0:/judge0.conf:ro
+      - ./envs/.env.judge0:/judge0.conf:ro
     ports:
       - "2358:2358"
     privileged: true
     <<: *default-logging
     restart: always
+    depends_on:
+      workers:
+        condition: service_started
+      redis:
+        condition: service_started
+      db:
+        condition: service_started
     profiles:
       - anubis
 
@@ -283,7 +383,12 @@ services:
     volumes_from:
       - asgard-dapr-config
     depends_on:
-      - server
+      server:
+        condition: service_started
+      asgard-dapr-placement:
+        condition: service_started
+      asgard-dapr-config:
+        condition: service_started
     network_mode: "service:server"
     profiles:
       - anubis
@@ -292,7 +397,7 @@ services:
     image: judge0/judge0:1.13.0
     command: ["./scripts/workers"]
     volumes:
-      - ./anubis-eval/.env.judge0:/judge0.conf:ro
+      - ./envs/.env.judge0:/judge0.conf:ro
     privileged: true
     <<: *default-logging
     restart: always
@@ -301,7 +406,7 @@ services:
 
   db:
     image: postgres:13.0
-    env_file: ./anubis-eval/.env.judge0
+    env_file: ./envs/.env.judge0
     volumes:
       - judge0-db:/var/lib/postgresql/data/
     <<: *default-logging
@@ -317,7 +422,7 @@ services:
         "-c",
         'docker-entrypoint.sh --appendonly yes --requirepass "$$REDIS_PASSWORD"',
       ]
-    env_file: ./anubis-eval/.env.judge0
+    env_file: ./envs/.env.judge0
     volumes:
       - redis-data:/data
     <<: *default-logging
@@ -333,6 +438,11 @@ services:
     command: ["./placement", "-port", "40000", "-log-level", "debug"]
     ports:
       - "40000"
+    depends_on:
+      asgard-zipkin:
+        condition: service_started
+      asgard-redis:
+        condition: service_started
     profiles:
       - dapr
 
@@ -354,7 +464,7 @@ services:
 
   asgard-dapr-config:
     container_name: asgard-dapr-config
-    image: asgard-dapr-config:1.0
+    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/asgard-dapr-config:${TAG:-latest}
     build:
       context: ./dapr
       dockerfile: Dockerfile
