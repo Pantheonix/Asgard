@@ -1,0 +1,36 @@
+name: Asgard Deployment - Deploy to DigitalOcean Droplet
+
+on:
+  push:
+    branches: ["master", "develop"]
+  
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install sshpass
+        run: sudo apt-get install sshpass
+      
+      - name: Copy docker-compose.yml to droplet
+        run: sshpass -v -p ${{ secrets.DROPLET_PASSWORD }} scp -o StrictHostKeyChecking=no docker-compose.yml root@${{ vars.DROPLET_IP }}:~
+      
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ vars.DROPLET_IP }}
+          username: root
+          password: ${{ secrets.DROPLET_PASSWORD }}
+          script: |
+            cd ~
+            docker-compose down
+            docker-compose pull
+            docker-compose up -d
+

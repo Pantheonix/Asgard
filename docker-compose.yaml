@@ -13,12 +13,12 @@ services:
 
   odin-api-gateway:
     container_name: odin-api-gateway
-    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/odin-api-gateway:${TAG:-latest}
+    image: ${REGISTRY:-ghcr.io/pantheonix}/odin-api-gateway:${TAG:-develop}
     build:
       context: odin-gateway
       dockerfile: ../odin-gateway/Dockerfile
-    env_file:
-      - envs/.env.odin
+    # env_file:
+    #   - envs/.env.odin
     ports:
       - "5200:5200"
       - "5201:5201"
@@ -77,7 +77,7 @@ services:
 
   quetzalcoatl-auth-api:
     container_name: quetzalcoatl-auth-api
-    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/quetzalcoatl-auth:${TAG:-latest}
+    image: ${REGISTRY:-ghcr.io/pantheonix}/quetzalcoatl-auth:${TAG:-develop}
     build:
       context: quetzalcoatl-auth
       dockerfile: ../quetzalcoatl-auth/Dockerfile
@@ -144,7 +144,7 @@ services:
 
   enki-problems-api:
     container_name: enki-problems-api
-    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/enki-problems:${TAG:-latest}
+    image: ${REGISTRY:-ghcr.io/pantheonix}/enki-problems:${TAG:-develop}
     build:
       context: enki-problems
       dockerfile: ../enki-problems/Dockerfile
@@ -226,7 +226,7 @@ services:
 
   hermes-tests-api:
     container_name: hermes-tests-api
-    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/hermes-tests:${TAG:-latest}
+    image: ${REGISTRY:-ghcr.io/pantheonix}/hermes-tests:${TAG:-develop}
     build:
       context: hermes-tests
       dockerfile: ../hermes-tests/Dockerfile
@@ -274,7 +274,7 @@ services:
 
   anubis-eval-api:
     container_name: anubis-eval-api
-    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/anubis-eval:${TAG:-latest}
+    image: ${REGISTRY:-ghcr.io/pantheonix}/anubis-eval:${TAG:-develop}
     build:
       context: anubis-eval
       dockerfile: ../anubis-eval/Dockerfile
@@ -464,7 +464,7 @@ services:
 
   asgard-dapr-config:
     container_name: asgard-dapr-config
-    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/asgard-dapr-config:${TAG:-latest}
+    image: ${REGISTRY:-ghcr.io/pantheonix}/asgard-dapr-config:${TAG:-develop}
     build:
       context: ./dapr
       dockerfile: Dockerfile
