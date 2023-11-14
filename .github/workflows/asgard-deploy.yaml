@@ -19,12 +19,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Log in to the Container registry
-        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.TOKEN }}
+    #   - name: Log in to the Container registry
+    #     uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+    #     with:
+    #       registry: ${{ env.REGISTRY }}
+    #       username: ${{ github.actor }}
+    #       password: ${{ secrets.TOKEN }}
 
       - name: Install sshpass
         run: sudo apt-get install sshpass
@@ -40,6 +40,7 @@ jobs:
           password: ${{ secrets.DROPLET_PASSWORD }}
           script: |
             cd ~
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.TOKEN }}
             docker-compose --profile asgard down
             docker-compose --profile asgard pull
             docker-compose --profile asgard up -d
