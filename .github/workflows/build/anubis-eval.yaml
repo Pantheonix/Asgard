@@ -7,7 +7,7 @@ on:
 
     paths:
       - "anubis-eval/**"
-      - ".github/workflows/anubis-eval.yaml"
+      - ".github/workflows/build/anubis-eval.yaml"
 
   pull_request:
     branches:

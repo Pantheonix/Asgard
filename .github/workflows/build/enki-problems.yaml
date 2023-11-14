@@ -7,7 +7,7 @@ on:
 
     paths:
       - "enki-problems/**"
-      - ".github/workflows/enki-problems.yaml"
+      - ".github/workflows/build/enki-problems.yaml"
 
     pull_request:
     branches:
@@ -38,7 +38,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta

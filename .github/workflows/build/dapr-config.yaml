@@ -7,7 +7,7 @@ on:
 
     paths:
       - "dapr/**"
-      - ".github/workflows/dapr-config.yaml"
+      - ".github/workflows/build/dapr-config.yaml"
 
     pull_request:
     branches:
@@ -38,7 +38,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
