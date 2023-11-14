@@ -19,7 +19,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: odin-gateway
+  IMAGE_NAME: odin-api-gateway
 
 jobs:
   build:
