@@ -19,8 +19,8 @@ jobs:
       - name: Install sshpass
         run: sudo apt-get install sshpass
       
-      - name: Copy docker-compose.yml to droplet
-        run: sshpass -v -p ${{ secrets.DROPLET_PASSWORD }} scp -o StrictHostKeyChecking=no docker-compose.yml root@${{ vars.DROPLET_IP }}:~
+      - name: Copy docker-compose.yaml to droplet
+        run: sshpass -v -p ${{ secrets.DROPLET_PASSWORD }} scp -o StrictHostKeyChecking=no docker-compose.yaml root@${{ vars.DROPLET_IP }}:~
       
       - name: Deploy
         uses: appleboy/ssh-action@master
