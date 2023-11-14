@@ -9,7 +9,7 @@ on:
       - "odin-gateway/**"
       - ".github/workflows/build/odin-gateway.yaml"
 
-    pull_request:
+  pull_request:
     branches:
       - develop
 

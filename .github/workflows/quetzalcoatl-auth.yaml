@@ -9,7 +9,7 @@ on:
       - "quetzalcoatl-auth/**"
       - ".github/workflows/build/quetzalcoatl-auth.yaml"
     
-    pull_request:
+  pull_request:
     branches:
       - develop
 

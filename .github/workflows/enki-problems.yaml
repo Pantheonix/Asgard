@@ -9,7 +9,7 @@ on:
       - "enki-problems/**"
       - ".github/workflows/build/enki-problems.yaml"
 
-    pull_request:
+  pull_request:
     branches:
       - develop
 
