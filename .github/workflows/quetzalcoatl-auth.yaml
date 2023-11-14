@@ -7,7 +7,7 @@ on:
 
     paths:
       - "quetzalcoatl-auth/**"
-      - ".github/workflows/build/quetzalcoatl-auth.yaml"
+      - ".github/workflows/quetzalcoatl-auth.yaml"
 
   pull_request:
     branches:

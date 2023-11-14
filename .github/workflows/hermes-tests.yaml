@@ -15,7 +15,7 @@ on:
 
     paths:
       - "hermes-tests/**"
-      - ".github/workflows/build/hermes-tests.yaml"
+      - ".github/workflows/hermes-tests.yaml"
 
 env:
   REGISTRY: ghcr.io

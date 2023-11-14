@@ -7,7 +7,7 @@ on:
 
     paths:
       - "odin-gateway/**"
-      - ".github/workflows/build/odin-gateway.yaml"
+      - ".github/workflows/odin-gateway.yaml"
 
   pull_request:
     branches:

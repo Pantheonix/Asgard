@@ -7,7 +7,7 @@ on:
 
     paths:
       - "enki-problems/**"
-      - ".github/workflows/build/enki-problems.yaml"
+      - ".github/workflows/enki-problems.yaml"
 
   pull_request:
     branches:
