@@ -4,7 +4,7 @@ on:
   push:
     branches:
         - master
-        # - develop
+        - develop
 
   pull_request:
     branches:
@@ -21,18 +21,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      #   - name: Log in to the Container registry
-      #     uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-      #     with:
-      #       registry: ${{ env.REGISTRY }}
-      #       username: ${{ github.actor }}
-      #       password: ${{ secrets.TOKEN }}
-
       - name: Install sshpass
         run: sudo apt-get install sshpass
 
       - name: Copy docker-compose.yaml to droplet
-        run: sshpass -v -p ${{ secrets.DROPLET_PASSWORD }} scp -o StrictHostKeyChecking=no docker-compose.yaml root@${{ vars.DROPLET_IP }}:~
+        run: sshpass -v -p ${{ secrets.DROPLET_PASSWORD }} scp -o StrictHostKeyChecking=no docker-compose.prod.yaml root@${{ vars.DROPLET_IP }}:~/docker-compose.yaml
 
       - name: Deploy
         uses: appleboy/ssh-action@master
