@@ -1,0 +1,41 @@
+name: Asgard Deployment - Deploy to DigitalOcean Droplet
+
+on:
+#   push:
+#     branches:
+#         - master
+#         - develop
+
+  pull_request:
+    branches:
+      - master
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install sshpass
+        run: sudo apt-get install sshpass
+
+      - name: Copy docker-compose.yaml to droplet
+        run: sshpass -v -p ${{ secrets.DROPLET_PASSWORD }} scp -o StrictHostKeyChecking=no docker-compose.prod.yaml root@${{ vars.DROPLET_IP }}:~/docker-compose.yaml
+
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ vars.DROPLET_IP }}
+          username: root
+          password: ${{ secrets.DROPLET_PASSWORD }}
+          script: |
+            cd ~
+            docker-compose --profile asgard down
+            echo ${{ secrets.TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker-compose --profile asgard pull
+            docker-compose --profile asgard up -d

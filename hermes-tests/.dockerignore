@@ -1,0 +1,12 @@
+.vscode/
+.idea/
+.dart_tool/
+test/
+temp/test/
+*.md
+config-template.json
+config.json
+.dockerignore
+Dockerfile*
+.env*
+Makefile

@@ -1,0 +1,37 @@
+{
+    "firebase": {
+        "apiKey": "",
+        "authDomain": "",
+        "projectId": "",
+        "storageBucket": "",
+        "messagingSenderId": "",
+        "appId": "",
+        "measurementId": ""
+    },
+    "dev": {
+        "host": "localhost",
+        "port": 4000,
+        "timeoutInSeconds": 60,
+        "tempLocalArchivedTestFolder": "",
+        "tempLocalUnarchivedTestFolder": "",
+        "remoteUnarchivedTestFolder": "",
+        "archiveTypeExtension": "zip",
+        "inputFilename": "input.txt",
+        "outputFilename": "output.txt",
+        "testMaxSizeInBytes": 10000000,
+        "logOutputFilePath": ""
+    },
+    "test": {
+        "host": "localhost",
+        "port": 3010,
+        "timeoutInSeconds": 60,
+        "tempLocalArchivedTestFolder": "",
+        "tempLocalUnarchivedTestFolder": "",
+        "remoteUnarchivedTestFolder": "",
+        "archiveTypeExtension": "zip",
+        "inputFilename": "input.txt",
+        "outputFilename": "output.txt",
+        "testMaxSizeInBytes": 1000000,
+        "logOutputFilePath": ""
+    }
+}
