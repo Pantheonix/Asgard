@@ -38,6 +38,7 @@ services:
         condition: service_started
     profiles:
       - odin
+      - asgard
 
   odin-api-gateway-dapr:
     container_name: odin-api-gateway-dapr
@@ -72,6 +73,7 @@ services:
     network_mode: "service:odin-api-gateway"
     profiles:
       - odin
+      - asgard
 
   ############ QUETZALCOATL ############
 
@@ -91,6 +93,7 @@ services:
         condition: service_started
     profiles:
       - quetzalcoatl
+      - asgard
 
   quetzalcoatl-auth-dapr:
     container_name: quetzalcoatl-auth-dapr
@@ -125,6 +128,7 @@ services:
     network_mode: "service:quetzalcoatl-auth-api"
     profiles:
       - quetzalcoatl
+      - asgard
 
   quetzalcoatl-mssql-db:
     container_name: quetzalcoatl-mssql-db
@@ -139,6 +143,7 @@ services:
       - quetzalcoatl-db:/var/opt/mssql/data
     profiles:
       - quetzalcoatl
+      - asgard
 
   ############ ENKI ############
 
@@ -164,6 +169,7 @@ services:
         condition: service_started
     profiles:
       - enki
+      - asgard
 
   enki-problems-dapr:
     container_name: enki-problems-dapr
@@ -198,6 +204,7 @@ services:
     network_mode: "service:enki-problems-api"
     profiles:
       - enki
+      - asgard
 
   enki-mongo-db:
     container_name: enki-mongo-db
@@ -221,6 +228,7 @@ services:
       retries: 3
     profiles:
       - enki
+      - asgard
 
   ############ HERMES ############
 
@@ -237,6 +245,7 @@ services:
     restart: always
     profiles:
       - hermes
+      - asgard
 
   hermes-tests-dapr:
     container_name: hermes-tests-dapr
@@ -269,6 +278,7 @@ services:
     network_mode: "service:hermes-tests-api"
     profiles:
       - hermes
+      - asgard
 
   ############ ANUBIS ############
 
@@ -292,6 +302,7 @@ services:
         condition: service_started
     profiles:
       - anubis
+      - asgard
 
   anubis-eval-dapr:
     container_name: anubis-eval-dapr
@@ -326,6 +337,7 @@ services:
     network_mode: "service:anubis-eval-api"
     profiles:
       - anubis
+      - asgard
 
   anubis-psql-db:
     container_name: anubis-psql-db
@@ -339,6 +351,7 @@ services:
       - envs/.env.anubis
     profiles:
       - anubis
+      - asgard
 
   server:
     image: judge0/judge0:1.13.0
@@ -358,6 +371,7 @@ services:
         condition: service_started
     profiles:
       - anubis
+      - asgard
 
   judge0-server-dapr:
     container_name: judge0-server-dapr
@@ -392,6 +406,7 @@ services:
     network_mode: "service:server"
     profiles:
       - anubis
+      - asgard
 
   workers:
     image: judge0/judge0:1.13.0
@@ -403,6 +418,7 @@ services:
     restart: always
     profiles:
       - anubis
+      - asgard
 
   db:
     image: postgres:13.0
@@ -413,6 +429,7 @@ services:
     restart: always
     profiles:
       - anubis
+      - asgard
 
   redis:
     image: redis:6.0
@@ -429,6 +446,7 @@ services:
     restart: always
     profiles:
       - anubis
+      - asgard
 
   ############ DAPR ############
 
@@ -445,6 +463,7 @@ services:
         condition: service_started
     profiles:
       - dapr
+      - asgard
 
   asgard-redis:
     container_name: asgard-redis
@@ -453,6 +472,7 @@ services:
       - "6379"
     profiles:
       - dapr
+      - asgard
 
   asgard-zipkin:
     container_name: asgard-zipkin
@@ -461,6 +481,7 @@ services:
       - "19411:9411"
     profiles:
       - dapr
+      - asgard
 
   asgard-dapr-config:
     container_name: asgard-dapr-config
@@ -470,6 +491,7 @@ services:
       dockerfile: Dockerfile
     profiles:
       - dapr
+      - asgard
 
   ############ VOLUMES ############
 

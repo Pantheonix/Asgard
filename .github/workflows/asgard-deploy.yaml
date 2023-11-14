@@ -30,7 +30,7 @@ jobs:
           password: ${{ secrets.DROPLET_PASSWORD }}
           script: |
             cd ~
-            docker-compose down
-            docker-compose pull
-            docker-compose up -d
+            docker-compose --profile asgard down
+            docker-compose --profile asgard pull
+            docker-compose --profile asgard up -d
 
