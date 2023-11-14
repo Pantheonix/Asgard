@@ -1,4 +1,4 @@
-name: Build Docker image and publish to GitHub Packages
+name: Hermes - Build Docker image and publish to GitHub Packages
 
 on:
   push:
