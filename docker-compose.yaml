@@ -13,7 +13,7 @@ services:
 
   odin-api-gateway:
     container_name: odin-api-gateway
-    image: odin-api-gateway:1.0
+    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/odin-api-gateway:${TAG:-latest}
     build:
       context: odin-gateway
       dockerfile: ../odin-gateway/Dockerfile
@@ -77,7 +77,7 @@ services:
 
   quetzalcoatl-auth-api:
     container_name: quetzalcoatl-auth-api
-    image: quetzalcoatl-auth:1.0
+    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/quetzalcoatl-auth:${TAG:-latest}
     build:
       context: quetzalcoatl-auth
       dockerfile: ../quetzalcoatl-auth/Dockerfile
@@ -144,7 +144,7 @@ services:
 
   enki-problems-api:
     container_name: enki-problems-api
-    image: enki-problems:1.0
+    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/enki-problems:${TAG:-latest}
     build:
       context: enki-problems
       dockerfile: ../enki-problems/Dockerfile
@@ -226,7 +226,7 @@ services:
 
   hermes-tests-api:
     container_name: hermes-tests-api
-    image: hermes-tests:1.0
+    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/hermes-tests:${TAG:-latest}
     build:
       context: hermes-tests
       dockerfile: ../hermes-tests/Dockerfile
@@ -274,7 +274,7 @@ services:
 
   anubis-eval-api:
     container_name: anubis-eval-api
-    image: anubis-eval:1.0
+    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/anubis-eval:${TAG:-latest}
     build:
       context: anubis-eval
       dockerfile: ../anubis-eval/Dockerfile
@@ -464,7 +464,7 @@ services:
 
   asgard-dapr-config:
     container_name: asgard-dapr-config
-    image: asgard-dapr-config:1.0
+    image: ${REGISTRY:-ghcr.io/pantheonix/asgard}/asgard-dapr-config:${TAG:-latest}
     build:
       context: ./dapr
       dockerfile: Dockerfile
