@@ -11,14 +11,14 @@ appenders:
       pattern: "{d(%Y-%m-%d %H:%M:%S%.3f)} {h({l})} {M} - {m}{n}"
 
 root:
-  level: debug
+  level: info
   appenders:
     - file_appender
     - console_appender
 
 loggers:
   anubis:
-    level: debug
+    level: info
     appenders:
       - file_appender
       - console_appender

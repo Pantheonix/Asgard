@@ -1,6 +1,7 @@
 use crate::application::auth::JwtContext;
 use crate::application::dapr_client::DaprClient;
 use crate::application::dapr_dtos::{CreateSubmissionBatchDto, CreateSubmissionTestCaseDto};
+use crate::config::di::CONFIG;
 use crate::domain::application_error::ApplicationError;
 use crate::domain::submission::{Language, Submission, TestCase, TestCaseStatus};
 use crate::infrastructure::db::Db;
@@ -61,30 +62,29 @@ pub async fn create_submission(
     }
 
     // FIREBASE - Get Problem Test Contents
-    let test_cases: Vec<Result<CreateSubmissionTestCaseDto, ApplicationError>> =
-        join_all(eval_metadata.tests.iter().map(|test| async {
-            let (input, output) = dapr_client
-                .get_input_and_output_for_test(
-                    test.test_id,
-                    eval_metadata.problem_id,
-                    (test.input.clone(), test.output.clone()),
-                )
-                .await?;
+    let mut test_cases = join_all(eval_metadata.tests.iter().map(|test| async {
+        let (input, output) = dapr_client
+            .get_input_and_output_for_test(
+                test.test_id,
+                eval_metadata.problem_id,
+                (test.input.clone(), test.output.clone()),
+            )
+            .await?;
 
-            Ok(CreateSubmissionTestCaseDto {
-                testcase_id: test.test_id,
-                source_code: submission.source_code.to_string(),
-                language: language.clone().into(),
-                stdin: input,
-                time: eval_metadata.time,
-                memory_limit: eval_metadata.total_memory * 1000_f32,
-                stack_limit: eval_metadata.stack_memory * 1000_f32,
-                expected_output: output,
-            })
-        }))
-        .await;
-
-    let mut test_cases = test_cases.into_iter().collect::<Result<Vec<_>, _>>()?;
+        Ok(CreateSubmissionTestCaseDto {
+            testcase_id: test.test_id,
+            source_code: submission.source_code.to_string(),
+            language: language.clone().into(),
+            stdin: input,
+            time: eval_metadata.time,
+            memory_limit: eval_metadata.total_memory * 1000_f32,
+            stack_limit: eval_metadata.stack_memory * 1000_f32,
+            expected_output: output,
+        })
+    }))
+    .await
+    .into_iter()
+    .collect::<Result<Vec<_>, ApplicationError>>()?;
 
     test_cases.sort_by(|a, b| a.testcase_id.cmp(&b.testcase_id));
 
@@ -92,12 +92,27 @@ pub async fn create_submission(
         submissions: test_cases,
     };
 
-    info!("Creating Submission Batch: {:?}", submission_batch);
+    info!("Creating Submission Batch");
 
     // JUDGE0 - Create Submission Batch
-    let submission_tokens = dapr_client
-        .create_submission_batch(&submission_batch)
-        .await?;
+    let submission_tokens = join_all(
+        submission_batch
+            .submissions
+            .chunks(CONFIG.eval_batch_size as usize)
+            .map(|submission_batch| async {
+                dapr_client
+                    .create_submission_batch(&CreateSubmissionBatchDto {
+                        submissions: submission_batch.to_vec(),
+                    })
+                    .await
+            }),
+    )
+    .await
+    .into_iter()
+    .collect::<Result<Vec<_>, ApplicationError>>()?
+    .into_iter()
+    .flatten()
+    .collect::<Vec<_>>();
 
     info!(
         "Submission Tokens received from Judge0 Evaluator: {:?}",
@@ -135,7 +150,7 @@ pub async fn create_submission(
         test_cases,
     );
 
-    info!("Saving Submission to database: {:?}", submission);
+    info!("Saving Submission to database: {:?}", submission.id());
 
     db.run(move |conn| match submission.insert(conn) {
         Ok(_) => {

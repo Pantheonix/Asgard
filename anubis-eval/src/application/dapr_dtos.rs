@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CacheSetItemDto {
     pub key: String,
@@ -11,7 +11,7 @@ pub struct CacheSetItemDto {
     pub metadata: Option<CacheMetadata>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CacheMetadata {
     pub ttl_in_seconds: String,
@@ -42,12 +42,12 @@ pub struct TestDto {
     pub score: usize,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateSubmissionBatchDto {
     pub submissions: Vec<CreateSubmissionTestCaseDto>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateSubmissionTestCaseDto {
     #[serde(skip_serializing)]
     pub testcase_id: usize,
@@ -61,17 +61,17 @@ pub struct CreateSubmissionTestCaseDto {
     pub expected_output: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TestCaseTokenDto {
     pub token: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EvaluatedSubmissionBatchDto {
     pub submissions: Vec<EvaluatedSubmissionTestCaseDto>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EvaluatedSubmissionTestCaseDto {
     pub token: String,
     #[serde(default)]
@@ -89,7 +89,7 @@ pub struct EvaluatedSubmissionTestCaseDto {
     pub stderr: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StatusDto {
     pub id: usize,
     pub description: String,
