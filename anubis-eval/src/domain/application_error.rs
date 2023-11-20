@@ -126,7 +126,6 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
                 )
                 .respond_to(request)
             }
-            .respond_to(request),
             ApplicationError::EvalMetadataError { problem_id, .. } => {
                 rocket::response::status::Custom(
                     rocket::http::Status::InternalServerError,
