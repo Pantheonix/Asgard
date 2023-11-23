@@ -18,6 +18,7 @@ pub struct Config {
     pub eval_cron_schedule: String,
     pub default_no_submissions_per_page: u16,
     pub default_cache_ttl_seconds: u64,
+    pub eval_batch_size: u16,
 }
 
 pub type Atomic<T> = Arc<Mutex<T>>;

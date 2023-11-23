@@ -40,7 +40,9 @@ impl DaprClient {
                 );
                 let response =
                     serde_json::from_value::<GetEvalMetadataForProblemDto>(cache_response)
-                        .map_err(|e| ApplicationError::JsonDeserializationError(e.to_string()))?;
+                        .map_err(|_| ApplicationError::CacheGetError {
+                            key: problem_id.clone(),
+                        })?;
                 Ok(response)
             }
             None => {
@@ -59,12 +61,18 @@ impl DaprClient {
                     })?
                     .json::<GetEvalMetadataForProblemDto>()
                     .await
-                    .map_err(|e| ApplicationError::Unknown(e.to_string()))?;
+                    .map_err(|e| ApplicationError::EvalMetadataError {
+                        problem_id: problem_id.clone(),
+                        source: e,
+                    })?;
 
                 let cache_set_item = CacheSetItemDto {
                     key: problem_id.clone(),
-                    value: serde_json::to_value(&response)
-                        .map_err(|e| ApplicationError::JsonSerializationError(e.to_string()))?,
+                    value: serde_json::to_value(&response).map_err(|_| {
+                        ApplicationError::CacheSetError {
+                            key: problem_id.clone(),
+                        }
+                    })?,
                     metadata: Some(CacheMetadata {
                         ttl_in_seconds: CONFIG.default_cache_ttl_seconds.to_string(),
                     }),
@@ -100,8 +108,11 @@ impl DaprClient {
 
         let cache_response = self.get_item_from_cache(input_key.as_str()).await?;
         let input = match cache_response {
-            Some(input) => serde_json::from_value::<String>(input)
-                .map_err(|e| ApplicationError::JsonDeserializationError(e.to_string()))?,
+            Some(input) => serde_json::from_value::<String>(input).map_err(|_| {
+                ApplicationError::CacheGetError {
+                    key: input_key.clone(),
+                }
+            })?,
             None => {
                 let input = self
                     .reqwest_client
@@ -115,7 +126,11 @@ impl DaprClient {
                     })?
                     .text()
                     .await
-                    .map_err(|e| ApplicationError::Unknown(e.to_string()))?;
+                    .map_err(|e| ApplicationError::TestInputOutputError {
+                        problem_id: problem_id.to_string(),
+                        test_id: test_id.to_string(),
+                        source: e,
+                    })?;
 
                 let cache_set_item = CacheSetItemDto {
                     key: input_key,
@@ -136,8 +151,11 @@ impl DaprClient {
 
         let cache_response = self.get_item_from_cache(output_key.as_str()).await?;
         let output = match cache_response {
-            Some(output) => serde_json::from_value::<String>(output)
-                .map_err(|e| ApplicationError::JsonDeserializationError(e.to_string()))?,
+            Some(output) => serde_json::from_value::<String>(output).map_err(|_| {
+                ApplicationError::CacheGetError {
+                    key: output_key.clone(),
+                }
+            })?,
             None => {
                 let output = self
                     .reqwest_client
@@ -151,7 +169,11 @@ impl DaprClient {
                     })?
                     .text()
                     .await
-                    .map_err(|e| ApplicationError::Unknown(e.to_string()))?;
+                    .map_err(|e| ApplicationError::TestInputOutputError {
+                        problem_id: problem_id.to_string(),
+                        test_id: test_id.to_string(),
+                        source: e,
+                    })?;
 
                 let cache_set_item = CacheSetItemDto {
                     key: output_key,
@@ -181,10 +203,10 @@ impl DaprClient {
             .json(&submission_batch)
             .send()
             .await
-            .map_err(|e| ApplicationError::HttpError { source: e })?
+            .map_err(|e| ApplicationError::SubmissionEvaluationError { source: e })?
             .json::<Vec<TestCaseTokenDto>>()
             .await
-            .map_err(|e| ApplicationError::Unknown(e.to_string()))?;
+            .map_err(|e| ApplicationError::SubmissionEvaluationError { source: e })?;
 
         Ok(response)
     }
@@ -207,10 +229,10 @@ impl DaprClient {
             .get(&url)
             .send()
             .await
-            .map_err(|e| ApplicationError::HttpError { source: e })?
+            .map_err(|e| ApplicationError::SubmissionEvaluationError { source: e })?
             .json::<EvaluatedSubmissionBatchDto>()
             .await
-            .map_err(|e| ApplicationError::Unknown(e.to_string()))?;
+            .map_err(|e| ApplicationError::SubmissionEvaluationError { source: e })?;
 
         Ok(response)
     }
@@ -219,19 +241,19 @@ impl DaprClient {
         let url = CONFIG.dapr_state_store_get_endpoint.to_owned();
         let url = url.replace("{key}", key);
 
-        let response = self.reqwest_client.get(&url).send().await.map_err(|e| {
+        let response = self.reqwest_client.get(&url).send().await.map_err(|_| {
             ApplicationError::CacheGetError {
                 key: key.to_string(),
-                source: e,
             }
         })?;
 
         let response = match response.status() {
             reqwest::StatusCode::OK => {
-                let response = response
-                    .json::<Value>()
-                    .await
-                    .map_err(|e| ApplicationError::JsonDeserializationError(e.to_string()))?;
+                let response = response.json::<Value>().await.map_err(|_| {
+                    ApplicationError::CacheGetError {
+                        key: key.to_string(),
+                    }
+                })?;
                 Some(response)
             }
             _ => None,
@@ -256,13 +278,12 @@ impl DaprClient {
             .json(&items)
             .send()
             .await
-            .map_err(|e| ApplicationError::CacheSetError {
+            .map_err(|_| ApplicationError::CacheSetError {
                 key: items
                     .iter()
                     .map(|item| item.key.clone())
                     .collect::<Vec<String>>()
                     .join(","),
-                source: e,
             })?;
 
         let status = response.status();

@@ -35,12 +35,12 @@ pub enum ApplicationError {
         #[source]
         source: diesel::result::Error,
     },
-    #[error("Error invoking external services")]
-    HttpError {
+    #[error("Submission evaluation service failed")]
+    SubmissionEvaluationError {
         #[from]
         source: reqwest::Error,
     },
-    #[error("Error retrieving eval metadata for problem")]
+    #[error("Error retrieving eval metadata for problem {problem_id:?}")]
     EvalMetadataError {
         problem_id: String,
         #[source]
@@ -53,22 +53,10 @@ pub enum ApplicationError {
         #[source]
         source: reqwest::Error,
     },
-    #[error("Error setting items in cache")]
-    CacheSetError {
-        key: String,
-        #[source]
-        source: reqwest::Error,
-    },
-    #[error("Error getting item from cache")]
-    CacheGetError {
-        key: String,
-        #[source]
-        source: reqwest::Error,
-    },
-    #[error("Error serializing json")]
-    JsonSerializationError(String),
-    #[error("Error deserializing json")]
-    JsonDeserializationError(String),
+    #[error("Error setting items in cache for key {key:?}")]
+    CacheSetError { key: String },
+    #[error("Error getting item from cache for key {key:?}")]
+    CacheGetError { key: String },
     #[error("Error authenticating user")]
     AuthError(String),
     #[error(
@@ -131,11 +119,13 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
                 )
                 .respond_to(request)
             }
-            ApplicationError::HttpError { .. } => rocket::response::status::Custom(
-                rocket::http::Status::InternalServerError,
-                "Error invoking external services".to_string(),
-            )
-            .respond_to(request),
+            ApplicationError::SubmissionEvaluationError { .. } => {
+                rocket::response::status::Custom(
+                    rocket::http::Status::InternalServerError,
+                    "Submission evaluation service failed".to_string(),
+                )
+                .respond_to(request)
+            }
             ApplicationError::EvalMetadataError { problem_id, .. } => {
                 rocket::response::status::Custom(
                     rocket::http::Status::InternalServerError,
@@ -163,16 +153,6 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
             ApplicationError::CacheGetError { key, .. } => rocket::response::status::Custom(
                 rocket::http::Status::InternalServerError,
                 format!("Error getting item from cache for key {}", key),
-            )
-            .respond_to(request),
-            ApplicationError::JsonSerializationError { .. } => rocket::response::status::Custom(
-                rocket::http::Status::InternalServerError,
-                "Error serializing json".to_string(),
-            )
-            .respond_to(request),
-            ApplicationError::JsonDeserializationError { .. } => rocket::response::status::Custom(
-                rocket::http::Status::InternalServerError,
-                "Error deserializing json".to_string(),
             )
             .respond_to(request),
             ApplicationError::AuthError(message) => rocket::response::status::Custom(
