@@ -108,7 +108,7 @@ static_resources:
                   local headers = request_handle:headers()
                   local cookie = headers:get("cookie")
                   if cookie then
-                    local token = string.match(cookie, "AccessToken=([^;]+)")
+                    local token = string.match(cookie, ".AspNetCore.AccessToken=([^;]+)")
                     if token then
                       headers:add("authorization", "Bearer " .. token)
                     end
