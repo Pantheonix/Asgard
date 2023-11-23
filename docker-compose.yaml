@@ -20,8 +20,8 @@ services:
     # env_file:
     #   - envs/.env.odin
     ports:
-      - "5200:5200"
-      - "5201:5201"
+      - "80:80"
+      - "443:443"
     restart: always
     depends_on:
       quetzalcoatl-auth-api:
@@ -49,7 +49,7 @@ services:
         "-app-id",
         "odin-api-gateway",
         "-app-port",
-        "5200",
+        "80",
         "-placement-host-address",
         "asgard-dapr-placement:40000",
         "-dapr-http-port",

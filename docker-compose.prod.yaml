@@ -14,9 +14,11 @@ services:
   odin-api-gateway:
     container_name: odin-api-gateway
     image: ${REGISTRY:-ghcr.io/pantheonix}/odin-api-gateway:${TAG:-develop}
+    # env_file:
+    #   - envs/.env.odin
     ports:
-      - "5200:5200"
-      - "5201:5201"
+      - "80:80"
+      - "443:443"
     restart: always
     depends_on:
       quetzalcoatl-auth-api:
