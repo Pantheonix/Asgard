@@ -54,6 +54,8 @@ The **Pantheonix** backend is called **Asgard**, as the realm of gods from the n
 
 ## Functionalities
 
+![Asgard Endpoints](assets/Asgard-Endpoints.png)
+
 ### Asgard MVP 1.0
 
 **Quetzalcoatl**:
