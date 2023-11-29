@@ -1,12 +1,17 @@
 # Asgard
+
 The **Pantheonix** backend is called **Asgard**, as the realm of gods from the northern mythology, and it consists in a cluster of microservices each performing a well-defined set of actions related to the domain context of such a programming educational platform:
+
 - **Quetzalcoatl**, as the feathered serpent Maya god of wisdom, is the identity microservice responsible to challenge each user's identity claim and authorize access to restricted resources
 - **Enki**, as the sumerian god of wisdom and handcrafting, is the problems microservice responsible to manage the access to the competitive programming problems archive
 - **Hermes**, as the greek god of travel, is the tests microservice responsible to allow swift access to each problem tests archive
 - **Anubis**, as the egyptian god which guides the souls to the underwold, is the submissions microservice responsible to guide the users submissions to their final judgement
 - **Odin**, as the almighty northern god of Asgard, is the API Gateway microservice responsible to guard the access to the rest of backend services
+
 ## Technologies
+
 **Pantheonix**:
+
 - Judge0 CE Evaluator
 - Docker
 - Dapr Runtime (Service Invocation, State Store)
@@ -17,6 +22,7 @@ The **Pantheonix** backend is called **Asgard**, as the realm of gods from the n
 - Github Actions
 
 **Quetzalcoatl**:
+
 - .NET 7
 - FastEndpoints
 - Identity Framework
@@ -25,26 +31,33 @@ The **Pantheonix** backend is called **Asgard**, as the realm of gods from the n
 - JWT Access Tokens and Refresh Tokens
 
 **Enki**:
+
 - .NET 7
 - ABP Framework
 - MongoDB
 
 **Hermes**:
+
 - Dart 2.19
 - gRPC
 
 **Anubis**:
+
 - Rust 1.71
 - Rocket
 - Diesel ORM
 - PostgreSQL
 
 **Odin**:
+
 - Envoy
+
 ## Functionalities
+
 ### Asgard MVP 1.0
 
 **Quetzalcoatl**:
+
 - [x] basic CRUD operations against user entities
 - [x] support for users to upload custom profile pictures
 - [x] login/register based on credentials (email, password)
@@ -52,49 +65,63 @@ The **Pantheonix** backend is called **Asgard**, as the realm of gods from the n
 - [x] access tokens renewal using refresh tokens
 
 **Enki**:
+
 - [x] basic CRUD operations against problem entities (excepting delete) with pagination, filtering and sorting add-ons
 - [x] basic CRUD operations against test entities which are delegated via a gRPC API to Hermes
 - [x] ability to publish a problem as a proposer to become visible for ordinary users
 - [x] ability to provide evaluation metadata for a specific problem to Anubis while judging a submission
 
 **Hermes**:
+
 - [x] basic CRUD operations against test archives
 - [x] while uploaded, tests are received as chunks of bytearrays composing a zip archive of input/output text files, defragmented locally on the server, unarchived and uploaded onward to Firebase Cloud Storage
 - [x] test input/output files can be directly downloaded from Firebase through URLs provided by a dedicated Hermes endpoint
 
 **Anubis**:
+
 - [x] create and read operations for submissions with pagination, filtering and sorting add-ons
 - [x] pending submissions are constantly retrieved from database, evaluated and updated against the db via a cron job
 - [x] support for C, C++, C#, Java, Python, JavaScript, Haskell, Lua, OCaml, Go, Rust
 
 **Odin**:
+
 - [x] HTTP rerouting
 - [x] use Envoy Lua filters to deny access from outside to internal endpoints and copy tokens from cookies to authorization header
+
 ### Asgard MVP 1.1
-***Quetzalcoatl***: 
+
+***Quetzalcoatl***:
+
 - [ ] add admin dashboard endpoints (set user roles)
 - [ ] add forgot email password using reset tokens from Identity Framework
 - [ ] add confirm email support
 - [ ] add OAuth2.0 support for Gmail and Github
 
-***Enki***: 
+***Enki***:
+
 - [ ] add problem labels
 - [ ] search problems by name
 - [ ] delete problem
 - [ ] add bundle of tests at once using a wrapping zip archive (add a metafile with tests scores)
 
-***Hermes***: 
+***Hermes***:
+
 - [ ] delete problem tests
 - [ ] add bundle of tests at once using a wrapping zip archive
 
-***Anubis***: 
+***Anubis***:
+
 - [ ] add standalone submissions
 - [ ] add statistics (submissions per language per problem, current submission time/memory performance among the other submissions with the same language)
+
 ## Architectures
+
+![Pantheonix Solution Architecture](assets/Pantheon-Architecture.png)
+
 From a macro-point of view, Asgard encompasses a few cloud design patterns which rule the overall system behavior and those are the Mesh Service, the API Gateway and the Sidecar patterns:
 
 1. **Mesh Service:**
-   
+
    - **Definition:** A mesh service, often associated with service mesh architecture, is a microservice that is part of a larger network of services (containerized in our case). Service mesh is designed to manage communication between microservices, handling tasks such as service discovery, load balancing, and security.
 
    - **Key Features:**
@@ -139,6 +166,3 @@ Domain-Driven Design (DDD) is a software development approach that focuses on un
 5. **Domain Events:** Capturing and representing significant changes or occurrences within the domain. Domain events help in maintaining consistency and can trigger further actions in the system.
 
 6. **Services:** Encapsulating domain logic that doesn't naturally fit into entities or value objects. Services help in keeping the domain layer clean and focused on core business logic.
-
-![](assets/Pantheon-Architecture.png)
-Pantheonix Solution Architecture
