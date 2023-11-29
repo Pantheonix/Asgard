@@ -29,7 +29,8 @@ public class CreateUserCommandHandler : CommandHandler<CreateUserCommand, Applic
 
         if (!result.Succeeded)
         {
-            var errors = result.Errors
+            var errors = result
+                .Errors
                 .Select(e => e.Description)
                 .Aggregate("Identity Errors: ", (a, b) => $"{a}, {b}");
 

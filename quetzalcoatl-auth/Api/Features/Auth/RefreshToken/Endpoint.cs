@@ -109,7 +109,8 @@ public class UserTokenServiceEndpoint : RefreshTokenService<UserTokenRequest, Us
         ThrowIfAnyErrors();
 
         // check if the refresh token exists in the database
-        var jti = validatedAccessToken.Claims
+        var jti = validatedAccessToken
+            .Claims
             .Single(x => x.Type == JwtRegisteredClaimNames.Jti)
             .Value;
 

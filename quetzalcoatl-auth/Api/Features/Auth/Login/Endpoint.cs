@@ -30,6 +30,8 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
     {
         _logger.LogInformation("Login user {Email}", req.Email);
 
+        _logger.LogInformation(HttpContext.Request.Cookies.Count.ToString());
+
         var validateUserCredentialsCommand = _mapper.Map<ValidateUserCredentialsCommand>(req);
         var user = await validateUserCredentialsCommand.ExecuteAsync(ct: ct);
 
@@ -45,29 +47,39 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
             }
         );
 
-        HttpContext.Response.Cookies.Append(
-            CookieAuthenticationDefaults.CookiePrefix + "AccessToken",
-            tokenResponse.AccessToken,
-            new CookieOptions
-            {
-                HttpOnly = true,
-                SameSite = SameSiteMode.None,
-                Secure = false,
-                Expires = DateTimeOffset.UtcNow.AddTicks(_jwtConfig.JwtAccessTokenLifetime.Ticks)
-            }
-        );
+        HttpContext
+            .Response
+            .Cookies
+            .Append(
+                CookieAuthenticationDefaults.CookiePrefix + "AccessToken",
+                tokenResponse.AccessToken,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    SameSite = SameSiteMode.Lax,
+                    Secure = false,
+                    Expires = DateTimeOffset
+                        .UtcNow
+                        .AddTicks(_jwtConfig.JwtAccessTokenLifetime.Ticks)
+                }
+            );
 
-        HttpContext.Response.Cookies.Append(
-            CookieAuthenticationDefaults.CookiePrefix + "RefreshToken",
-            tokenResponse.RefreshToken,
-            new CookieOptions
-            {
-                HttpOnly = true,
-                SameSite = SameSiteMode.None,
-                Secure = false,
-                Expires = DateTimeOffset.UtcNow.AddTicks(_jwtConfig.JwtRefreshTokenLifetime.Ticks)
-            }
-        );
+        HttpContext
+            .Response
+            .Cookies
+            .Append(
+                CookieAuthenticationDefaults.CookiePrefix + "RefreshToken",
+                tokenResponse.RefreshToken,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    SameSite = SameSiteMode.Lax,
+                    Secure = false,
+                    Expires = DateTimeOffset
+                        .UtcNow
+                        .AddTicks(_jwtConfig.JwtRefreshTokenLifetime.Ticks)
+                }
+            );
 
         await SendOkAsync(
             response: new UserTokenResponse

@@ -32,9 +32,11 @@ public class JtiResolver : IValueResolver<UserTokenResponse, Domain.Entities.Ref
     )
     {
         return Guid.Parse(
-            source.AccessToken
+            source
+                .AccessToken
                 .ExtractValidatedClaimsPrincipal(_tokenValidationParameters)!
-                .Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti)
+                .Claims
+                .Single(x => x.Type == JwtRegisteredClaimNames.Jti)
                 .Value
         );
     }
