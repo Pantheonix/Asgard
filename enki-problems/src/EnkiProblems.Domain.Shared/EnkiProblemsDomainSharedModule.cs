@@ -42,7 +42,8 @@ public class EnkiProblemsDomainSharedModule : AbpModule
 
         Configure<AbpLocalizationOptions>(options =>
         {
-            options.Resources
+            options
+                .Resources
                 .Add<EnkiProblemsResource>("en")
                 .AddBaseTypes(typeof(AbpValidationResource))
                 .AddVirtualJson("/Localization/EnkiProblems");

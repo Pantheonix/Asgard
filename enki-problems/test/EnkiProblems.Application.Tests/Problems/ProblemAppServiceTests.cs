@@ -125,12 +125,14 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         var problemListDto = await _problemAppService.GetListAsync(new ProblemListFilterDto());
 
         problemListDto.TotalCount.ShouldBe(1);
-        problemListDto.Items.ShouldContain(
-            p =>
-                p.Name == _testData.ProblemName1
-                && p.ProposerId == _testData.ProposerUserId1
-                && p.IsPublished == true
-        );
+        problemListDto
+            .Items
+            .ShouldContain(
+                p =>
+                    p.Name == _testData.ProblemName1
+                    && p.ProposerId == _testData.ProposerUserId1
+                    && p.IsPublished == true
+            );
     }
     #endregion
 
@@ -143,19 +145,24 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         var problemListDto = await _problemAppService.GetListUnpublishedAsync();
 
         problemListDto.TotalCount.ShouldBe(1);
-        problemListDto.Items.ShouldContain(
-            p =>
-                p.Name == _testData.ProblemName1
-                && p.ProposerId == _testData.ProposerUserId1
-                && p.IsPublished == false
-        );
+        problemListDto
+            .Items
+            .ShouldContain(
+                p =>
+                    p.Name == _testData.ProblemName1
+                    && p.ProposerId == _testData.ProposerUserId1
+                    && p.IsPublished == false
+            );
 
-        problemListDto.Items[0].Tests.ShouldContain(
-            t =>
-                t.Score == _testData.TestScore1
-                && t.InputDownloadUrl == _testData.TestInputLink1
-                && t.OutputDownloadUrl == _testData.TestOutputLink1
-        );
+        problemListDto
+            .Items[0]
+            .Tests
+            .ShouldContain(
+                t =>
+                    t.Score == _testData.TestScore1
+                    && t.InputDownloadUrl == _testData.TestInputLink1
+                    && t.OutputDownloadUrl == _testData.TestOutputLink1
+            );
     }
 
     [Fact]
@@ -215,12 +222,14 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         problemDto.ShouldNotBeNull();
         problemDto.Id.ShouldBe(_testData.ProblemId1);
         problemDto.Name.ShouldBe(_testData.ProblemName1);
-        problemDto.Tests.ShouldContain(
-            t =>
-                t.Score == _testData.TestScore1
-                && t.InputDownloadUrl == _testData.TestInputLink1
-                && t.OutputDownloadUrl == _testData.TestOutputLink1
-        );
+        problemDto
+            .Tests
+            .ShouldContain(
+                t =>
+                    t.Score == _testData.TestScore1
+                    && t.InputDownloadUrl == _testData.TestInputLink1
+                    && t.OutputDownloadUrl == _testData.TestOutputLink1
+            );
     }
 
     [Fact]
@@ -233,12 +242,14 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         problemDto.ShouldNotBeNull();
         problemDto.Id.ShouldBe(_testData.ProblemId1);
         problemDto.Name.ShouldBe(_testData.ProblemName1);
-        problemDto.Tests.ShouldContain(
-            t =>
-                t.Score == _testData.TestScore1
-                && t.InputDownloadUrl == _testData.TestInputLink1
-                && t.OutputDownloadUrl == _testData.TestOutputLink1
-        );
+        problemDto
+            .Tests
+            .ShouldContain(
+                t =>
+                    t.Score == _testData.TestScore1
+                    && t.InputDownloadUrl == _testData.TestInputLink1
+                    && t.OutputDownloadUrl == _testData.TestOutputLink1
+            );
     }
 
     [Fact]
@@ -1085,12 +1096,14 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         evalMetadataDto.StackMemory.ShouldBe(_testData.ProblemStackMemoryLimit1);
         evalMetadataDto.IoType.ShouldBe(_testData.ProblemIoType1);
         evalMetadataDto.Tests.Count().ShouldBe(1);
-        evalMetadataDto.Tests.ShouldContain(
-            t =>
-                t.Score == _testData.TestScore1
-                && t.InputDownloadUrl == _testData.TestInputLink1
-                && t.OutputDownloadUrl == _testData.TestOutputLink1
-        );
+        evalMetadataDto
+            .Tests
+            .ShouldContain(
+                t =>
+                    t.Score == _testData.TestScore1
+                    && t.InputDownloadUrl == _testData.TestInputLink1
+                    && t.OutputDownloadUrl == _testData.TestOutputLink1
+            );
     }
 
     [Fact]

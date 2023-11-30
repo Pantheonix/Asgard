@@ -5,5 +5,4 @@
 */Logs/
 *.env
 QuetzalcoatlAuth.sln.DotSettings.user
-global.json
 .config/

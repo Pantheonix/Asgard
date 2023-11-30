@@ -5,6 +5,7 @@ use rocket::fairing::AdHoc;
 use rocket::log::private::info;
 use rocket::{catchers, error, launch, routes};
 use tokio_cron_scheduler::{Job, JobScheduler};
+use crate::api::cors::Cors;
 
 mod api;
 mod application;
@@ -48,6 +49,7 @@ async fn rocket() -> _ {
         .manage(REQWEST_CLIENT.clone())
         .attach(Db::fairing())
         .attach(AdHoc::on_ignite("Diesel Migrations", run_migrations))
+        .attach(Cors)
         .mount(
             "/api",
             routes![

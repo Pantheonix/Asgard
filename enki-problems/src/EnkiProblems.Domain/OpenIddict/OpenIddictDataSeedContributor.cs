@@ -273,9 +273,9 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
                 }.All(grantTypes.Contains)
             )
             {
-                application.Permissions.Add(
-                    OpenIddictConstants.Permissions.ResponseTypes.CodeIdToken
-                );
+                application
+                    .Permissions
+                    .Add(OpenIddictConstants.Permissions.ResponseTypes.CodeIdToken);
 
                 if (
                     string.Equals(
@@ -285,12 +285,12 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
                     )
                 )
                 {
-                    application.Permissions.Add(
-                        OpenIddictConstants.Permissions.ResponseTypes.CodeIdTokenToken
-                    );
-                    application.Permissions.Add(
-                        OpenIddictConstants.Permissions.ResponseTypes.CodeToken
-                    );
+                    application
+                        .Permissions
+                        .Add(OpenIddictConstants.Permissions.ResponseTypes.CodeIdTokenToken);
+                    application
+                        .Permissions
+                        .Add(OpenIddictConstants.Permissions.ResponseTypes.CodeToken);
                 }
             }
 
@@ -313,9 +313,9 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
             {
                 if (grantType == OpenIddictConstants.GrantTypes.AuthorizationCode)
                 {
-                    application.Permissions.Add(
-                        OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode
-                    );
+                    application
+                        .Permissions
+                        .Add(OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode);
                     application.Permissions.Add(OpenIddictConstants.Permissions.ResponseTypes.Code);
                 }
 
@@ -324,9 +324,9 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
                     || grantType == OpenIddictConstants.GrantTypes.Implicit
                 )
                 {
-                    application.Permissions.Add(
-                        OpenIddictConstants.Permissions.Endpoints.Authorization
-                    );
+                    application
+                        .Permissions
+                        .Add(OpenIddictConstants.Permissions.Endpoints.Authorization);
                 }
 
                 if (
@@ -338,55 +338,55 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
                 )
                 {
                     application.Permissions.Add(OpenIddictConstants.Permissions.Endpoints.Token);
-                    application.Permissions.Add(
-                        OpenIddictConstants.Permissions.Endpoints.Revocation
-                    );
-                    application.Permissions.Add(
-                        OpenIddictConstants.Permissions.Endpoints.Introspection
-                    );
+                    application
+                        .Permissions
+                        .Add(OpenIddictConstants.Permissions.Endpoints.Revocation);
+                    application
+                        .Permissions
+                        .Add(OpenIddictConstants.Permissions.Endpoints.Introspection);
                 }
 
                 if (grantType == OpenIddictConstants.GrantTypes.ClientCredentials)
                 {
-                    application.Permissions.Add(
-                        OpenIddictConstants.Permissions.GrantTypes.ClientCredentials
-                    );
+                    application
+                        .Permissions
+                        .Add(OpenIddictConstants.Permissions.GrantTypes.ClientCredentials);
                 }
 
                 if (grantType == OpenIddictConstants.GrantTypes.Implicit)
                 {
-                    application.Permissions.Add(
-                        OpenIddictConstants.Permissions.GrantTypes.Implicit
-                    );
+                    application
+                        .Permissions
+                        .Add(OpenIddictConstants.Permissions.GrantTypes.Implicit);
                 }
 
                 if (grantType == OpenIddictConstants.GrantTypes.Password)
                 {
-                    application.Permissions.Add(
-                        OpenIddictConstants.Permissions.GrantTypes.Password
-                    );
+                    application
+                        .Permissions
+                        .Add(OpenIddictConstants.Permissions.GrantTypes.Password);
                 }
 
                 if (grantType == OpenIddictConstants.GrantTypes.RefreshToken)
                 {
-                    application.Permissions.Add(
-                        OpenIddictConstants.Permissions.GrantTypes.RefreshToken
-                    );
+                    application
+                        .Permissions
+                        .Add(OpenIddictConstants.Permissions.GrantTypes.RefreshToken);
                 }
 
                 if (grantType == OpenIddictConstants.GrantTypes.DeviceCode)
                 {
-                    application.Permissions.Add(
-                        OpenIddictConstants.Permissions.GrantTypes.DeviceCode
-                    );
+                    application
+                        .Permissions
+                        .Add(OpenIddictConstants.Permissions.GrantTypes.DeviceCode);
                     application.Permissions.Add(OpenIddictConstants.Permissions.Endpoints.Device);
                 }
 
                 if (grantType == OpenIddictConstants.GrantTypes.Implicit)
                 {
-                    application.Permissions.Add(
-                        OpenIddictConstants.Permissions.ResponseTypes.IdToken
-                    );
+                    application
+                        .Permissions
+                        .Add(OpenIddictConstants.Permissions.ResponseTypes.IdToken);
                     if (
                         string.Equals(
                             type,
@@ -395,20 +395,20 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
                         )
                     )
                     {
-                        application.Permissions.Add(
-                            OpenIddictConstants.Permissions.ResponseTypes.IdTokenToken
-                        );
-                        application.Permissions.Add(
-                            OpenIddictConstants.Permissions.ResponseTypes.Token
-                        );
+                        application
+                            .Permissions
+                            .Add(OpenIddictConstants.Permissions.ResponseTypes.IdTokenToken);
+                        application
+                            .Permissions
+                            .Add(OpenIddictConstants.Permissions.ResponseTypes.Token);
                     }
                 }
 
                 if (!buildInGrantTypes.Contains(grantType))
                 {
-                    application.Permissions.Add(
-                        OpenIddictConstants.Permissions.Prefixes.GrantType + grantType
-                    );
+                    application
+                        .Permissions
+                        .Add(OpenIddictConstants.Permissions.Prefixes.GrantType + grantType);
                 }
             }
 
@@ -429,9 +429,9 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
                 }
                 else
                 {
-                    application.Permissions.Add(
-                        OpenIddictConstants.Permissions.Prefixes.Scope + scope
-                    );
+                    application
+                        .Permissions
+                        .Add(OpenIddictConstants.Permissions.Prefixes.Scope + scope);
                 }
             }
 

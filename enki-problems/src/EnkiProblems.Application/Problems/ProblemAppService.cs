@@ -1,16 +1,16 @@
 using System;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Asgard.Hermes;
 using EnkiProblems.Problems.Tests;
-using Volo.Abp.Authorization;
-using Volo.Abp.Domain.Repositories;
-using Volo.Abp.Application.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Volo.Abp;
+using Volo.Abp.Application.Dtos;
+using Volo.Abp.Authorization;
+using Volo.Abp.Domain.Repositories;
 
 namespace EnkiProblems.Problems;
 
@@ -108,9 +108,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     }
 
     [Authorize]
-    public async Task<
-        PagedResultDto<ProblemWithTestsDto>
-    > GetListUnpublishedAsync()
+    public async Task<PagedResultDto<ProblemWithTestsDto>> GetListUnpublishedAsync()
     {
         _logger.LogInformation(
             "Getting unpublished problems list for user {UserId}",
@@ -341,11 +339,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     }
 
     [Authorize]
-    public async Task<ProblemWithTestsDto> UpdateTestAsync(
-        Guid id,
-        int testId,
-        UpdateTestDto input
-    )
+    public async Task<ProblemWithTestsDto> UpdateTestAsync(Guid id, int testId, UpdateTestDto input)
     {
         _logger.LogInformation("Updating test {TestId} for problem {ProblemId}", testId, id);
 

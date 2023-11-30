@@ -27,10 +27,12 @@ public class EnkiProblemsMongoDbModule : AbpModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
-        context.Services.AddMongoDbContext<EnkiProblemsMongoDbContext>(options =>
-        {
-            options.AddDefaultRepositories();
-        });
+        context
+            .Services
+            .AddMongoDbContext<EnkiProblemsMongoDbContext>(options =>
+            {
+                options.AddDefaultRepositories();
+            });
 
         Configure<AbpUnitOfWorkDefaultOptions>(options =>
         {
