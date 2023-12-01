@@ -114,6 +114,97 @@ static_resources:
                     end
                   end
                 end
+          # get the content of the RefreshToken cookie
+          # get the userId from the request body
+          # add the userId and RefreshToken to the request body
+          # forward the request to the auth service
+          # get the new access token from the response body
+          # set the new access token in the response cookie
+          # forward the response to the client
+          - name: envoy.filters.http.lua
+            config:
+              inline_code: |
+                function envoy_on_request(request_handle)
+                  local path = request_handle:headers():get(":path")
+                  request_handle:logInfo("Request path: " .. path)
+
+                  if string.match(path, "^/api/identity/auth/refresh%-token$") then
+                    local headers = request_handle:headers()
+                    local cookie = headers:get("cookie")
+
+                    if not cookie then
+                      request_handle:respond({ [":status"] = "400" }, "Invalid refresh token, please login again")
+                      return
+                    end
+
+                    local body = request_handle:body()
+
+                    local body_str = body:getBytes(0, body:length())
+                    request_handle:logInfo("Request body: " .. body_str)
+
+                    local user_id = string.match(body_str, '"userId": "([^"]+)"')
+                    local refresh_token = string.match(cookie, ".AspNetCore.RefreshToken=([^;]+)")
+
+                    if not user_id or not refresh_token then
+                      request_handle:respond({ [":status"] = "400" }, "Invalid refresh token, please login again")
+                      return
+                    end
+
+                    request_handle:logInfo("UserId: " .. user_id)
+                    request_handle:logInfo("RefreshToken: " .. refresh_token)
+
+                    local new_body = '{"userId":"' .. user_id .. '","refreshToken":"' .. refresh_token .. '"}'
+                    request_handle:logInfo("New body: " .. new_body)
+                    local response_headers, response_body = request_handle:httpCall(
+                      "quetzalcoatl",
+                      {
+                        [":method"] = "POST",
+                        [":path"] = "/api/auth/refresh-token",
+                        [":authority"] = request_handle:headers():get(":authority"),
+                        ["content-type"] = "application/json",
+                        ["content-length"] = string.len(new_body)
+                      },
+                      new_body,
+                      5000
+                    )
+
+                    for key, value in pairs(response_headers) do
+                      request_handle:logInfo("Response header: " .. key .. " = " .. value)
+                    end
+                    request_handle:logInfo("Response body: " .. response_body)
+
+                    if response_headers[":status"] ~= "200" then
+                      request_handle:respond(
+                        response_headers,
+                        response_body
+                      )
+                      return
+                    end
+                    
+                    local new_access_token = string.match(response_body, '"accessToken":"([^"]+)"')
+                    request_handle:logInfo("New access token: " .. new_access_token)
+
+                    local expirySeconds = 10
+                    local path = "/"
+                    local cookieName = ".AspNetCore.AccessToken"
+                    local expires = os.date("!%a, %d %b %Y %H:%M:%S GMT", os.time() + expirySeconds)
+
+                    local cookieAttributes = {
+                        "HttpOnly",
+                        "Expires=" .. expires,
+                        "Path=" .. path,
+                        "SameSite=Lax",
+                    }
+
+                    local new_cookie = cookieName .. "=" .. new_access_token .. "; " .. table.concat(cookieAttributes, "; ")
+                    response_headers["set-cookie"] = new_cookie
+
+                    request_handle:respond(
+                      response_headers,
+                      "{\"userId\":\"" .. user_id .. "\"}"
+                    )
+                  end
+                end
           - name: envoy.filters.http.router
       # tls_context:
       #   common_tls_context:
