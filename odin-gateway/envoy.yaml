@@ -184,7 +184,7 @@ static_resources:
                     local new_access_token = string.match(response_body, '"accessToken":"([^"]+)"')
                     request_handle:logInfo("New access token: " .. new_access_token)
 
-                    local expirySeconds = 10
+                    local expirySeconds = 3600
                     local path = "/"
                     local cookieName = ".AspNetCore.AccessToken"
                     local expires = os.date("!%a, %d %b %Y %H:%M:%S GMT", os.time() + expirySeconds)
