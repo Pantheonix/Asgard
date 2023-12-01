@@ -18,7 +18,7 @@ public class DeleteStaleRefreshTokens : IBeforeSaveTrigger<RefreshToken>
         if (context.ChangeType is ChangeType.Added or ChangeType.Modified)
         {
             await _tokenRepository.DeleteRefreshTokenAsync(
-                token => token.IsInvalidated || token.IsUsed || token.ExpiryDate < DateTime.UtcNow
+                token => token.IsInvalidated || token.ExpiryDate < DateTime.UtcNow
             );
         }
     }

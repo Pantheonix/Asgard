@@ -265,6 +265,8 @@ src/EnkiProblems.HttpApi.HostWithIds/Logs/*
 src/EnkiProblems.DbMigrator/Logs/*
 src/EnkiProblems.Blazor.Server/Logs/*
 src/EnkiProblems.Blazor.Server.Tiered/Logs/*
+EnkiProblems.sln.DotSettings
+.config/
 
 # Use abp install-libs to restore.
 **/wwwroot/libs/*

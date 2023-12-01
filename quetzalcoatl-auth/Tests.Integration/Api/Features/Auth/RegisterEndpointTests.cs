@@ -37,13 +37,13 @@ public class RegisterEndpointTests : IClassFixture<ApiWebFactory>
             "demo.jpg"
         );
 
-        _client.DefaultRequestHeaders.Accept.Add(
-            new MediaTypeWithQualityHeaderValue("application/json")
-        );
-        _client.DefaultRequestHeaders.TryAddWithoutValidation(
-            "Content-Type",
-            "multipart/form-data"
-        );
+        _client
+            .DefaultRequestHeaders
+            .Accept
+            .Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        _client
+            .DefaultRequestHeaders
+            .TryAddWithoutValidation("Content-Type", "multipart/form-data");
 
         var requestForm = new MultipartFormDataContent();
 
@@ -108,13 +108,13 @@ public class RegisterEndpointTests : IClassFixture<ApiWebFactory>
             "demo.jpg"
         );
 
-        _client.DefaultRequestHeaders.Accept.Add(
-            new MediaTypeWithQualityHeaderValue("application/json")
-        );
-        _client.DefaultRequestHeaders.TryAddWithoutValidation(
-            "Content-Type",
-            "multipart/form-data"
-        );
+        _client
+            .DefaultRequestHeaders
+            .Accept
+            .Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        _client
+            .DefaultRequestHeaders
+            .TryAddWithoutValidation("Content-Type", "multipart/form-data");
 
         var requestForm = new MultipartFormDataContent();
 

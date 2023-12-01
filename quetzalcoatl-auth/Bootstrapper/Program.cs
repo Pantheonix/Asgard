@@ -1,7 +1,10 @@
-Log.Logger = new LoggerConfiguration().MinimumLevel
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel
     .Override("Microsoft", LogEventLevel.Information)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
+    .Enrich
+    .FromLogContext()
+    .WriteTo
+    .Console()
     .CreateLogger();
 
 try
@@ -27,12 +30,19 @@ try
 
     builder.Services.AddHealthChecks().AddSqlServer(dsnConnectionString!);
 
-    builder.Host.UseSerilog(
-        (context, services, configuration) =>
-            configuration.ReadFrom.Configuration(context.Configuration).ReadFrom.Services(services)
-    );
+    builder
+        .Host
+        .UseSerilog(
+            (context, services, configuration) =>
+                configuration
+                    .ReadFrom
+                    .Configuration(context.Configuration)
+                    .ReadFrom
+                    .Services(services)
+        );
 
-    builder.Services
+    builder
+        .Services
         .AddDbContext<ApplicationDbContext>(options =>
         {
             options.UseSqlServer(dsnConnectionString);
@@ -50,10 +60,26 @@ try
 
     if (builder.Environment.IsDevelopment())
     {
-        builder.Services.EnsureDbCreated<ApplicationDbContext>();
+        builder.Services.ApplyMigrations<ApplicationDbContext>();
     }
 
-    builder.Services
+    var corsOrigins = builder.Configuration.GetSection("AllowedOrigins").Value?.Split(';');
+    Log.Information("Allowed origins: {CorsOrigins}", corsOrigins);
+    builder
+        .Services
+        .AddCors(options =>
+        {
+            options.AddDefaultPolicy(builder =>
+            {
+                builder
+                    .WithOrigins(
+                        corsOrigins ?? new[] { "http://localhost:10000", "https://pantheonix.live" }
+                    )
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+            });
+        })
         .AddFastEndpoints(options =>
         {
             options.DisableAutoDiscovery = true;
@@ -87,6 +113,7 @@ try
 
     app.UseSerilogRequestLogging()
         .UseDefaultExceptionHandler()
+        .UseCors()
         .UseAuthentication()
         .UseAuthorization()
         .UseFastEndpoints(config =>

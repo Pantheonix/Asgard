@@ -19,6 +19,7 @@ pub struct Config {
     pub default_no_submissions_per_page: u16,
     pub default_cache_ttl_seconds: u64,
     pub eval_batch_size: u16,
+    pub allowed_origins: String,
 }
 
 pub type Atomic<T> = Arc<Mutex<T>>;

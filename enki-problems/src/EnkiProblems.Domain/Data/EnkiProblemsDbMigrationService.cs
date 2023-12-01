@@ -53,7 +53,8 @@ public class EnkiProblemsDbMigrationService : ITransientDependency
             {
                 if (tenant.ConnectionStrings.Any())
                 {
-                    var tenantConnectionStrings = tenant.ConnectionStrings
+                    var tenantConnectionStrings = tenant
+                        .ConnectionStrings
                         .Select(x => x.Value)
                         .ToList();
 

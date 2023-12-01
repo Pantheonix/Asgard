@@ -1,10 +1,10 @@
-global using Domain.Entities;
-global using FastEndpoints;
-global using Microsoft.AspNetCore.Identity;
-global using FastEndpoints.Security;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Security.Claims;
 global using AutoMapper;
-global using IMapper = AutoMapper.IMapper;
 global using Domain.Configs;
+global using Domain.Entities;
+global using FastEndpoints;
+global using FastEndpoints.Security;
+global using Microsoft.AspNetCore.Identity;
 global using Microsoft.Extensions.Logging;
+global using IMapper = AutoMapper.IMapper;

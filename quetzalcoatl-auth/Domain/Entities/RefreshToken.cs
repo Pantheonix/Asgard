@@ -1,14 +1,12 @@
 namespace Domain.Entities;
 
 [Table("RefreshTokens")]
-[PrimaryKey(nameof(Token), nameof(Jti))]
+[PrimaryKey(nameof(Token))]
 public class RefreshToken
 {
     public Guid Token { get; set; }
-    public Guid Jti { get; set; }
     public DateTime CreationDate { get; set; }
     public DateTime ExpiryDate { get; set; }
-    public bool IsUsed { get; set; }
     public bool IsInvalidated { get; set; }
     public Guid UserId { get; set; }
 

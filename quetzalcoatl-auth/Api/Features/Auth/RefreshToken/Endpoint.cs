@@ -4,6 +4,7 @@ public class UserTokenServiceEndpoint : RefreshTokenService<UserTokenRequest, Us
 {
     private readonly IRefreshTokenRepository _tokenRepository;
     private readonly TokenValidationParameters _tokenValidationParameters;
+    private readonly JwtConfig _jwtConfig;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IMapper _mapper;
     private readonly ILogger<UserTokenServiceEndpoint> _logger;
@@ -22,15 +23,16 @@ public class UserTokenServiceEndpoint : RefreshTokenService<UserTokenRequest, Us
         _tokenValidationParameters =
             tokenValidationParameters
             ?? throw new ArgumentNullException(nameof(tokenValidationParameters));
+        _jwtConfig = jwtConfig.Value ?? throw new ArgumentNullException(nameof(jwtConfig));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         Setup(opt =>
         {
-            opt.TokenSigningKey = jwtConfig.Value.SecretKey;
-            opt.AccessTokenValidity = jwtConfig.Value.JwtAccessTokenLifetime;
-            opt.RefreshTokenValidity = jwtConfig.Value.JwtRefreshTokenLifetime;
+            opt.TokenSigningKey = _jwtConfig.SecretKey;
+            opt.AccessTokenValidity = _jwtConfig.JwtAccessTokenLifetime;
+            opt.RefreshTokenValidity = _jwtConfig.JwtRefreshTokenLifetime;
             opt.Endpoint(
                 "/auth/refresh-token",
                 ep =>
@@ -53,107 +55,37 @@ public class UserTokenServiceEndpoint : RefreshTokenService<UserTokenRequest, Us
         );
 
         var token = _mapper.Map<Domain.Entities.RefreshToken>(response);
-
-        var lastNotExpiredRefreshTokenUsedByUser = await _tokenRepository.GetRefreshTokenAsync(
-            rt =>
-                rt.UserId == Guid.Parse(response.UserId)
-                && rt.ExpiryDate > DateTime.UtcNow
-                && !rt.IsUsed
-                && !rt.IsInvalidated,
-            rtOrd => rtOrd.OrderByDescending(rt => rt.ExpiryDate)
-        );
-
-        if (lastNotExpiredRefreshTokenUsedByUser is not null)
-        {
-            token.CreationDate = lastNotExpiredRefreshTokenUsedByUser.CreationDate;
-            token.ExpiryDate = lastNotExpiredRefreshTokenUsedByUser.ExpiryDate;
-            token.IsUsed = false;
-        }
-
         await _tokenRepository.CreateRefreshTokenAsync(token, new CancellationToken());
     }
 
     public override async Task RefreshRequestValidationAsync(UserTokenRequest req)
     {
         _logger.LogInformation(
-            "Validating the refresh/access token pair for user {UserId}",
+            "Validating the refresh token for user {UserId}",
             req.UserId
         );
-
-        var validatedAccessToken = req.AccessToken.ExtractValidatedClaimsPrincipal(
-            _tokenValidationParameters
-        );
-
-        // check if the access token is valid
-        if (validatedAccessToken is null)
-        {
-            _logger.LogError("Access token is invalid");
-            AddError("Access token is invalid");
-        }
-        ThrowIfAnyErrors();
-
-        // check if the access token is expired
-        var expiryDateUnix = long.Parse(
-            validatedAccessToken!.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Exp).Value
-        );
-
-        var expiryDateTimeUtc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(
-            expiryDateUnix
-        );
-
-        if (expiryDateTimeUtc > DateTime.UtcNow)
-        {
-            _logger.LogError("Access token has not expired yet");
-            AddError("Access token has not expired yet");
-        }
-        ThrowIfAnyErrors();
-
-        // check if the refresh token exists in the database
-        var jti = validatedAccessToken.Claims
-            .Single(x => x.Type == JwtRegisteredClaimNames.Jti)
-            .Value;
 
         var storedRefreshToken = await _tokenRepository.GetRefreshTokenAsync(
             rt =>
                 rt.Token == Guid.Parse(req.RefreshToken)
-                && rt.Jti == Guid.Parse(jti)
                 && rt.UserId == Guid.Parse(req.UserId)
+                && rt.ExpiryDate > DateTime.UtcNow
         );
 
         if (storedRefreshToken is null)
         {
-            _logger.LogError("The refresh/access token pair does not exist");
-            AddError("This refresh/access token pair does not exist");
-        }
-        ThrowIfAnyErrors();
-
-        // check if the refresh token is expired
-        if (DateTime.UtcNow > storedRefreshToken!.ExpiryDate)
-        {
-            _logger.LogError("This refresh token has expired");
-            AddError("This refresh token has expired");
+            _logger.LogError("The refresh token has expired or does not exist in the database");
+            AddError("The refresh token has expired or does not exist in the database");
         }
         ThrowIfAnyErrors();
 
         // check if the refresh token has been invalidated
-        if (storedRefreshToken.IsInvalidated)
+        if (storedRefreshToken!.IsInvalidated)
         {
-            _logger.LogError("This refresh token has been invalidated");
-            AddError("This refresh token has been invalidated");
+            _logger.LogError("The refresh token has been invalidated");
+            AddError("The refresh token has been invalidated");
         }
         ThrowIfAnyErrors();
-
-        // check if the refresh token has been used
-        if (storedRefreshToken.IsUsed)
-        {
-            _logger.LogError("This refresh token has been used for the provided access token");
-            AddError("This refresh token has been used for the provided access token");
-        }
-        ThrowIfAnyErrors();
-
-        // mark refresh token as used
-        storedRefreshToken.IsUsed = true;
-        await _tokenRepository.UpdateRefreshTokenAsync(storedRefreshToken, new CancellationToken());
     }
 
     public override async Task SetRenewalPrivilegesAsync(

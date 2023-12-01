@@ -12,7 +12,7 @@ public static class ServiceCollectionExtensions
             services.Remove(descriptor);
     }
 
-    public static void EnsureDbCreated<T>(this IServiceCollection services)
+    public static void ApplyMigrations<T>(this IServiceCollection services)
         where T : DbContext
     {
         var serviceProvider = services.BuildServiceProvider();

@@ -15,7 +15,7 @@ public class ApiWebFactory : WebApplicationFactory<IProgramMarker>, IAsyncLifeti
             {
                 options.UseSqlServer(_database.GetConnectionString());
             });
-            services.EnsureDbCreated<ApplicationDbContext>();
+            services.ApplyMigrations<ApplicationDbContext>();
         });
     }
 

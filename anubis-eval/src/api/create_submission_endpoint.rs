@@ -28,7 +28,7 @@ pub struct CreateSubmissionResponse {
     dto: CreateSubmissionResponseDto,
 }
 
-#[post("/submission", format = "json", data = "<submission>")]
+#[post("/submissions", format = "json", data = "<submission>")]
 pub async fn create_submission(
     submission: Validated<Json<CreateSubmissionRequest>>,
     user_ctx: JwtContext,
