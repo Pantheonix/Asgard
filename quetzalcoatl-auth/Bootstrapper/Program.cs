@@ -60,7 +60,7 @@ try
 
     if (builder.Environment.IsDevelopment())
     {
-        builder.Services.EnsureDbCreated<ApplicationDbContext>();
+        builder.Services.ApplyMigrations<ApplicationDbContext>();
     }
 
     var corsOrigins = builder.Configuration.GetSection("AllowedOrigins").Value?.Split(';');
