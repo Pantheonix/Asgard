@@ -22,7 +22,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    restart: always
+    restart: unless-stopped
     depends_on:
       quetzalcoatl-auth-api:
         condition: service_started
@@ -87,7 +87,7 @@ services:
       - "5210:5210"
     env_file:
       - envs/.env.quetzalcoatl
-    restart: always
+    restart: unless-stopped
     depends_on:
       quetzalcoatl-mssql-db:
         condition: service_started
@@ -133,7 +133,7 @@ services:
   quetzalcoatl-mssql-db:
     container_name: quetzalcoatl-mssql-db
     image: mcr.microsoft.com/mssql/server:2022-latest
-    restart: always
+    restart: unless-stopped
     user: root
     ports:
       - "1434:1433"
@@ -157,7 +157,7 @@ services:
       - "5211:5211"
     env_file:
       - envs/.env.enki
-    restart: always
+    restart: unless-stopped
     depends_on:
       enki-mongo-db:
         condition: service_started
@@ -209,7 +209,7 @@ services:
   enki-mongo-db:
     container_name: enki-mongo-db
     image: mongo:5.0
-    restart: always
+    restart: unless-stopped
     command: ["--replSet", "enki-rs", "--bind_ip_all", "--port", "30001"]
     volumes:
       - enki-db:/data/db
@@ -244,7 +244,7 @@ services:
       - "5212:5212"
     env_file:
       - envs/.env.hermes
-    restart: always
+    restart: unless-stopped
     profiles:
       - hermes
       - asgard
@@ -294,7 +294,7 @@ services:
       - "5213:5213"
     env_file:
       - envs/.env.anubis
-    restart: always
+    restart: unless-stopped
     depends_on:
       server:
         condition: service_started
@@ -346,7 +346,7 @@ services:
     image: postgres:14.1
     volumes:
       - anubis-db:/var/lib/postgresql/data/
-    restart: always
+    restart: unless-stopped
     ports:
       - "5435:5432"
     env_file:
@@ -363,7 +363,7 @@ services:
       - "2358:2358"
     privileged: true
     <<: *default-logging
-    restart: always
+    restart: unless-stopped
     depends_on:
       workers:
         condition: service_started
@@ -417,7 +417,7 @@ services:
       - ./envs/.env.judge0:/judge0.conf:ro
     privileged: true
     <<: *default-logging
-    restart: always
+    restart: unless-stopped
     profiles:
       - anubis
       - asgard
@@ -428,7 +428,7 @@ services:
     volumes:
       - judge0-db:/var/lib/postgresql/data/
     <<: *default-logging
-    restart: always
+    restart: unless-stopped
     profiles:
       - anubis
       - asgard
@@ -445,7 +445,7 @@ services:
     volumes:
       - redis-data:/data
     <<: *default-logging
-    restart: always
+    restart: unless-stopped
     profiles:
       - anubis
       - asgard
