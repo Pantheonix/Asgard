@@ -55,7 +55,7 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, UserTokenRespo
                 new CookieOptions
                 {
                     HttpOnly = true,
-                    SameSite = SameSiteMode.None,
+                    SameSite = SameSiteMode.Lax,
                     Secure = false,
                     Expires = DateTimeOffset
                         .UtcNow
@@ -72,7 +72,7 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, UserTokenRespo
                 new CookieOptions
                 {
                     HttpOnly = true,
-                    SameSite = SameSiteMode.None,
+                    SameSite = SameSiteMode.Lax,
                     Secure = false,
                     Expires = DateTimeOffset
                         .UtcNow
