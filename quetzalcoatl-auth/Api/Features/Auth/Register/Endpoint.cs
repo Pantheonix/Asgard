@@ -90,11 +90,7 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, UserTokenRespo
                 Email = user.Email!,
                 Fullname = user.Fullname,
                 Bio = user.Bio,
-                ProfilePictureUrl = user.GetProfilePictureUrl(
-                    ProfilePictureConstants.BaseUrl,
-                    ProfilePictureConstants.EndpointUrl,
-                    ProfilePictureConstants.Extension
-                ),
+                ProfilePictureId = user.ProfilePicture?.Id
             },
             cancellation: ct
         );

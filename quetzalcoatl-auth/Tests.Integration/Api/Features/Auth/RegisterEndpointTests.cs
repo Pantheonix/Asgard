@@ -87,7 +87,7 @@ public class RegisterEndpointTests : IClassFixture<ApiWebFactory>
         result.Email.Should().Be(request.Email);
         result.Fullname.Should().Be(request.Fullname);
         result.Bio.Should().Be(request.Bio);
-        result.ProfilePictureUrl.Should().NotBeNullOrWhiteSpace();
+        result.ProfilePictureId.Should().NotBeNull();
 
         #endregion
     }

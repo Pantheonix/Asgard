@@ -383,11 +383,7 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
             Email = applicationUser.Email!,
             Fullname = $"{applicationUser.Fullname!}-updated",
             Bio = applicationUser.Bio,
-            ProfilePictureUrl = applicationUser.GetProfilePictureUrl(
-                ProfilePictureConstants.BaseUrl,
-                ProfilePictureConstants.EndpointUrl,
-                ProfilePictureConstants.Extension
-            )
+            ProfilePictureId = applicationUser.ProfilePicture?.Id
         };
 
         #endregion
@@ -412,7 +408,7 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
         result.Should().NotBeNull();
         result
             .Should()
-            .BeEquivalentTo(expectedResponse, opt => opt.Excluding(r => r.ProfilePictureUrl));
+            .BeEquivalentTo(expectedResponse, opt => opt.Excluding(r => r.ProfilePictureId));
 
         #endregion
     }
@@ -503,11 +499,7 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
             Email = $"{applicationUser.Email!}-updated",
             Fullname = $"{applicationUser.Fullname!}-updated",
             Bio = $"{applicationUser.Bio!}-updated",
-            ProfilePictureUrl = applicationUser.GetProfilePictureUrl(
-                ProfilePictureConstants.BaseUrl,
-                ProfilePictureConstants.EndpointUrl,
-                ProfilePictureConstants.Extension
-            )
+            ProfilePictureId = applicationUser.ProfilePicture?.Id
         };
 
         #endregion
@@ -532,7 +524,7 @@ public class UpdateEndpointTests : IClassFixture<ApiWebFactory>
         result.Should().NotBeNull();
         result
             .Should()
-            .BeEquivalentTo(expectedResponse, opt => opt.Excluding(r => r.ProfilePictureUrl));
+            .BeEquivalentTo(expectedResponse, opt => opt.Excluding(r => r.ProfilePictureId));
 
         #endregion
     }
