@@ -193,7 +193,7 @@ static_resources:
                         "HttpOnly",
                         "Expires=" .. expires,
                         "Path=" .. path,
-                        "SameSite=Lax",
+                        "SameSite=None",
                         "Secure"
                     }
 

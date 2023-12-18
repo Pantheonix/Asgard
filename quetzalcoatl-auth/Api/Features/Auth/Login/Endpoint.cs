@@ -56,7 +56,7 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
                 new CookieOptions
                 {
                     HttpOnly = true,
-                    SameSite = SameSiteMode.Lax,
+                    SameSite = SameSiteMode.None,
                     Secure = true,
                     Expires = DateTimeOffset
                         .UtcNow
@@ -73,7 +73,7 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
                 new CookieOptions
                 {
                     HttpOnly = true,
-                    SameSite = SameSiteMode.Lax,
+                    SameSite = SameSiteMode.None,
                     Secure = true,
                     Expires = DateTimeOffset
                         .UtcNow
