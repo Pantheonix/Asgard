@@ -62,7 +62,7 @@ public class ApplicationUserToUpdateUserResponseProfile : Profile
                 dest => dest.ProfilePictureId,
                 opt =>
                     opt.MapFrom<Guid?>(
-                        src => src.ProfilePicture == null ? src.ProfilePicture!.Id : null
+                        src => src.ProfilePicture != null ? src.ProfilePicture!.Id : null
                         )
             );
     }
