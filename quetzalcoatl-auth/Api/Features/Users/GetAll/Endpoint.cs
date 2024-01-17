@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace Api.Features.Users.GetAll;
+﻿namespace Api.Features.Users.GetAll;
 
 public class GetAllUsersEndpoint : Endpoint<GetAllUsersRequest, GetAllUsersResponse>
 {
@@ -41,9 +39,12 @@ public class GetAllUsersEndpoint : Endpoint<GetAllUsersRequest, GetAllUsersRespo
             users = users.Where(user => user.Email.Contains(req.Email));
         }
 
-        users = users.SortUsers(req.SortBy);
+        if (req.SortBy is not null)
+        {
+            users = users.SortUsers(req.SortBy.Value);
+        }
 
-        users = LinqExtensions.Paginate(users, req.Page, req.PageSize);
+        users = LinqExtensions.Paginate(users, req.Page ?? 1, req.PageSize ?? 10);
 
         await SendOkAsync(response: new GetAllUsersResponse { Users = users }, ct);
     }

@@ -9,13 +9,13 @@ public class GetAllUsersRequest
     public string? Email { get; set; }
     
     [FromQuery(Name = "sortBy")]
-    public SortUsersBy SortBy { get; set; } = SortUsersBy.NameAsc;
+    public SortUsersBy? SortBy { get; set; } = SortUsersBy.NameAsc;
     
     [FromQuery(Name = "page")]
-    public int Page { get; set; } = 1;
+    public int? Page { get; set; } = 1;
     
     [FromQuery(Name = "pageSize")]
-    public int PageSize { get; set; } = 10;
+    public int? PageSize { get; set; } = 10;
 }
 
 public class GetAllUsersResponse
