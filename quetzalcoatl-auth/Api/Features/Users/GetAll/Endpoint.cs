@@ -1,4 +1,6 @@
-﻿namespace Api.Features.Users.GetAll;
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Api.Features.Users.GetAll;
 
 public class GetAllUsersEndpoint : Endpoint<GetAllUsersRequest, GetAllUsersResponse>
 {
@@ -27,7 +29,21 @@ public class GetAllUsersEndpoint : Endpoint<GetAllUsersRequest, GetAllUsersRespo
     {
         _logger.LogInformation("Getting all users");
 
-        var users = _userManager.Users.Select(user => _mapper.Map<UserDto>(user));
+        var users = _userManager.Users.Select(user => _mapper.Map<UserDto>(user)).AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(req.Name))
+        {
+            users = users.Where(user => user.Username.Contains(req.Name));
+        }
+
+        if (!string.IsNullOrWhiteSpace(req.Email))
+        {
+            users = users.Where(user => user.Email.Contains(req.Email));
+        }
+
+        users = users.SortUsers(req.SortBy);
+
+        users = LinqExtensions.Paginate(users, req.Page, req.PageSize);
 
         await SendOkAsync(response: new GetAllUsersResponse { Users = users }, ct);
     }

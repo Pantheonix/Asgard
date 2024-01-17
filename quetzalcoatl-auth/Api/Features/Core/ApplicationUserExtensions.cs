@@ -14,3 +14,29 @@ public static class ApplicationUserExtensions
             : null;
     }
 }
+
+public enum SortUsersBy
+{
+    NameAsc,
+    NameDesc,
+    EmailAsc,
+    EmailDesc,
+}
+
+public static class SortUsersByExtensions
+{
+    public static IEnumerable<UserDto> SortUsers(
+        this IEnumerable<UserDto> query,
+        SortUsersBy sortBy
+    )
+    {
+        return sortBy switch
+        {
+            SortUsersBy.NameAsc => query.OrderBy(user => user.Username),
+            SortUsersBy.NameDesc => query.OrderByDescending(user => user.Username),
+            SortUsersBy.EmailAsc => query.OrderBy(user => user.Email),
+            SortUsersBy.EmailDesc => query.OrderByDescending(user => user.Email),
+            _ => query.OrderBy(user => user.Username),
+        };
+    }
+}
