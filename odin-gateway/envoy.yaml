@@ -126,27 +126,50 @@ static_resources:
               inline_code: |
                 function envoy_on_request(request_handle)
                   local path = request_handle:headers():get(":path")
+                  local method = request_handle:headers():get(":method")
                   request_handle:logInfo("Request path: " .. path)
+                  request_handle:logInfo("Method: " .. method)
 
-                  if string.match(path, "^/api/identity/auth/refresh%-token$") then
+                 if string.match(path, "^/api/identity/auth/refresh%-token$") and method == "POST" then
+                    request_handle:logInfo("Request path matched")
+
                     local headers = request_handle:headers()
+                    request_handle:logInfo("Headers grabbed")
+
                     local cookie = headers:get("cookie")
+                    request_handle:logInfo("Cookies grabbed")
 
                     if not cookie then
-                      request_handle:respond({ [":status"] = "400" }, "Invalid refresh token, please login again")
+                      request_handle:logInfo("No cookies found")
+                      request_handle:respond(
+                        {
+                          [":status"] = "400",
+                          ["access-control-allow-credentials"] = "true",
+                          ["access-control-allow-origin"] = headers:get("origin")
+                        },
+                        "Invalid refresh token, please login again"
+                      )
                       return
                     end
 
                     local body = request_handle:body()
+                    request_handle:logInfo("Body grabbed")
 
                     local body_str = body:getBytes(0, body:length())
                     request_handle:logInfo("Request body: " .. body_str)
 
-                    local user_id = string.match(body_str, '"userId": "([^"]+)"')
+                    local user_id = string.match(body_str, '"userId":"([^"]+)"')
                     local refresh_token = string.match(cookie, ".AspNetCore.RefreshToken=([^;]+)")
 
                     if not user_id or not refresh_token then
-                      request_handle:respond({ [":status"] = "400" }, "Invalid refresh token, please login again")
+                      request_handle:respond(
+                        {
+                          [":status"] = "400",
+                          ["access-control-allow-credentials"] = "true",
+                          ["access-control-allow-origin"] = request_handle:headers():get("origin")
+                        },
+                        "Invalid refresh token, please login again"
+                      )
                       return
                     end
 
@@ -199,6 +222,8 @@ static_resources:
 
                     local new_cookie = cookieName .. "=" .. new_access_token .. "; " .. table.concat(cookieAttributes, "; ")
                     response_headers["set-cookie"] = new_cookie
+                    response_headers["access-control-allow-credentials"] = "true"
+                    response_headers["access-control-allow-origin"] = request_handle:headers():get("origin")
 
                     request_handle:respond(
                       response_headers,
