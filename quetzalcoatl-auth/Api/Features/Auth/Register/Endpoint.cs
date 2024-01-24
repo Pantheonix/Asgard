@@ -55,8 +55,8 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, UserTokenRespo
                 new CookieOptions
                 {
                     HttpOnly = true,
-                    SameSite = SameSiteMode.None,
-                    Secure = true,
+                    SameSite = SameSiteMode.Lax,
+                    Secure = false,
                     Expires = DateTimeOffset
                         .UtcNow
                         .AddTicks(_jwtConfig.JwtAccessTokenLifetime.Ticks)
@@ -72,8 +72,8 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, UserTokenRespo
                 new CookieOptions
                 {
                     HttpOnly = true,
-                    SameSite = SameSiteMode.None,
-                    Secure = true,
+                    SameSite = SameSiteMode.Lax,
+                    Secure = false,
                     Expires = DateTimeOffset
                         .UtcNow
                         .AddTicks(_jwtConfig.JwtRefreshTokenLifetime.Ticks)

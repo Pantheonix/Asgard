@@ -216,8 +216,7 @@ static_resources:
                         "HttpOnly",
                         "Expires=" .. expires,
                         "Path=" .. path,
-                        "SameSite=None",
-                        "Secure"
+                        "SameSite=Lax",
                     }
 
                     local new_cookie = cookieName .. "=" .. new_access_token .. "; " .. table.concat(cookieAttributes, "; ")
