@@ -1,4 +1,4 @@
-name: Dapr - Build Docker image and publish to GitHub Packages
+name: Dapr - Build Docker image and publish to Docker Hub
 
 on:
   push:
@@ -38,13 +38,13 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: ${{ env.NAMESPACE }}/${{ env.REPOSITORY }}
-      
+
       - name: Build and push Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:

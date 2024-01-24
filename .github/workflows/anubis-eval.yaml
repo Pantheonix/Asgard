@@ -1,4 +1,4 @@
-name: Anubis - Build Docker image and publish to GitHub Packages
+name: Anubis - Build Docker image and publish to Docker Hub
 
 on:
   push:
