@@ -344,6 +344,7 @@ services:
   anubis-psql-db:
     container_name: anubis-psql-db
     image: postgres:14.1
+    command: postgres -c 'max_connections=250'
     volumes:
       - anubis-db:/var/lib/postgresql/data/
     restart: unless-stopped
