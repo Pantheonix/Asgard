@@ -9,6 +9,26 @@ x-logging: &default-logging
       max-size: 100m
 
 services:
+  ############ MIDGARD ############
+
+  midgard-web:
+    container_name: midgard-web
+    image: ${REGISTRY:-pantheonix}/midgard:${TAG:-ucv}
+    build:
+      context: ../Midgard
+      dockerfile: ./Dockerfile
+    env_file:
+      - envs/.env.midgard
+    ports:
+      - "10000:443"
+    volumes:
+      - ./envs/certs/midgard/https.crt:/etc/nginx/ssl/https.crt
+      - ./envs/certs/midgard/key.pem:/etc/nginx/ssl/key.pem
+    restart: always
+    profiles:
+      - midgard
+      - pantheonix
+
   ############ ODIN ############
 
   odin-api-gateway:
