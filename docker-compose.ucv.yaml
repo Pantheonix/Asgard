@@ -30,6 +30,9 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      - ./envs/certs/https.crt:/etc/ssl/certs/https.crt
+      - ./envs/certs/key.pem:/etc/ssl/certs/key.pem
     restart: always
     depends_on:
       quetzalcoatl-auth-api:

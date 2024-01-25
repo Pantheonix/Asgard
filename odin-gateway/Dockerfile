@@ -2,7 +2,6 @@ FROM envoyproxy/envoy:v1.14.2
 
 # COPY ./https/https.crt /etc/ssl/certs/https.crt
 # COPY ./https/key.pem /etc/ssl/certs/key.pem
-# COPY envoy.yaml /tmpl/envoy.yaml.tmpl
 
 COPY envoy.yaml /etc/envoy/envoy.yaml
 

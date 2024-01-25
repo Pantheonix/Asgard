@@ -56,8 +56,8 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
                 new CookieOptions
                 {
                     HttpOnly = true,
-                    SameSite = SameSiteMode.Lax,
-                    Secure = false,
+                    SameSite = SameSiteMode.None,
+                    Secure = true,
                     Expires = DateTimeOffset
                         .UtcNow
                         .AddTicks(_jwtConfig.JwtAccessTokenLifetime.Ticks)
@@ -73,8 +73,8 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
                 new CookieOptions
                 {
                     HttpOnly = true,
-                    SameSite = SameSiteMode.Lax,
-                    Secure = false,
+                    SameSite = SameSiteMode.None,
+                    Secure = true,
                     Expires = DateTimeOffset
                         .UtcNow
                         .AddTicks(_jwtConfig.JwtRefreshTokenLifetime.Ticks)
