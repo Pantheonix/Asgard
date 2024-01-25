@@ -16,7 +16,10 @@ services:
     env_file:
       - envs/.env.midgard
     ports:
-      - "10000:80"
+      - "10000:443"
+    volumes:
+      - ./envs/certs/midgard/https.crt:/etc/nginx/ssl/https.crt
+      - ./envs/certs/midgard/key.pem:/etc/nginx/ssl/key.pem
     restart: always
     profiles:
       - midgard
@@ -31,8 +34,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./envs/certs/https.crt:/etc/ssl/certs/https.crt
-      - ./envs/certs/key.pem:/etc/ssl/certs/key.pem
+      - ./envs/certs/asgard/https.crt:/etc/ssl/certs/https.crt
+      - ./envs/certs/asgard/key.pem:/etc/ssl/certs/key.pem
     restart: always
     depends_on:
       quetzalcoatl-auth-api:
