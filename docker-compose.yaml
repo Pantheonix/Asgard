@@ -22,6 +22,9 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      - ./envs/certs/asgard/https.crt:/etc/ssl/certs/https.crt
+      - ./envs/certs/asgard/key.pem:/etc/ssl/certs/key.pem
     restart: unless-stopped
     depends_on:
       quetzalcoatl-auth-api:
