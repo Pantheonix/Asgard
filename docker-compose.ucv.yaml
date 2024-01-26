@@ -291,9 +291,8 @@ services:
   firebase-emulator:
     container_name: firebase-emulator
     image: ${REGISTRY:-pantheonix}/firebase-emulator:${TAG:-ucv}
-    build:
-      context: ./firebase-emulator
-      dockerfile: Dockerfile
+    volumes:
+      - firebase-emulator:/firebase
     ports:
       - "4000:4000"
       - "9099:9099"
@@ -519,6 +518,8 @@ volumes:
   quetzalcoatl-db:
     driver: local
   enki-db:
+    driver: local
+  firebase-emulator:
     driver: local
   anubis-db:
     driver: local
