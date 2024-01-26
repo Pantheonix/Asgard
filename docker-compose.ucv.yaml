@@ -246,6 +246,9 @@ services:
     env_file:
       - envs/.env.hermes
     restart: always
+    depends_on:
+      firebase-emulator:
+        condition: service_started
     profiles:
       - hermes
       - asgard
@@ -280,6 +283,22 @@ services:
       asgard-dapr-config:
         condition: service_started
     network_mode: "service:hermes-tests-api"
+    profiles:
+      - hermes
+      - asgard
+      - pantheonix
+
+  firebase-emulator:
+    container_name: firebase-emulator
+    image: ${REGISTRY:-pantheonix}/firebase-emulator:${TAG:-ucv}
+    build:
+      context: ./firebase-emulator
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+      - "9099:9099"
+      - "9199:9199"
+    restart: always
     profiles:
       - hermes
       - asgard
