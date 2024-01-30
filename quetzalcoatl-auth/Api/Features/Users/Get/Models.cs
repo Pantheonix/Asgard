@@ -13,4 +13,5 @@ public class GetUserResponse
     public string? Fullname { get; set; }
     public string? Bio { get; set; }
     public Guid? ProfilePictureId { get; set; }
+    public IEnumerable<string> Roles { get; set; } = new List<string>();
 }

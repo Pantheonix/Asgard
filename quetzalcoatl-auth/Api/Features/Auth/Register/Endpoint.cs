@@ -90,7 +90,8 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, UserTokenRespo
                 Email = user.Email!,
                 Fullname = user.Fullname,
                 Bio = user.Bio,
-                ProfilePictureId = user.ProfilePicture?.Id
+                ProfilePictureId = user.ProfilePicture?.Id,
+                Roles = userRoles
             },
             cancellation: ct
         );

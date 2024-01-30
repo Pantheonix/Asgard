@@ -9,7 +9,7 @@ public static class WebApplicationExtensions
 
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
 
-        var roles = Enum.GetValues<ApplicationRoles>();
+        var roles = Enum.GetValues<ApplicationRole>();
         foreach (var role in roles)
         {
             var roleExists = await roleManager.RoleExistsAsync(role.ToString());
@@ -42,7 +42,7 @@ public static class WebApplicationExtensions
             );
             var resultAddRoles = await userManager.AddToRolesAsync(
                 adminUser,
-                new[] { ApplicationRoles.Proposer.ToString(), ApplicationRoles.Admin.ToString() }
+                new[] { ApplicationRole.Proposer.ToString(), ApplicationRole.Admin.ToString() }
             );
 
             if (!resultCreateUser.Succeeded || !resultAddRoles.Succeeded)

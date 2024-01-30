@@ -25,9 +25,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
-        
+
         if (optionsBuilder.IsConfigured) return;
-        
+
         var connectionString = Environment.GetEnvironmentVariable("QUETZALCOATL_DSN");
         optionsBuilder.UseSqlServer(connectionString!);
     }
