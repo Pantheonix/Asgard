@@ -69,6 +69,7 @@ public class RemoveRoleEndpoint : Endpoint<RemoveRoleRequest, UserDto>
 
         var updatedUser = await _userManager.FindByIdAsync(req.Id.ToString());
         var response = _mapper.Map<UserDto>(updatedUser);
+        response.Roles = await _userManager.GetRolesAsync(updatedUser!);
 
         await SendOkAsync(response, ct);
     }
