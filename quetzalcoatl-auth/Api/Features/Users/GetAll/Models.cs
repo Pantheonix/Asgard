@@ -2,8 +2,8 @@
 
 public class GetAllUsersRequest
 {
-    [FromQuery(Name = "name")]
-    public string? Name { get; set; }
+    [FromQuery(Name = "username")]
+    public string? Username { get; set; }
 
     [FromQuery(Name = "sortBy")]
     public SortUsersBy? SortBy { get; set; } = SortUsersBy.NameAsc;

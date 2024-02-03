@@ -38,9 +38,9 @@ public class GetAllUsersEndpoint : Endpoint<GetAllUsersRequest, GetAllUsersRespo
 
         var totalCount = await users.CountAsync(cancellationToken: ct);
 
-        if (!string.IsNullOrWhiteSpace(req.Name))
+        if (!string.IsNullOrWhiteSpace(req.Username))
         {
-            users = users.Where(user => user.Username.Contains(req.Name));
+            users = users.Where(user => user.Username.Contains(req.Username));
         }
 
         if (req.SortBy is not null)
