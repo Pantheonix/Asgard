@@ -67,7 +67,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         return ObjectMapper.Map<Problem, ProblemDto>(problem);
     }
 
-    [AllowAnonymous]
+    [Authorize]
     public async Task<PagedResultDto<ProblemDto>> GetListAsync(ProblemListFilterDto input)
     {
         _logger.LogInformation("Getting problems list");
@@ -75,6 +75,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         var problemQueryable = await _problemRepository.GetQueryableAsync();
 
         problemQueryable = problemQueryable.Where(p => p.IsPublished);
+        var totalCount = await AsyncExecuter.CountAsync(problemQueryable);
 
         if (!string.IsNullOrEmpty(input.Name))
         {
@@ -98,7 +99,6 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         problemQueryable = problemQueryable.PageBy(input).OrderBy(p => p.CreationDate);
 
-        var totalCount = await AsyncExecuter.CountAsync(problemQueryable);
         var problems = await AsyncExecuter.ToListAsync(problemQueryable);
 
         return new PagedResultDto<ProblemDto>(
@@ -142,7 +142,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         );
     }
 
-    [AllowAnonymous]
+    [Authorize]
     public async Task<ProblemDto> GetAsync(Guid id)
     {
         _logger.LogInformation("Getting problem {ProblemId}", id);
