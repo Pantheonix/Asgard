@@ -35,14 +35,14 @@ public class GetAllUsersEndpoint : Endpoint<GetAllUsersRequest, GetAllUsersRespo
             userDto.Roles = await _userManager.GetRolesAsync(user);
             return userDto;
         }).AsAsyncEnumerable();
-
-        var totalCount = await users.CountAsync(cancellationToken: ct);
-
+        
         if (!string.IsNullOrWhiteSpace(req.Username))
         {
             users = users.Where(user => user.Username.Contains(req.Username));
         }
 
+        var totalCount = await users.CountAsync(cancellationToken: ct);
+        
         if (req.SortBy is not null)
         {
             users = users.SortUsers(req.SortBy.Value);
