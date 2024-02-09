@@ -11,7 +11,7 @@ public interface IProblemAppService : IApplicationService
 
     Task<PagedResultDto<ProblemDto>> GetListAsync(ProblemListFilterDto input);
 
-    Task<PagedResultDto<ProblemWithTestsDto>> GetListUnpublishedAsync();
+    Task<PagedResultDto<ProblemWithTestsDto>> GetListUnpublishedAsync(ProblemListFilterDto input);
 
     Task<ProblemDto> GetAsync(Guid id);
 

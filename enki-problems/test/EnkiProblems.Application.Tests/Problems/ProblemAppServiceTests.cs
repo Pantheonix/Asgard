@@ -142,7 +142,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     {
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
 
-        var problemListDto = await _problemAppService.GetListUnpublishedAsync();
+        var problemListDto = await _problemAppService.GetListUnpublishedAsync(new ProblemListFilterDto());
 
         problemListDto.TotalCount.ShouldBe(1);
         problemListDto
@@ -172,7 +172,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
 
         await Assert.ThrowsAsync<AbpAuthorizationException>(async () =>
         {
-            await _problemAppService.GetListUnpublishedAsync();
+            await _problemAppService.GetListUnpublishedAsync(new ProblemListFilterDto());
         });
     }
     #endregion

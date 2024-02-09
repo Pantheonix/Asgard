@@ -75,7 +75,6 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         var problemQueryable = await _problemRepository.GetQueryableAsync();
 
         problemQueryable = problemQueryable.Where(p => p.IsPublished);
-        var totalCount = await AsyncExecuter.CountAsync(problemQueryable);
 
         if (!string.IsNullOrEmpty(input.Name))
         {
@@ -97,6 +96,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             problemQueryable = problemQueryable.Where(p => p.Difficulty == input.Difficulty);
         }
 
+        var totalCount = await AsyncExecuter.CountAsync(problemQueryable);
         problemQueryable = problemQueryable.PageBy(input).OrderBy(p => p.CreationDate);
 
         var problems = await AsyncExecuter.ToListAsync(problemQueryable);
@@ -108,7 +108,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     }
 
     [Authorize]
-    public async Task<PagedResultDto<ProblemWithTestsDto>> GetListUnpublishedAsync()
+    public async Task<PagedResultDto<ProblemWithTestsDto>> GetListUnpublishedAsync(ProblemListFilterDto input)
     {
         _logger.LogInformation(
             "Getting unpublished problems list for user {UserId}",
@@ -130,10 +130,31 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         var problemQueryable = await _problemRepository.GetQueryableAsync();
 
         problemQueryable = problemQueryable
-            .Where(p => !p.IsPublished && p.ProposerId == CurrentUser.Id)
-            .OrderBy(p => p.CreationDate);
+            .Where(p => !p.IsPublished && p.ProposerId == CurrentUser.Id);
+
+        if (!string.IsNullOrEmpty(input.Name))
+        {
+            problemQueryable = problemQueryable.Where(p => p.Name.Contains(input.Name));
+        }
+
+        if (input.ProposerId is not null)
+        {
+            problemQueryable = problemQueryable.Where(p => p.ProposerId == input.ProposerId);
+        }
+
+        if (input.IoType is not null)
+        {
+            problemQueryable = problemQueryable.Where(p => p.IoType == input.IoType);
+        }
+
+        if (input.Difficulty is not null)
+        {
+            problemQueryable = problemQueryable.Where(p => p.Difficulty == input.Difficulty);
+        }
 
         var totalCount = await AsyncExecuter.CountAsync(problemQueryable);
+        problemQueryable = problemQueryable.PageBy(input).OrderBy(p => p.CreationDate);
+
         var problems = await AsyncExecuter.ToListAsync(problemQueryable);
 
         return new PagedResultDto<ProblemWithTestsDto>(
