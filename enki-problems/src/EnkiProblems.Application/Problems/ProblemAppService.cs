@@ -264,6 +264,70 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     }
 
     [Authorize]
+    public async Task DeleteAsync(Guid id)
+    {
+        _logger.LogInformation("Deleting problem {ProblemId}", id);
+
+        var problem = await _problemRepository.GetAsync(id);
+
+        if (problem is null)
+        {
+            _logger.LogError("Problem {ProblemId} not found", id);
+            throw new BusinessException(
+                EnkiProblemsDomainErrorCodes.ProblemNotFound,
+                $"Problem {id} not found."
+            );
+        }
+
+        // TODO: convert to permission
+        if (problem.IsPublished && CurrentUser.Roles.All(r => r != EnkiProblemsConsts.AdminRoleName))
+        {
+            _logger.LogError("User {UserId} is not allowed to delete problem {ProblemId}", CurrentUser.Id, id);
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.NotAllowedToDeletePublishedProblem
+            );
+        }
+
+        // TODO: convert to permission
+        if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.AdminRoleName) &&
+            CurrentUser.Id != id)
+        {
+            _logger.LogError("User {UserId} is not allowed to delete problem {ProblemId}", CurrentUser.Id, id);
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.ProblemCannotBeDeleted
+            );
+        }
+
+        var problemTests = problem.Tests.ToList();
+        
+        foreach (var problemTest in problemTests)
+        {
+            var deleteResponse = await _testService.DeleteTestAsync(
+                new DeleteTestRequest { ProblemId = id.ToString(), TestId = problemTest.Id.ToString() }
+            );
+        
+            if (deleteResponse.Status.Code != StatusCode.Ok)
+            {
+                _logger.LogError(
+                    "Test delete failed with status code {StatusCode}: {StatusMessage}",
+                    deleteResponse.Status.Code,
+                    deleteResponse.Status.Message
+                );
+                throw new BusinessException(
+                        EnkiProblemsDomainErrorCodes.TestDeleteFailed,
+                        $"Test delete failed with status code {deleteResponse.Status.Code}: {deleteResponse.Status.Message}."
+                    )
+                    .WithData("id", problem.Id)
+                    .WithData("testId", problemTest.Id);
+            }
+
+            problem = _problemManager.RemoveTest(problem, problemTest.Id);
+        }
+
+        await _problemRepository.DeleteAsync(problem);
+    }
+
+    [Authorize]
     public async Task<ProblemWithTestsDto> CreateTestAsync(Guid id, CreateTestDto input)
     {
         _logger.LogInformation("Creating test for problem {ProblemId}", id);
