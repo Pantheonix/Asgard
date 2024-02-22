@@ -1,4 +1,7 @@
-use diesel::{allow_tables_to_appear_in_same_query, joinable, table};
+use diesel::{
+    allow_columns_to_appear_in_same_group_by_clause, allow_tables_to_appear_in_same_query,
+    joinable, table,
+};
 table! {
     problems (id) {
         id -> Text,
@@ -46,3 +49,14 @@ joinable!(submissions -> problems (problem_id));
 joinable!(submissions_testcases -> submissions (submission_id));
 
 allow_tables_to_appear_in_same_query!(problems, submissions, submissions_testcases,);
+allow_columns_to_appear_in_same_group_by_clause!(
+    submissions::id,
+    submissions::problem_id,
+    submissions::user_id,
+    submissions::language,
+    submissions::status,
+    submissions::score,
+    submissions::created_at,
+    submissions::avg_time,
+    submissions::avg_memory
+);

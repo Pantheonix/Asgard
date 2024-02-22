@@ -1,4 +1,4 @@
-use crate::application::dapr_dtos::GetEvalMetadataForProblemDto;
+use crate::contracts::dapr_dtos::GetEvalMetadataForProblemDto;
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]

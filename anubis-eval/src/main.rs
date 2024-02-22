@@ -1,3 +1,4 @@
+use crate::api::cors::Cors;
 use crate::config::di::{CONFIG, DAPR_CLIENT, DB_CONN, REQWEST_CLIENT};
 use crate::config::logger::init_logger;
 use crate::infrastructure::db::{run_migrations, Db};
@@ -5,11 +6,11 @@ use rocket::fairing::AdHoc;
 use rocket::log::private::info;
 use rocket::{catchers, error, launch, routes};
 use tokio_cron_scheduler::{Job, JobScheduler};
-use crate::api::cors::Cors;
 
 mod api;
 mod application;
 mod config;
+mod contracts;
 mod domain;
 mod infrastructure;
 mod schema;
@@ -57,6 +58,7 @@ async fn rocket() -> _ {
                 api::create_submission_endpoint::create_submission,
                 api::get_submission_endpoint::get_submission,
                 api::get_submissions_endpoint::get_submissions,
+                api::get_highest_score_submissions::get_highest_score_submissions,
             ],
         )
         .register(

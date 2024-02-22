@@ -3,7 +3,7 @@ use crate::domain::problem::Problem;
 use crate::infrastructure::problem_model::ProblemModel;
 use crate::schema::problems::dsl::problems as all_problems;
 use crate::schema::problems::id;
-use diesel::{PgConnection, RunQueryDsl};
+use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 
 impl Problem {
     pub fn upsert(&self, conn: &mut PgConnection) -> Result<(), ApplicationError> {
@@ -21,5 +21,16 @@ impl Problem {
             })?;
 
         Ok(())
+    }
+
+    pub fn find_by_id(problem_id: &String, conn: &mut PgConnection) -> Result<Problem, ApplicationError> {
+        all_problems
+            .find(problem_id)
+            .first(conn)
+            .map(|model: ProblemModel| model.into())
+            .map_err(|e| ApplicationError::ProblemFindError {
+                problem_id: problem_id.to_string(),
+                source: e,
+            })
     }
 }

@@ -1,11 +1,11 @@
 use crate::domain::submission::{Submission, TestCase};
 use crate::schema::submissions;
 use crate::schema::submissions_testcases;
-use diesel::{AsChangeset, Associations, Identifiable, Insertable, Queryable, Selectable};
+use diesel::{AsChangeset, Associations, Identifiable, Insertable, Queryable, QueryableByName, Selectable};
 use std::time::SystemTime;
 use uuid::Uuid;
 
-#[derive(Debug, Clone, PartialEq, Queryable, Insertable, Identifiable, AsChangeset, Selectable)]
+#[derive(Debug, Clone, PartialEq, Queryable, Insertable, Identifiable, AsChangeset, Selectable, QueryableByName)]
 #[diesel(belongs_to(ProblemModel, foreign_key = problem_id))]
 #[diesel(table_name = submissions)]
 pub(in crate::infrastructure) struct SubmissionModel {

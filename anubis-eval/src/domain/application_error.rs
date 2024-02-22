@@ -35,6 +35,12 @@ pub enum ApplicationError {
         #[source]
         source: diesel::result::Error,
     },
+    #[error("Problem {problem_id:?} not found")]
+    ProblemFindError {
+        problem_id: String,
+        #[source]
+        source: diesel::result::Error,
+    },
     #[error("Submission evaluation service failed")]
     SubmissionEvaluationError {
         #[from]
@@ -112,27 +118,30 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
                 "Error finding testcases".to_string(),
             )
             .respond_to(request),
-            ApplicationError::ProblemSaveError { problem_id, .. } => {
+            ApplicationError::ProblemFindError { problem_id, .. } =>
+                rocket::response::status::Custom(
+                    rocket::http::Status::NotFound,
+                    format!("Problem {} not found", problem_id),
+                )
+                .respond_to(request),
+            ApplicationError::ProblemSaveError { problem_id, .. } =>
                 rocket::response::status::Custom(
                     rocket::http::Status::BadRequest,
                     format!("Error saving problem eval metadata for problem {}", problem_id),
                 )
-                .respond_to(request)
-            }
-            ApplicationError::SubmissionEvaluationError { .. } => {
+                .respond_to(request),
+            ApplicationError::SubmissionEvaluationError { .. } =>
                 rocket::response::status::Custom(
                     rocket::http::Status::InternalServerError,
                     "Submission evaluation service failed".to_string(),
                 )
-                .respond_to(request)
-            }
-            ApplicationError::EvalMetadataError { problem_id, .. } => {
+                .respond_to(request),
+            ApplicationError::EvalMetadataError { problem_id, .. } =>
                 rocket::response::status::Custom(
                     rocket::http::Status::InternalServerError,
                     format!("Error retrieving eval metadata for problem {}", problem_id),
                 )
-                .respond_to(request)
-            }
+                .respond_to(request),
             ApplicationError::TestInputOutputError {
                 problem_id,
                 test_id,

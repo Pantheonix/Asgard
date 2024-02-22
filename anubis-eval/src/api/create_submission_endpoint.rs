@@ -1,7 +1,8 @@
 use crate::application::auth::JwtContext;
 use crate::application::dapr_client::DaprClient;
-use crate::application::dapr_dtos::{CreateSubmissionBatchDto, CreateSubmissionTestCaseDto};
 use crate::config::di::CONFIG;
+use crate::contracts::create_submission_dtos::CreateSubmissionResponseDto;
+use crate::contracts::dapr_dtos::{CreateSubmissionBatchDto, CreateSubmissionTestCaseDto};
 use crate::domain::application_error::ApplicationError;
 use crate::domain::submission::{Language, Submission, TestCase, TestCaseStatus};
 use crate::infrastructure::db::Db;
@@ -9,7 +10,6 @@ use rocket::futures::future::join_all;
 use rocket::serde::json::Json;
 use rocket::{debug, error, info, post, Responder};
 use rocket_validation::{Validate, Validated};
-use serde::Serialize;
 use std::str::FromStr;
 use uuid::Uuid;
 
@@ -167,23 +167,4 @@ pub async fn create_submission(
         }
     })
     .await
-}
-
-#[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
-pub struct CreateSubmissionResponseDto {
-    id: String,
-}
-
-#[rocket::async_trait]
-impl<'r> rocket::response::Responder<'r, 'static> for CreateSubmissionResponseDto {
-    fn respond_to(self, _: &'r rocket::Request<'_>) -> rocket::response::Result<'static> {
-        let json =
-            serde_json::to_string(&self).unwrap_or("Failed to serialize response".to_string());
-
-        rocket::Response::build()
-            .header(rocket::http::ContentType::JSON)
-            .sized_body(json.len(), std::io::Cursor::new(json))
-            .ok()
-    }
 }

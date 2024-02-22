@@ -1,6 +1,6 @@
 use crate::application::dapr_client::DaprClient;
-use crate::application::dapr_dtos::TestCaseTokenDto;
 use crate::config::di::Atomic;
+use crate::contracts::dapr_dtos::TestCaseTokenDto;
 use crate::domain::application_error::ApplicationError;
 use crate::domain::submission::{Submission, SubmissionStatus, TestCase, TestCaseStatus};
 use diesel::PgConnection;

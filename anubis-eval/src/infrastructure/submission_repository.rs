@@ -1,13 +1,17 @@
-use crate::application::fsp_dtos::FspSubmissionDto;
-use crate::application::fsp_dtos::{Languages, SortDiscriminant, SubmissionStatuses, Uuids};
+use crate::contracts::fps_dtos::{
+    FpsSubmissionDto, Languages, SortDiscriminant, SubmissionStatuses, Uuids,
+};
 use crate::domain::application_error::ApplicationError;
+use crate::domain::problem::Problem;
 use crate::domain::submission::{Submission, SubmissionStatus, TestCase, TestCaseStatus};
 use crate::infrastructure::pagination::Paginate;
+use crate::infrastructure::raw_queries;
 use crate::infrastructure::submission_model::{SubmissionModel, TestCaseModel};
 use crate::schema::problems::dsl::problems as all_problems;
 use crate::schema::submissions::dsl::submissions as all_submissions;
 use crate::schema::submissions_testcases::dsl::submissions_testcases as all_testcases;
-use diesel::{BoolExpressionMethods, ExpressionMethods, SelectableHelper};
+use diesel::sql_types::Text;
+use diesel::{sql_query, BoolExpressionMethods, ExpressionMethods, SelectableHelper};
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use rocket::error;
 use std::time::SystemTime;
@@ -86,12 +90,54 @@ impl Submission {
             .map_err(|source| ApplicationError::SubmissionFindError { source })
     }
 
+    pub fn find_highest_score_submissions_by_user_id(
+        current_user_id: &Uuid,
+        user_id: &String,
+        problem_id: &Option<String>,
+        conn: &mut PgConnection,
+    ) -> Result<Vec<(Submission, Problem)>, ApplicationError> {
+        // filter out submissions which should not be visible for current user,
+        // i.e. keep only submissions for which the problem is published or
+        // the user is the submitter or the user is the proposer
+
+        // if problem_id is provided, return the submission with the highest score for that problem
+        // else return a vector of submissions with the highest score for each problem
+
+        let query_results = match problem_id {
+            Some(problem_id) => {
+                sql_query(raw_queries::GET_HIGHEST_SCORE_SUBMISSIONS_PER_USER_AND_PROBLEM)
+                    .bind::<Text, _>(current_user_id.to_string())
+                    .bind::<Text, _>(user_id.to_string())
+                    .bind::<Text, _>(problem_id.to_string())
+                    .load::<SubmissionModel>(conn)
+            },
+            None => sql_query(raw_queries::GET_HIGHEST_SCORE_SUBMISSIONS_PER_USER)
+                .bind::<Text, _>(current_user_id.to_string())
+                .bind::<Text, _>(user_id.to_string())
+                .load::<SubmissionModel>(conn),
+        };
+
+        query_results
+            .map_err(|source| ApplicationError::SubmissionFindError { source })
+            .map(|submissions| {
+                submissions
+                    .into_iter()
+                    .map(|submission| {
+                        let problem = Problem::find_by_id(&submission.problem_id, conn)
+                            .map(|problem| problem.into())?;
+
+                        Ok((submission.into(), problem))
+                    })
+                    .collect::<Result<Vec<_>, _>>()
+            })?
+    }
+
     pub fn find_all(
-        fsp_dto: FspSubmissionDto,
+        fps_dto: FpsSubmissionDto,
         user_id: &Uuid,
         conn: &mut PgConnection,
     ) -> Result<(Vec<Submission>, usize, usize), ApplicationError> {
-        use crate::application::fsp_dtos;
+        use crate::contracts::fps_dtos;
         use crate::schema::{problems, submissions};
 
         let mut query = all_submissions
@@ -113,7 +159,7 @@ impl Submission {
                 .or(submissions::dsl::user_id.eq(user_id.to_string())),
         );
 
-        if let Some(Uuids { uuids: user_ids }) = fsp_dto.user_id {
+        if let Some(Uuids { uuids: user_ids }) = fps_dto.user_id {
             let user_ids = user_ids
                 .into_iter()
                 .map(|user_id| user_id.to_string())
@@ -121,7 +167,7 @@ impl Submission {
             query = query.filter(submissions::dsl::user_id.eq_any(user_ids));
         }
 
-        if let Some(Uuids { uuids: problem_ids }) = fsp_dto.problem_id {
+        if let Some(Uuids { uuids: problem_ids }) = fps_dto.problem_id {
             let problem_ids = problem_ids
                 .into_iter()
                 .map(|problem_id| problem_id.to_string())
@@ -129,7 +175,7 @@ impl Submission {
             query = query.filter(submissions::dsl::problem_id.eq_any(problem_ids));
         }
 
-        if let Some(Languages { languages }) = fsp_dto.language {
+        if let Some(Languages { languages }) = fps_dto.language {
             let languages = languages
                 .into_iter()
                 .map(|language| language.to_string())
@@ -137,7 +183,7 @@ impl Submission {
             query = query.filter(submissions::dsl::language.eq_any(languages));
         }
 
-        if let Some(SubmissionStatuses { statuses }) = fsp_dto.status {
+        if let Some(SubmissionStatuses { statuses }) = fps_dto.status {
             let statuses = statuses
                 .into_iter()
                 .map(|status| status.to_string())
@@ -145,47 +191,47 @@ impl Submission {
             query = query.filter(submissions::dsl::status.eq_any(statuses));
         }
 
-        if let Some(lt_score) = fsp_dto.lt_score {
+        if let Some(lt_score) = fps_dto.lt_score {
             query = query.filter(submissions::dsl::score.lt(lt_score as i32));
         }
 
-        if let Some(gt_score) = fsp_dto.gt_score {
+        if let Some(gt_score) = fps_dto.gt_score {
             query = query.filter(submissions::dsl::score.gt(gt_score as i32));
         }
 
-        if let Some(lt_avg_time) = fsp_dto.lt_avg_time {
+        if let Some(lt_avg_time) = fps_dto.lt_avg_time {
             query = query.filter(submissions::dsl::avg_time.lt(lt_avg_time));
         }
 
-        if let Some(gt_avg_time) = fsp_dto.gt_avg_time {
+        if let Some(gt_avg_time) = fps_dto.gt_avg_time {
             query = query.filter(submissions::dsl::avg_time.gt(gt_avg_time));
         }
 
-        if let Some(lt_avg_memory) = fsp_dto.lt_avg_memory {
+        if let Some(lt_avg_memory) = fps_dto.lt_avg_memory {
             query = query.filter(submissions::dsl::avg_memory.lt(lt_avg_memory));
         }
 
-        if let Some(gt_avg_memory) = fsp_dto.gt_avg_memory {
+        if let Some(gt_avg_memory) = fps_dto.gt_avg_memory {
             query = query.filter(submissions::dsl::avg_memory.gt(gt_avg_memory));
         }
 
-        if let Some(fsp_dtos::DateTime {
+        if let Some(fps_dtos::DateTime {
             date_time: start_date,
-        }) = fsp_dto.start_date
+        }) = fps_dto.start_date
         {
             let start_date = SystemTime::from(start_date);
             query = query.filter(submissions::dsl::created_at.gt(start_date));
         }
 
-        if let Some(fsp_dtos::DateTime {
+        if let Some(fps_dtos::DateTime {
             date_time: end_date,
-        }) = fsp_dto.end_date
+        }) = fps_dto.end_date
         {
             let end_date = SystemTime::from(end_date);
             query = query.filter(submissions::dsl::created_at.lt(end_date));
         }
 
-        if let Some(sort_by) = fsp_dto.sort_by {
+        if let Some(sort_by) = fps_dto.sort_by {
             query = match sort_by {
                 SortDiscriminant::ScoreAsc => query.order(submissions::dsl::score.asc()),
                 SortDiscriminant::ScoreDesc => query.order(submissions::dsl::score.desc()),
@@ -198,9 +244,9 @@ impl Submission {
             };
         }
 
-        let mut query = query.paginate(fsp_dto.page.unwrap_or(1));
+        let mut query = query.paginate(fps_dto.page.unwrap_or(1));
 
-        if let Some(per_page) = fsp_dto.per_page {
+        if let Some(per_page) = fps_dto.per_page {
             query = query.per_page(per_page);
         }
 

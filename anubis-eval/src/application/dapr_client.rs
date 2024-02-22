@@ -1,8 +1,8 @@
-use crate::application::dapr_dtos::{
+use crate::config::di::{CONFIG, DB_CONN};
+use crate::contracts::dapr_dtos::{
     CacheMetadata, CacheSetItemDto, CreateSubmissionBatchDto, EvaluatedSubmissionBatchDto,
     GetEvalMetadataForProblemDto, TestCaseTokenDto,
 };
-use crate::config::di::{CONFIG, DB_CONN};
 use crate::domain::application_error::ApplicationError;
 use crate::domain::problem::Problem;
 use rocket::request::{FromRequest, Outcome};
