@@ -504,6 +504,8 @@ services:
         condition: service_started
       asgard-redis:
         condition: service_started
+      asgard-rabbitmq:
+        condition: service_started
     profiles:
       - dapr
       - asgard
@@ -514,6 +516,19 @@ services:
     image: redis:alpine
     ports:
       - "6379"
+    profiles:
+      - dapr
+      - asgard
+      - pantheonix
+
+  asgard-rabbitmq:
+    container_name: asgard-rabbitmq
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
     profiles:
       - dapr
       - asgard
@@ -552,6 +567,8 @@ volumes:
   judge0-db:
     driver: local
   redis-data:
+    driver: local
+  rabbitmq-data:
     driver: local
 
   ############ NETWORKS ############

@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Asgard.Hermes;
+using Dapr.Client;
+using EnkiProblems.Problems.Events;
 using EnkiProblems.Problems.Tests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
@@ -19,18 +21,21 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     private readonly ProblemManager _problemManager;
     private readonly IRepository<Problem, Guid> _problemRepository;
     private readonly ITestService _testService;
+    private readonly DaprClient _daprClient;
     private readonly ILogger _logger;
 
     public ProblemAppService(
         ProblemManager problemManager,
         IRepository<Problem, Guid> problemRepository,
         ITestService testService,
+        DaprClient daprClient,
         ILogger<ProblemAppService> logger
     )
     {
         _problemManager = problemManager;
         _problemRepository = problemRepository;
         _testService = testService;
+        _daprClient = daprClient;
         _logger = logger;
     }
 
@@ -62,7 +67,15 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             input.Difficulty
         );
 
-        await _problemRepository.InsertAsync(problem);
+        problem = await _problemRepository.InsertAsync(problem);
+
+        var problemEvalMetadataUpsertedEvent = ObjectMapper.Map<Problem, ProblemEvalMetadataUpsertedEvent>(problem);
+
+        await _daprClient.PublishEventAsync(
+            EnkiProblemsConsts.PubSubName,
+            EnkiProblemsConsts.ProblemEvalMetadataUpsertedTopic,
+            problemEvalMetadataUpsertedEvent
+        );
 
         return ObjectMapper.Map<Problem, ProblemDto>(problem);
     }
@@ -258,8 +271,19 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             input.IsPublished
         );
 
+        updatedProblem = await _problemRepository.UpdateAsync(updatedProblem);
+
+        var problemEvalMetadataUpsertedEvent = ObjectMapper.Map<Problem, ProblemEvalMetadataUpsertedEvent>(updatedProblem);
+        _logger.LogInformation("Publishing ProblemEvalMetadataUpsertedEvent for problem {ProblemId}: {Event}", id, problemEvalMetadataUpsertedEvent);
+
+        await _daprClient.PublishEventAsync(
+            EnkiProblemsConsts.PubSubName,
+            EnkiProblemsConsts.ProblemEvalMetadataUpsertedTopic,
+            problemEvalMetadataUpsertedEvent
+        );
+
         return ObjectMapper.Map<Problem, ProblemDto>(
-            await _problemRepository.UpdateAsync(updatedProblem)
+           updatedProblem
         );
     }
 
@@ -299,13 +323,13 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         }
 
         var problemTests = problem.Tests.ToList();
-        
+
         foreach (var problemTest in problemTests)
         {
             var deleteResponse = await _testService.DeleteTestAsync(
                 new DeleteTestRequest { ProblemId = id.ToString(), TestId = problemTest.Id.ToString() }
             );
-        
+
             if (deleteResponse.Status.Code != StatusCode.Ok)
             {
                 _logger.LogError(
@@ -420,6 +444,18 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         );
         await _problemRepository.UpdateAsync(updatedProblem);
 
+        await _daprClient.PublishEventAsync(
+            EnkiProblemsConsts.PubSubName,
+            EnkiProblemsConsts.TestUpsertedTopic,
+            new TestUpsertedEvent
+            {
+                Id = testId,
+                ProblemId = id,
+                InputDownloadUrl = getDownloadUrlsResponse.InputLink,
+                OutputDownloadUrl = getDownloadUrlsResponse.OutputLink,
+            }
+        );
+
         return ObjectMapper.Map<Problem, ProblemWithTestsDto>(updatedProblem);
     }
 
@@ -519,6 +555,18 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         await _problemRepository.UpdateAsync(problem);
 
+        await _daprClient.PublishEventAsync(
+            EnkiProblemsConsts.PubSubName,
+            EnkiProblemsConsts.TestUpsertedTopic,
+            new TestUpsertedEvent
+            {
+                Id = testId,
+                ProblemId = id,
+                InputDownloadUrl = getDownloadUrlsResponse.InputLink,
+                OutputDownloadUrl = getDownloadUrlsResponse.OutputLink,
+            }
+        );
+
         return ObjectMapper.Map<Problem, ProblemWithTestsDto>(problem);
     }
 
@@ -580,6 +628,16 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         var updatedProblem = _problemManager.RemoveTest(problem, testId);
 
         await _problemRepository.UpdateAsync(updatedProblem);
+
+        await _daprClient.PublishEventAsync(
+            EnkiProblemsConsts.PubSubName,
+            EnkiProblemsConsts.TestDeletedTopic,
+            new TestDeletedEvent
+            {
+                Id = testId,
+                ProblemId = id,
+            }
+        );
 
         return ObjectMapper.Map<Problem, ProblemWithTestsDto>(updatedProblem);
     }

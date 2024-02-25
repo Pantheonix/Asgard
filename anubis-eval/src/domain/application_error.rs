@@ -35,8 +35,16 @@ pub enum ApplicationError {
         #[source]
         source: diesel::result::Error,
     },
-    #[error("Problem {problem_id:?} not found")]
+    #[error("Error finding problems")]
     ProblemFindError {
+        #[source]
+        source: diesel::result::Error,
+    },
+    #[error("Error finding problem {problem_id:?}")]
+    ProblemNotFoundError { problem_id: String },
+    #[error("Error saving test {test_id:?} for problem {problem_id:?} to database")]
+    TestSaveError {
+        test_id: String,
         problem_id: String,
         #[source]
         source: diesel::result::Error,
@@ -59,10 +67,10 @@ pub enum ApplicationError {
         #[source]
         source: reqwest::Error,
     },
-    #[error("Error setting items in cache for key {key:?}")]
-    CacheSetError { key: String },
-    #[error("Error getting item from cache for key {key:?}")]
-    CacheGetError { key: String },
+    #[error("Error getting item from state store for key {key:?}")]
+    StateStoreGetError { key: String },
+    #[error("Error setting item in state store for key {key:?}")]
+    StateStoreSetError { key: String },
     #[error("Error authenticating user")]
     AuthError(String),
     #[error(
@@ -73,6 +81,18 @@ pub enum ApplicationError {
         "Viewing submissions for unpublished problems is not allowed unless you are the proposer"
     )]
     CannotViewSubmissionsForUnpublishedProblemError,
+    #[error("Failed to parse json: {value:?}")]
+    JsonParseError {
+        value: String,
+        #[source]
+        source: serde_json::Error,
+    },
+    #[error("Failed to parse cloud event: {value:?}")]
+    CloudEventParseError {
+        value: String,
+        #[source]
+        source: anyhow::Error,
+    },
     #[error("Unknown error")]
     Unknown(String),
 }
@@ -118,16 +138,27 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
                 "Error finding testcases".to_string(),
             )
             .respond_to(request),
-            ApplicationError::ProblemFindError { problem_id, .. } =>
+            ApplicationError::ProblemNotFoundError { problem_id, .. } =>
                 rocket::response::status::Custom(
                     rocket::http::Status::NotFound,
                     format!("Problem {} not found", problem_id),
                 )
                 .respond_to(request),
+            ApplicationError::ProblemFindError { .. } => rocket::response::status::Custom(
+                rocket::http::Status::InternalServerError,
+                "Error finding problems".to_string(),
+            )
+            .respond_to(request),
             ApplicationError::ProblemSaveError { problem_id, .. } =>
                 rocket::response::status::Custom(
                     rocket::http::Status::BadRequest,
                     format!("Error saving problem eval metadata for problem {}", problem_id),
+                )
+                .respond_to(request),
+            ApplicationError::TestSaveError { problem_id, test_id, .. } =>
+                rocket::response::status::Custom(
+                    rocket::http::Status::BadRequest,
+                    format!("Error saving test {} for problem {}", test_id, problem_id),
                 )
                 .respond_to(request),
             ApplicationError::SubmissionEvaluationError { .. } =>
@@ -154,14 +185,14 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
                 ),
             )
             .respond_to(request),
-            ApplicationError::CacheSetError { key, .. } => rocket::response::status::Custom(
+            ApplicationError::StateStoreGetError { key, .. } => rocket::response::status::Custom(
                 rocket::http::Status::InternalServerError,
-                format!("Error setting items in cache for key {}", key),
+                format!("Error getting item from state store for key {}", key),
             )
             .respond_to(request),
-            ApplicationError::CacheGetError { key, .. } => rocket::response::status::Custom(
+            ApplicationError::StateStoreSetError { key, .. } => rocket::response::status::Custom(
                 rocket::http::Status::InternalServerError,
-                format!("Error getting item from cache for key {}", key),
+                format!("Error setting item in state store for key {}", key),
             )
             .respond_to(request),
             ApplicationError::AuthError(message) => rocket::response::status::Custom(
@@ -177,6 +208,16 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
             ApplicationError::CannotViewSubmissionsForUnpublishedProblemError => rocket::response::status::Custom(
                 rocket::http::Status::Forbidden,
                 "Viewing submissions for unpublished problems is not allowed unless you are the proposer".to_string(),
+            )
+            .respond_to(request),
+            ApplicationError::JsonParseError { .. } => rocket::response::status::Custom(
+                rocket::http::Status::BadRequest,
+                "Failed to parse json".to_string(),
+            )
+            .respond_to(request),
+            ApplicationError::CloudEventParseError { .. } => rocket::response::status::Custom(
+                rocket::http::Status::BadRequest,
+                "Failed to parse cloud event".to_string(),
             )
             .respond_to(request),
             ApplicationError::Unknown(message) => rocket::response::status::Custom(

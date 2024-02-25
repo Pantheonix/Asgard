@@ -1,26 +1,28 @@
-use crate::config::di::{CONFIG, DB_CONN};
+use crate::config::di::{Atomic, CONFIG};
 use crate::contracts::dapr_dtos::{
-    CacheMetadata, CacheSetItemDto, CreateSubmissionBatchDto, EvaluatedSubmissionBatchDto,
-    GetEvalMetadataForProblemDto, TestCaseTokenDto,
+    CreateSubmissionBatchDto, EvaluatedSubmissionBatchDto, StateStoreSetItemDto, TestCaseTokenDto,
 };
+use crate::contracts::problem_eval_metadata_upserted_dtos::EvalMetadataForProblemDto;
 use crate::domain::application_error::ApplicationError;
 use crate::domain::problem::Problem;
+use diesel::PgConnection;
 use rocket::request::{FromRequest, Outcome};
-use rocket::{debug, info};
+use rocket::{debug, error, info, warn};
 use serde_json::Value;
 use std::ops::DerefMut;
 use uuid::Uuid;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct DaprClient {
-    pub reqwest_client: reqwest::Client,
+    pub http_client: reqwest::Client,
+    pub db_conn: Atomic<PgConnection>,
 }
 
 impl DaprClient {
     pub async fn get_eval_metadata_for_problem(
         &self,
         problem_id: &Uuid,
-    ) -> Result<GetEvalMetadataForProblemDto, ApplicationError> {
+    ) -> Result<EvalMetadataForProblemDto, ApplicationError> {
         let problem_id = problem_id.to_string();
 
         let url = CONFIG
@@ -28,30 +30,26 @@ impl DaprClient {
             .to_owned()
             .replace("{problem_id}", problem_id.as_str());
 
-        info!("Get Eval Metadata for Problem {} from cache", problem_id);
+        info!("Get Eval Metadata for Problem {} from db", problem_id);
 
-        let cache_response = self.get_item_from_cache(problem_id.as_str()).await?;
+        let eval_metadata = {
+            let mut db = self.db_conn.lock().await;
+            Problem::find_by_id(&problem_id, db.deref_mut())
+        };
 
-        match cache_response {
-            Some(cache_response) => {
-                info!(
-                    "Eval Metadata for Problem {} retrieved from cache",
-                    problem_id
-                );
-                let response =
-                    serde_json::from_value::<GetEvalMetadataForProblemDto>(cache_response)
-                        .map_err(|_| ApplicationError::CacheGetError {
-                            key: problem_id.clone(),
-                        })?;
-                Ok(response)
+        match eval_metadata {
+            Ok(eval_metadata) => {
+                info!("Eval Metadata for Problem {} found in db", problem_id);
+                Ok(eval_metadata.into())
             }
-            None => {
-                info!(
-                    "Eval Metadata for Problem {} not found in cache",
+            Err(ApplicationError::ProblemFindError { .. })
+            | Err(ApplicationError::ProblemNotFoundError { .. }) => {
+                warn!(
+                    "Eval Metadata for Problem {} not found in db. Fetching from Enki",
                     problem_id
                 );
                 let response = self
-                    .reqwest_client
+                    .http_client
                     .get(&url)
                     .send()
                     .await
@@ -59,40 +57,16 @@ impl DaprClient {
                         problem_id: problem_id.clone(),
                         source: e,
                     })?
-                    .json::<GetEvalMetadataForProblemDto>()
+                    .json::<EvalMetadataForProblemDto>()
                     .await
                     .map_err(|e| ApplicationError::EvalMetadataError {
                         problem_id: problem_id.clone(),
                         source: e,
                     })?;
 
-                let cache_set_item = CacheSetItemDto {
-                    key: problem_id.clone(),
-                    value: serde_json::to_value(&response).map_err(|_| {
-                        ApplicationError::CacheSetError {
-                            key: problem_id.clone(),
-                        }
-                    })?,
-                    metadata: Some(CacheMetadata {
-                        ttl_in_seconds: CONFIG.default_cache_ttl_seconds.to_string(),
-                    }),
-                };
-
-                info!("Set Eval Metadata for Problem {} in cache", problem_id);
-                self.set_items_in_cache(vec![cache_set_item]).await?;
-
-                let problem: Problem = response.clone().into();
-                let db = DB_CONN.clone();
-                let mut db = db.lock().await;
-
-                info!(
-                    "Upserting Eval Metadata for Problem {} in database",
-                    problem_id
-                );
-                problem.upsert(db.deref_mut())?;
-
                 Ok(response)
             }
+            Err(e) => Err(e),
         }
     }
 
@@ -104,18 +78,18 @@ impl DaprClient {
     ) -> Result<(String, String), ApplicationError> {
         let input_key = format!("{}-{}-input", problem_id, test_id);
 
-        info!("Get Input for Test {} from cache", test_id);
+        info!("Get Input for Test {} from state store", test_id);
 
-        let cache_response = self.get_item_from_cache(input_key.as_str()).await?;
-        let input = match cache_response {
+        let state_store_response = self.get_item_from_state_store(input_key.as_str()).await?;
+        let input = match state_store_response {
             Some(input) => serde_json::from_value::<String>(input).map_err(|_| {
-                ApplicationError::CacheGetError {
+                ApplicationError::StateStoreGetError {
                     key: input_key.clone(),
                 }
             })?,
             None => {
                 let input = self
-                    .reqwest_client
+                    .http_client
                     .get(input_url.clone())
                     .send()
                     .await
@@ -132,14 +106,12 @@ impl DaprClient {
                         source: e,
                     })?;
 
-                let cache_set_item = CacheSetItemDto {
+                let state_store_set_item = StateStoreSetItemDto {
                     key: input_key,
                     value: Value::String(input.clone()),
-                    metadata: Some(CacheMetadata {
-                        ttl_in_seconds: CONFIG.default_cache_ttl_seconds.to_string(),
-                    }),
                 };
-                self.set_items_in_cache(vec![cache_set_item]).await?;
+                self.set_items_in_state_store(vec![state_store_set_item])
+                    .await?;
 
                 input
             }
@@ -147,18 +119,18 @@ impl DaprClient {
 
         let output_key = format!("{}-{}-output", problem_id, test_id);
 
-        info!("Get Output for Test {} from cache", test_id);
+        info!("Get Output for Test {} from state store", test_id);
 
-        let cache_response = self.get_item_from_cache(output_key.as_str()).await?;
-        let output = match cache_response {
+        let state_store_response = self.get_item_from_state_store(output_key.as_str()).await?;
+        let output = match state_store_response {
             Some(output) => serde_json::from_value::<String>(output).map_err(|_| {
-                ApplicationError::CacheGetError {
+                ApplicationError::StateStoreGetError {
                     key: output_key.clone(),
                 }
             })?,
             None => {
                 let output = self
-                    .reqwest_client
+                    .http_client
                     .get(output_url.clone())
                     .send()
                     .await
@@ -175,14 +147,12 @@ impl DaprClient {
                         source: e,
                     })?;
 
-                let cache_set_item = CacheSetItemDto {
+                let state_store_set_item = StateStoreSetItemDto {
                     key: output_key,
                     value: Value::String(output.clone()),
-                    metadata: Some(CacheMetadata {
-                        ttl_in_seconds: CONFIG.default_cache_ttl_seconds.to_string(),
-                    }),
                 };
-                self.set_items_in_cache(vec![cache_set_item]).await?;
+                self.set_items_in_state_store(vec![state_store_set_item])
+                    .await?;
 
                 output
             }
@@ -198,7 +168,7 @@ impl DaprClient {
         let url = CONFIG.dapr_judge_endpoint.to_owned();
 
         let response = self
-            .reqwest_client
+            .http_client
             .post(&url)
             .json(&submission_batch)
             .send()
@@ -225,7 +195,7 @@ impl DaprClient {
         let url = url.replace("{tokens}", tokens.as_str());
 
         let response = self
-            .reqwest_client
+            .http_client
             .get(&url)
             .send()
             .await
@@ -237,12 +207,17 @@ impl DaprClient {
         Ok(response)
     }
 
-    async fn get_item_from_cache(&self, key: &str) -> Result<Option<Value>, ApplicationError> {
+    async fn get_item_from_state_store(
+        &self,
+        key: &str,
+    ) -> Result<Option<Value>, ApplicationError> {
         let url = CONFIG.dapr_state_store_get_endpoint.to_owned();
         let url = url.replace("{key}", key);
 
-        let response = self.reqwest_client.get(&url).send().await.map_err(|_| {
-            ApplicationError::CacheGetError {
+        let response = self.http_client.get(&url).send().await.map_err(|e| {
+            error!("Error getting item from state store: {:?}", e);
+            
+            ApplicationError::StateStoreGetError {
                 key: key.to_string(),
             }
         })?;
@@ -250,7 +225,7 @@ impl DaprClient {
         let response = match response.status() {
             reqwest::StatusCode::OK => {
                 let response = response.json::<Value>().await.map_err(|_| {
-                    ApplicationError::CacheGetError {
+                    ApplicationError::StateStoreGetError {
                         key: key.to_string(),
                     }
                 })?;
@@ -259,26 +234,26 @@ impl DaprClient {
             _ => None,
         };
 
-        debug!("Cache response: {:?}", response);
+        debug!("State store response: {:?}", response);
 
         Ok(response)
     }
 
-    async fn set_items_in_cache(
+    async fn set_items_in_state_store(
         &self,
-        items: Vec<CacheSetItemDto>,
+        items: Vec<StateStoreSetItemDto>,
     ) -> Result<(), ApplicationError> {
         let url = CONFIG.dapr_state_store_post_endpoint.to_owned();
 
-        debug!("Cache request: {:?}", items);
+        debug!("State store request: {:?}", items);
 
         let response = self
-            .reqwest_client
+            .http_client
             .post(&url)
             .json(&items)
             .send()
             .await
-            .map_err(|_| ApplicationError::CacheSetError {
+            .map_err(|_| ApplicationError::StateStoreSetError {
                 key: items
                     .iter()
                     .map(|item| item.key.clone())
@@ -287,7 +262,7 @@ impl DaprClient {
             })?;
 
         let status = response.status();
-        debug!("Cache response status: {:?}", status);
+        debug!("State store response status: {:?}", status);
 
         Ok(())
     }
@@ -298,19 +273,21 @@ impl<'r> FromRequest<'r> for DaprClient {
     type Error = ApplicationError;
 
     async fn from_request(req: &'r rocket::Request<'_>) -> Outcome<Self, Self::Error> {
-        let reqwest_client = req.rocket().state::<reqwest::Client>();
+        let http_client = req.rocket().state::<reqwest::Client>();
+        let db_conn = req.rocket().state::<Atomic<PgConnection>>();
 
-        match reqwest_client {
-            None => {
-                let response = String::from("Error getting reqwest client");
+        match (http_client, db_conn) {
+            (Some(http_client), Some(db_conn)) => Outcome::Success(DaprClient {
+                http_client: http_client.clone(),
+                db_conn: db_conn.clone(),
+            }),
+            _ => {
+                let response = String::from("Error initializing http client and/or db connection");
                 Outcome::Failure((
                     rocket::http::Status::InternalServerError,
                     ApplicationError::Unknown(response),
                 ))
             }
-            Some(reqwest_client) => Outcome::Success(DaprClient {
-                reqwest_client: reqwest_client.clone(),
-            }),
         }
     }
 }

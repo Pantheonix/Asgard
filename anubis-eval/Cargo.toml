@@ -31,3 +31,5 @@ envy = "0.4.2"
 chrono = { version = "0.4.30", features = ["serde"] }
 reqwest = { version = "0.11.22", features = ["json"] }
 futures = "0.3.28"
+cloudevents-sdk = "0.7.0"
+anyhow = "1.0.80"

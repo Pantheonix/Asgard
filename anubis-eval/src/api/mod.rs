@@ -6,3 +6,4 @@ pub mod get_highest_score_submissions;
 pub mod get_submission_endpoint;
 pub mod get_submissions_endpoint;
 pub mod health_check_endpoint;
+pub mod problem_eval_metadata_upserted_event_handler;

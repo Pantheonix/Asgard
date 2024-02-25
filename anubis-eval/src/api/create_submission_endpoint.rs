@@ -42,10 +42,11 @@ pub async fn create_submission(
         ApplicationError::AuthError("Failed to parse user id from token".to_string())
     })?;
     let language: Language = submission.language.clone().into();
+    let problem_id = submission.problem_id;
 
-    // ENKI - Get Eval Metadata for Problem
+    // DB - Get Eval Metadata for Problem
     let eval_metadata = dapr_client
-        .get_eval_metadata_for_problem(&submission.problem_id)
+        .get_eval_metadata_for_problem(&problem_id)
         .await?;
 
     info!("Eval Metadata retrieved: {:?}", eval_metadata);
@@ -67,7 +68,7 @@ pub async fn create_submission(
             .get_input_and_output_for_test(
                 test.test_id,
                 eval_metadata.problem_id,
-                (test.input.clone(), test.output.clone()),
+                (test.input_url.clone(), test.output_url.clone()),
             )
             .await?;
 

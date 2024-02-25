@@ -55,7 +55,7 @@ impl Submission {
                         submission_id: id.to_string(),
                     }),
                     false => {
-                        let submission = submission_and_testcases[0].0.clone();
+                        let submission = submission_and_testcases.first().unwrap().0.clone();
                         let testcases = submission_and_testcases
                             .into_iter()
                             .map(|(_, testcase)| testcase.into())
@@ -110,7 +110,7 @@ impl Submission {
                     .bind::<Text, _>(user_id.to_string())
                     .bind::<Text, _>(problem_id.to_string())
                     .load::<SubmissionModel>(conn)
-            },
+            }
             None => sql_query(raw_queries::GET_HIGHEST_SCORE_SUBMISSIONS_PER_USER)
                 .bind::<Text, _>(current_user_id.to_string())
                 .bind::<Text, _>(user_id.to_string())
@@ -123,8 +123,7 @@ impl Submission {
                 submissions
                     .into_iter()
                     .map(|submission| {
-                        let problem = Problem::find_by_id(&submission.problem_id, conn)
-                            .map(|problem| problem.into())?;
+                        let problem = Problem::find_by_id(&submission.problem_id, conn)?;
 
                         Ok((submission.into(), problem))
                     })
@@ -285,23 +284,6 @@ impl Submission {
             })?;
 
         Ok(())
-    }
-
-    pub fn get_problems_solved_by_user(
-        user_id: &String,
-        conn: &mut PgConnection,
-    ) -> Result<Vec<String>, ApplicationError> {
-        use crate::schema::submissions::dsl::{
-            problem_id as problem_id_column, status as status_column, user_id as user_id_column,
-        };
-
-        all_submissions
-            .filter(user_id_column.eq(user_id.to_string()))
-            .filter(status_column.eq(SubmissionStatus::Accepted.to_string()))
-            .select(problem_id_column)
-            .distinct()
-            .load::<String>(conn)
-            .map_err(|source| ApplicationError::SubmissionFindError { source })
     }
 
     pub fn is_problem_solved_by_user(
