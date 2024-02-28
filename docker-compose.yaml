@@ -516,6 +516,8 @@ services:
     image: redis:alpine
     ports:
       - "6379"
+    volumes:
+      - dapr-redis-data:/data
     profiles:
       - dapr
       - asgard
@@ -529,6 +531,7 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
+      - rabbitmq-logs:/var/log/rabbitmq
     profiles:
       - dapr
       - asgard
@@ -570,7 +573,10 @@ volumes:
     driver: local
   rabbitmq-data:
     driver: local
-
+  rabbitmq-logs:
+    driver: local
+  dapr-redis-data:
+    driver: local
   ############ NETWORKS ############
 
 networks:
