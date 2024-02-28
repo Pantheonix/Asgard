@@ -1,6 +1,7 @@
 use crate::config::di::{Atomic, CONFIG};
 use crate::contracts::dapr_dtos::{
-    CreateSubmissionBatchDto, EvaluatedSubmissionBatchDto, StateStoreSetItemDto, TestCaseTokenDto,
+    CreateSubmissionBatchDto, CreateSubmissionTestCaseDto, EvaluatedSubmissionBatchDto,
+    EvaluatedSubmissionTestCaseDto, StateStoreSetItemDto, TestCaseTokenDto,
 };
 use crate::contracts::problem_eval_metadata_upserted_dtos::EvalMetadataForProblemDto;
 use crate::domain::application_error::ApplicationError;
@@ -94,7 +95,7 @@ impl DaprClient {
                         key: input_key.clone(),
                     }
                 })?
-            },
+            }
             None => {
                 let input = self
                     .http_client
@@ -139,7 +140,7 @@ impl DaprClient {
                         key: output_key.clone(),
                     }
                 })?
-            },
+            }
             None => {
                 let output = self
                     .http_client
@@ -177,7 +178,7 @@ impl DaprClient {
         &self,
         submission_batch: &CreateSubmissionBatchDto,
     ) -> Result<Vec<TestCaseTokenDto>, ApplicationError> {
-        let url = CONFIG.dapr_judge_endpoint.to_owned();
+        let url = CONFIG.dapr_judge_submission_batch_endpoint.to_owned();
 
         let response = self
             .http_client
@@ -187,6 +188,30 @@ impl DaprClient {
             .await
             .map_err(|e| ApplicationError::SubmissionEvaluationError { source: e })?
             .json::<Vec<TestCaseTokenDto>>()
+            .await
+            .map_err(|e| ApplicationError::SubmissionEvaluationError { source: e })?;
+
+        Ok(response)
+    }
+
+    pub async fn create_submission_test_case(
+        &self,
+        submission: &CreateSubmissionTestCaseDto,
+    ) -> Result<TestCaseTokenDto, ApplicationError> {
+        let url = CONFIG.dapr_judge_submission_endpoint.to_owned();
+
+        let response = self
+            .http_client
+            .post(&url)
+            .json(&submission)
+            .send()
+            .await
+            .map_err(|e| ApplicationError::SubmissionEvaluationError { source: e })?;
+
+        debug!("Create Submission Test Case Response: {:?}", response);
+
+        let response = response
+            .json::<TestCaseTokenDto>()
             .await
             .map_err(|e| ApplicationError::SubmissionEvaluationError { source: e })?;
 
@@ -219,6 +244,26 @@ impl DaprClient {
         Ok(response)
     }
 
+    async fn get_submission_test_case(
+        &self,
+        token: &TestCaseTokenDto,
+    ) -> Result<EvaluatedSubmissionTestCaseDto, ApplicationError> {
+        let url = CONFIG.dapr_get_submission_endpoint.to_owned();
+        let url = url.replace("{token}", token.token.as_str());
+
+        let response = self
+            .http_client
+            .get(&url)
+            .send()
+            .await
+            .map_err(|e| ApplicationError::SubmissionEvaluationError { source: e })?
+            .json::<EvaluatedSubmissionTestCaseDto>()
+            .await
+            .map_err(|e| ApplicationError::SubmissionEvaluationError { source: e })?;
+
+        Ok(response)
+    }
+
     async fn get_item_from_state_store(
         &self,
         key: &str,
@@ -228,7 +273,7 @@ impl DaprClient {
 
         let response = self.http_client.get(&url).send().await.map_err(|e| {
             error!("Error getting item from state store: {:?}", e);
-            
+
             ApplicationError::StateStoreGetError {
                 key: key.to_string(),
             }
