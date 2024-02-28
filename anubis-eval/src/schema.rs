@@ -47,7 +47,7 @@ diesel::table! {
 }
 
 diesel::table! {
-    tests (id) {
+    tests (id, problem_id) {
         id -> Int4,
         problem_id -> Text,
         score -> Int4,
@@ -60,4 +60,9 @@ diesel::joinable!(submissions -> problems (problem_id));
 diesel::joinable!(submissions_testcases -> submissions (submission_id));
 diesel::joinable!(tests -> problems (problem_id));
 
-diesel::allow_tables_to_appear_in_same_query!(problems, submissions, submissions_testcases, tests,);
+diesel::allow_tables_to_appear_in_same_query!(
+    problems,
+    submissions,
+    submissions_testcases,
+    tests,
+);

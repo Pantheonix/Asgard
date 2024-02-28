@@ -74,7 +74,7 @@ impl Test {
 
         diesel::insert_into(all_tests)
             .values(&model)
-            .on_conflict(tests::id)
+            .on_conflict((tests::id, tests::problem_id))
             .do_update()
             .set(&model)
             .execute(conn)

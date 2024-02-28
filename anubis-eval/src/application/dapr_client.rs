@@ -64,6 +64,10 @@ impl DaprClient {
                         source: e,
                     })?;
 
+                let mut db = self.db_conn.lock().await;
+                let problem = Problem::from(response.clone());
+                problem.upsert(db.deref_mut())?;
+
                 Ok(response)
             }
             Err(e) => Err(e),
@@ -82,11 +86,15 @@ impl DaprClient {
 
         let state_store_response = self.get_item_from_state_store(input_key.as_str()).await?;
         let input = match state_store_response {
-            Some(input) => serde_json::from_value::<String>(input).map_err(|_| {
-                ApplicationError::StateStoreGetError {
-                    key: input_key.clone(),
-                }
-            })?,
+            Some(input) => {
+                info!("Input for Test {} found in state store", test_id);
+
+                serde_json::from_value::<String>(input).map_err(|_| {
+                    ApplicationError::StateStoreGetError {
+                        key: input_key.clone(),
+                    }
+                })?
+            },
             None => {
                 let input = self
                     .http_client
@@ -123,11 +131,15 @@ impl DaprClient {
 
         let state_store_response = self.get_item_from_state_store(output_key.as_str()).await?;
         let output = match state_store_response {
-            Some(output) => serde_json::from_value::<String>(output).map_err(|_| {
-                ApplicationError::StateStoreGetError {
-                    key: output_key.clone(),
-                }
-            })?,
+            Some(output) => {
+                info!("Output for Test {} found in state store", test_id);
+
+                serde_json::from_value::<String>(output).map_err(|_| {
+                    ApplicationError::StateStoreGetError {
+                        key: output_key.clone(),
+                    }
+                })?
+            },
             None => {
                 let output = self
                     .http_client

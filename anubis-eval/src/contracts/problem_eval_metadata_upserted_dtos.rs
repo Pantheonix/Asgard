@@ -5,21 +5,21 @@ use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EvalMetadataForProblemDto {
-    #[serde(rename = "Id")]
+    #[serde(alias = "id", alias = "Id")]
     pub problem_id: Uuid,
-    #[serde(rename = "Name")]
+    #[serde(alias = "name", alias = "Name")]
     pub name: String,
-    #[serde(rename = "ProposerId")]
+    #[serde(alias = "proposerId", alias = "ProposerId")]
     pub proposer_id: Uuid,
-    #[serde(rename = "IsPublished")]
+    #[serde(alias = "isPublished", alias = "IsPublished")]
     pub is_published: bool,
-    #[serde(rename = "Time")]
+    #[serde(alias = "time", alias = "Time")]
     pub time: f32,
-    #[serde(rename = "StackMemory")]
+    #[serde(alias = "stackMemory", alias = "StackMemory")]
     pub stack_memory: f32,
-    #[serde(rename = "TotalMemory")]
+    #[serde(alias = "totalMemory", alias = "TotalMemory")]
     pub total_memory: f32,
-    #[serde(rename = "Tests")]
+    #[serde(alias = "tests", alias = "Tests")]
     pub tests: Vec<TestDto>,
 }
 

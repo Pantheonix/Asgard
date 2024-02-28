@@ -12,13 +12,13 @@ pub struct StateStoreSetItemDto {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TestDto {
-    #[serde(rename = "Id")]
+    #[serde(alias = "id", alias = "Id")]
     pub test_id: usize,
-    #[serde(rename = "InputDownloadUrl")]
+    #[serde(alias = "inputDownloadUrl", alias = "InputDownloadUrl")]
     pub input_url: String,
-    #[serde(rename = "OutputDownloadUrl")]
+    #[serde(alias = "outputDownloadUrl", alias = "OutputDownloadUrl")]
     pub output_url: String,
-    #[serde(rename = "Score")]
+    #[serde(alias = "score", alias = "Score")]
     pub score: usize,
 }
 
