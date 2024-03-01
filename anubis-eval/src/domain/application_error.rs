@@ -1,4 +1,5 @@
 use rocket::response::Responder;
+use rocket::serde::json::{json, Value};
 use rocket::{error, Request};
 use thiserror::Error;
 
@@ -60,7 +61,7 @@ pub enum ApplicationError {
         #[source]
         source: reqwest::Error,
     },
-    #[error("Error retrieving input and output for test")]
+    #[error("Error retrieving input and output for test {test_id:?} of problem {problem_id:?}")]
     TestInputOutputError {
         problem_id: String,
         test_id: String,
@@ -100,129 +101,135 @@ pub enum ApplicationError {
 impl<'r, 'o: 'r> Responder<'r, 'o> for ApplicationError {
     fn respond_to(self, request: &'r Request<'_>) -> rocket::response::Result<'o> {
         error!("Application Error: {:?}", self);
+        let error_json = json!({"error": self.to_string()});
 
         match self {
-            ApplicationError::SubmissionSaveError { submission_id, .. } => {
-                rocket::response::status::Custom(
-                    rocket::http::Status::BadRequest,
-                    format!("Error saving submission {} to database", submission_id),
+            ApplicationError::SubmissionSaveError { .. } => {
+                rocket::response::status::Custom::<Value>(
+                    rocket::http::Status::InternalServerError,
+                    error_json,
                 )
                 .respond_to(request)
             }
-            ApplicationError::SubmissionNotFoundError { submission_id } => {
-                rocket::response::status::Custom(
+            ApplicationError::SubmissionNotFoundError { .. } => {
+                rocket::response::status::Custom::<Value>(
                     rocket::http::Status::NotFound,
-                    format!("Submission {} not found", submission_id),
+                    error_json,
                 )
                 .respond_to(request)
             }
-            ApplicationError::SubmissionFindError { .. } => rocket::response::status::Custom(
-                rocket::http::Status::InternalServerError,
-                "Error finding submissions".to_string(),
-            )
-            .respond_to(request),
-            ApplicationError::TestCaseSaveError {
-                testcase_id,
-                submission_id,
-                ..
-            } => rocket::response::status::Custom(
-                rocket::http::Status::BadRequest,
-                format!(
-                    "Error saving testcase {} for submission {} to database",
-                    testcase_id, submission_id
-                ),
-            )
-            .respond_to(request),
-            ApplicationError::TestCaseFindError { .. } => rocket::response::status::Custom(
-                rocket::http::Status::NotFound,
-                "Error finding testcases".to_string(),
-            )
-            .respond_to(request),
-            ApplicationError::ProblemNotFoundError { problem_id, .. } =>
-                rocket::response::status::Custom(
+            ApplicationError::SubmissionFindError { .. } => {
+                rocket::response::status::Custom::<Value>(
+                    rocket::http::Status::InternalServerError,
+                    error_json,
+                )
+                .respond_to(request)
+            }
+            ApplicationError::TestCaseSaveError { .. } => {
+                rocket::response::status::Custom::<Value>(
+                    rocket::http::Status::InternalServerError,
+                    error_json,
+                )
+                .respond_to(request)
+            }
+            ApplicationError::TestCaseFindError { .. } => {
+                rocket::response::status::Custom::<Value>(
+                    rocket::http::Status::InternalServerError,
+                    error_json,
+                )
+                .respond_to(request)
+            }
+            ApplicationError::ProblemNotFoundError { .. } => {
+                rocket::response::status::Custom::<Value>(
                     rocket::http::Status::NotFound,
-                    format!("Problem {} not found", problem_id),
+                    error_json,
                 )
-                .respond_to(request),
-            ApplicationError::ProblemFindError { .. } => rocket::response::status::Custom(
+                .respond_to(request)
+            }
+            ApplicationError::ProblemFindError { .. } => rocket::response::status::Custom::<Value>(
                 rocket::http::Status::InternalServerError,
-                "Error finding problems".to_string(),
+                error_json,
             )
             .respond_to(request),
-            ApplicationError::ProblemSaveError { problem_id, .. } =>
-                rocket::response::status::Custom(
-                    rocket::http::Status::BadRequest,
-                    format!("Error saving problem eval metadata for problem {}", problem_id),
-                )
-                .respond_to(request),
-            ApplicationError::TestSaveError { problem_id, test_id, .. } =>
-                rocket::response::status::Custom(
-                    rocket::http::Status::BadRequest,
-                    format!("Error saving test {} for problem {}", test_id, problem_id),
-                )
-                .respond_to(request),
-            ApplicationError::SubmissionEvaluationError { .. } =>
-                rocket::response::status::Custom(
+            ApplicationError::ProblemSaveError { .. } => rocket::response::status::Custom::<Value>(
+                rocket::http::Status::InternalServerError,
+                error_json,
+            )
+            .respond_to(request),
+            ApplicationError::TestSaveError { .. } => rocket::response::status::Custom::<Value>(
+                rocket::http::Status::InternalServerError,
+                error_json,
+            )
+            .respond_to(request),
+            ApplicationError::SubmissionEvaluationError { .. } => {
+                rocket::response::status::Custom::<Value>(
                     rocket::http::Status::InternalServerError,
-                    "Submission evaluation service failed".to_string(),
+                    error_json,
                 )
-                .respond_to(request),
-            ApplicationError::EvalMetadataError { problem_id, .. } =>
-                rocket::response::status::Custom(
+                .respond_to(request)
+            }
+            ApplicationError::EvalMetadataError { .. } => {
+                rocket::response::status::Custom::<Value>(
                     rocket::http::Status::InternalServerError,
-                    format!("Error retrieving eval metadata for problem {}", problem_id),
+                    error_json,
                 )
-                .respond_to(request),
-            ApplicationError::TestInputOutputError {
-                problem_id,
-                test_id,
-                ..
-            } => rocket::response::status::Custom(
-                rocket::http::Status::InternalServerError,
-                format!(
-                    "Error retrieving input and output for test {} of problem {}",
-                    test_id, problem_id
-                ),
-            )
-            .respond_to(request),
-            ApplicationError::StateStoreGetError { key, .. } => rocket::response::status::Custom(
-                rocket::http::Status::InternalServerError,
-                format!("Error getting item from state store for key {}", key),
-            )
-            .respond_to(request),
-            ApplicationError::StateStoreSetError { key, .. } => rocket::response::status::Custom(
-                rocket::http::Status::InternalServerError,
-                format!("Error setting item in state store for key {}", key),
-            )
-            .respond_to(request),
-            ApplicationError::AuthError(message) => rocket::response::status::Custom(
+                .respond_to(request)
+            }
+            ApplicationError::TestInputOutputError { .. } => {
+                rocket::response::status::Custom::<Value>(
+                    rocket::http::Status::InternalServerError,
+                    error_json,
+                )
+                .respond_to(request)
+            }
+            ApplicationError::StateStoreGetError { .. } => {
+                rocket::response::status::Custom::<Value>(
+                    rocket::http::Status::InternalServerError,
+                    error_json,
+                )
+                .respond_to(request)
+            }
+            ApplicationError::StateStoreSetError { .. } => {
+                rocket::response::status::Custom::<Value>(
+                    rocket::http::Status::InternalServerError,
+                    error_json,
+                )
+                .respond_to(request)
+            }
+            ApplicationError::AuthError(_) => rocket::response::status::Custom::<Value>(
                 rocket::http::Status::Unauthorized,
-                format!("Error authenticating user: {}", message),
+                error_json,
             )
             .respond_to(request),
-            ApplicationError::CannotSubmitForUnpublishedProblemError => rocket::response::status::Custom(
-                rocket::http::Status::Forbidden,
-                "Sending submissions for unpublished problems is not allowed unless you are the proposer".to_string(),
-            )
-            .respond_to(request),
-            ApplicationError::CannotViewSubmissionsForUnpublishedProblemError => rocket::response::status::Custom(
-                rocket::http::Status::Forbidden,
-                "Viewing submissions for unpublished problems is not allowed unless you are the proposer".to_string(),
-            )
-            .respond_to(request),
-            ApplicationError::JsonParseError { .. } => rocket::response::status::Custom(
-                rocket::http::Status::BadRequest,
-                "Failed to parse json".to_string(),
-            )
-            .respond_to(request),
-            ApplicationError::CloudEventParseError { .. } => rocket::response::status::Custom(
-                rocket::http::Status::BadRequest,
-                "Failed to parse cloud event".to_string(),
-            )
-            .respond_to(request),
-            ApplicationError::Unknown(message) => rocket::response::status::Custom(
+            ApplicationError::CannotSubmitForUnpublishedProblemError => {
+                rocket::response::status::Custom::<Value>(
+                    rocket::http::Status::Forbidden,
+                    error_json,
+                )
+                .respond_to(request)
+            }
+            ApplicationError::CannotViewSubmissionsForUnpublishedProblemError => {
+                rocket::response::status::Custom::<Value>(
+                    rocket::http::Status::Forbidden,
+                    error_json,
+                )
+                .respond_to(request)
+            }
+            ApplicationError::JsonParseError { .. } => rocket::response::status::Custom::<Value>(
                 rocket::http::Status::InternalServerError,
-                format!("Unknown error: {}", message),
+                error_json,
+            )
+            .respond_to(request),
+            ApplicationError::CloudEventParseError { .. } => {
+                rocket::response::status::Custom::<Value>(
+                    rocket::http::Status::InternalServerError,
+                    error_json,
+                )
+                .respond_to(request)
+            }
+            ApplicationError::Unknown(_) => rocket::response::status::Custom::<Value>(
+                rocket::http::Status::InternalServerError,
+                error_json,
             )
             .respond_to(request),
         }

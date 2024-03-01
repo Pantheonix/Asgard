@@ -4,11 +4,11 @@ use crate::contracts::dapr_dtos::TestCaseTokenDto;
 use crate::domain::application_error::ApplicationError;
 use crate::domain::submission::{Submission, SubmissionStatus, TestCase, TestCaseStatus};
 use diesel::PgConnection;
+use futures::future::join_all;
 use rocket::error;
 use rocket::log::private::{debug, info};
 use std::ops::DerefMut;
 use std::str::FromStr;
-use futures::future::join_all;
 use uuid::Uuid;
 
 pub async fn evaluate_pending_submissions(
@@ -30,7 +30,7 @@ pub async fn evaluate_pending_submissions(
     };
 
     // DB - for each submission, get the pending/running test cases
-     join_all(pending_submissions_ids.iter().map(|submission_id| async {
+    join_all(pending_submissions_ids.iter().map(|submission_id| async {
         evaluate_submission(submission_id, dapr_client.clone(), db.clone()).await
     }))
     .await
