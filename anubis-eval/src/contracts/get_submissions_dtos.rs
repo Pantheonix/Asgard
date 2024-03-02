@@ -1,3 +1,4 @@
+use crate::domain::problem::Problem;
 use crate::domain::submission::Submission;
 use chrono::{DateTime, Utc};
 use rocket::serde::Serialize;
@@ -23,8 +24,8 @@ impl<'r> rocket::response::Responder<'r, 'static> for GetSubmissionsDto {
     }
 }
 
-impl From<(Vec<Submission>, usize, usize)> for GetSubmissionsDto {
-    fn from((submissions, items, total_pages): (Vec<Submission>, usize, usize)) -> Self {
+impl From<(Vec<(Submission, Problem)>, usize, usize)> for GetSubmissionsDto {
+    fn from((submissions, items, total_pages): (Vec<(Submission, Problem)>, usize, usize)) -> Self {
         Self {
             submissions: submissions
                 .into_iter()
@@ -36,8 +37,8 @@ impl From<(Vec<Submission>, usize, usize)> for GetSubmissionsDto {
     }
 }
 
-impl From<Vec<Submission>> for GetSubmissionsDto {
-    fn from(submissions: Vec<Submission>) -> Self {
+impl From<Vec<(Submission, Problem)>> for GetSubmissionsDto {
+    fn from(submissions: Vec<(Submission, Problem)>) -> Self {
         Self {
             submissions: submissions
                 .clone()
@@ -55,6 +56,7 @@ impl From<Vec<Submission>> for GetSubmissionsDto {
 pub struct GetSubmissionDto {
     id: String,
     problem_id: String,
+    problem_name: String,
     user_id: String,
     language: String,
     status: String,
@@ -65,11 +67,12 @@ pub struct GetSubmissionDto {
     avg_memory: f32,
 }
 
-impl From<Submission> for GetSubmissionDto {
-    fn from(submission: Submission) -> Self {
+impl From<(Submission, Problem)> for GetSubmissionDto {
+    fn from((submission, problem): (Submission, Problem)) -> Self {
         Self {
             id: submission.id().to_string(),
             problem_id: submission.problem_id().to_string(),
+            problem_name: problem.name().to_string(),
             user_id: submission.user_id().to_string(),
             language: submission.language().to_string(),
             status: submission.status().to_string(),

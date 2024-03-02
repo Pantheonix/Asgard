@@ -17,6 +17,8 @@ use rocket::error;
 use std::time::SystemTime;
 use uuid::Uuid;
 
+type SubmissionsPaginated = (Vec<(Submission, Problem)>, usize, usize);
+
 impl Submission {
     pub fn insert(&self, conn: &mut PgConnection) -> Result<(), ApplicationError> {
         // check if submission fails to insert
@@ -135,7 +137,7 @@ impl Submission {
         fps_dto: FpsSubmissionDto,
         user_id: &Uuid,
         conn: &mut PgConnection,
-    ) -> Result<(Vec<Submission>, usize, usize), ApplicationError> {
+    ) -> Result<SubmissionsPaginated, ApplicationError> {
         use crate::contracts::fps_dtos;
         use crate::schema::{problems, submissions};
 
@@ -255,11 +257,15 @@ impl Submission {
             .map(|(submissions, total_pages)| {
                 let submissions = submissions
                     .into_iter()
-                    .map(|submission| submission.into())
-                    .collect::<Vec<_>>();
+                    .map(|submission| {
+                        let problem = Problem::find_by_id(&submission.problem_id, conn)?;
+
+                        Ok((submission.into(), problem))
+                    })
+                    .collect::<Result<Vec<_>, ApplicationError>>()?;
                 let items = submissions.len();
-                (submissions, items, total_pages as usize)
-            })
+                Ok((submissions, items, total_pages as usize))
+            })?
     }
 
     pub fn update_evaluation_metadata(
