@@ -1,4 +1,4 @@
-use crate::api::cors::Cors;
+use crate::api::middleware::cors::Cors;
 use crate::config::di::{CONFIG, DAPR_CLIENT, DB_CONN, HTTP_CLIENT};
 use crate::config::logger::init_logger;
 use crate::infrastructure::db::{run_migrations, Db};
@@ -68,6 +68,8 @@ async fn rocket() -> _ {
             catchers![
                 rocket_validation::validation_catcher,
                 api::catchers::unauthorized_catcher,
+                api::catchers::not_found_catcher,
+                api::catchers::internal_error_catcher,
             ],
         )
 }

@@ -1,4 +1,4 @@
-use crate::application::auth::JwtContext;
+use crate::api::middleware::auth::JwtContext;
 use crate::contracts::fps_dtos::FpsSubmissionDto;
 use crate::contracts::get_submissions_dtos::GetSubmissionsDto;
 use crate::domain::application_error::ApplicationError;

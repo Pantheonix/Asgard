@@ -1,4 +1,4 @@
-use crate::application::auth::JwtContext;
+use crate::api::middleware::auth::JwtContext;
 use crate::contracts::get_highest_score_submissions_dtos::GetHighestScoreSubmissionsDto;
 use crate::domain::application_error::ApplicationError;
 use crate::domain::submission::Submission;

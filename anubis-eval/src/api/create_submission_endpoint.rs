@@ -1,4 +1,4 @@
-use crate::application::auth::JwtContext;
+use crate::api::middleware::auth::JwtContext;
 use crate::application::dapr_client::DaprClient;
 use crate::config::di::CONFIG;
 use crate::contracts::create_submission_dtos::CreateSubmissionResponseDto;

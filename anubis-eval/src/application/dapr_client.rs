@@ -340,7 +340,7 @@ impl<'r> FromRequest<'r> for DaprClient {
             }),
             _ => {
                 let response = String::from("Error initializing http client and/or db connection");
-                Outcome::Failure((
+                Outcome::Error((
                     rocket::http::Status::InternalServerError,
                     ApplicationError::Unknown(response),
                 ))
