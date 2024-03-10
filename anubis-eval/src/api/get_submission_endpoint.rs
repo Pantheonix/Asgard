@@ -30,7 +30,7 @@ pub async fn get_submission(
 
     db.run(move |conn| {
         match Submission::find_by_id(&submission_id, conn) {
-            Ok(submission) => {
+            Ok((submission, problem)) => {
                 // Check if the user is allowed to view the submission
                 let handle = Handle::current();
                 let _ = handle.enter();
@@ -67,7 +67,7 @@ pub async fn get_submission(
 
                 info!("Submission retrieved: {:?}", submission);
                 Ok(GetSubmissionResponse {
-                    dto: submission.into(),
+                    dto: (submission, problem).into(),
                 })
             }
             Err(e) => {

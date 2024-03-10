@@ -44,7 +44,7 @@ impl Submission {
     pub fn find_by_id(
         id: &String,
         conn: &mut PgConnection,
-    ) -> Result<Submission, ApplicationError> {
+    ) -> Result<(Submission, Problem), ApplicationError> {
         all_submissions
             .find(id.to_string())
             .inner_join(all_testcases)
@@ -58,23 +58,30 @@ impl Submission {
                     }),
                     false => {
                         let submission = submission_and_testcases.first().unwrap().0.clone();
-                        let testcases = submission_and_testcases
+                        let problem = Problem::find_by_id(&submission.problem_id, conn)?;
+
+                        let mut testcases = submission_and_testcases
                             .into_iter()
                             .map(|(_, testcase)| testcase.into())
-                            .collect::<Vec<_>>();
+                            .collect::<Vec<TestCase>>();
+                        
+                        testcases.sort_by_key(|a| a.testcase_id());
 
-                        Ok(Submission::new(
-                            Uuid::parse_str(&submission.id).unwrap(),
-                            Uuid::parse_str(&submission.user_id).unwrap(),
-                            Uuid::parse_str(&submission.problem_id).unwrap(),
-                            submission.language.into(),
-                            submission.source_code,
-                            submission.status.into(),
-                            submission.score,
-                            submission.created_at,
-                            submission.avg_time,
-                            submission.avg_memory,
-                            testcases,
+                        Ok((
+                            Submission::new(
+                                Uuid::parse_str(&submission.id).unwrap(),
+                                Uuid::parse_str(&submission.user_id).unwrap(),
+                                Uuid::parse_str(&submission.problem_id).unwrap(),
+                                submission.language.into(),
+                                submission.source_code,
+                                submission.status.into(),
+                                submission.score,
+                                submission.created_at,
+                                submission.avg_time,
+                                submission.avg_memory,
+                                testcases,
+                            ),
+                            problem,
                         ))
                     }
                 },
