@@ -31,6 +31,7 @@ impl From<(Submission, Problem)> for GetSubmissionWithTestCasesDto {
                 id: submission.id().to_string(),
                 problem_id: submission.problem_id().to_string(),
                 problem_name: problem.name().to_string(),
+                is_published: problem.is_published(),
                 user_id: submission.user_id().to_string(),
                 language: submission.language().to_string(),
                 source_code: match submission.source_code().to_string().is_empty() {
@@ -68,6 +69,7 @@ pub struct GetSubmissionDto {
     id: String,
     problem_id: String,
     problem_name: String,
+    is_published: bool,
     user_id: String,
     language: String,
     source_code: Option<String>,

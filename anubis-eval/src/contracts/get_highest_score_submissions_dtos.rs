@@ -38,17 +38,18 @@ pub struct GetHighestScoreSubmissionDto {
     id: String,
     problem_id: String,
     problem_name: String,
+    is_published: bool,
     score: usize,
 }
 
 impl From<(Submission, Problem)> for GetHighestScoreSubmissionDto {
-    fn from(submission: (Submission, Problem)) -> Self {
-        let (submission, problem) = (submission.0, submission.1);
+    fn from((submission, problem): (Submission, Problem)) -> Self {
 
         Self {
             id: submission.id().to_string(),
             problem_id: submission.problem_id().to_string(),
             problem_name: problem.name().to_string(),
+            is_published: problem.is_published(),
             score: submission.score() as usize,
         }
     }
