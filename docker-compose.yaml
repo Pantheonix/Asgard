@@ -63,6 +63,12 @@ services:
       - odin
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
   odin-api-gateway-dapr:
     container_name: odin-api-gateway-dapr
@@ -121,6 +127,12 @@ services:
       - quetzalcoatl
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
   quetzalcoatl-auth-dapr:
     container_name: quetzalcoatl-auth-dapr
@@ -158,6 +170,12 @@ services:
       - quetzalcoatl
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
 
   quetzalcoatl-mssql-db:
     container_name: quetzalcoatl-mssql-db
@@ -174,6 +192,12 @@ services:
       - quetzalcoatl
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 512M
 
   ############ ENKI ############
 
@@ -201,6 +225,12 @@ services:
       - enki
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
   enki-problems-dapr:
     container_name: enki-problems-dapr
@@ -238,6 +268,12 @@ services:
       - enki
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
 
   enki-mongo-db:
     container_name: enki-mongo-db
@@ -265,6 +301,12 @@ services:
       - enki
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 512M
 
   ############ HERMES ############
 
@@ -283,6 +325,12 @@ services:
       - hermes
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
   hermes-tests-dapr:
     container_name: hermes-tests-dapr
@@ -318,6 +366,12 @@ services:
       - hermes
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
 
   ############ ANUBIS ############
 
@@ -341,6 +395,12 @@ services:
       - anubis
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
   anubis-eval-dapr:
     container_name: anubis-eval-dapr
@@ -378,6 +438,12 @@ services:
       - anubis
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
 
   anubis-psql-db:
     container_name: anubis-psql-db
@@ -394,6 +460,12 @@ services:
       - anubis
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 512M
 
   ############ JUDGE0 ############
 
@@ -412,6 +484,13 @@ services:
       - judge0
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
+
 
   server:
     image: judge0/judge0:1.13.0
@@ -433,6 +512,13 @@ services:
       - judge0
       - asgard
       - pantheonix
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
   workers:
     image: judge0/judge0:1.13.0
@@ -446,6 +532,11 @@ services:
       - judge0
       - asgard
       - pantheonix
+    deploy:
+      replicas: 2
+      resources:
+        reservations:
+          memory: 1024M
 
   db:
     image: postgres:13.0
@@ -458,6 +549,12 @@ services:
       - judge0
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 512M
 
   redis:
     image: redis:6.0
@@ -476,6 +573,12 @@ services:
       - judge0
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
   ############ DAPR ############
 
@@ -497,6 +600,12 @@ services:
       - dapr
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
   asgard-redis:
     container_name: asgard-redis
@@ -510,6 +619,12 @@ services:
       - dapr
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
   asgard-rabbitmq:
     container_name: asgard-rabbitmq
@@ -525,6 +640,12 @@ services:
       - dapr
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
   asgard-zipkin:
     container_name: asgard-zipkin
@@ -536,6 +657,12 @@ services:
       - dapr
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
   asgard-dapr-config:
     container_name: asgard-dapr-config
@@ -547,6 +674,12 @@ services:
       - dapr
       - asgard
       - pantheonix
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
   ############ VOLUMES ############
 
