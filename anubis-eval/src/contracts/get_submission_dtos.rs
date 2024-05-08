@@ -1,7 +1,7 @@
+use crate::domain::problem::Problem;
 use crate::domain::submission::Submission;
 use chrono::{DateTime, Utc};
 use rocket::serde::Serialize;
-use crate::domain::problem::Problem;
 
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]

@@ -64,7 +64,7 @@ impl Submission {
                             .into_iter()
                             .map(|(_, testcase)| testcase.into())
                             .collect::<Vec<TestCase>>();
-                        
+
                         testcases.sort_by_key(|a| a.testcase_id());
 
                         Ok((
@@ -301,7 +301,7 @@ impl Submission {
 
     pub fn is_problem_solved_by_user(
         user_id: &String,
-        problem_id: String,
+        problem_id: &String,
         conn: &mut PgConnection,
     ) -> bool {
         use crate::schema::submissions::dsl::{

@@ -44,7 +44,6 @@ pub struct GetHighestScoreSubmissionDto {
 
 impl From<(Submission, Problem)> for GetHighestScoreSubmissionDto {
     fn from((submission, problem): (Submission, Problem)) -> Self {
-
         Self {
             id: submission.id().to_string(),
             problem_id: submission.problem_id().to_string(),
