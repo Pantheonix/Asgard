@@ -1,4 +1,5 @@
 pub mod catchers;
+pub mod cors;
 pub mod create_submission_endpoint;
 pub mod evaluate_submission_job;
 pub mod get_highest_score_submissions;

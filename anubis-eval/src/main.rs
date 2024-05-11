@@ -6,6 +6,7 @@ use rocket::fairing::AdHoc;
 use rocket::log::private::info;
 use rocket::{catchers, error, launch, routes};
 use tokio_cron_scheduler::{Job, JobScheduler};
+use crate::api::cors::Cors;
 
 mod api;
 mod application;
