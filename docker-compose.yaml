@@ -491,7 +491,6 @@ services:
 #        reservations:
 #          memory: 128M
 
-
   server:
     image: judge0/judge0:1.13.0
     volumes:
