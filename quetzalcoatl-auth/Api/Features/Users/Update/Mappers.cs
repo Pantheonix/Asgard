@@ -59,16 +59,11 @@ public class ApplicationUserToUpdateUserResponseProfile : Profile
             .ForMember(dest => dest.Fullname, opt => opt.MapFrom(src => src.Fullname))
             .ForMember(dest => dest.Bio, opt => opt.MapFrom(src => src.Bio))
             .ForMember(
-                dest => dest.ProfilePictureUrl,
+                dest => dest.ProfilePictureId,
                 opt =>
-                    opt.MapFrom(
-                        src =>
-                            src.GetProfilePictureUrl(
-                                ProfilePictureConstants.BaseUrl,
-                                ProfilePictureConstants.EndpointUrl,
-                                ProfilePictureConstants.Extension
-                            )
-                    )
+                    opt.MapFrom<Guid?>(
+                        src => src.ProfilePicture != null ? src.ProfilePicture!.Id : null
+                        )
             );
     }
 }

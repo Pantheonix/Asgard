@@ -21,3 +21,4 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using Microsoft.IdentityModel.Tokens;
 global using IMapper = AutoMapper.IMapper;
+global using Domain.Consts;

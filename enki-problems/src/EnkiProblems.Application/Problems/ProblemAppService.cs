@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Asgard.Hermes;
+using Dapr.Client;
+using EnkiProblems.Problems.Events;
 using EnkiProblems.Problems.Tests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
@@ -19,18 +21,21 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     private readonly ProblemManager _problemManager;
     private readonly IRepository<Problem, Guid> _problemRepository;
     private readonly ITestService _testService;
+    private readonly DaprClient _daprClient;
     private readonly ILogger _logger;
 
     public ProblemAppService(
         ProblemManager problemManager,
         IRepository<Problem, Guid> problemRepository,
         ITestService testService,
+        DaprClient daprClient,
         ILogger<ProblemAppService> logger
     )
     {
         _problemManager = problemManager;
         _problemRepository = problemRepository;
         _testService = testService;
+        _daprClient = daprClient;
         _logger = logger;
     }
 
@@ -62,12 +67,20 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             input.Difficulty
         );
 
-        await _problemRepository.InsertAsync(problem);
+        problem = await _problemRepository.InsertAsync(problem);
+
+        var problemEvalMetadataUpsertedEvent = ObjectMapper.Map<Problem, ProblemEvalMetadataUpsertedEvent>(problem);
+
+        await _daprClient.PublishEventAsync(
+            EnkiProblemsConsts.PubSubName,
+            EnkiProblemsConsts.ProblemEvalMetadataUpsertedTopic,
+            problemEvalMetadataUpsertedEvent
+        );
 
         return ObjectMapper.Map<Problem, ProblemDto>(problem);
     }
 
-    [AllowAnonymous]
+    [Authorize]
     public async Task<PagedResultDto<ProblemDto>> GetListAsync(ProblemListFilterDto input)
     {
         _logger.LogInformation("Getting problems list");
@@ -96,9 +109,9 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             problemQueryable = problemQueryable.Where(p => p.Difficulty == input.Difficulty);
         }
 
+        var totalCount = await AsyncExecuter.CountAsync(problemQueryable);
         problemQueryable = problemQueryable.PageBy(input).OrderBy(p => p.CreationDate);
 
-        var totalCount = await AsyncExecuter.CountAsync(problemQueryable);
         var problems = await AsyncExecuter.ToListAsync(problemQueryable);
 
         return new PagedResultDto<ProblemDto>(
@@ -108,7 +121,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     }
 
     [Authorize]
-    public async Task<PagedResultDto<ProblemWithTestsDto>> GetListUnpublishedAsync()
+    public async Task<PagedResultDto<ProblemWithTestsDto>> GetListUnpublishedAsync(ProblemListFilterDto input)
     {
         _logger.LogInformation(
             "Getting unpublished problems list for user {UserId}",
@@ -130,10 +143,31 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         var problemQueryable = await _problemRepository.GetQueryableAsync();
 
         problemQueryable = problemQueryable
-            .Where(p => !p.IsPublished && p.ProposerId == CurrentUser.Id)
-            .OrderBy(p => p.CreationDate);
+            .Where(p => !p.IsPublished && p.ProposerId == CurrentUser.Id);
+
+        if (!string.IsNullOrEmpty(input.Name))
+        {
+            problemQueryable = problemQueryable.Where(p => p.Name.Contains(input.Name));
+        }
+
+        if (input.ProposerId is not null)
+        {
+            problemQueryable = problemQueryable.Where(p => p.ProposerId == input.ProposerId);
+        }
+
+        if (input.IoType is not null)
+        {
+            problemQueryable = problemQueryable.Where(p => p.IoType == input.IoType);
+        }
+
+        if (input.Difficulty is not null)
+        {
+            problemQueryable = problemQueryable.Where(p => p.Difficulty == input.Difficulty);
+        }
 
         var totalCount = await AsyncExecuter.CountAsync(problemQueryable);
+        problemQueryable = problemQueryable.PageBy(input).OrderBy(p => p.CreationDate);
+
         var problems = await AsyncExecuter.ToListAsync(problemQueryable);
 
         return new PagedResultDto<ProblemWithTestsDto>(
@@ -142,7 +176,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         );
     }
 
-    [AllowAnonymous]
+    [Authorize]
     public async Task<ProblemDto> GetAsync(Guid id)
     {
         _logger.LogInformation("Getting problem {ProblemId}", id);
@@ -237,9 +271,84 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             input.IsPublished
         );
 
-        return ObjectMapper.Map<Problem, ProblemDto>(
-            await _problemRepository.UpdateAsync(updatedProblem)
+        updatedProblem = await _problemRepository.UpdateAsync(updatedProblem);
+
+        var problemEvalMetadataUpsertedEvent = ObjectMapper.Map<Problem, ProblemEvalMetadataUpsertedEvent>(updatedProblem);
+        _logger.LogInformation("Publishing ProblemEvalMetadataUpsertedEvent for problem {ProblemId}: {Event}", id, problemEvalMetadataUpsertedEvent);
+
+        await _daprClient.PublishEventAsync(
+            EnkiProblemsConsts.PubSubName,
+            EnkiProblemsConsts.ProblemEvalMetadataUpsertedTopic,
+            problemEvalMetadataUpsertedEvent
         );
+
+        return ObjectMapper.Map<Problem, ProblemDto>(
+           updatedProblem
+        );
+    }
+
+    [Authorize]
+    public async Task DeleteAsync(Guid id)
+    {
+        _logger.LogInformation("Deleting problem {ProblemId}", id);
+
+        var problem = await _problemRepository.GetAsync(id);
+
+        if (problem is null)
+        {
+            _logger.LogError("Problem {ProblemId} not found", id);
+            throw new BusinessException(
+                EnkiProblemsDomainErrorCodes.ProblemNotFound,
+                $"Problem {id} not found."
+            );
+        }
+
+        // TODO: convert to permission
+        if (problem.IsPublished && CurrentUser.Roles.All(r => r != EnkiProblemsConsts.AdminRoleName))
+        {
+            _logger.LogError("User {UserId} is not allowed to delete problem {ProblemId}", CurrentUser.Id, id);
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.NotAllowedToDeletePublishedProblem
+            );
+        }
+
+        // TODO: convert to permission
+        if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.AdminRoleName) &&
+            CurrentUser.Id != id)
+        {
+            _logger.LogError("User {UserId} is not allowed to delete problem {ProblemId}", CurrentUser.Id, id);
+            throw new AbpAuthorizationException(
+                EnkiProblemsDomainErrorCodes.ProblemCannotBeDeleted
+            );
+        }
+
+        var problemTests = problem.Tests.ToList();
+
+        foreach (var problemTest in problemTests)
+        {
+            var deleteResponse = await _testService.DeleteTestAsync(
+                new DeleteTestRequest { ProblemId = id.ToString(), TestId = problemTest.Id.ToString() }
+            );
+
+            if (deleteResponse.Status.Code != StatusCode.Ok)
+            {
+                _logger.LogError(
+                    "Test delete failed with status code {StatusCode}: {StatusMessage}",
+                    deleteResponse.Status.Code,
+                    deleteResponse.Status.Message
+                );
+                throw new BusinessException(
+                        EnkiProblemsDomainErrorCodes.TestDeleteFailed,
+                        $"Test delete failed with status code {deleteResponse.Status.Code}: {deleteResponse.Status.Message}."
+                    )
+                    .WithData("id", problem.Id)
+                    .WithData("testId", problemTest.Id);
+            }
+
+            problem = _problemManager.RemoveTest(problem, problemTest.Id);
+        }
+
+        await _problemRepository.DeleteAsync(problem);
     }
 
     [Authorize]
@@ -334,6 +443,18 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             getDownloadUrlsResponse.OutputLink
         );
         await _problemRepository.UpdateAsync(updatedProblem);
+
+        await _daprClient.PublishEventAsync(
+            EnkiProblemsConsts.PubSubName,
+            EnkiProblemsConsts.TestUpsertedTopic,
+            new TestUpsertedEvent
+            {
+                Id = testId,
+                ProblemId = id,
+                InputDownloadUrl = getDownloadUrlsResponse.InputLink,
+                OutputDownloadUrl = getDownloadUrlsResponse.OutputLink,
+            }
+        );
 
         return ObjectMapper.Map<Problem, ProblemWithTestsDto>(updatedProblem);
     }
@@ -434,6 +555,18 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         await _problemRepository.UpdateAsync(problem);
 
+        await _daprClient.PublishEventAsync(
+            EnkiProblemsConsts.PubSubName,
+            EnkiProblemsConsts.TestUpsertedTopic,
+            new TestUpsertedEvent
+            {
+                Id = testId,
+                ProblemId = id,
+                InputDownloadUrl = getDownloadUrlsResponse.InputLink,
+                OutputDownloadUrl = getDownloadUrlsResponse.OutputLink,
+            }
+        );
+
         return ObjectMapper.Map<Problem, ProblemWithTestsDto>(problem);
     }
 
@@ -495,6 +628,16 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         var updatedProblem = _problemManager.RemoveTest(problem, testId);
 
         await _problemRepository.UpdateAsync(updatedProblem);
+
+        await _daprClient.PublishEventAsync(
+            EnkiProblemsConsts.PubSubName,
+            EnkiProblemsConsts.TestDeletedTopic,
+            new TestDeletedEvent
+            {
+                Id = testId,
+                ProblemId = id,
+            }
+        );
 
         return ObjectMapper.Map<Problem, ProblemWithTestsDto>(updatedProblem);
     }

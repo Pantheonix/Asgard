@@ -9,6 +9,26 @@ x-logging: &default-logging
       max-size: 100m
 
 services:
+  ############ MIDGARD ############
+
+  midgard-web:
+    container_name: midgard-web
+    image: ${REGISTRY:-pantheonix}/midgard:${TAG:-ucv}
+    build:
+      context: ../Midgard
+      dockerfile: ./Dockerfile
+    env_file:
+      - envs/.env.midgard
+    ports:
+      - "10000:443"
+    volumes:
+      - ./envs/certs/midgard/https.crt:/etc/nginx/ssl/https.crt
+      - ./envs/certs/midgard/key.pem:/etc/nginx/ssl/key.pem
+    restart: always
+    profiles:
+      - midgard
+      - pantheonix
+
   ############ ODIN ############
 
   odin-api-gateway:
@@ -22,7 +42,10 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    restart: always
+    volumes:
+      - ./envs/certs/asgard/https.crt:/etc/ssl/certs/https.crt
+      - ./envs/certs/asgard/key.pem:/etc/ssl/certs/key.pem
+    restart: unless-stopped
     depends_on:
       quetzalcoatl-auth-api:
         condition: service_started
@@ -39,6 +62,13 @@ services:
     profiles:
       - odin
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 512M
+#        reservations:
+#          memory: 128M
 
   odin-api-gateway-dapr:
     container_name: odin-api-gateway-dapr
@@ -63,6 +93,7 @@ services:
       ]
     volumes_from:
       - asgard-dapr-config
+    restart: unless-stopped
     depends_on:
       odin-api-gateway:
         condition: service_started
@@ -74,6 +105,7 @@ services:
     profiles:
       - odin
       - asgard
+      - pantheonix
 
   ############ QUETZALCOATL ############
 
@@ -84,16 +116,23 @@ services:
       context: quetzalcoatl-auth
       dockerfile: ../quetzalcoatl-auth/Dockerfile
     ports:
-      - "5210:5210"
+      - "5210"
     env_file:
       - envs/.env.quetzalcoatl
-    restart: always
+    restart: unless-stopped
     depends_on:
       quetzalcoatl-mssql-db:
         condition: service_started
     profiles:
       - quetzalcoatl
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 512M
+#        reservations:
+#          memory: 128M
 
   quetzalcoatl-auth-dapr:
     container_name: quetzalcoatl-auth-dapr
@@ -118,6 +157,7 @@ services:
       ]
     volumes_from:
       - asgard-dapr-config
+    restart: unless-stopped
     depends_on:
       quetzalcoatl-auth-api:
         condition: service_started
@@ -129,11 +169,18 @@ services:
     profiles:
       - quetzalcoatl
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 128M
+#        reservations:
+#          memory: 64M
 
   quetzalcoatl-mssql-db:
     container_name: quetzalcoatl-mssql-db
     image: mcr.microsoft.com/mssql/server:2022-latest
-    restart: always
+    restart: unless-stopped
     user: root
     ports:
       - "1434:1433"
@@ -144,6 +191,13 @@ services:
     profiles:
       - quetzalcoatl
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 1024M
+#        reservations:
+#          memory: 512M
 
   ############ ENKI ############
 
@@ -154,10 +208,10 @@ services:
       context: enki-problems
       dockerfile: ../enki-problems/Dockerfile
     ports:
-      - "5211:5211"
+      - "5211"
     env_file:
       - envs/.env.enki
-    restart: always
+    restart: unless-stopped
     depends_on:
       enki-mongo-db:
         condition: service_started
@@ -170,6 +224,13 @@ services:
     profiles:
       - enki
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 512M
+#        reservations:
+#          memory: 128M
 
   enki-problems-dapr:
     container_name: enki-problems-dapr
@@ -194,6 +255,7 @@ services:
       ]
     volumes_from:
       - asgard-dapr-config
+    restart: unless-stopped
     depends_on:
       enki-problems-api:
         condition: service_started
@@ -205,16 +267,23 @@ services:
     profiles:
       - enki
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 128M
+#        reservations:
+#          memory: 64M
 
   enki-mongo-db:
     container_name: enki-mongo-db
     image: mongo:5.0
-    restart: always
+    restart: unless-stopped
     command: ["--replSet", "enki-rs", "--bind_ip_all", "--port", "30001"]
     volumes:
       - enki-db:/data/db
     ports:
-      - 30001:30001
+      - "30001:30001"
     healthcheck:
       # for docker-compose
       test:
@@ -231,6 +300,13 @@ services:
     profiles:
       - enki
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 1024M
+#        reservations:
+#          memory: 512M
 
   ############ HERMES ############
 
@@ -241,13 +317,20 @@ services:
       context: hermes-tests
       dockerfile: ../hermes-tests/Dockerfile
     ports:
-      - "5212:5212"
+      - "5212"
     env_file:
       - envs/.env.hermes
-    restart: always
+    restart: unless-stopped
     profiles:
       - hermes
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 512M
+#        reservations:
+#          memory: 128M
 
   hermes-tests-dapr:
     container_name: hermes-tests-dapr
@@ -270,6 +353,7 @@ services:
       ]
     volumes_from:
       - asgard-dapr-config
+    restart: unless-stopped
     depends_on:
       hermes-tests-api:
         condition: service_started
@@ -281,6 +365,13 @@ services:
     profiles:
       - hermes
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 128M
+#        reservations:
+#          memory: 64M
 
   ############ ANUBIS ############
 
@@ -291,20 +382,25 @@ services:
       context: anubis-eval
       dockerfile: ../anubis-eval/Dockerfile
     ports:
-      - "5213:5213"
+      - "5213"
     env_file:
       - envs/.env.anubis
-    restart: always
+    restart: unless-stopped
     depends_on:
-      server:
-        condition: service_started
-      judge0-server-dapr:
+      judge0-lb:
         condition: service_started
       anubis-psql-db:
         condition: service_started
     profiles:
       - anubis
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 512M
+#        reservations:
+#          memory: 128M
 
   anubis-eval-dapr:
     container_name: anubis-eval-dapr
@@ -329,6 +425,7 @@ services:
       ]
     volumes_from:
       - asgard-dapr-config
+    restart: unless-stopped
     depends_on:
       anubis-eval-api:
         condition: service_started
@@ -340,13 +437,21 @@ services:
     profiles:
       - anubis
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 128M
+#        reservations:
+#          memory: 64M
 
   anubis-psql-db:
     container_name: anubis-psql-db
     image: postgres:14.1
+    command: postgres -c 'max_connections=250'
     volumes:
       - anubis-db:/var/lib/postgresql/data/
-    restart: always
+    restart: unless-stopped
     ports:
       - "5435:5432"
     env_file:
@@ -354,16 +459,48 @@ services:
     profiles:
       - anubis
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 1024M
+#        reservations:
+#          memory: 512M
+
+  ############ JUDGE0 ############
+
+  judge0-lb:
+    container_name: judge0-lb
+    build:
+      context: anubis-eval/eval-lb
+      dockerfile: ../eval-lb/Dockerfile
+    ports:
+      - "4000"
+    restart: unless-stopped
+    depends_on:
+      server:
+        condition: service_started
+    profiles:
+      - judge0
+      - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 512M
+#        reservations:
+#          memory: 128M
+
 
   server:
     image: judge0/judge0:1.13.0
     volumes:
       - ./envs/.env.judge0:/judge0.conf:ro
     ports:
-      - "2358:2358"
+      - "2358"
     privileged: true
     <<: *default-logging
-    restart: always
+    restart: unless-stopped
     depends_on:
       workers:
         condition: service_started
@@ -372,43 +509,16 @@ services:
       db:
         condition: service_started
     profiles:
-      - anubis
+      - judge0
       - asgard
-
-  judge0-server-dapr:
-    container_name: judge0-server-dapr
-    image: daprio/daprd:1.11.2
-    command:
-      [
-        "./daprd",
-        "-app-id",
-        "judge0-server",
-        "-app-port",
-        "2358",
-        "-placement-host-address",
-        "asgard-dapr-placement:40000",
-        "-dapr-http-port",
-        "3504",
-        "-dapr-grpc-port",
-        "50004",
-        "-components-path",
-        "/components",
-        "-config",
-        "/config/config.yaml",
-      ]
-    volumes_from:
-      - asgard-dapr-config
-    depends_on:
-      server:
-        condition: service_started
-      asgard-dapr-placement:
-        condition: service_started
-      asgard-dapr-config:
-        condition: service_started
-    network_mode: "service:server"
-    profiles:
-      - anubis
-      - asgard
+      - pantheonix
+    deploy:
+      replicas: 2
+      resources:
+#        limits:
+#          memory: 512M
+        reservations:
+          memory: 128M
 
   workers:
     image: judge0/judge0:1.13.0
@@ -417,10 +527,16 @@ services:
       - ./envs/.env.judge0:/judge0.conf:ro
     privileged: true
     <<: *default-logging
-    restart: always
+    restart: unless-stopped
     profiles:
-      - anubis
+      - judge0
       - asgard
+      - pantheonix
+    deploy:
+      replicas: 2
+      resources:
+        reservations:
+          memory: 1024M
 
   db:
     image: postgres:13.0
@@ -428,10 +544,17 @@ services:
     volumes:
       - judge0-db:/var/lib/postgresql/data/
     <<: *default-logging
-    restart: always
+    restart: unless-stopped
     profiles:
-      - anubis
+      - judge0
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 1024M
+#        reservations:
+#          memory: 512M
 
   redis:
     image: redis:6.0
@@ -445,10 +568,17 @@ services:
     volumes:
       - redis-data:/data
     <<: *default-logging
-    restart: always
+    restart: unless-stopped
     profiles:
-      - anubis
+      - judge0
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 512M
+#        reservations:
+#          memory: 128M
 
   ############ DAPR ############
 
@@ -458,32 +588,81 @@ services:
     command: ["./placement", "-port", "40000", "-log-level", "debug"]
     ports:
       - "40000"
+    restart: unless-stopped
     depends_on:
       asgard-zipkin:
         condition: service_started
       asgard-redis:
         condition: service_started
+      asgard-rabbitmq:
+        condition: service_started
     profiles:
       - dapr
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 512M
+#        reservations:
+#          memory: 128M
 
   asgard-redis:
     container_name: asgard-redis
     image: redis:alpine
     ports:
       - "6379"
+    restart: unless-stopped
+    volumes:
+      - dapr-redis-data:/data
     profiles:
       - dapr
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 512M
+#        reservations:
+#          memory: 128M
+
+  asgard-rabbitmq:
+    container_name: asgard-rabbitmq
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672"
+      - "15672:15672"
+    restart: unless-stopped
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+      - rabbitmq-logs:/var/log/rabbitmq
+    profiles:
+      - dapr
+      - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 512M
+#        reservations:
+#          memory: 128M
 
   asgard-zipkin:
     container_name: asgard-zipkin
     image: openzipkin/zipkin:latest
     ports:
       - "19411:9411"
+    restart: unless-stopped
     profiles:
       - dapr
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 512M
+#        reservations:
+#          memory: 128M
 
   asgard-dapr-config:
     container_name: asgard-dapr-config
@@ -494,6 +673,13 @@ services:
     profiles:
       - dapr
       - asgard
+      - pantheonix
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 512M
+#        reservations:
+#          memory: 128M
 
   ############ VOLUMES ############
 
@@ -508,7 +694,12 @@ volumes:
     driver: local
   redis-data:
     driver: local
-
+  rabbitmq-data:
+    driver: local
+  rabbitmq-logs:
+    driver: local
+  dapr-redis-data:
+    driver: local
   ############ NETWORKS ############
 
 networks:

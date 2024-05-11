@@ -1,4 +1,5 @@
 ﻿namespace EnkiProblems;
 
 public abstract class EnkiProblemsApplicationTestBase
-    : EnkiProblemsTestBase<EnkiProblemsApplicationTestModule> { }
+    : EnkiProblemsTestBase<EnkiProblemsApplicationTestModule>
+{ }

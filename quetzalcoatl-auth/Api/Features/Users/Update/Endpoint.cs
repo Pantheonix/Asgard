@@ -67,7 +67,10 @@ public class UpdateUserEndpoint : Endpoint<UpdateUserRequest, UpdateUserResponse
         ThrowIfAnyErrors();
 
         var updatedUser = await _userManager.FindByIdAsync(req.Id.ToString());
+        var userRoles = await _userManager.GetRolesAsync(updatedUser!);
+        var response = _mapper.Map<UpdateUserResponse>(updatedUser);
+        response.Roles = userRoles;
 
-        await SendOkAsync(response: _mapper.Map<UpdateUserResponse>(updatedUser), ct);
+        await SendOkAsync(response, ct);
     }
 }

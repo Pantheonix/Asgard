@@ -17,7 +17,7 @@ public class DeleteUserEndpoint : Endpoint<DeleteUserRequest>
     public override void Configure()
     {
         Delete("{id}");
-        Roles(ApplicationRoles.Admin.ToString());
+        Roles(ApplicationRole.Admin.ToString());
         Group<UsersGroup>();
     }
 

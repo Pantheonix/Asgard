@@ -53,6 +53,7 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
         ConfigureLogger(context, configuration);
+        ConfigureHttpClient(context, configuration);
         ConfigureDapr(context, configuration);
         ConfigureHermesTestsGrpcClient(context, configuration);
         ConfigureConventionalControllers();
@@ -76,14 +77,28 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
             });
     }
 
+    private void ConfigureHttpClient(ServiceConfigurationContext context, IConfiguration configuration)
+    {
+        context
+            .Services
+            .AddHttpClient();
+    }
+
     private void ConfigureDapr(ServiceConfigurationContext context, IConfiguration configuration)
     {
         var hermesAppId = configuration["Dapr:HermesAppId"];
+        var address = configuration["Dapr:GrpcEndpoint"];
+
         context
             .Services
             .AddSingleton<DaprMetadata>(
                 _ => new() { HermesContext = new() { { "dapr-app-id", hermesAppId! } } }
-            );
+            )
+            .AddDaprClient(options =>
+            {
+                options.UseJsonSerializationOptions(new() { PropertyNameCaseInsensitive = true });
+                options.UseGrpcEndpoint(address);
+            });
     }
 
     private void ConfigureHermesTestsGrpcClient(
@@ -91,7 +106,7 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         IConfiguration configuration
     )
     {
-        var address = configuration["Dapr:HermesAddress"];
+        var address = configuration["Dapr:GrpcEndpoint"];
         var channel = GrpcChannel.ForAddress(address!);
 
         context
@@ -269,6 +284,7 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         app.UseCorrelationId();
         app.UseStaticFiles();
         app.UseRouting();
+        app.UseCloudEvents();
         app.UseCors();
         app.UseAuthentication();
 
@@ -292,6 +308,9 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         app.UseAuditing();
         app.UseAbpSerilogEnrichers();
         app.UseUnitOfWork();
-        app.UseConfiguredEndpoints();
+        app.UseConfiguredEndpoints(options =>
+        {
+            options.MapSubscribeHandler();
+        });
     }
 }
