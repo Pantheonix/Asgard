@@ -699,6 +699,7 @@ volumes:
     driver: local
   dapr-redis-data:
     driver: local
+
   ############ NETWORKS ############
 
 networks:
