@@ -368,7 +368,7 @@ services:
       db:
         condition: service_started
     deploy:
-      replicas: 4
+      replicas: 2
     profiles:
       - anubis
       - asgard
@@ -382,7 +382,7 @@ services:
     <<: *default-logging
     restart: always
     deploy:
-      replicas: 4
+      replicas: 2
     profiles:
       - anubis
       - asgard
@@ -441,6 +441,20 @@ services:
       - dapr
       - asgard
 
+  asgard-rabbitmq:
+    container_name: asgard-rabbitmq
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672"
+      - "15672:15672"
+    restart: unless-stopped
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+      - rabbitmq-logs:/var/log/rabbitmq
+    profiles:
+      - dapr
+      - asgard
+
   asgard-zipkin:
     container_name: asgard-zipkin
     image: openzipkin/zipkin:latest
@@ -469,6 +483,12 @@ volumes:
   judge0-db:
     driver: local
   redis-data:
+    driver: local
+  rabbitmq-data:
+    driver: local
+  rabbitmq-logs:
+    driver: local
+  dapr-redis-data:
     driver: local
 
   ############ NETWORKS ############
