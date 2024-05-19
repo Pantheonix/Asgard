@@ -1,5 +1,5 @@
 use rocket::serde::json::{json, Value};
-use rocket::{catch, error};
+use rocket::{catch, error, options};
 
 #[catch(401)]
 pub fn unauthorized_catcher(req: &rocket::Request) -> Value {
@@ -24,3 +24,6 @@ pub fn internal_error_catcher(req: &rocket::Request) -> Value {
         "error": "Internal server error"
     })
 }
+
+#[options("/<_..>")]
+pub fn cors_preflight() {}
