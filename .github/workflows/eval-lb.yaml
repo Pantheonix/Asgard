@@ -3,7 +3,7 @@ name: Eval Nginx Load Balancer - Build Docker image and publish to GitHub Packag
 on:
   push:
     branches:
-      - develop
+      - ucv
 
     paths:
       - "anubis-eval/eval-lb/**"
@@ -11,7 +11,7 @@ on:
 
   pull_request:
     branches:
-      - develop
+      - ucv
 
     paths:
       - "anubis-eval/eval-lb/**"
