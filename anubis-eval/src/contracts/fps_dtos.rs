@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 // FSP stands for Filter, Sort, Paginate
 #[derive(Debug, PartialEq, FromForm)]
-pub struct FspSubmissionDto {
+pub struct FpsSubmissionDto {
     pub user_id: Option<Uuids>,
     pub problem_id: Option<Uuids>,
     pub language: Option<Languages>,

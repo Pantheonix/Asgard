@@ -221,6 +221,7 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         }
 
         Tests.Add(new Test(testId, Id, score, inputDownloadUrl, outputDownloadUrl));
+        Tests = Tests.OrderBy(t => t.Id).ToList();
 
         return this;
     }
@@ -237,6 +238,7 @@ public class Problem : FullAuditedAggregateRoot<Guid>
         }
 
         Tests.Remove(test);
+        Tests = Tests.OrderBy(t => t.Id).ToList();
 
         return this;
     }

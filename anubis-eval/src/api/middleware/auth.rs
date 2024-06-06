@@ -30,28 +30,28 @@ impl<'r> FromRequest<'r> for JwtContext {
         match req.headers().get_one("authorization") {
             None => {
                 let response = String::from("Error validating JWT token - No token provided");
-                Outcome::Failure((Status::Unauthorized, ApplicationError::AuthError(response)))
+                Outcome::Error((Status::Unauthorized, ApplicationError::AuthError(response)))
             }
             Some(key) => match is_valid(key) {
                 Ok(claims) => Outcome::Success(JwtContext { claims }),
                 Err(err) => match &err.kind() {
                     ErrorKind::ExpiredSignature => {
                         let response = String::from("Error validating JWT token - Expired Token");
-                        Outcome::Failure((
+                        Outcome::Error((
                             Status::Unauthorized,
                             ApplicationError::AuthError(response),
                         ))
                     }
                     ErrorKind::InvalidToken => {
                         let response = String::from("Error validating JWT token - Invalid Token");
-                        Outcome::Failure((
+                        Outcome::Error((
                             Status::Unauthorized,
                             ApplicationError::AuthError(response),
                         ))
                     }
                     _ => {
                         let response = format!("Error validating JWT token - {}", err);
-                        Outcome::Failure((
+                        Outcome::Error((
                             Status::Unauthorized,
                             ApplicationError::AuthError(response),
                         ))

@@ -1,5 +1,3 @@
-using Api.Features.Auth.RefreshToken;
-
 namespace Api.Features.Auth.Register;
 
 public class RegisterUserSummary : Summary<RegisterUserEndpoint>

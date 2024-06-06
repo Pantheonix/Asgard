@@ -144,10 +144,11 @@ impl Submission {
         // user has solved the problem or is submission owner or is problem proposer
         let user_has_solved_problem = Submission::is_problem_solved_by_user(
             &user_id.to_string(),
-            self.problem_id.to_string(),
+            &self.problem_id.to_string(),
             conn,
         );
-        user_has_solved_problem || self.user_id == *user_id || self.user_id == *proposer_id
+
+        user_has_solved_problem || self.user_id == *user_id || user_id == proposer_id
     }
 
     pub fn id(&self) -> Uuid {

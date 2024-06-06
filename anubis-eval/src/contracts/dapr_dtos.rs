@@ -5,40 +5,20 @@ use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct CacheSetItemDto {
+pub struct StateStoreSetItemDto {
     pub key: String,
     pub value: serde_json::Value,
-    pub metadata: Option<CacheMetadata>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct CacheMetadata {
-    pub ttl_in_seconds: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct GetEvalMetadataForProblemDto {
-    #[serde(rename = "id")]
-    pub problem_id: Uuid,
-    pub name: String,
-    pub proposer_id: Uuid,
-    pub is_published: bool,
-    pub time: f32,
-    pub stack_memory: f32,
-    pub total_memory: f32,
-    pub tests: Vec<TestDto>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TestDto {
-    #[serde(rename = "id")]
+    #[serde(alias = "id", alias = "Id")]
     pub test_id: usize,
-    #[serde(rename = "inputDownloadUrl")]
-    pub input: String,
-    #[serde(rename = "outputDownloadUrl")]
-    pub output: String,
+    #[serde(alias = "inputDownloadUrl", alias = "InputDownloadUrl")]
+    pub input_url: String,
+    #[serde(alias = "outputDownloadUrl", alias = "OutputDownloadUrl")]
+    pub output_url: String,
+    #[serde(alias = "score", alias = "Score")]
     pub score: usize,
 }
 

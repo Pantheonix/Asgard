@@ -1,6 +1,6 @@
 use crate::application::dapr_client::DaprClient;
-use crate::application::dapr_dtos::TestCaseTokenDto;
 use crate::config::di::Atomic;
+use crate::contracts::dapr_dtos::TestCaseTokenDto;
 use crate::domain::application_error::ApplicationError;
 use crate::domain::submission::{Submission, SubmissionStatus, TestCase, TestCaseStatus};
 use diesel::PgConnection;
@@ -13,14 +13,14 @@ use uuid::Uuid;
 
 pub async fn evaluate_pending_submissions(
     dapr_client: Atomic<DaprClient>,
-    arc_db: Atomic<PgConnection>,
+    db: Atomic<PgConnection>,
 ) -> Result<(), ApplicationError> {
     info!("Evaluating pending submissions...");
 
     // DB - get all pending submissions
     let pending_submissions_ids = {
-        let arc_db = arc_db.clone();
-        let mut db = arc_db.lock().await;
+        let db = db.clone();
+        let mut db = db.lock().await;
 
         let pending_submissions_ids =
             Submission::find_by_status(SubmissionStatus::Evaluating, db.deref_mut())?;
@@ -31,7 +31,7 @@ pub async fn evaluate_pending_submissions(
 
     // DB - for each submission, get the pending/running test cases
     join_all(pending_submissions_ids.iter().map(|submission_id| async {
-        evaluate_submission(submission_id, dapr_client.clone(), arc_db.clone()).await
+        evaluate_submission(submission_id, dapr_client.clone(), db.clone()).await
     }))
     .await
     .into_iter()

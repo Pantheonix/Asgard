@@ -144,7 +144,7 @@ public class GetAllEndpointTests : IClassFixture<ApiWebFactory>
             Email = appUser.Email!,
             Fullname = appUser.Fullname,
             Bio = appUser.Bio,
-            ProfilePictureId = appUser.ProfilePicture?.Id 
+            ProfilePictureId = appUser.ProfilePicture?.Id
         };
     }
 }
