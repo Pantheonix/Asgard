@@ -368,7 +368,7 @@ services:
       db:
         condition: service_started
     deploy:
-      replicas: 2
+      replicas: 1
     profiles:
       - anubis
       - asgard
@@ -382,7 +382,7 @@ services:
     <<: *default-logging
     restart: always
     deploy:
-      replicas: 2
+      replicas: 1
     profiles:
       - anubis
       - asgard

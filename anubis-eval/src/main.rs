@@ -53,6 +53,7 @@ async fn rocket() -> _ {
         .attach(Db::fairing())
         .attach(AdHoc::on_ignite("Diesel Migrations", run_migrations))
         .attach(Cors)
+        .mount("/", routes![api::catchers::cors_preflight])
         .mount(
             "/api",
             routes![
