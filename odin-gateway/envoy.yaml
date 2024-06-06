@@ -413,6 +413,13 @@ static_resources:
                           end
                         end
                   - name: envoy.filters.http.router
+              tls_context:
+                common_tls_context:
+                  tls_certificates:
+                    - certificate_chain:
+                        filename: "/etc/ssl/certs/https.crt"
+                      private_key:
+                        filename: "/etc/ssl/certs/key.pem"
   clusters:
     - name: dapr
       connect_timeout: 0.25s
