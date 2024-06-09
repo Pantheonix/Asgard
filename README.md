@@ -22,20 +22,28 @@ The **Pantheonix** backend is called **Asgard**, as the realm of gods from the n
     ```
    
 3. **Copy the `envs-template` folder** locally and rename it to `envs` (keep in mind to update the `.env` files with your own secrets).
-   
-4. **Copy the `docker-compose.ucv.yaml` file** locally into the same folder as the envs and rename it to `docker-compose.yaml`.
 
-5. **Pull the latest images** from the Docker Hub:
+4. **Copy the `odin-gateway/https/https.config` file** locally and use the following openssl commands to generate the necessary certificates:
+    ```bash
+    openssl req -config https.config -new -out csr.pem
+
+    openssl x509 -req -days 365 -extfile https.config -extensions v3_req -in csr.pem -signkey key.pem -out https.crt
+    ```
+   After generating the pair of certificates for both the frontend and backend, copy them (*csr.pem, key.pem, https.crt*) into the `envs/certs/asgard`, respectively `envs/certs/midgard` folders.
+
+5. **Copy the `docker-compose.ucv.yaml` file** locally into the same folder as the envs and rename it to `docker-compose.yaml`.
+
+6. **Pull the latest images** from the Docker Hub:
     ```bash
     docker-compose --profile pantheonix pull
     ```
    
-6. Run the following command to **start the Pantheonix cluster** (the Midgard frontend is also included as a service, so you don't need to start it separately):
+7. Run the following command to **start the Pantheonix cluster** (the Midgard frontend is also included as a service, so you don't need to start it separately):
     ```bash
     docker-compose --profile pantheonix up -d
     ```   
 
-7. Access the Midgard frontend at `https://localhost:10000` and the Asgard backend at `https://localhost`.
+8. Access the Midgard frontend at `https://localhost:10000` and the Asgard backend at `https://localhost`.
 
 ## Technologies
 
