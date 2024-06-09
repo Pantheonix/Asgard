@@ -8,6 +8,35 @@ The **Pantheonix** backend is called **Asgard**, as the realm of gods from the n
 - **Anubis**, as the egyptian god which guides the souls to the underwold, is the submissions microservice responsible to guide the users submissions to their final judgement
 - **Odin**, as the almighty northern god of Asgard, is the API Gateway microservice responsible to guard the access to the rest of backend services
 
+## Self-hosting Pantheonix steps
+
+1. **Prerequisites**:
+   - **Docker** installed on your machine
+   - **Docker Compose** installed on your machine
+   
+2. [**Set cgroup version to 1**](https://docs.docker.com/config/containers/runmetrics/#changing-cgroup-version) to allow Judge0 evaluators to work properly:
+    ```bash
+    sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& systemd.unified_cgroup_hierarchy=0/' /etc/default/grub
+    sudo update-grub
+    sudo reboot
+    ```
+   
+3. **Copy the `envs-template` folder** locally and rename it to `envs` (keep in mind to update the `.env` files with your own secrets).
+   
+4. **Copy the `docker-compose.ucv.yaml` file** locally into the same folder as the envs and rename it to `docker-compose.yaml`.
+
+5. **Pull the latest images** from the Docker Hub:
+    ```bash
+    docker-compose --profile pantheonix pull
+    ```
+   
+6. Run the following command to **start the Pantheonix cluster** (the Midgard frontend is also included as a service, so you don't need to start it separately):
+    ```bash
+    docker-compose --profile pantheonix up -d
+    ```   
+
+7. Access the Midgard frontend at `https://localhost:10000` and the Asgard backend at `https://localhost`.
+
 ## Technologies
 
 **Pantheonix**:
