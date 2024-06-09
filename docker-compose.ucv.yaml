@@ -62,43 +62,6 @@ services:
   #        reservations:
   #          memory: 128M
 
-  odin-api-gateway-dapr:
-    container_name: odin-api-gateway-dapr
-    image: daprio/daprd:1.11.2
-    command:
-      [
-        "./daprd",
-        "-app-id",
-        "odin-api-gateway",
-        "-app-port",
-        "80",
-        "-placement-host-address",
-        "asgard-dapr-placement:40000",
-        "-dapr-http-port",
-        "3400",
-        "-dapr-grpc-port",
-        "30000",
-        "-components-path",
-        "/components",
-        "-config",
-        "/config/config.yaml",
-      ]
-    volumes_from:
-      - asgard-dapr-config
-    restart: always
-    depends_on:
-      odin-api-gateway:
-        condition: service_started
-      asgard-dapr-placement:
-        condition: service_started
-      asgard-dapr-config:
-        condition: service_started
-    network_mode: "service:odin-api-gateway"
-    profiles:
-      - odin
-      - asgard
-      - pantheonix
-
   ############ QUETZALCOATL ############
 
   quetzalcoatl-auth-api:

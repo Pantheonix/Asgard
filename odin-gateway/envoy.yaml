@@ -310,16 +310,16 @@ static_resources:
                           local method = request_handle:headers():get(":method")
                           request_handle:logInfo("Request path: " .. path)
                           request_handle:logInfo("Method: " .. method)
-
+                        
                          if string.match(path, "^/api/identity/auth/refresh%-token$") and method == "POST" then
                             request_handle:logInfo("Request path matched")
-
+                        
                             local headers = request_handle:headers()
                             request_handle:logInfo("Headers grabbed")
-
+                        
                             local cookie = headers:get("cookie")
                             request_handle:logInfo("Cookies grabbed")
-
+                        
                             if not cookie then
                               request_handle:logInfo("No cookies found")
                               request_handle:respond(
@@ -332,16 +332,16 @@ static_resources:
                               )
                               return
                             end
-
+                        
                             local body = request_handle:body()
                             request_handle:logInfo("Body grabbed")
-
+                        
                             local body_str = body:getBytes(0, body:length())
                             request_handle:logInfo("Request body: " .. body_str)
-
+                        
                             local user_id = string.match(body_str, '"userId":"([^"]+)"')
                             local refresh_token = string.match(cookie, ".AspNetCore.RefreshToken=([^;]+)")
-
+                        
                             if not user_id or not refresh_token then
                               request_handle:respond(
                                 {
@@ -353,10 +353,10 @@ static_resources:
                               )
                               return
                             end
-
+                        
                             request_handle:logInfo("UserId: " .. user_id)
                             request_handle:logInfo("RefreshToken: " .. refresh_token)
-
+                        
                             local new_body = '{"userId":"' .. user_id .. '","refreshToken":"' .. refresh_token .. '"}'
                             request_handle:logInfo("New body: " .. new_body)
                             local response_headers, response_body = request_handle:httpCall(
@@ -371,12 +371,12 @@ static_resources:
                               new_body,
                               5000
                             )
-
+                        
                             for key, value in pairs(response_headers) do
                               request_handle:logInfo("Response header: " .. key .. " = " .. value)
                             end
                             request_handle:logInfo("Response body: " .. response_body)
-
+                        
                             if response_headers[":status"] ~= "200" then
                               request_handle:respond(
                                 response_headers,
@@ -384,15 +384,15 @@ static_resources:
                               )
                               return
                             end
-                            
+                        
                             local new_access_token = string.match(response_body, '"accessToken":"([^"]+)"')
                             request_handle:logInfo("New access token: " .. new_access_token)
-
+                        
                             local expirySeconds = 3600
                             local path = "/"
                             local cookieName = ".AspNetCore.AccessToken"
                             local expires = os.date("!%a, %d %b %Y %H:%M:%S GMT", os.time() + expirySeconds)
-
+                        
                             local cookieAttributes = {
                                 "HttpOnly",
                                 "Expires=" .. expires,
@@ -400,12 +400,12 @@ static_resources:
                                 "SameSite=None",
                                 "Secure"
                             }
-
+                        
                             local new_cookie = cookieName .. "=" .. new_access_token .. "; " .. table.concat(cookieAttributes, "; ")
                             response_headers["set-cookie"] = new_cookie
                             response_headers["access-control-allow-credentials"] = "true"
                             response_headers["access-control-allow-origin"] = request_handle:headers():get("origin")
-
+                        
                             request_handle:respond(
                               response_headers,
                               "{\"userId\":\"" .. user_id .. "\"}"
@@ -413,13 +413,13 @@ static_resources:
                           end
                         end
                   - name: envoy.filters.http.router
-      tls_context:
-        common_tls_context:
-          tls_certificates:
-            - certificate_chain:
-                filename: "/etc/ssl/certs/https.crt"
-              private_key:
-                filename: "/etc/ssl/certs/key.pem"
+          tls_context:
+            common_tls_context:
+              tls_certificates:
+                - certificate_chain:
+                    filename: "/etc/ssl/certs/https.crt"
+                  private_key:
+                    filename: "/etc/ssl/certs/key.pem"
   clusters:
     - name: dapr
       connect_timeout: 0.25s
