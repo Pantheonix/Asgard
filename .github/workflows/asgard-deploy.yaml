@@ -1,14 +1,14 @@
 name: Asgard Deployment - Deploy to DigitalOcean Droplet
 
 on:
-#   push:
-#     branches:
-#         - master
+   push:
+     branches:
+         - master
 #         - develop
 
-  pull_request:
-    branches:
-      - master
+#  pull_request:
+#    branches:
+#      - master
 
 env:
   REGISTRY: ghcr.io
