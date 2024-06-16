@@ -12,13 +12,13 @@ on:
       - "quetzalcoatl-auth/**"
       - ".github/workflows/quetzalcoatl-auth.yaml"
 
-  pull_request:
-    branches:
-      - develop
-
-    paths:
-      - "quetzalcoatl-auth/**"
-      - ".github/workflows/quetzalcoatl-auth.yaml"
+#  pull_request:
+#    branches:
+#      - develop
+#
+#    paths:
+#      - "quetzalcoatl-auth/**"
+#      - ".github/workflows/quetzalcoatl-auth.yaml"
 
 env:
   REGISTRY: ghcr.io

@@ -12,13 +12,13 @@ on:
       - "odin-gateway/**"
       - ".github/workflows/odin-gateway.yaml"
 
-  pull_request:
-    branches:
-      - develop
-
-    paths:
-      - "odin-gateway/**"
-      - ".github/workflows/odin-gateway.yaml"
+#  pull_request:
+#    branches:
+#      - develop
+#
+#    paths:
+#      - "odin-gateway/**"
+#      - ".github/workflows/odin-gateway.yaml"
 
 env:
   REGISTRY: ghcr.io

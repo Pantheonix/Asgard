@@ -12,13 +12,13 @@ on:
       - "enki-problems/**"
       - ".github/workflows/enki-problems.yaml"
 
-  pull_request:
-    branches:
-      - develop
-
-    paths:
-      - "enki-problems/**"
-      - ".github/workflows/enki-problems.yaml"
+#  pull_request:
+#    branches:
+#      - develop
+#
+#    paths:
+#      - "enki-problems/**"
+#      - ".github/workflows/enki-problems.yaml"
 
 env:
   REGISTRY: ghcr.io

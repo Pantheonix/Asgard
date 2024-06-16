@@ -12,13 +12,13 @@ on:
       - "hermes-tests/**"
       - ".github/workflows/hermes-tests.yaml"
 
-  pull_request:
-    branches:
-      - develop
-
-    paths:
-      - "hermes-tests/**"
-      - ".github/workflows/hermes-tests.yaml"
+#  pull_request:
+#    branches:
+#      - develop
+#
+#    paths:
+#      - "hermes-tests/**"
+#      - ".github/workflows/hermes-tests.yaml"
 
 env:
   REGISTRY: ghcr.io

@@ -12,13 +12,13 @@ on:
       - "anubis-eval/**"
       - ".github/workflows/anubis-eval.yaml"
 
-  pull_request:
-    branches:
-      - develop
-
-    paths:
-      - "anubis-eval/**"
-      - ".github/workflows/anubis-eval.yaml"
+#  pull_request:
+#    branches:
+#      - develop
+#
+#    paths:
+#      - "anubis-eval/**"
+#      - ".github/workflows/anubis-eval.yaml"
 
 env:
   REGISTRY: ghcr.io

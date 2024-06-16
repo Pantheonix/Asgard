@@ -12,13 +12,13 @@ on:
       - "dapr/**"
       - ".github/workflows/dapr-config.yaml"
 
-  pull_request:
-    branches:
-      - develop
-
-    paths:
-      - "dapr-config/**"
-      - ".github/workflows/dapr-config.yaml"
+#  pull_request:
+#    branches:
+#      - develop
+#
+#    paths:
+#      - "dapr-config/**"
+#      - ".github/workflows/dapr-config.yaml"
 
 env:
   REGISTRY: ghcr.io
