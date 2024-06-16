@@ -8,6 +8,9 @@ The **Pantheonix** backend is called **Asgard**, as the realm of gods from the n
 - **Anubis**, as the egyptian god which guides the souls to the underwold, is the submissions microservice responsible to guide the users submissions to their final judgement
 - **Odin**, as the almighty northern god of Asgard, is the API Gateway microservice responsible to guard the access to the rest of backend services
 
+## Self-hosting steps:
+Check the ucv branch's [README](https://github.com/Pantheonix/Asgard/tree/ucv?tab=readme-ov-file#self-hosting-pantheonix-steps) for more details.
+
 ## Technologies
 
 **Pantheonix**:
