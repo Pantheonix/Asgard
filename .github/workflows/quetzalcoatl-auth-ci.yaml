@@ -18,6 +18,8 @@ jobs:
           dotnet-version: '7.0.x'
       - name: Cd into the project directory
         run: cd quetzalcoatl-auth
+      - name: Pwd
+        run: pwd
       - name: Install dependencies
         run: dotnet restore
       - name: Build
