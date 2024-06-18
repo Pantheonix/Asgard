@@ -19,6 +19,7 @@ jobs:
       - name: Build
         run: |
           dotnet restore "quetzalcoatl-auth/Bootstrapper/Bootstrapper.csproj"
+          dotnet restore "quetzalcoatl-auth/Tests.Integration/Tests.Integration.csproj"
           cd quetzalcoatl-auth
           dotnet build --no-restore
       - name: Test
