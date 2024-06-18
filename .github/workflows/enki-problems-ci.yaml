@@ -16,6 +16,8 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '7.0.x'
+      - name: Cd into the project directory
+        run: cd enki-problems
       - name: Install dependencies
         run: dotnet restore
       - name: Build
