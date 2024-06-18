@@ -16,13 +16,10 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '7.0.x'
-      - name: Cd into the project directory
-        run: cd quetzalcoatl-auth
-      - name: Pwd
-        run: pwd
-      - name: Install dependencies
-        run: dotnet restore
       - name: Build
-        run: dotnet build
-      - name: Test with the dotnet CLI
-        run: dotnet test
+        run: |
+          dotnet restore "quetzalcoatl-auth/Bootstrapper/Bootstrapper.csproj"
+          cd quetzalcoatl-auth
+          dotnet build --no-restore
+      - name: Test
+        run: dotnet test "quetzalcoatl-auth/Tests.Integration/Tests.Integration.csproj"
