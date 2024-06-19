@@ -90,14 +90,17 @@ try
             };
         })
         .AddSingleton(tokenValidationParameters)
-        .AddJWTBearerAuth(jwtConfig.SecretKey)
+        .AddAuthenticationJwtBearer(opt =>
+        {
+            opt.SigningKey = jwtConfig!.SecretKey;
+        })
         .AddAutoMapper(typeof(IApiMarker), typeof(IApplicationMarker))
-        .AddSwaggerDoc(settings =>
+        .AddSwaggerDocument(settings =>
         {
             settings.Title = "Quetzalcoatl Auth API";
             settings.Version = "v1";
         });
-
+    
     var app = builder.Build();
 
     if (app.Environment.IsDevelopment())
