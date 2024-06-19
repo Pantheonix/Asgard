@@ -41,6 +41,7 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
 
         const string validPassword = "P@ssw0rd!";
         await userManager.CreateAsync(applicationUser, validPassword);
+        var users = await userManager.Users.ToListAsync();
 
         var request = new DeleteUserRequest { Id = applicationUser.Id };
 

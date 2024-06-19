@@ -1,3 +1,5 @@
+using System.Net.Http.Formatting;
+
 namespace Tests.Integration.Api.Features.Auth;
 
 public class RegisterEndpointTests : IClassFixture<ApiWebFactory>
@@ -144,11 +146,17 @@ public class RegisterEndpointTests : IClassFixture<ApiWebFactory>
         // check if AccessToken and RefreshToken cookies exist
         response.Headers.TryGetValues("Set-Cookie", out _).Should().BeFalse();
 
-        var result = await response.Content.ReadAsAsync<ErrorResponse>();
+        var formatters = new MediaTypeFormatterCollection();
+        formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/json"));
+        formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/problem+json"));
+        
+        var result = await response.Content.ReadAsAsync<ErrorResponse>(formatters: formatters);
 
         result.Should().NotBeNull();
-        result!.Errors.Keys.Should().Contain(nameof(request.Password));
-        result.Errors.Keys.Should().Contain(nameof(request.ProfilePicture));
+        result!.Errors.Keys.Select(r => r.ToUpper())
+            .Should().Contain(nameof(request.Password).ToUpper());
+        result.Errors.Keys.Select(r => r.ToUpper())
+            .Should().Contain(nameof(request.ProfilePicture).ToUpper());
 
         #endregion
     }
