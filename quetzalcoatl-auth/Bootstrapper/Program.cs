@@ -1,7 +1,3 @@
-using Domain.Consts;
-using DotNetEnv;
-using DotNetEnv.Configuration;
-
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
     .Enrich.FromLogContext()
@@ -78,7 +74,7 @@ try
             {
                 corsPolicyBuilder
                     .WithOrigins(
-                        corsOrigins ?? ["http://localhost:10000", "https://pantheonix.live"]
+                        corsOrigins ?? new[] { "http://localhost:10000", "https://pantheonix.live" }
                     )
                     .AllowAnyMethod()
                     .AllowAnyHeader()
@@ -86,16 +82,16 @@ try
             });
         })
         .AddSingleton(tokenValidationParameters)
-        .AddAuthenticationJwtBearer(opt =>
-        {
-            opt.SigningKey = jwtConfig.SecretKey;
-        })
-        .AddAuthorization()
+        .AddJWTBearerAuth(jwtConfig.SecretKey)
         .AddAutoMapper(typeof(IApiMarker), typeof(IApplicationMarker))
         .AddFastEndpoints(options =>
         {
             options.DisableAutoDiscovery = true;
-            options.Assemblies = [typeof(IApiMarker).Assembly, typeof(IApplicationMarker).Assembly];
+            options.Assemblies = new[]
+            {
+                typeof(IApiMarker).Assembly,
+                typeof(IApplicationMarker).Assembly
+            };
         });
 
     var app = builder.Build();
