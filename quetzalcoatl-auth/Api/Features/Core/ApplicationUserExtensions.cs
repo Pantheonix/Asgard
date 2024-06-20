@@ -26,7 +26,7 @@ public static class SortUsersByExtensions
     public static IEnumerable<UserDto> SortUsers(
         this IEnumerable<UserDto> query,
         SortUsersBy sortBy
-        )
+    )
     {
         return sortBy switch
         {
@@ -39,7 +39,7 @@ public static class SortUsersByExtensions
     public static IAsyncEnumerable<UserDto> SortUsers(
         this IAsyncEnumerable<UserDto> query,
         SortUsersBy sortBy
-        )
+    )
     {
         return sortBy switch
         {

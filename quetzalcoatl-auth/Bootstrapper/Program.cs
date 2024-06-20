@@ -3,12 +3,9 @@ using DotNetEnv;
 using DotNetEnv.Configuration;
 
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel
-    .Override("Microsoft", LogEventLevel.Information)
-    .Enrich
-    .FromLogContext()
-    .WriteTo
-    .Console()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
     .CreateLogger();
 
 try
@@ -19,11 +16,9 @@ try
 
     if (builder.Environment.IsEnvironment(SystemConsts.TestingEnvironment))
     {
-        _ = builder.Configuration
-            .AddDotNetEnv(".env.template", LoadOptions.TraversePath())
-            .Build();
+        _ = builder.Configuration.AddDotNetEnv(".env.template", LoadOptions.TraversePath()).Build();
     }
-    
+
     builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection(nameof(JwtConfig)));
     builder.Services.Configure<AdminConfig>(builder.Configuration.GetSection(nameof(AdminConfig)));
 
@@ -39,43 +34,26 @@ try
     };
     var dsnConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-    if (builder.Environment.IsEnvironment(SystemConsts.TestingEnvironment))
+    if (!builder.Environment.IsEnvironment(SystemConsts.TestingEnvironment))
     {
-        builder.Services.AddEntityFrameworkInMemoryDatabase();
-    }
-    else
-    {
-        builder.Services
-            .AddHealthChecks()
-            .AddSqlServer(dsnConnectionString!);
+        builder.Services.AddHealthChecks().AddSqlServer(dsnConnectionString!);
     }
 
-    builder
-        .Host
-        .UseSerilog(
-            (context, services, configuration) =>
-                configuration
-                    .ReadFrom
-                    .Configuration(context.Configuration)
-                    .ReadFrom
-                    .Services(services)
-        );
+    builder.Host.UseSerilog(
+        (context, services, configuration) =>
+            configuration.ReadFrom.Configuration(context.Configuration).ReadFrom.Services(services)
+    );
 
     builder
-        .Services
-        .AddDbContext<ApplicationDbContext>(options =>
+        .Services.AddDbContext<ApplicationDbContext>(options =>
         {
-            if (builder.Environment.IsEnvironment(SystemConsts.TestingEnvironment))
-            {
-                options.UseInMemoryDatabase("InMemoryDbForTesting");
-            }
-            else
+            if (!builder.Environment.IsEnvironment(SystemConsts.TestingEnvironment))
             {
                 options.UseSqlServer(dsnConnectionString);
             }
 
-            options.UseTriggers(
-                triggerOptions => triggerOptions.AddTrigger<DeleteStaleRefreshTokens>()
+            options.UseTriggers(triggerOptions =>
+                triggerOptions.AddTrigger<DeleteStaleRefreshTokens>()
             );
         })
         .AddScoped<IPictureRepository, PictureRepository>()
@@ -94,8 +72,7 @@ try
     var corsOrigins = builder.Configuration.GetSection("AllowedOrigins").Value?.Split(';');
     Log.Information("Allowed origins: {CorsOrigins}", corsOrigins);
     builder
-        .Services
-        .AddCors(options =>
+        .Services.AddCors(options =>
         {
             options.AddDefaultPolicy(corsPolicyBuilder =>
             {
@@ -108,23 +85,19 @@ try
                     .AllowCredentials();
             });
         })
-        .AddFastEndpoints(options =>
-        {
-            options.DisableAutoDiscovery = true;
-            options.Assemblies =
-            [
-                typeof(IApiMarker).Assembly,
-                typeof(IApplicationMarker).Assembly
-            ];
-        })
         .AddSingleton(tokenValidationParameters)
         .AddAuthenticationJwtBearer(opt =>
         {
             opt.SigningKey = jwtConfig.SecretKey;
         })
         .AddAuthorization()
-        .AddAutoMapper(typeof(IApiMarker), typeof(IApplicationMarker));
-    
+        .AddAutoMapper(typeof(IApiMarker), typeof(IApplicationMarker))
+        .AddFastEndpoints(options =>
+        {
+            options.DisableAutoDiscovery = true;
+            options.Assemblies = [typeof(IApiMarker).Assembly, typeof(IApplicationMarker).Assembly];
+        });
+
     var app = builder.Build();
 
     if (app.Environment.IsDevelopment())
@@ -136,7 +109,10 @@ try
     {
         app.MapHealthChecks(
                 "/_health",
-                new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse, }
+                new HealthCheckOptions
+                {
+                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
+                }
             )
             .RequireHost("*:5210");
     }

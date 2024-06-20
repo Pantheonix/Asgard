@@ -28,8 +28,8 @@ public class UpdateUserEndpoint : Endpoint<UpdateUserRequest, UpdateUserResponse
     {
         _logger.LogInformation("Updating user with id {Id}", req.Id.ToString());
 
-        var subClaim = User.Claims
-            .Where(c => c.Type == ClaimTypes.NameIdentifier)
+        var subClaim = User
+            .Claims.Where(c => c.Type == ClaimTypes.NameIdentifier)
             .Select(c => c.Value)
             .FirstOrDefault();
 
@@ -52,8 +52,7 @@ public class UpdateUserEndpoint : Endpoint<UpdateUserRequest, UpdateUserResponse
         if (!result.Succeeded)
         {
             var errors = result
-                .Errors
-                .Select(e => e.Description)
+                .Errors.Select(e => e.Description)
                 .Aggregate("Identity Errors: ", (a, b) => $"{a}, {b}");
 
             _logger.LogWarning(

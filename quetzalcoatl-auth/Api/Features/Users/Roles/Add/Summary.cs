@@ -6,7 +6,11 @@ public class AddRoleSummary : Summary<AddRoleEndpoint>
     {
         Summary = "Add a role to a user";
         Description = "Add a role to a user by id";
-        ExampleRequest = new AddRoleRequest { Id = Guid.NewGuid(), Role = ApplicationRole.Proposer.ToString() };
+        ExampleRequest = new AddRoleRequest
+        {
+            Id = Guid.NewGuid(),
+            Role = ApplicationRole.Proposer.ToString()
+        };
         Response<UserDto>(
             200,
             "Role added successfully",

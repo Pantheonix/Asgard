@@ -26,7 +26,11 @@ public class AddRoleEndpoint : Endpoint<AddRoleRequest, UserDto>
 
     public override async Task HandleAsync(AddRoleRequest req, CancellationToken ct)
     {
-        _logger.LogInformation("Adding role {Role} to user with id {Id}", req.Role.ToString(), req.Id.ToString());
+        _logger.LogInformation(
+            "Adding role {Role} to user with id {Id}",
+            req.Role.ToString(),
+            req.Id.ToString()
+        );
 
         if (!Enum.TryParse<ApplicationRole>(req.Role, out var role))
         {
@@ -47,7 +51,11 @@ public class AddRoleEndpoint : Endpoint<AddRoleRequest, UserDto>
 
         if (await _userManager.IsInRoleAsync(user, role.ToString()))
         {
-            _logger.LogWarning("User with id {Id} already has role {Role}", req.Id.ToString(), role.ToString());
+            _logger.LogWarning(
+                "User with id {Id} already has role {Role}",
+                req.Id.ToString(),
+                role.ToString()
+            );
             var errors = $"User with id {req.Id.ToString()} already has role {role}";
             AddError(errors);
         }
@@ -58,11 +66,15 @@ public class AddRoleEndpoint : Endpoint<AddRoleRequest, UserDto>
         if (!result.Succeeded)
         {
             var errors = result
-                .Errors
-                .Select(e => e.Description)
+                .Errors.Select(e => e.Description)
                 .Aggregate("Identity Errors: ", (a, b) => $"{a}, {b}");
 
-            _logger.LogWarning("Failed to add role {Role} to user with id {Id}: {errors}", role.ToString(), req.Id.ToString(), errors);
+            _logger.LogWarning(
+                "Failed to add role {Role} to user with id {Id}: {errors}",
+                role.ToString(),
+                req.Id.ToString(),
+                errors
+            );
             AddError(errors);
         }
         ThrowIfAnyErrors();

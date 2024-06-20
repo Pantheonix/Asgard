@@ -23,4 +23,4 @@ jobs:
           cd quetzalcoatl-auth
           dotnet build --no-restore
       - name: Test
-        run: dotnet test "quetzalcoatl-auth/Tests.Integration/Tests.Integration.csproj"
+        run: dotnet test -e ASPNETCORE_ENVIRONMENT=Testing "quetzalcoatl-auth/Tests.Integration/Tests.Integration.csproj"
