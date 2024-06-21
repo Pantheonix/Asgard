@@ -15,7 +15,11 @@ public class ProblemSubscriberController : EnkiProblemsController
     private readonly DaprClient _daprClient;
     private readonly ILogger _logger;
 
-    public ProblemSubscriberController(HttpClient httpClient, DaprClient daprClient, ILogger<ProblemSubscriberController> logger)
+    public ProblemSubscriberController(
+        HttpClient httpClient,
+        DaprClient daprClient,
+        ILogger<ProblemSubscriberController> logger
+    )
     {
         _httpClient = httpClient;
         _daprClient = daprClient;
@@ -36,13 +40,19 @@ public class ProblemSubscriberController : EnkiProblemsController
 
         if (inputResponse.StatusCode != HttpStatusCode.OK)
         {
-            _logger.LogError("Failed to download input file from {InputDownloadUrl}", @event.InputDownloadUrl);
+            _logger.LogError(
+                "Failed to download input file from {InputDownloadUrl}",
+                @event.InputDownloadUrl
+            );
             return BadRequest();
         }
 
         if (outputResponse.StatusCode != HttpStatusCode.OK)
         {
-            _logger.LogError("Failed to download output file from {OutputDownloadUrl}", @event.OutputDownloadUrl);
+            _logger.LogError(
+                "Failed to download output file from {OutputDownloadUrl}",
+                @event.OutputDownloadUrl
+            );
             return BadRequest();
         }
 
@@ -51,7 +61,7 @@ public class ProblemSubscriberController : EnkiProblemsController
         await _daprClient.DeleteStateAsync(
             EnkiProblemsConsts.StateStoreName,
             $"{@event.ProblemId}-{@event.Id}-{EnkiProblemsConsts.TestInputSuffix}"
-            );
+        );
 
         await _daprClient.SaveStateAsync(
             EnkiProblemsConsts.StateStoreName,
@@ -64,7 +74,7 @@ public class ProblemSubscriberController : EnkiProblemsController
         await _daprClient.DeleteStateAsync(
             EnkiProblemsConsts.StateStoreName,
             $"{@event.ProblemId}-{@event.Id}-{EnkiProblemsConsts.TestOutputSuffix}"
-            );
+        );
 
         await _daprClient.SaveStateAsync(
             EnkiProblemsConsts.StateStoreName,
@@ -84,14 +94,14 @@ public class ProblemSubscriberController : EnkiProblemsController
         // delete the input/output files from the dapr statestore
 
         await _daprClient.DeleteStateAsync(
-           EnkiProblemsConsts.StateStoreName,
-           $"{@event.ProblemId}-{@event.Id}-{EnkiProblemsConsts.TestInputSuffix}"
-           );
+            EnkiProblemsConsts.StateStoreName,
+            $"{@event.ProblemId}-{@event.Id}-{EnkiProblemsConsts.TestInputSuffix}"
+        );
 
         await _daprClient.DeleteStateAsync(
-           EnkiProblemsConsts.StateStoreName,
-           $"{@event.ProblemId}-{@event.Id}-{EnkiProblemsConsts.TestOutputSuffix}"
-           );
+            EnkiProblemsConsts.StateStoreName,
+            $"{@event.ProblemId}-{@event.Id}-{EnkiProblemsConsts.TestOutputSuffix}"
+        );
 
         return Ok();
     }

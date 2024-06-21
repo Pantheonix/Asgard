@@ -3,5 +3,4 @@
 namespace EnkiProblems.MongoDB;
 
 public class EnkiProblemsMongoDbCollectionFixtureBase
-    : ICollectionFixture<EnkiProblemsMongoDbFixture>
-{ }
+    : ICollectionFixture<EnkiProblemsMongoDbFixture> { }
