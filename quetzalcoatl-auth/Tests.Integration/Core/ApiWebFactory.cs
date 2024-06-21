@@ -10,8 +10,6 @@ public class ApiWebFactory : WebApplicationFactory<IProgramMarker>, IAsyncLifeti
     {
         builder.ConfigureTestServices(services =>
         {
-            Console.WriteLine(_database.GetConnectionString());
-            
             services.RemoveDbContext<ApplicationDbContext>();
             services.AddDbContext<ApplicationDbContext>(options =>
             {
