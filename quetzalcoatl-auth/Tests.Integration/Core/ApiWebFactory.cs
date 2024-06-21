@@ -15,7 +15,7 @@ public class ApiWebFactory : WebApplicationFactory<IProgramMarker>, IAsyncLifeti
             services.RemoveDbContext<ApplicationDbContext>();
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(_database.GetConnectionString());
+                options.UseSqlServer($"{_database.GetConnectionString()};MultipleActiveResultSets=true");
             });
             services.ApplyMigrations<ApplicationDbContext>();
         });
