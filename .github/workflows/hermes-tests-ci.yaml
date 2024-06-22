@@ -31,4 +31,6 @@ jobs:
           dart pub get
 
       - name: Test
-        run: dart test
+        run: |
+          cd hermes-tests
+          dart test
