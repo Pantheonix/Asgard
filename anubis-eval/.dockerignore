@@ -5,6 +5,7 @@ README.md
 .idea/
 target/
 logs/
+tests/
 .env*
 .gitignore
 eval-lb/
