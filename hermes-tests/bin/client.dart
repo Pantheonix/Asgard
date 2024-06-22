@@ -6,7 +6,7 @@ import 'package:hermes_tests/domain/core/file_log_output.dart';
 import 'package:logger/logger.dart';
 
 Future<void> main(List<String> arguments) async {
-  final config = Config.fromJsonFile('config.json');
+  final config = Config.fromEnv('HERMES_CONFIG');
   final serverConfig = ServerConfig.fromJson(config.dev);
 
   final logger = Logger(

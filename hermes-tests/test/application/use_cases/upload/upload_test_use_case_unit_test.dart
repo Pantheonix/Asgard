@@ -23,7 +23,7 @@ void main() {
   group('Upload Test UseCase Unit Tests', () {
     setUpAll(() {
       testConfig = ServerConfig.fromJson(
-        Config.fromJsonFile('config.json').test,
+        Config.fromEnv('HERMES_CONFIG').test,
       );
       mockTestRepository = MockTestRepository();
       final logger = Logger(
@@ -50,7 +50,7 @@ void main() {
         'Then no storage failure is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToUpload(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '2',
         fromDir: testConfig.tempLocalUnarchivedTestFolder,
         toDir: testConfig.tempLocalUnarchivedTestFolder,
@@ -85,7 +85,7 @@ void main() {
         'Then localtTestNotFound storage failure is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToUpload(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '3',
         fromDir: testConfig.tempLocalUnarchivedTestFolder,
         toDir: testConfig.tempLocalUnarchivedTestFolder,
@@ -126,7 +126,7 @@ void main() {
         'Then unexpected storage failure is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToUpload(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '2',
         fromDir: testConfig.tempLocalUnarchivedTestFolder,
         toDir: testConfig.tempLocalUnarchivedTestFolder,
@@ -167,7 +167,7 @@ void main() {
         'Then unexpected storage failure is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToDownload(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '2',
         fromDir: testConfig.tempLocalUnarchivedTestFolder,
         toDir: testConfig.tempLocalUnarchivedTestFolder,

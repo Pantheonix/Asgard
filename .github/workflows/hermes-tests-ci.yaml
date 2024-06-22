@@ -1,0 +1,40 @@
+name: Hermes - Build and Test Tests Service
+
+on:
+  push:
+    paths:
+      - "hermes-tests/**"
+      - ".github/workflows/hermes-tests-ci.yaml"
+
+  pull_request:
+    paths:
+      - "hermes-tests/**"
+      - ".github/workflows/hermes-tests-ci.yaml"
+
+env:
+  HERMES_CONFIG: ${{ secrets.HERMES_CONFIG }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 2.19.2
+
+      - name: Get dependencies
+        run: |
+          cd hermes-tests
+          dart pub get
+
+      - name: Format code
+        run: dart format --set-exit-if-changed .
+
+      - name: Analyze code
+        run: dart analyze
+
+      - name: Test
+        run: dart test
