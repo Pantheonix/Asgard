@@ -3,8 +3,13 @@ name: Quetzalcoatl - Build and Test Auth Service
 on:
   push:
     paths:
-        - "quetzalcoatl-auth/**"
-        - ".github/workflows/quetzalcoatl-auth-ci.yaml"
+      - "quetzalcoatl-auth/**"
+      - ".github/workflows/quetzalcoatl-auth-ci.yaml"
+
+  pull_request:
+    paths:
+      - "quetzalcoatl-auth/**"
+      - ".github/workflows/quetzalcoatl-auth-ci.yaml"
 
 jobs:
   build:

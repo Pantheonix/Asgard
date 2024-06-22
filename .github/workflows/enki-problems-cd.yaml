@@ -10,7 +10,7 @@ on:
 
     paths:
       - "enki-problems/**"
-      - ".github/workflows/enki-problems.yaml"
+      - ".github/workflows/enki-problems-cd.yaml"
 
 #  pull_request:
 #    branches:
@@ -18,7 +18,7 @@ on:
 #
 #    paths:
 #      - "enki-problems/**"
-#      - ".github/workflows/enki-problems.yaml"
+#      - ".github/workflows/enki-problems-cd.yaml"
 
 env:
   REGISTRY: ghcr.io
@@ -26,6 +26,26 @@ env:
 
 jobs:
   build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0.x'
+      - name: Build
+        run: |
+          dotnet restore "enki-problems/src/EnkiProblems.HttpApi.Host/EnkiProblems.HttpApi.Host.csproj"
+          dotnet restore "enki-problems/test/EnkiProblems.Application.Tests/EnkiProblems.Application.Tests.csproj"
+          cd enki-problems
+          dotnet build --no-restore
+      - name: Test
+        run: |
+          cd enki-problems
+          dotnet test -e DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+  deploy:
     runs-on: ubuntu-latest
 
     permissions:
@@ -52,7 +72,7 @@ jobs:
             type=semver,pattern={{version}}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: enki-problems
           push: true

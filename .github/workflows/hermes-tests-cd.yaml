@@ -1,4 +1,4 @@
-name: Anubis - Build Docker image and publish to GitHub Packages
+name: Hermes - Build Docker image and publish to GitHub Packages
 
 on:
   push:
@@ -9,23 +9,49 @@ on:
 #      - develop
 
     paths:
-      - "anubis-eval/**"
-      - ".github/workflows/anubis-eval.yaml"
+      - "hermes-tests/**"
+      - ".github/workflows/hermes-tests-cd.yaml"
 
 #  pull_request:
 #    branches:
 #      - develop
 #
 #    paths:
-#      - "anubis-eval/**"
-#      - ".github/workflows/anubis-eval.yaml"
+#      - "hermes-tests/**"
+#      - ".github/workflows/hermes-tests-cd.yaml"
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: anubis-eval
+  IMAGE_NAME: hermes-tests
+  HERMES_CONFIG: ${{ secrets.HERMES_CONFIG }}
 
 jobs:
   build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 2.19.2
+
+      - name: Create logs/test.log file
+        run: |
+          mkdir -p hermes-tests/logs
+          touch hermes-tests/logs/test.log
+
+      - name: Get dependencies
+        run: |
+          cd hermes-tests
+          dart pub get
+
+      - name: Test
+        run: |
+          cd hermes-tests
+          dart test
+
+  deploy:
     runs-on: ubuntu-latest
 
     permissions:
@@ -52,9 +78,9 @@ jobs:
             type=semver,pattern={{version}}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          context: anubis-eval
+          context: hermes-tests
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

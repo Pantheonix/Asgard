@@ -1,4 +1,4 @@
-name: Quetzalcoatl - Build Docker image and publish to GitHub Packages
+name: Anubis - Build Docker image and publish to GitHub Packages
 
 on:
   push:
@@ -9,20 +9,20 @@ on:
 #      - develop
 
     paths:
-      - "quetzalcoatl-auth/**"
-      - ".github/workflows/quetzalcoatl-auth.yaml"
+      - "anubis-eval/**"
+      - ".github/workflows/anubis-eval-cd.yaml"
 
 #  pull_request:
 #    branches:
 #      - develop
 #
 #    paths:
-#      - "quetzalcoatl-auth/**"
-#      - ".github/workflows/quetzalcoatl-auth.yaml"
+#      - "anubis-eval/**"
+#      - ".github/workflows/anubis-eval-cd.yaml"
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: quetzalcoatl-auth
+  IMAGE_NAME: anubis-eval
 
 jobs:
   build:
@@ -52,9 +52,9 @@ jobs:
             type=semver,pattern={{version}}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          context: quetzalcoatl-auth
+          context: anubis-eval
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
