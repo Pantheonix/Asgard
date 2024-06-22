@@ -14,6 +14,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: anubis-eval
 
     steps:
       - uses: actions/checkout@v4
@@ -27,11 +30,7 @@ jobs:
           rust-version: '1.72.0'
 
       - name: Build
-        run: |
-          cd anubis-eval
-          cargo build --release
+        run: cargo build --release
 
       - name: Test
-        run: |
-          cd anubis-eval
-          cargo test --all-features
+        run: cargo test --all-features

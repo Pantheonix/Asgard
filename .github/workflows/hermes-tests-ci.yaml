@@ -17,6 +17,9 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: hermes-tests
 
     steps:
       - uses: actions/checkout@v4
@@ -28,15 +31,11 @@ jobs:
 
       - name: Create logs/test.log file
         run: |
-          mkdir -p hermes-tests/logs
-          touch hermes-tests/logs/test.log
+          mkdir -p logs
+          touch logs/test.log
 
       - name: Get dependencies
-        run: |
-          cd hermes-tests
-          dart pub get
+        run: dart pub get
 
       - name: Test
-        run: |
-          cd hermes-tests
-          dart test
+        run: dart test
