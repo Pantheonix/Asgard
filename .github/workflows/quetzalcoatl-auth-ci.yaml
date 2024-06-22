@@ -30,4 +30,4 @@ jobs:
           dotnet restore "Tests.Integration/Tests.Integration.csproj"
           dotnet build --no-restore
       - name: Test
-        run: dotnet test -e ASPNETCORE_ENVIRONMENT=Testing
+        run: dotnet test -e ASPNETCORE_ENVIRONMENT=Testing "Tests.Integration/Tests.Integration.csproj"
