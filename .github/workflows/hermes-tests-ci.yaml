@@ -25,6 +25,11 @@ jobs:
         with:
           sdk: 2.19.2
 
+      - name: Create logs/test.log file
+        run: |
+          mkdir -p hermes-tests/logs
+          touch hermes-tests/logs/test.log
+
       - name: Get dependencies
         run: |
           cd hermes-tests
