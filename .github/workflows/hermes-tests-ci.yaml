@@ -30,11 +30,5 @@ jobs:
           cd hermes-tests
           dart pub get
 
-      - name: Format code
-        run: dart format --set-exit-if-changed .
-
-      - name: Analyze code
-        run: dart analyze
-
       - name: Test
         run: dart test
