@@ -32,5 +32,11 @@ jobs:
       - name: Build
         run: cargo build --release
 
+      - name: Run docker-compose
+        uses: hoverkraft-tech/compose-action@v2.0.1
+        with:
+          compose-file: "./tests-setup/docker-compose.yaml"
+          up-flags: "--build -d"
+
       - name: Test
         run: cargo test --all-features

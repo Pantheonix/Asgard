@@ -9,3 +9,4 @@ tests/
 .env*
 .gitignore
 eval-lb/
+tests-setup/
