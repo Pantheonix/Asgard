@@ -43,3 +43,61 @@ pub async fn get_submissions(
     )
     .await
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::api::middleware::auth::tests::encode_jwt;
+    use crate::contracts::get_submissions_dtos::GetSubmissionsDto;
+    use crate::tests::common::{Result, ROCKET_CLIENT};
+    use crate::tests::user::tests::{User, UserProfile};
+    use rocket::http::{Header, Status};
+    use serial_test::serial;
+
+    #[tokio::test]
+    #[serial]
+    async fn unauthenticated_user_cannot_get_submissions() -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+
+        // Act
+        let response = client.get("/api/submissions").dispatch().await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Unauthorized,
+            "Unauthenticated user cannot get submissions"
+        );
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn authenticated_user_can_get_submissions() -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let token = encode_jwt(User::get(UserProfile::Ordinary))?;
+
+        // Act
+        let response = client
+            .get("/api/submissions")
+            .header(Header::new("Authorization", format!("Bearer {}", token)))
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Ok,
+            "Unauthenticated user cannot get submissions"
+        );
+
+        let body: GetSubmissionsDto = serde_json::from_str(&response.into_string().await.unwrap())?;
+        assert_eq!(body.items, 3);
+        assert_eq!(body.total_pages, 1);
+        assert_eq!(body.submissions.len(), 3);
+
+        Ok(())
+    }
+}

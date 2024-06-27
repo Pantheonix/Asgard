@@ -15,16 +15,21 @@ pub async fn health_check(db: Db) -> &'static str {
 
 #[cfg(test)]
 mod tests {
+    use crate::tests::common::ROCKET_CLIENT;
+    use crate::tests::common::Result;
     use rocket::http::Status;
-    use crate::tests::common::setup_rocket;
+    use serial_test::serial;
 
     #[tokio::test]
-    async fn test_health_check() {
-        let client = setup_rocket().await.unwrap();
+    #[serial]
+    async fn test_health_check() -> Result<()> {
+        let client = ROCKET_CLIENT.get().await.clone();
 
         let response = client.get("/api/health_check").dispatch().await;
 
         assert_eq!(response.status(), Status::Ok);
         assert_eq!(response.into_string().await.unwrap(), "Healthy!");
+        
+        Ok(())
     }
 }
