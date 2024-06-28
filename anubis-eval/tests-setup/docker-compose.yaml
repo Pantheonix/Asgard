@@ -52,6 +52,16 @@ services:
     env_file: ../.env.judge0.template
     restart: unless-stopped
 
+  cache-stub:
+    build:
+      context: ./cache-stub
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - REDIS_DSN=redis://default:pass@redis:6379
+    restart: unless-stopped
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
     ports:
