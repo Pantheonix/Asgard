@@ -51,10 +51,8 @@ mod tests {
     use crate::tests::common::{Result, ROCKET_CLIENT};
     use crate::tests::user::tests::{User, UserProfile};
     use rocket::http::{Header, Status};
-    use serial_test::serial;
 
     #[tokio::test]
-    #[serial]
     async fn unauthenticated_user_cannot_get_submissions() -> Result<()> {
         // Arrange
         let client = ROCKET_CLIENT.get().await.clone();
@@ -73,8 +71,8 @@ mod tests {
     }
 
     #[tokio::test]
-    #[serial]
-    async fn authenticated_user_can_get_submissions() -> Result<()> {
+    async fn authenticated_user_can_get_submissions_including_own_for_prior_published_problem(
+    ) -> Result<()> {
         // Arrange
         let client = ROCKET_CLIENT.get().await.clone();
         let token = encode_jwt(User::get(UserProfile::Ordinary))?;
@@ -90,7 +88,64 @@ mod tests {
         assert_eq!(
             response.status(),
             Status::Ok,
-            "Unauthenticated user cannot get submissions"
+            "Authenticated user can get submissions including own for prior published problem"
+        );
+
+        let body: GetSubmissionsDto = serde_json::from_str(&response.into_string().await.unwrap())?;
+        assert_eq!(body.items, 4);
+        assert_eq!(body.total_pages, 1);
+        assert_eq!(body.submissions.len(), 4);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn authenticated_user_can_get_submissions_including_those_for_own_unpublished_problem(
+    ) -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let token = encode_jwt(User::get(UserProfile::Admin))?;
+
+        // Act
+        let response = client
+            .get("/api/submissions")
+            .header(Header::new("Authorization", format!("Bearer {}", token)))
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Ok,
+            "Authenticated user can get submissions including those for own unpublished problem"
+        );
+
+        let body: GetSubmissionsDto = serde_json::from_str(&response.into_string().await.unwrap())?;
+        assert_eq!(body.items, 5);
+        assert_eq!(body.total_pages, 1);
+        assert_eq!(body.submissions.len(), 5);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn authenticated_user_can_get_submissions() -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let token = encode_jwt(User::get(UserProfile::Proposer))?;
+
+        // Act
+        let response = client
+            .get("/api/submissions")
+            .header(Header::new("Authorization", format!("Bearer {}", token)))
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Ok,
+            "Authenticated user can get submissions"
         );
 
         let body: GetSubmissionsDto = serde_json::from_str(&response.into_string().await.unwrap())?;

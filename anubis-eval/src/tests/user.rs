@@ -12,13 +12,13 @@ pub mod tests {
         pub email: String,
         pub role: Vec<Role>,
     }
-    
+
     pub enum UserProfile {
         Admin,
         Proposer,
         Ordinary,
     }
-    
+
     impl User {
         pub fn get(user_profile: UserProfile) -> User {
             match user_profile {

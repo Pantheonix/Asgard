@@ -28,8 +28,32 @@ Admin_SumAB_Submission3:
   problem_id: e8d818c3-cb9b-4164-a1f8-ba0967008086
   language: "OCaml"
   source_code: "print_endline \"Hello, world!\""
-  status: !Rejected
+  status: "Rejected"
   score: 50
+  created_at: "2021-01-01T00:00:00Z"
+  avg_time: 0.2
+  avg_memory: 32
+  
+Admin_DiffAB_Submission4:
+  id: 3c3c3c3c-3c3c-3c3c-3c3c-3c3c3c3c3c3c
+  user_id: db4c3d60-229f-4d49-84f9-ee560f9160d5
+  problem_id: 855efecc-0953-479f-b9fd-a64e78a8c1e6
+  language: "Python"
+  source_code: "print(\"Hello, world!\")"
+  status: "Accepted"
+  score: 100
+  created_at: "2021-01-01T00:00:00Z"
+  avg_time: 0.2
+  avg_memory: 64
+
+Ordinary_DiffAB_Submission5:
+  id: 4d4d4d4d-4d4d-4d4d-4d4d-4d4d4d4d4d4d
+  user_id: f0833576-d077-4c08-89b5-9fc47dfcb7d2
+  problem_id: 855efecc-0953-479f-b9fd-a64e78a8c1e6
+  language: "Python"
+  source_code: "print(\"Hello, world!\")"
+  status: "Rejected"
+  score: 0
   created_at: "2021-01-01T00:00:00Z"
   avg_time: 0.2
   avg_memory: 32

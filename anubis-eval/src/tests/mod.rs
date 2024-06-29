@@ -1,5 +1,5 @@
-mod problem;
-mod submission;
+pub mod problem;
+pub mod submission;
 pub mod user;
 
 #[cfg(test)]
@@ -68,8 +68,10 @@ pub mod common {
 
         problem.upsert(db.deref_mut())?;
 
+        let raw_test1 = TESTS.get("DiffAB_Test1")?.to_owned();
+
         let raw_problem = PROBLEMS.get("DiffAB")?.to_owned();
-        let problem: Problem = (raw_problem, vec![]).into();
+        let problem: Problem = (raw_problem, vec![raw_test1]).into();
 
         problem.upsert(db.deref_mut())?;
 
@@ -103,6 +105,20 @@ pub mod common {
 
         submission.upsert(db.deref_mut())?;
 
+        let raw_testcase1 = TEST_CASES.get("Submission4_TestCase1")?.to_owned();
+
+        let raw_submission = SUBMISSIONS.get("Admin_DiffAB_Submission4")?.to_owned();
+        let submission: Submission = (raw_submission, vec![raw_testcase1]).into();
+
+        submission.upsert(db.deref_mut())?;
+
+        let raw_testcase1 = TEST_CASES.get("Submission5_TestCase1")?.to_owned();
+
+        let raw_submission = SUBMISSIONS.get("Ordinary_DiffAB_Submission5")?.to_owned();
+        let submission: Submission = (raw_submission, vec![raw_testcase1]).into();
+
+        submission.upsert(db.deref_mut())?;
+
         Ok(())
     }
 
@@ -116,7 +132,16 @@ pub mod common {
         dapr_client
             .save_test_for_problem(2, problem1_id.clone(), ("3 4".to_string(), "7".to_string()))
             .await?;
-        
+
+        let problem2_id = PROBLEMS.get("DiffAB")?.id.clone();
+        dapr_client
+            .save_test_for_problem(
+                1,
+                problem2_id.clone(),
+                ("1 2".to_string(), "-1".to_string()),
+            )
+            .await?;
+
         Ok(())
     }
 
@@ -133,17 +158,19 @@ pub mod common {
                 key: input_key.clone(),
                 value: Value::String(input.clone()),
             };
-            
+
             let output_key = format!("{}-{}-output", problem_id, test_id);
             let output_item = StateStoreSetItemDto {
                 key: output_key,
                 value: Value::String(output.clone()),
             };
-            
+
             self.set_items_in_state_store(vec![input_item, output_item])
                 .await?;
-            
-            let val = self.get_item_from_state_store(input_key.clone().as_str()).await?;
+
+            let val = self
+                .get_item_from_state_store(input_key.clone().as_str())
+                .await?;
             info!("Value: {:?}", val);
 
             Ok(())

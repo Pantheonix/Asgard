@@ -1,14 +1,14 @@
 use crate::domain::problem::Problem;
 use crate::domain::submission::Submission;
 use chrono::{DateTime, Utc};
-use rocket::serde::Serialize;
+use rocket::serde::{Deserialize, Serialize};
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct GetSubmissionWithTestCasesDto {
     #[serde(flatten)]
-    submission: GetSubmissionDto,
-    test_cases: Vec<GetSubmissionTestCaseDto>,
+    pub submission: GetSubmissionDto,
+    pub test_cases: Vec<GetSubmissionTestCaseDto>,
 }
 
 #[rocket::async_trait]
@@ -63,34 +63,34 @@ impl From<(Submission, Problem)> for GetSubmissionWithTestCasesDto {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct GetSubmissionDto {
-    id: String,
-    problem_id: String,
-    problem_name: String,
-    is_published: bool,
-    user_id: String,
-    language: String,
-    source_code: Option<String>,
-    status: String,
-    score: usize,
+    pub id: String,
+    pub problem_id: String,
+    pub problem_name: String,
+    pub is_published: bool,
+    pub user_id: String,
+    pub language: String,
+    pub source_code: Option<String>,
+    pub status: String,
+    pub score: usize,
     #[serde(with = "chrono::serde::ts_seconds")]
-    created_at: DateTime<Utc>,
-    avg_time: f32,
-    avg_memory: f32,
+    pub created_at: DateTime<Utc>,
+    pub avg_time: f32,
+    pub avg_memory: f32,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct GetSubmissionTestCaseDto {
-    id: usize,
-    status: String,
-    time: f32,
-    memory: f32,
-    expected_score: usize,
-    eval_message: String,
-    compile_output: String,
-    stdout: String,
-    stderr: String,
+    pub id: usize,
+    pub status: String,
+    pub time: f32,
+    pub memory: f32,
+    pub expected_score: usize,
+    pub eval_message: String,
+    pub compile_output: String,
+    pub stdout: String,
+    pub stderr: String,
 }

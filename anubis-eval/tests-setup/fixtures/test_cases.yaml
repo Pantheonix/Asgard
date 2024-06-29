@@ -76,3 +76,28 @@ Submission3_TestCase2:
   expected_score: 50
   compile_output: ""
   
+Submission4_TestCase1:
+  token: 38af049a-208e-4892-9d54-28e6138644b6
+  submission_id: 3c3c3c3c-3c3c-3c3c-3c3c-3c3c3c3c3c3c
+  status: "Accepted"
+  time: 0.2
+  memory: 64
+  eval_message: "Accepted"
+  stdout: ""
+  stderr: ""
+  testcase_id: 1
+  expected_score: 100
+  compile_output: ""
+  
+Submission5_TestCase1:
+  token: ed62ccad-6437-4806-aa87-3127cda27826
+  submission_id: 4d4d4d4d-4d4d-4d4d-4d4d-4d4d4d4d4d4d
+  status: "Runtime Error"
+  time: 0.2
+  memory: 32
+  eval_message: "Runtime Error"
+  stdout: ""
+  stderr: "Traceback (most recent call last):\n  File \"main.py\", line 1, in <module>\n    print(\"Hello, world!\")\nNameError: name 'print' is not defined\n"
+  testcase_id: 1
+  expected_score: 0
+  compile_output: ""

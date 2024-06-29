@@ -11,3 +11,10 @@ SumAB_Test2:
   score: 50
   input_url: "https://example.com/SumAB/input2.txt"
   output_url: "https://example.com/SumAB/output2.txt"
+  
+DiffAB_Test1:
+  id: 1
+  problem_id: 855efecc-0953-479f-b9fd-a64e78a8c1e6
+  score: 100
+  input_url: "https://example.com/DiffAB/input1.txt"
+  output_url: "https://example.com/DiffAB/output1.txt"

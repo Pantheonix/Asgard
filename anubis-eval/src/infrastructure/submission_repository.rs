@@ -40,7 +40,7 @@ impl Submission {
 
         Ok(())
     }
-    
+
     pub fn upsert(&self, conn: &mut PgConnection) -> Result<(), ApplicationError> {
         // check if submission fails to insert
         let submission: SubmissionModel = self.clone().into();
@@ -364,7 +364,7 @@ impl TestCase {
 
         Ok(())
     }
-    
+
     fn upsert(&self, conn: &mut PgConnection) -> Result<(), ApplicationError> {
         let testcase: TestCaseModel = self.clone().into();
 

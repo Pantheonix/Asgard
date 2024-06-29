@@ -39,14 +39,17 @@ jobs:
         with:
           rust-version: '1.72.0'
 
-      - name: Cache rust dependencies
-        uses: Swatinem/rust-cache@v2
+      - name: Install cargo-nextest
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: cargo-nextest
+          locked: true
 
       - name: Build
         run: cargo build --release
 
       - name: Test
-        run: cargo test --all-features
+        run: cargo nextest run --all-features --profile ci
 
   deploy:
     runs-on: ubuntu-latest
