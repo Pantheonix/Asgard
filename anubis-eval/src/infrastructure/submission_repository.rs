@@ -65,6 +65,20 @@ impl Submission {
         Ok(())
     }
 
+    pub fn delete_by_id(id: &String, conn: &mut PgConnection) -> Result<(), ApplicationError> {
+        // delete submission and its test cases
+        TestCase::delete_by_submission_id(id, conn)?;
+
+        diesel::delete(all_submissions.find(id.to_string()))
+            .execute(conn)
+            .map_err(|source| ApplicationError::SubmissionSaveError {
+                submission_id: id.to_string(),
+                source,
+            })?;
+
+        Ok(())
+    }
+
     pub fn find_by_id(
         id: &String,
         conn: &mut PgConnection,
@@ -448,6 +462,24 @@ impl TestCase {
             .iter()
             .map(|testcase| testcase.update(conn))
             .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(())
+    }
+
+    pub fn delete_by_submission_id(
+        submission_id: &String,
+        conn: &mut PgConnection,
+    ) -> Result<(), ApplicationError> {
+        diesel::delete(
+            all_testcases
+                .filter(crate::schema::submissions_testcases::dsl::submission_id.eq(submission_id)),
+        )
+        .execute(conn)
+        .map_err(|source| ApplicationError::TestCaseSaveError {
+            testcase_id: "".to_string(),
+            submission_id: submission_id.clone(),
+            source,
+        })?;
 
         Ok(())
     }

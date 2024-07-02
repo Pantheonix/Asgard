@@ -1,6 +1,6 @@
-use rocket::serde::Serialize;
+use rocket::serde::{Deserialize, Serialize};
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct CreateSubmissionResponseDto {
     pub(crate) id: String,

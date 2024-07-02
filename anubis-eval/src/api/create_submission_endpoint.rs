@@ -1,3 +1,12 @@
+use std::str::FromStr;
+
+use rocket::futures::future::join_all;
+use rocket::serde::json::Json;
+use rocket::serde::{Deserialize, Serialize};
+use rocket::{debug, error, info, post, Responder};
+use rocket_validation::{Validate, Validated};
+use uuid::Uuid;
+
 use crate::api::middleware::auth::JwtContext;
 use crate::application::dapr_client::DaprClient;
 use crate::config::di::CONFIG;
@@ -6,14 +15,8 @@ use crate::contracts::dapr_dtos::{CreateSubmissionBatchDto, CreateSubmissionTest
 use crate::domain::application_error::ApplicationError;
 use crate::domain::submission::{Language, Submission, TestCase, TestCaseStatus};
 use crate::infrastructure::db::Db;
-use rocket::futures::future::join_all;
-use rocket::serde::json::Json;
-use rocket::{debug, error, info, post, Responder};
-use rocket_validation::{Validate, Validated};
-use std::str::FromStr;
-use uuid::Uuid;
 
-#[derive(Debug, serde::Deserialize, Validate)]
+#[derive(Debug, Serialize, Deserialize, Validate)]
 #[serde(crate = "rocket::serde")]
 pub struct CreateSubmissionRequest {
     problem_id: Uuid,
@@ -168,4 +171,204 @@ pub async fn create_submission(
         }
     })
     .await
+}
+
+#[cfg(test)]
+mod tests {
+    use std::str::FromStr;
+
+    use rocket::http::{Header, Status};
+    use uuid::Uuid;
+
+    use crate::api::create_submission_endpoint::CreateSubmissionRequest;
+    use crate::api::middleware::auth::tests::encode_jwt;
+    use crate::config::di::DB_CONN;
+    use crate::contracts::create_submission_dtos::CreateSubmissionResponseDto;
+    use crate::domain::submission::Submission;
+    use crate::tests::common::{Result, ROCKET_CLIENT};
+    use crate::tests::problem::tests::PROBLEMS;
+    use crate::tests::user::tests::{User, UserProfile};
+
+    #[tokio::test]
+    async fn unauthenticated_user_cannot_create_submission() -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let problem = PROBLEMS.get("SumAB")?;
+        let submission_req = CreateSubmissionRequest {
+            problem_id: Uuid::from_str(problem.id.as_str()).unwrap(),
+            language: "Rust".to_string(),
+            source_code: "fn main() { let mut s = String::new(); std::io::stdin().read_line(&mut s).unwrap(); let v: Vec<i32> = s.trim().split_whitespace().map(|x| x.parse().unwrap()).collect(); println!(\"{}\", v[0] + v[1]); }".to_string(),
+        };
+
+        // Act
+        let response = client
+            .post("/api/submissions")
+            .header(Header::new("Content-Type", "application/json"))
+            .body(serde_json::to_string(&submission_req)?)
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Unauthorized,
+            "Unauthenticated user cannot create submission"
+        );
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn authenticated_user_can_create_submission_for_unpublished_problem_if_proposer(
+    ) -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let problem = PROBLEMS.get("DiffAB")?;
+        let token = encode_jwt(User::get(UserProfile::Admin))?;
+
+        let submission_req = CreateSubmissionRequest {
+            problem_id: Uuid::from_str(problem.id.as_str()).unwrap(),
+            language: "Rust".to_string(),
+            source_code: "fn main() { let mut s = String::new(); std::io::stdin().read_line(&mut s).unwrap(); let v: Vec<i32> = s.trim().split_whitespace().map(|x| x.parse().unwrap()).collect(); println!(\"{}\", v[0] - v[1]); }".to_string(),
+        };
+
+        // Act
+        let response = client
+            .post("/api/submissions")
+            .header(Header::new("Content-Type", "application/json"))
+            .header(Header::new("Authorization", format!("Bearer {}", token)))
+            .body(serde_json::to_string(&submission_req)?)
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Created,
+            "Authenticated user can create submission for unpublished problem if proposer"
+        );
+
+        let body: CreateSubmissionResponseDto =
+            serde_json::from_str(&response.into_string().await.unwrap())?;
+        let conn = DB_CONN.clone();
+        let mut conn = conn.lock().await;
+
+        let (submission, _) = Submission::find_by_id(&body.id, &mut conn)?;
+
+        // clear the submission after evaluation
+        Submission::delete_by_id(&body.id, &mut conn)?;
+
+        assert_eq!(submission.id(), Uuid::from_str(&body.id)?);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn authenticated_user_cannot_create_submission_for_unpublished_problem() -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let problem = PROBLEMS.get("DiffAB")?;
+        let token = encode_jwt(User::get(UserProfile::Proposer))?;
+
+        let submission_req = CreateSubmissionRequest {
+            problem_id: Uuid::from_str(problem.id.as_str()).unwrap(),
+            language: "Rust".to_string(),
+            source_code: "fn main() { let mut s = String::new(); std::io::stdin().read_line(&mut s).unwrap(); let v: Vec<i32> = s.trim().split_whitespace().map(|x| x.parse().unwrap()).collect(); println!(\"{}\", v[0] - v[1]); }".to_string(),
+        };
+
+        // Act
+        let response = client
+            .post("/api/submissions")
+            .header(Header::new("Content-Type", "application/json"))
+            .header(Header::new("Authorization", format!("Bearer {}", token)))
+            .body(serde_json::to_string(&submission_req)?)
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Forbidden,
+            "Authenticated user cannot create submission for unpublished problem"
+        );
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn authenticated_user_can_create_submission() -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let problem = PROBLEMS.get("SumAB")?;
+        let token = encode_jwt(User::get(UserProfile::Ordinary))?;
+
+        let submission_req = CreateSubmissionRequest {
+            problem_id: Uuid::from_str(problem.id.as_str()).unwrap(),
+            language: "Rust".to_string(),
+            source_code: "fn main() { let mut s = String::new(); std::io::stdin().read_line(&mut s).unwrap(); let v: Vec<i32> = s.trim().split_whitespace().map(|x| x.parse().unwrap()).collect(); println!(\"{}\", v[0] + v[1]); }".to_string(),
+        };
+
+        // Act
+        let response = client
+            .post("/api/submissions")
+            .header(Header::new("Content-Type", "application/json"))
+            .header(Header::new("Authorization", format!("Bearer {}", token)))
+            .body(serde_json::to_string(&submission_req)?)
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Created,
+            "Authenticated user can create submission and it is accepted"
+        );
+
+        let body: CreateSubmissionResponseDto =
+            serde_json::from_str(&response.into_string().await.unwrap())?;
+        let conn = DB_CONN.clone();
+        let mut conn = conn.lock().await;
+
+        let (submission, _) = Submission::find_by_id(&body.id, &mut conn)?;
+
+        // clear the submission after evaluation
+        Submission::delete_by_id(&body.id, &mut conn)?;
+
+        assert_eq!(submission.id(), Uuid::from_str(&body.id)?);
+
+        // let submission_id = Arc::new(Mutex::new(body.id.clone()));
+        // let conn = DB_CONN.clone();
+        //
+        // let eval_task = async move {
+        //     let mut conn = conn.lock().await;
+        //     let submission_id = submission_id.lock().await.clone();
+        //     let mut ticker = tokio::time::interval(Duration::from_millis(100));
+        //
+        //     loop {
+        //         ticker.tick().await;
+        //         let (submission, _) = Submission::find_by_id(&submission_id, &mut conn).unwrap();
+        //         if submission.status() != SubmissionStatus::Evaluating {
+        //             return Ok::<Submission, DefaultAtomicError>(submission);
+        //         }
+        //     }
+        // };
+        // let eval_handle = tokio::spawn(eval_task);
+        //
+        // // clear the submission after evaluation
+        // let conn = DB_CONN.clone();
+        // let mut conn = conn.lock().await;
+        // let submission_id = body.id;
+        // Submission::delete_by_id(&submission_id, &mut conn)?;
+        //
+        // match timeout(Duration::from_secs(5), eval_handle).await {
+        //     Ok(Ok(Ok(submission))) => {
+        //         assert_eq!(submission.status(), SubmissionStatus::Accepted);
+        //     }
+        //     _ => {
+        //         panic!("TIMEOUT: Submission did not complete evaluation in time");
+        //     }
+        // }
+
+        Ok(())
+    }
 }

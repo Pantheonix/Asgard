@@ -24,7 +24,9 @@ pub mod common {
     use crate::tests::problem::tests::{PROBLEMS, TESTS};
     use crate::tests::submission::tests::{SUBMISSIONS, TEST_CASES};
 
-    pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error + 'static>>;
+    pub type DefaultError = Box<dyn std::error::Error + 'static>;
+    pub type DefaultAtomicError = Box<dyn std::error::Error + Send + Sync + 'static>;
+    pub type Result<T> = std::result::Result<T, DefaultError>;
 
     lazy_static! {
         pub static ref ROCKET_CLIENT: AsyncOnce<Arc<Client>> = AsyncOnce::new(async {
