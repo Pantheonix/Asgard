@@ -34,6 +34,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Run docker-compose
+        uses: hoverkraft-tech/compose-action@v2.0.1
+        with:
+          compose-file: "./anubis-eval/tests-setup/docker-compose.yaml"
+          up-flags: "--build -d"
+
       - name: Setup rust
         uses: hecrj/setup-rust-action@v2
         with:
