@@ -1,6 +1,7 @@
 .vscode/
 .idea/
 .dart_tool/
+.fvm*
 test/
 temp/test/
 *.md

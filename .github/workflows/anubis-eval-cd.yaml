@@ -10,7 +10,7 @@ on:
 
     paths:
       - "anubis-eval/**"
-      - ".github/workflows/anubis-eval.yaml"
+      - ".github/workflows/anubis-eval-cd.yaml"
 
 #  pull_request:
 #    branches:
@@ -18,7 +18,7 @@ on:
 #
 #    paths:
 #      - "anubis-eval/**"
-#      - ".github/workflows/anubis-eval.yaml"
+#      - ".github/workflows/anubis-eval-cd.yaml"
 
 env:
   REGISTRY: ghcr.io
@@ -26,6 +26,32 @@ env:
 
 jobs:
   build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: anubis-eval
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup rust
+        uses: hecrj/setup-rust-action@v2
+        with:
+          rust-version: '1.72.0'
+
+      - name: Install cargo-nextest
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: cargo-nextest
+          locked: true
+
+      - name: Build
+        run: cargo build --release
+
+      - name: Test
+        run: cargo nextest run --all-features --profile ci
+
+  deploy:
     runs-on: ubuntu-latest
 
     permissions:
@@ -52,7 +78,7 @@ jobs:
             type=semver,pattern={{version}}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: anubis-eval
           push: true

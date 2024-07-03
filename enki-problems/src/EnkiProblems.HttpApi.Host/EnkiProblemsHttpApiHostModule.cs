@@ -67,21 +67,20 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
 
     private void ConfigureLogger(ServiceConfigurationContext context, IConfiguration configuration)
     {
-        context
-            .Services
-            .AddLogging(config =>
-            {
-                config.AddConfiguration(configuration.GetSection("Logging"));
-                config.AddConsole();
-                config.AddDebug();
-            });
+        context.Services.AddLogging(config =>
+        {
+            config.AddConfiguration(configuration.GetSection("Logging"));
+            config.AddConsole();
+            config.AddDebug();
+        });
     }
 
-    private void ConfigureHttpClient(ServiceConfigurationContext context, IConfiguration configuration)
+    private void ConfigureHttpClient(
+        ServiceConfigurationContext context,
+        IConfiguration configuration
+    )
     {
-        context
-            .Services
-            .AddHttpClient();
+        context.Services.AddHttpClient();
     }
 
     private void ConfigureDapr(ServiceConfigurationContext context, IConfiguration configuration)
@@ -90,9 +89,8 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         var address = configuration["Dapr:GrpcEndpoint"];
 
         context
-            .Services
-            .AddSingleton<DaprMetadata>(
-                _ => new() { HermesContext = new() { { "dapr-app-id", hermesAppId! } } }
+            .Services.AddSingleton<DaprMetadata>(_ =>
+                new() { HermesContext = new() { { "dapr-app-id", hermesAppId! } } }
             )
             .AddDaprClient(options =>
             {
@@ -109,9 +107,9 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         var address = configuration["Dapr:GrpcEndpoint"];
         var channel = GrpcChannel.ForAddress(address!);
 
-        context
-            .Services
-            .AddSingleton<HermesTestsService.HermesTestsServiceClient>(_ => new(channel));
+        context.Services.AddSingleton<HermesTestsService.HermesTestsServiceClient>(_ =>
+            new(channel)
+        );
         context.Services.AddScoped<ITestService, HermesTestsGrpcService>();
     }
 
@@ -129,15 +127,13 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         {
             options.ConventionalControllers.FormBodyBindingIgnoredTypes.Add(typeof(CreateTestDto));
             options.ConventionalControllers.FormBodyBindingIgnoredTypes.Add(typeof(UpdateTestDto));
-            options
-                .ConventionalControllers
-                .Create(
-                    typeof(EnkiProblemsApplicationModule).Assembly,
-                    opts =>
-                    {
-                        opts.RootPath = "enki";
-                    }
-                );
+            options.ConventionalControllers.Create(
+                typeof(EnkiProblemsApplicationModule).Assembly,
+                opts =>
+                {
+                    opts.RootPath = "enki";
+                }
+            );
         });
     }
 
@@ -147,8 +143,7 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
     )
     {
         context
-            .Services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -170,44 +165,42 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         IConfiguration configuration
     )
     {
-        context
-            .Services
-            .AddAbpSwaggerGen(options =>
-            {
-                options.SwaggerDoc(
-                    "v1",
-                    new OpenApiInfo { Title = "EnkiProblems API", Version = "v1" }
-                );
-                options.DocInclusionPredicate((docName, description) => true);
-                options.CustomSchemaIds(type => type.FullName);
-                options.AddSecurityDefinition(
-                    "Bearer",
-                    new OpenApiSecurityScheme
+        context.Services.AddAbpSwaggerGen(options =>
+        {
+            options.SwaggerDoc(
+                "v1",
+                new OpenApiInfo { Title = "EnkiProblems API", Version = "v1" }
+            );
+            options.DocInclusionPredicate((docName, description) => true);
+            options.CustomSchemaIds(type => type.FullName);
+            options.AddSecurityDefinition(
+                "Bearer",
+                new OpenApiSecurityScheme
+                {
+                    Description =
+                        "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey
+                }
+            );
+            options.AddSecurityRequirement(
+                new OpenApiSecurityRequirement
+                {
                     {
-                        Description =
-                            "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                        Name = "Authorization",
-                        In = ParameterLocation.Header,
-                        Type = SecuritySchemeType.ApiKey
-                    }
-                );
-                options.AddSecurityRequirement(
-                    new OpenApiSecurityRequirement
-                    {
+                        new OpenApiSecurityScheme
                         {
-                            new OpenApiSecurityScheme
+                            Reference = new OpenApiReference
                             {
-                                Reference = new OpenApiReference
-                                {
-                                    Type = ReferenceType.SecurityScheme,
-                                    Id = "Bearer"
-                                }
-                            },
-                            Array.Empty<string>()
-                        }
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
                     }
-                );
-            });
+                }
+            );
+        });
     }
 
     private void ConfigureDataProtection(
@@ -217,8 +210,7 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
     )
     {
         var dataProtectionBuilder = context
-            .Services
-            .AddDataProtection()
+            .Services.AddDataProtection()
             .SetApplicationName("EnkiProblems");
         if (!hostingEnvironment.IsDevelopment())
         {
@@ -235,39 +227,33 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         IConfiguration configuration
     )
     {
-        context
-            .Services
-            .AddSingleton<IDistributedLockProvider>(sp =>
-            {
-                var connection = ConnectionMultiplexer.Connect(
-                    configuration["Redis:Configuration"]
-                );
-                return new RedisDistributedSynchronizationProvider(connection.GetDatabase());
-            });
+        context.Services.AddSingleton<IDistributedLockProvider>(sp =>
+        {
+            var connection = ConnectionMultiplexer.Connect(configuration["Redis:Configuration"]);
+            return new RedisDistributedSynchronizationProvider(connection.GetDatabase());
+        });
     }
 
     private void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
     {
-        context
-            .Services
-            .AddCors(options =>
+        context.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(builder =>
             {
-                options.AddDefaultPolicy(builder =>
-                {
-                    builder
-                        .WithOrigins(
-                            configuration["AllowedOrigins"]
-                                ?.Split(";", StringSplitOptions.RemoveEmptyEntries)
-                                .Select(o => o.RemovePostFix("/"))
-                                .ToArray() ?? Array.Empty<string>()
-                        )
-                        .WithAbpExposedHeaders()
-                        .SetIsOriginAllowedToAllowWildcardSubdomains()
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials();
-                });
+                builder
+                    .WithOrigins(
+                        configuration["AllowedOrigins"]
+                            ?.Split(";", StringSplitOptions.RemoveEmptyEntries)
+                            .Select(o => o.RemovePostFix("/"))
+                            .ToArray() ?? Array.Empty<string>()
+                    )
+                    .WithAbpExposedHeaders()
+                    .SetIsOriginAllowedToAllowWildcardSubdomains()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
             });
+        });
     }
 
     public override void OnApplicationInitialization(ApplicationInitializationContext context)

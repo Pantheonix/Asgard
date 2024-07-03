@@ -46,39 +46,29 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, UserTokenRespo
             }
         );
 
-        HttpContext
-            .Response
-            .Cookies
-            .Append(
-                CookieAuthenticationDefaults.CookiePrefix + "AccessToken",
-                tokenResponse.AccessToken,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    SameSite = SameSiteMode.None,
-                    Secure = true,
-                    Expires = DateTimeOffset
-                        .UtcNow
-                        .AddTicks(_jwtConfig.JwtAccessTokenLifetime.Ticks)
-                }
-            );
+        HttpContext.Response.Cookies.Append(
+            CookieAuthenticationDefaults.CookiePrefix + "AccessToken",
+            tokenResponse.AccessToken,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.None,
+                Secure = true,
+                Expires = DateTimeOffset.UtcNow.AddTicks(_jwtConfig.JwtAccessTokenLifetime.Ticks)
+            }
+        );
 
-        HttpContext
-            .Response
-            .Cookies
-            .Append(
-                CookieAuthenticationDefaults.CookiePrefix + "RefreshToken",
-                tokenResponse.RefreshToken,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    SameSite = SameSiteMode.None,
-                    Secure = true,
-                    Expires = DateTimeOffset
-                        .UtcNow
-                        .AddTicks(_jwtConfig.JwtRefreshTokenLifetime.Ticks)
-                }
-            );
+        HttpContext.Response.Cookies.Append(
+            CookieAuthenticationDefaults.CookiePrefix + "RefreshToken",
+            tokenResponse.RefreshToken,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.None,
+                Secure = true,
+                Expires = DateTimeOffset.UtcNow.AddTicks(_jwtConfig.JwtRefreshTokenLifetime.Ticks)
+            }
+        );
 
         await SendCreatedAtAsync(
             endpointName: $"/api/users/{user.Id}",

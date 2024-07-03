@@ -19,7 +19,7 @@ void main() {
   group('Decode Test UseCase Unit Tests', () {
     setUpAll(() {
       testConfig = ServerConfig.fromJson(
-        Config.fromJsonFile('config.json').test,
+        Config.fromEnv('HERMES_CONFIG').test,
       );
       final logger = Logger(
         output: FileLogOutput(
@@ -43,7 +43,7 @@ void main() {
         () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToDecode(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '1',
         archiveTypeExtension: testConfig.archiveTypeExtension,
         fromDir: testConfig.tempLocalArchivedTestFolder,
@@ -86,7 +86,7 @@ void main() {
         'Then localTestNotFound storage failure is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToDecode(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '3',
         archiveTypeExtension: testConfig.archiveTypeExtension,
         fromDir: testConfig.tempLocalArchivedTestFolder,
@@ -118,7 +118,7 @@ void main() {
         'Then invalidLocalTestFormat storage failure is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToDecode(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '4',
         archiveTypeExtension: testConfig.archiveTypeExtension,
         fromDir: testConfig.tempLocalArchivedTestFolder,
@@ -150,7 +150,7 @@ void main() {
         'Then unexpected storage failure is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToEncode(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '4',
         archiveTypeExtension: testConfig.archiveTypeExtension,
         fromDir: testConfig.tempLocalArchivedTestFolder,

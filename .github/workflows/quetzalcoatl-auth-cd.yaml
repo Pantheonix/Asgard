@@ -1,4 +1,4 @@
-name: Hermes - Build Docker image and publish to GitHub Packages
+name: Quetzalcoatl - Build Docker image and publish to GitHub Packages
 
 on:
   push:
@@ -9,23 +9,43 @@ on:
 #      - develop
 
     paths:
-      - "hermes-tests/**"
-      - ".github/workflows/hermes-tests.yaml"
+      - "quetzalcoatl-auth/**"
+      - ".github/workflows/quetzalcoatl-auth-cd.yaml"
 
 #  pull_request:
 #    branches:
 #      - develop
 #
 #    paths:
-#      - "hermes-tests/**"
-#      - ".github/workflows/hermes-tests.yaml"
+#      - "quetzalcoatl-auth/**"
+#      - ".github/workflows/quetzalcoatl-auth-cd.yaml"
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: hermes-tests
+  IMAGE_NAME: quetzalcoatl-auth
 
 jobs:
   build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: quetzalcoatl-auth
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0.x'
+      - name: Build
+        run: |
+          dotnet restore "Bootstrapper/Bootstrapper.csproj"
+          dotnet restore "Tests.Integration/Tests.Integration.csproj"
+          dotnet build --no-restore
+      - name: Test
+        run: dotnet test -e ASPNETCORE_ENVIRONMENT=Testing "Tests.Integration/Tests.Integration.csproj"
+
+  deploy:
     runs-on: ubuntu-latest
 
     permissions:
@@ -52,9 +72,9 @@ jobs:
             type=semver,pattern={{version}}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          context: hermes-tests
+          context: quetzalcoatl-auth
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

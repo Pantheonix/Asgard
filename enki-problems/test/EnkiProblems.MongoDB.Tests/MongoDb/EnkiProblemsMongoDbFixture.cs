@@ -1,24 +1,16 @@
-using System;
-using Mongo2Go;
+using System.Threading.Tasks;
+using Testcontainers.MongoDb;
+using Xunit;
 
 namespace EnkiProblems.MongoDB;
 
-public class EnkiProblemsMongoDbFixture : IDisposable
+public class EnkiProblemsMongoDbFixture : IAsyncLifetime
 {
-    private static readonly MongoDbRunner MongoDbRunner;
-    public static readonly string ConnectionString;
+    private static readonly MongoDbContainer MongoDbContainer = new MongoDbBuilder().Build();
 
-    static EnkiProblemsMongoDbFixture()
-    {
-        MongoDbRunner = MongoDbRunner.Start(
-            singleNodeReplSet: true,
-            singleNodeReplSetWaitTimeout: 20
-        );
-        ConnectionString = MongoDbRunner.ConnectionString;
-    }
+    public static string GetConnectionString() => MongoDbContainer.GetConnectionString();
 
-    public void Dispose()
-    {
-        MongoDbRunner?.Dispose();
-    }
+    public Task InitializeAsync() => MongoDbContainer.StartAsync();
+
+    public Task DisposeAsync() => MongoDbContainer.StopAsync();
 }

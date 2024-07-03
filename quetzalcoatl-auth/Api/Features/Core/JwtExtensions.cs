@@ -26,9 +26,9 @@ public static class JwtExtensions
     private static bool IsJwtWithValidSecurityAlgorithm(SecurityToken validatedToken)
     {
         return (validatedToken is JwtSecurityToken jwtSecurityToken)
-            && jwtSecurityToken
-                .Header
-                .Alg
-                .Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
+            && jwtSecurityToken.Header.Alg.Equals(
+                SecurityAlgorithms.HmacSha256,
+                StringComparison.InvariantCultureIgnoreCase
+            );
     }
 }

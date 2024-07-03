@@ -19,7 +19,7 @@ void main() {
   group('Encode Test UseCase Unit Tests', () {
     setUpAll(() {
       testConfig = ServerConfig.fromJson(
-        Config.fromJsonFile('config.json').test,
+        Config.fromEnv('HERMES_CONFIG').test,
       );
       final logger = Logger(
         output: FileLogOutput(
@@ -42,7 +42,7 @@ void main() {
         'Then metadata for corresponding archived test is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToEncode(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '2',
         archiveTypeExtension: testConfig.archiveTypeExtension,
         fromDir: testConfig.tempLocalUnarchivedTestFolder,
@@ -77,7 +77,7 @@ void main() {
         'Then metadata for corresponding archived test is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToEncode(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '1',
         archiveTypeExtension: testConfig.archiveTypeExtension,
         fromDir: testConfig.tempLocalUnarchivedTestFolder,
@@ -103,7 +103,7 @@ void main() {
         'Then localTestNotFound storage failure is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToEncode(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '3',
         archiveTypeExtension: testConfig.archiveTypeExtension,
         fromDir: testConfig.tempLocalUnarchivedTestFolder,
@@ -135,7 +135,7 @@ void main() {
         'Then invalidLocalTestFormat storage failure is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToEncode(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '6',
         archiveTypeExtension: testConfig.archiveTypeExtension,
         fromDir: testConfig.tempLocalUnarchivedTestFolder,
@@ -167,7 +167,7 @@ void main() {
         'Then unexpected storage failure is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToDecode(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '6',
         archiveTypeExtension: testConfig.archiveTypeExtension,
         fromDir: testConfig.tempLocalUnarchivedTestFolder,

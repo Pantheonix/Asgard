@@ -39,8 +39,7 @@ public class DeleteUserEndpoint : Endpoint<DeleteUserRequest>
         if (!result.Succeeded)
         {
             var errors = result
-                .Errors
-                .Select(e => e.Description)
+                .Errors.Select(e => e.Description)
                 .Aggregate("Identity Errors: ", (a, b) => $"{a}, {b}");
 
             _logger.LogWarning(

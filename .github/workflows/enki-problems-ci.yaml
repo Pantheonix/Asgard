@@ -1,0 +1,33 @@
+name: Enki - Build and Test Problems Service
+
+on:
+  push:
+    paths:
+      - "enki-problems/**"
+      - ".github/workflows/enki-problems-ci.yaml"
+
+  pull_request:
+    paths:
+      - "enki-problems/**"
+      - ".github/workflows/enki-problems-ci.yaml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: enki-problems
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0.x'
+      - name: Build
+        run: |
+          dotnet restore "src/EnkiProblems.HttpApi.Host/EnkiProblems.HttpApi.Host.csproj"
+          dotnet restore "test/EnkiProblems.Application.Tests/EnkiProblems.Application.Tests.csproj"
+          dotnet build --no-restore
+      - name: Test
+        run: dotnet test -e DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false

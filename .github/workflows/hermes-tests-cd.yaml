@@ -1,4 +1,4 @@
-name: Enki - Build Docker image and publish to GitHub Packages
+name: Hermes - Build Docker image and publish to GitHub Packages
 
 on:
   push:
@@ -9,23 +9,49 @@ on:
 #      - develop
 
     paths:
-      - "enki-problems/**"
-      - ".github/workflows/enki-problems.yaml"
+      - "hermes-tests/**"
+      - ".github/workflows/hermes-tests-cd.yaml"
 
 #  pull_request:
 #    branches:
 #      - develop
 #
 #    paths:
-#      - "enki-problems/**"
-#      - ".github/workflows/enki-problems.yaml"
+#      - "hermes-tests/**"
+#      - ".github/workflows/hermes-tests-cd.yaml"
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: enki-problems
+  IMAGE_NAME: hermes-tests
+  HERMES_CONFIG: ${{ secrets.HERMES_CONFIG }}
 
 jobs:
   build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: hermes-tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 2.19.2
+
+      - name: Create logs/test.log file
+        run: |
+          mkdir -p logs
+          touch logs/test.log
+
+      - name: Get dependencies
+        run: dart pub get
+
+      - name: Test
+        run: dart test
+
+  deploy:
     runs-on: ubuntu-latest
 
     permissions:
@@ -52,9 +78,9 @@ jobs:
             type=semver,pattern={{version}}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          context: enki-problems
+          context: hermes-tests
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

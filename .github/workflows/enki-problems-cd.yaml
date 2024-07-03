@@ -1,4 +1,4 @@
-name: Quetzalcoatl - Build Docker image and publish to GitHub Packages
+name: Enki - Build Docker image and publish to GitHub Packages
 
 on:
   push:
@@ -9,23 +9,43 @@ on:
 #      - develop
 
     paths:
-      - "quetzalcoatl-auth/**"
-      - ".github/workflows/quetzalcoatl-auth.yaml"
+      - "enki-problems/**"
+      - ".github/workflows/enki-problems-cd.yaml"
 
 #  pull_request:
 #    branches:
 #      - develop
 #
 #    paths:
-#      - "quetzalcoatl-auth/**"
-#      - ".github/workflows/quetzalcoatl-auth.yaml"
+#      - "enki-problems/**"
+#      - ".github/workflows/enki-problems-cd.yaml"
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: quetzalcoatl-auth
+  IMAGE_NAME: enki-problems
 
 jobs:
   build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: enki-problems
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0.x'
+      - name: Build
+        run: |
+          dotnet restore "src/EnkiProblems.HttpApi.Host/EnkiProblems.HttpApi.Host.csproj"
+          dotnet restore "test/EnkiProblems.Application.Tests/EnkiProblems.Application.Tests.csproj"
+          dotnet build --no-restore
+      - name: Test
+        run: dotnet test -e DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+  deploy:
     runs-on: ubuntu-latest
 
     permissions:
@@ -52,9 +72,9 @@ jobs:
             type=semver,pattern={{version}}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          context: quetzalcoatl-auth
+          context: enki-problems
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

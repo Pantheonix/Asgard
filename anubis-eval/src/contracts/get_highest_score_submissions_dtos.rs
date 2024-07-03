@@ -1,11 +1,11 @@
 use crate::domain::problem::Problem;
 use crate::domain::submission::Submission;
-use rocket::serde::Serialize;
+use rocket::serde::{Deserialize, Serialize};
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct GetHighestScoreSubmissionsDto {
-    submissions: Vec<GetHighestScoreSubmissionDto>,
+    pub submissions: Vec<GetHighestScoreSubmissionDto>,
 }
 
 #[rocket::async_trait]
@@ -32,14 +32,14 @@ impl From<Vec<(Submission, Problem)>> for GetHighestScoreSubmissionsDto {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct GetHighestScoreSubmissionDto {
-    id: String,
-    problem_id: String,
-    problem_name: String,
-    is_published: bool,
-    score: usize,
+    pub id: String,
+    pub problem_id: String,
+    pub problem_name: String,
+    pub is_published: bool,
+    pub score: usize,
 }
 
 impl From<(Submission, Problem)> for GetHighestScoreSubmissionDto {

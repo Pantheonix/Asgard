@@ -29,9 +29,6 @@ public class GetAllEndpointTests : IClassFixture<ApiWebFactory>
         using var scope = _apiWebFactory.Services.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-        var existingUsers = await userManager.Users.ToListAsync();
-        await userManager.DeleteAsync(existingUsers.ElementAt(0));
-
         var profilePictureData = await ImageHelpers.GetImageAsByteArrayAsync(
             "https://picsum.photos/200"
         );
