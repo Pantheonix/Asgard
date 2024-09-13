@@ -4,7 +4,7 @@ users:
     register: /identity/auth/register
     login: /identity/auth/login
   data:
-    - username: admin
+    - email: admin@gmail.com
       password: Password@123
 problems:
   endpoints:

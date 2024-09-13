@@ -22,8 +22,8 @@ type UserFixtures struct {
 }
 
 type UserData struct {
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
+	Email    string `yaml:"email" json:"email"`
+	Password string `yaml:"password" json:"password"`
 }
 
 type ProblemFixtures struct {
