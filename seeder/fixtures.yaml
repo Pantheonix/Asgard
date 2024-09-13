@@ -1,0 +1,16 @@
+base_url: http://localhost/api
+users:
+  endpoints:
+    register: /identity/auth/register
+    login: /identity/auth/login
+  data:
+    - username: admin
+      password: Password@123
+problems:
+  endpoints:
+    create: /problems
+  data:
+submissions:
+  endpoints:
+    create: /eval/submissions
+  data:
