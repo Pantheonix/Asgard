@@ -18,7 +18,7 @@ type UserFixtures struct {
 		Register string `yaml:"register"`
 		Login    string `yaml:"login"`
 	}
-	Data []UserData `yaml:",flow"`
+	Data []*UserData `yaml:"data,flow"`
 }
 
 type UserData struct {
@@ -28,38 +28,46 @@ type UserData struct {
 
 type ProblemFixtures struct {
 	Endpoints struct {
-		Create string `yaml:"create"`
+		Create     string `yaml:"create"`
+		CreateTest string `yaml:"create_test"`
 	}
-	Data []ProblemData `yaml:",flow"`
+	Data []*ProblemData `yaml:"data,flow"`
 }
 
 type ProblemData struct {
+	CreateReqPath string      `yaml:"create_req_path"`
+	Tests         []*TestData `yaml:"tests,flow"`
+}
+
+type TestData struct {
+	TestZipPath string `yaml:"test_zip_path"`
+	Score       int    `yaml:"score"`
 }
 
 type SubmissionFixtures struct {
 	Endpoints struct {
 		Create string `yaml:"create"`
 	}
-	Data []SubmissionData `yaml:",flow"`
+	Data []*SubmissionData `yaml:"data,flow"`
 }
 
 type SubmissionData struct {
 }
 
 // LoadFixtures loads fixtures from a YAML file
-func LoadFixtures(filename string) Fixtures {
+func LoadFixtures(filename string) *Fixtures {
 	file, err := os.Open(filename)
+	defer file.Close()
 
 	if err != nil {
-		log.Fatalf("Failed to open fixtures file: %s", err)
+		log.Printf("Failed to open fixtures file: %s", err)
 	}
-	defer file.Close()
 
 	content, err := os.ReadFile(filename)
 
-	fixtures := Fixtures{}
-	if err := yaml.Unmarshal(content, &fixtures); err != nil {
-		log.Fatalf("Failed to decode fixtures: %s", err)
+	fixtures := &Fixtures{}
+	if err := yaml.Unmarshal(content, fixtures); err != nil {
+		log.Printf("Failed to decode fixtures: %s", err)
 	}
 
 	return fixtures

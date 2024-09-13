@@ -9,7 +9,20 @@ users:
 problems:
   endpoints:
     create: /problems
+    create_test: /problems/{problem_id}/test
   data:
+    - create_req_path: ../../ProblemArchive/vecsum/create_req.json
+      tests:
+        - test_zip_path: ../../ProblemArchive/vecsum/tests/1/1.zip
+          score: 20
+        - test_zip_path: ../../ProblemArchive/vecsum/tests/2/2.zip
+          score: 20
+        - test_zip_path: ../../ProblemArchive/vecsum/tests/3/3.zip
+          score: 20
+        - test_zip_path: ../../ProblemArchive/vecsum/tests/4/4.zip
+          score: 20
+        - test_zip_path: ../../ProblemArchive/vecsum/tests/5/5.zip
+          score: 20
 submissions:
   endpoints:
     create: /eval/submissions
