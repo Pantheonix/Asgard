@@ -21,7 +21,6 @@ func (s *Seeder) SeedProblems() error {
 	token, err := s.client.Login(admin)
 
 	if err != nil {
-		log.Printf("Login failed: %s", err)
 		return err
 	}
 

@@ -1,8 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"gopkg.in/yaml.v3"
-	"log"
 	"os"
 )
 
@@ -55,20 +55,20 @@ type SubmissionData struct {
 }
 
 // LoadFixtures loads fixtures from a YAML file
-func LoadFixtures(filename string) *Fixtures {
+func LoadFixtures(filename string) (*Fixtures, error) {
+	fixtures := &Fixtures{}
+
 	file, err := os.Open(filename)
 	defer file.Close()
 
 	if err != nil {
-		log.Printf("Failed to open fixtures file: %s", err)
+		return nil, fmt.Errorf("failed to open fixtures file: %s", err)
 	}
 
 	content, err := os.ReadFile(filename)
-
-	fixtures := &Fixtures{}
 	if err := yaml.Unmarshal(content, fixtures); err != nil {
-		log.Printf("Failed to decode fixtures: %s", err)
+		return nil, fmt.Errorf("failed to decode fixtures: %s", err)
 	}
 
-	return fixtures
+	return fixtures, nil
 }

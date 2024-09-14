@@ -1,8 +1,13 @@
 package main
 
+import "log"
+
 func main() {
 	// Load fixtures from fixtures.yaml
-	fixtures := LoadFixtures("./fixtures.yaml")
+	fixtures, err := LoadFixtures("./fixtures.yaml")
+	if err != nil {
+		log.Fatalf("failed to load fixtures: %s", err)
+	}
 
 	// Create a new Pantheonix client
 	client := NewPantheonixClient(fixtures)
@@ -11,5 +16,7 @@ func main() {
 	seeder := NewSeeder(client)
 
 	// Seed problems
-	_ = seeder.SeedProblems()
+	if err := seeder.SeedProblems(); err != nil {
+		log.Fatalf("failed to seed problems: %s", err)
+	}
 }
