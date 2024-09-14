@@ -29,6 +29,7 @@ type UserData struct {
 type ProblemFixtures struct {
 	Endpoints struct {
 		Create     string `yaml:"create"`
+		Update     string `yaml:"update"`
 		CreateTest string `yaml:"create_test"`
 	}
 	Data []*ProblemData `yaml:"data,flow"`

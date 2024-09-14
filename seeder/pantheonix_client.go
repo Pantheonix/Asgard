@@ -70,54 +70,59 @@ type ProblemDto struct {
 	Id string `json:"id"`
 }
 
-func (c *PantheonixClient) CreateProblem(token *BearerToken, problemId int) error {
+func (c *PantheonixClient) CreateProblem(token *BearerToken, problemId int) (*ProblemDto, error) {
 	problem := c.config.Problems.Data[problemId]
 
 	reqBodyJson, err := os.ReadFile(problem.CreateReqPath)
 	if err != nil {
-		return fmt.Errorf("failed to parse create problem request file content for problem %d: %v", problemId, err)
+		return nil, fmt.Errorf("failed to parse create problem request file content for problem %d: %v", problemId, err)
 	}
 
 	bodyReader := bytes.NewReader(reqBodyJson)
 	req, err := http.NewRequest(http.MethodPost, c.Endpoint(c.config.Problems.Endpoints.Create), bodyReader)
 
 	if err != nil {
-		return fmt.Errorf("failed to create problem with id %d: %v", problemId, err)
+		return nil, fmt.Errorf("failed to create problem with id %d: %v", problemId, err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.AddCookie(token.Cookie)
 
 	res, err := c.Do(req)
 	if err != nil {
-		return fmt.Errorf("failed to create problem with id %d: %s", problemId, err)
+		return nil, fmt.Errorf("failed to create problem with id %d: %s", problemId, err)
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to create problem: %s", res.Status)
+		return nil, fmt.Errorf("failed to create problem: %s", res.Status)
 	}
 
 	problemDto := &ProblemDto{}
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
-		return fmt.Errorf("failed to create problem with id %d: %s", problemId, err)
+		return nil, fmt.Errorf("failed to create problem with id %d: %s", problemId, err)
 	}
 
 	if err := json.Unmarshal(resBody, problemDto); err != nil {
-		return fmt.Errorf("failed to create problem with id %d: %s", problemId, err)
+		return nil, fmt.Errorf("failed to create problem with id %d: %s", problemId, err)
 	}
 
 	// Upload tests
 	tests := c.config.Problems.Data[problemId].Tests
 	for testId := range len(tests) {
 		if err := c.CreateTest(token, problemDto.Id, problemId, testId); err != nil {
-			return err
+			return nil, err
 		}
+	}
+
+	// Publish problem
+	if err := c.PublishProblem(token, problemDto.Id); err != nil {
+		return nil, err
 	}
 
 	log.Printf("Successfully created problem with id %d and guid %s\n", problemId, problemDto.Id)
 
-	return nil
+	return problemDto, nil
 }
 
 func (c *PantheonixClient) CreateTest(token *BearerToken, problemGuid string, problemId, testId int) error {
@@ -146,6 +151,38 @@ func (c *PantheonixClient) CreateTest(token *BearerToken, problemGuid string, pr
 	}
 
 	log.Printf("Successfully created test with id %d\n", testId)
+
+	return nil
+}
+
+func (c *PantheonixClient) PublishProblem(token *BearerToken, problemGuid string) error {
+	publishProblemEndpoint := c.Endpoint(c.config.Problems.Endpoints.Update)
+	publishProblemEndpoint = strings.Replace(publishProblemEndpoint, "{problem_id}", problemGuid, 1)
+
+	bodyJson, err := json.Marshal(map[string]bool{"isPublished": true})
+	if err != nil {
+		return fmt.Errorf("failed to serialize publish request for problem %s: %s", problemGuid, err)
+	}
+
+	body := bytes.NewReader(bodyJson)
+	req, err := http.NewRequest(http.MethodPut, publishProblemEndpoint, body)
+	if err != nil {
+		return fmt.Errorf("failed to compose publish request for problem %s: %s", problemGuid, err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.AddCookie(token.Cookie)
+
+	res, err := c.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send publish request for problem %s: %s", problemGuid, err)
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to publish problem %s: %s", problemGuid, res.Status)
+	}
+
+	log.Printf("Successfully published problem %s\n", problemGuid)
 
 	return nil
 }

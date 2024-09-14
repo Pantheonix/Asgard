@@ -9,6 +9,7 @@ users:
 problems:
   endpoints:
     create: /problems
+    update: /problems/{problem_id}
     create_test: /problems/{problem_id}/test
   data:
     - create_req_path: ../../ProblemArchive/vecsum/create_req.json

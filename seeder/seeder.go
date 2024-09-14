@@ -12,8 +12,8 @@ func NewSeeder(client *PantheonixClient) *Seeder {
 	return &Seeder{client}
 }
 
-func (s *Seeder) SeedUsers() {
-	// Seed users
+func (s *Seeder) SeedUsers() error {
+	return nil
 }
 
 func (s *Seeder) SeedProblems() error {
@@ -26,7 +26,12 @@ func (s *Seeder) SeedProblems() error {
 
 	problems := s.client.config.Problems.Data
 	for i := range len(problems) {
-		if err := s.client.CreateProblem(token, i); err != nil {
+		problemDto, err := s.client.CreateProblem(token, i)
+		if err != nil {
+			return err
+		}
+
+		if err := s.SeedSubmissions(problemDto); err != nil {
 			return err
 		}
 	}
@@ -36,6 +41,6 @@ func (s *Seeder) SeedProblems() error {
 	return nil
 }
 
-func (s *Seeder) SeedSubmissions() {
-	// Seed submissions
+func (s *Seeder) SeedSubmissions(problemDto *ProblemDto) error {
+	return nil
 }
