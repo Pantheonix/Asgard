@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/sync/errgroup"
 	"io"
 	"log"
 	"mime/multipart"
@@ -106,19 +105,11 @@ func (c *PantheonixClient) CreateProblem(ctx context.Context, token *BearerToken
 	}
 
 	// Upload tests
-	g, ctx := errgroup.WithContext(ctx)
 	tests := c.config.Problems.Data[problemId].Tests
 	for testId := range len(tests) {
-		g.Go(func() error {
-			if err := c.CreateTest(token, problemDto.Id, problemId, testId); err != nil {
-				return err
-			}
-			return nil
-		})
-	}
-
-	if err := g.Wait(); err != nil {
-		return nil, err
+		if err := c.CreateTest(token, problemDto.Id, problemId, testId); err != nil {
+			return nil, err
+		}
 	}
 
 	// Publish problem

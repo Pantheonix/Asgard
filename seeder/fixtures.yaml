@@ -13,18 +13,18 @@ problems:
     create_test: /problems/{problem_id}/test
     create_submission: /eval/submissions
   data: 
-    - create_req_path: ../../ProblemArchive/vecsum/create_req.json
+    - create_req_path: /temp/ProblemArchive/vecsum/create_req.json
       tests:
-        - test_zip_path: ../../ProblemArchive/vecsum/tests/1/1.zip
+        - test_zip_path: /temp/ProblemArchive/vecsum/tests/1/1.zip
           score: 20
-        - test_zip_path: ../../ProblemArchive/vecsum/tests/2/2.zip
+        - test_zip_path: /temp/ProblemArchive/vecsum/tests/2/2.zip
           score: 20
-        - test_zip_path: ../../ProblemArchive/vecsum/tests/3/3.zip
+        - test_zip_path: /temp/ProblemArchive/vecsum/tests/3/3.zip
           score: 20
-        - test_zip_path: ../../ProblemArchive/vecsum/tests/4/4.zip
+        - test_zip_path: /temp/ProblemArchive/vecsum/tests/4/4.zip
           score: 20
-        - test_zip_path: ../../ProblemArchive/vecsum/tests/5/5.zip
+        - test_zip_path: /temp/ProblemArchive/vecsum/tests/5/5.zip
           score: 20
       submissions:
-        - source_code_path: ../../ProblemArchive/vecsum/solutions/main.rs
+        - source_code_path: /temp/ProblemArchive/vecsum/solutions/main.rs
           language: Rust

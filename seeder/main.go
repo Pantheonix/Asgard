@@ -7,7 +7,7 @@ import (
 
 func main() {
 	// Load fixtures from fixtures.yaml
-	fixtures, err := LoadFixtures("./fixtures.yaml")
+	fixtures, err := LoadFixtures("/temp/fixtures.yaml")
 	if err != nil {
 		log.Fatalf("failed to load fixtures: %s", err)
 	}
