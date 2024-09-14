@@ -11,7 +11,8 @@ problems:
     create: /problems
     update: /problems/{problem_id}
     create_test: /problems/{problem_id}/test
-  data:
+    create_submission: /eval/submissions
+  data: 
     - create_req_path: ../../ProblemArchive/vecsum/create_req.json
       tests:
         - test_zip_path: ../../ProblemArchive/vecsum/tests/1/1.zip
@@ -24,7 +25,6 @@ problems:
           score: 20
         - test_zip_path: ../../ProblemArchive/vecsum/tests/5/5.zip
           score: 20
-submissions:
-  endpoints:
-    create: /eval/submissions
-  data:
+      submissions:
+        - source_code_path: ../../ProblemArchive/vecsum/solutions/main.rs
+          language: Rust

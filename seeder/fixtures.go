@@ -7,10 +7,9 @@ import (
 )
 
 type Fixtures struct {
-	BaseUrl     string             `yaml:"base_url"`
-	Users       UserFixtures       `yaml:"users"`
-	Problems    ProblemFixtures    `yaml:"problems"`
-	Submissions SubmissionFixtures `yaml:"submissions"`
+	BaseUrl  string          `yaml:"base_url"`
+	Users    UserFixtures    `yaml:"users"`
+	Problems ProblemFixtures `yaml:"problems"`
 }
 
 type UserFixtures struct {
@@ -28,16 +27,18 @@ type UserData struct {
 
 type ProblemFixtures struct {
 	Endpoints struct {
-		Create     string `yaml:"create"`
-		Update     string `yaml:"update"`
-		CreateTest string `yaml:"create_test"`
+		Create           string `yaml:"create"`
+		Update           string `yaml:"update"`
+		CreateTest       string `yaml:"create_test"`
+		CreateSubmission string `yaml:"create_submission"`
 	}
 	Data []*ProblemData `yaml:"data,flow"`
 }
 
 type ProblemData struct {
-	CreateReqPath string      `yaml:"create_req_path"`
-	Tests         []*TestData `yaml:"tests,flow"`
+	CreateReqPath string            `yaml:"create_req_path"`
+	Tests         []*TestData       `yaml:"tests,flow"`
+	Submissions   []*SubmissionData `yaml:"submissions,flow"`
 }
 
 type TestData struct {
@@ -45,14 +46,9 @@ type TestData struct {
 	Score       int    `yaml:"score"`
 }
 
-type SubmissionFixtures struct {
-	Endpoints struct {
-		Create string `yaml:"create"`
-	}
-	Data []*SubmissionData `yaml:"data,flow"`
-}
-
 type SubmissionData struct {
+	SourceCodePath string `yaml:"source_code_path"`
+	Language       string `yaml:"language"`
 }
 
 // LoadFixtures loads fixtures from a YAML file

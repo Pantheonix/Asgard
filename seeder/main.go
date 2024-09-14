@@ -1,6 +1,9 @@
 package main
 
-import "log"
+import (
+	"context"
+	"log"
+)
 
 func main() {
 	// Load fixtures from fixtures.yaml
@@ -15,8 +18,9 @@ func main() {
 	// Create a new seeder
 	seeder := NewSeeder(client)
 
-	// Seed problems
-	if err := seeder.SeedProblems(); err != nil {
+	// Seed problems, tests and submissions
+	ctx := context.Background()
+	if err := seeder.SeedProblems(ctx); err != nil {
 		log.Fatalf("failed to seed problems: %s", err)
 	}
 }

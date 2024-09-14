@@ -2,8 +2,10 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"golang.org/x/sync/errgroup"
 	"io"
 	"log"
 	"mime/multipart"
@@ -66,11 +68,7 @@ func (c *PantheonixClient) Login(user *UserData) (*BearerToken, error) {
 	return token, nil
 }
 
-type ProblemDto struct {
-	Id string `json:"id"`
-}
-
-func (c *PantheonixClient) CreateProblem(token *BearerToken, problemId int) (*ProblemDto, error) {
+func (c *PantheonixClient) CreateProblem(ctx context.Context, token *BearerToken, problemId int) (*ProblemDto, error) {
 	problem := c.config.Problems.Data[problemId]
 
 	reqBodyJson, err := os.ReadFile(problem.CreateReqPath)
@@ -108,11 +106,19 @@ func (c *PantheonixClient) CreateProblem(token *BearerToken, problemId int) (*Pr
 	}
 
 	// Upload tests
+	g, ctx := errgroup.WithContext(ctx)
 	tests := c.config.Problems.Data[problemId].Tests
 	for testId := range len(tests) {
-		if err := c.CreateTest(token, problemDto.Id, problemId, testId); err != nil {
-			return nil, err
-		}
+		g.Go(func() error {
+			if err := c.CreateTest(token, problemDto.Id, problemId, testId); err != nil {
+				return err
+			}
+			return nil
+		})
+	}
+
+	if err := g.Wait(); err != nil {
+		return nil, err
 	}
 
 	// Publish problem
@@ -187,6 +193,37 @@ func (c *PantheonixClient) PublishProblem(token *BearerToken, problemGuid string
 	return nil
 }
 
+func (c *PantheonixClient) CreateSubmission(token *BearerToken, submissionDto *SubmissionDto) error {
+	createSubmissionEndpoint := c.Endpoint(c.config.Problems.Endpoints.CreateSubmission)
+
+	bodyJson, err := json.Marshal(submissionDto)
+	if err != nil {
+		return fmt.Errorf("failed to serialize submission: %s", err)
+	}
+
+	body := bytes.NewReader(bodyJson)
+	req, err := http.NewRequest(http.MethodPost, createSubmissionEndpoint, body)
+	if err != nil {
+		return fmt.Errorf("failed to compose submission request: %s", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.AddCookie(token.Cookie)
+
+	res, err := c.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send submission request: %s", err)
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusCreated {
+		return fmt.Errorf("failed to submit: %s", res.Status)
+	}
+
+	log.Printf("Successfully submitted solution for problem %s\n", submissionDto.ProblemId)
+
+	return nil
+}
+
 func newFileUploadRequest(uri string, filePath string, testFileParamName string, params map[string]string) (*http.Request, error) {
 	fileReader, err := os.Open(filePath)
 	if err != nil {
@@ -221,6 +258,16 @@ func newFileUploadRequest(uri string, filePath string, testFileParamName string,
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 
 	return req, nil
+}
+
+type ProblemDto struct {
+	Id string `json:"id"`
+}
+
+type SubmissionDto struct {
+	ProblemId  string `json:"problem_id"`
+	Language   string `json:"language"`
+	SourceCode string `json:"source_code"`
 }
 
 type BearerToken struct {
