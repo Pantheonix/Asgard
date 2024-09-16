@@ -493,6 +493,7 @@ services:
 
   server:
     image: judge0/judge0:1.13.0
+#    image: pantheonix/judge0:latest-slim
     volumes:
       - ./envs/.env.judge0:/judge0.conf:ro
     ports:
@@ -521,6 +522,7 @@ services:
 
   workers:
     image: judge0/judge0:1.13.0
+#    image: pantheonix/judge0:latest-slim
     command: ["./scripts/workers"]
     volumes:
       - ./envs/.env.judge0:/judge0.conf:ro
