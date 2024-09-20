@@ -1,21 +1,19 @@
-name: Hermes - Build and Test Tests Service
+name: Hermes - PR Verify
 
 on:
-  push:
-    paths:
-      - "hermes-tests/**"
-      - ".github/workflows/hermes-tests-ci.yaml"
-
   pull_request:
+    branches:
+      - develop
     paths:
       - "hermes-tests/**"
-      - ".github/workflows/hermes-tests-ci.yaml"
+      - ".github/workflows/hermes-tests-pr-verify.yaml"
 
 env:
   HERMES_CONFIG: ${{ secrets.HERMES_CONFIG }}
 
 jobs:
   build:
+    name: Build and Test Hermes Tests Microservice
     runs-on: ubuntu-latest
     defaults:
       run:

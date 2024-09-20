@@ -1,18 +1,16 @@
-name: Enki - Build and Test Problems Service
+name: Enki - PR Verify
 
 on:
-  push:
-    paths:
-      - "enki-problems/**"
-      - ".github/workflows/enki-problems-ci.yaml"
-
   pull_request:
+    branches:
+      - develop
     paths:
       - "enki-problems/**"
-      - ".github/workflows/enki-problems-ci.yaml"
+      - ".github/workflows/enki-problems-pr-verify.yaml"
 
 jobs:
   build:
+    name: Build and Test Enki Problems Microservice
     runs-on: ubuntu-latest
     defaults:
       run:

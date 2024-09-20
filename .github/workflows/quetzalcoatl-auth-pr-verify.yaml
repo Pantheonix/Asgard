@@ -1,18 +1,16 @@
-name: Quetzalcoatl - Build and Test Auth Service
+name: Quetzalcoatl - PR Verify
 
 on:
-  push:
-    paths:
-      - "quetzalcoatl-auth/**"
-      - ".github/workflows/quetzalcoatl-auth-ci.yaml"
-
   pull_request:
+    branches:
+      - develop
     paths:
       - "quetzalcoatl-auth/**"
-      - ".github/workflows/quetzalcoatl-auth-ci.yaml"
+      - ".github/workflows/quetzalcoatl-auth-pr-verify.yaml"
 
 jobs:
   build:
+    name: Build and Test Quetzalcoatl Auth Microservice
     runs-on: ubuntu-latest
     defaults:
       run:

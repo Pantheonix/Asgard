@@ -1,18 +1,16 @@
-name: Anubis - Build and Test Submissions Service
+name: Anubis - PR Verify
 
 on:
-  push:
-    paths:
-      - "anubis-eval/**"
-      - ".github/workflows/anubis-eval-ci.yaml"
-
   pull_request:
+    branches:
+      - develop
     paths:
       - "anubis-eval/**"
-      - ".github/workflows/anubis-eval-ci.yaml"
+      - ".github/workflows/anubis-eval-pr-verify.yaml"
 
 jobs:
   build:
+    name: Build and Test Anubis Eval Microservice
     runs-on: ubuntu-latest
     defaults:
       run:
