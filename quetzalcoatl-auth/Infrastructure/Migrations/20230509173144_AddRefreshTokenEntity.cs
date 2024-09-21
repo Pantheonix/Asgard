@@ -13,14 +13,13 @@ namespace Infrastructure.Migrations
         {
             migrationBuilder.CreateTable(
                 name: "RefreshTokens",
-                columns: table =>
-                    new
-                    {
-                        Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                        Token = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                        ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                        UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                    },
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RefreshTokens", x => x.Id);

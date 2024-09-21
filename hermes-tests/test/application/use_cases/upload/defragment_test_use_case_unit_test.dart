@@ -21,7 +21,7 @@ void main() {
   group('Defragment Test UseCase Unit Tests', () {
     setUpAll(() async {
       testConfig = ServerConfig.fromJson(
-        Config.fromJsonFile('config.json').test,
+        Config.fromEnv('HERMES_CONFIG').test,
       );
       final logger = Logger(
         output: FileLogOutput(
@@ -44,11 +44,11 @@ void main() {
         'Then the test is successfully written on disk '
         'and associated metadata is returned', () async {
       // Arrange
-      final String inputPath = 'temp/test/archived/marsx/1-valid.zip';
+      final String inputPath = 'temp/test/archived/sum/1-valid.zip';
       final int testSize = File(inputPath).lengthSync();
 
       final Metadata metadata = Metadata()
-        ..problemId = 'marsx'
+        ..problemId = 'sum'
         ..testId = '2'
         ..testSize = testSize;
 
@@ -89,11 +89,11 @@ void main() {
         'When defragment test use case is called, '
         'Then invalidLocalTestFormat storage failure is returned', () async {
       // Arrange
-      final String inputPath = 'temp/test/archived/marsx/1-invalid.tar.xz';
+      final String inputPath = 'temp/test/archived/sum/1-invalid.tar.gz';
       final int testSize = File(inputPath).lengthSync();
 
       final Metadata metadata = Metadata()
-        ..problemId = 'marsx'
+        ..problemId = 'sum'
         ..testId = '2'
         ..testSize = testSize;
 
@@ -134,11 +134,11 @@ void main() {
         'When defragment test use case is called, '
         'Then testSizeLimitExceeded storage failure is returned', () async {
       // Arrange
-      final String inputPath = 'temp/test/archived/marsx/1-oversize.zip';
+      final String inputPath = 'temp/test/archived/sum/1-oversize.zip';
       final int testSize = File(inputPath).lengthSync();
 
       final Metadata metadata = Metadata()
-        ..problemId = 'marsx'
+        ..problemId = 'sum'
         ..testId = '2'
         ..testSize = testSize;
 
@@ -179,11 +179,11 @@ void main() {
         'When defragment test use case is called, '
         'Then unexpected storage failure is returned', () async {
       // Arrange
-      final String inputPath = 'temp/test/archived/marsx/1-oversize.zip';
+      final String inputPath = 'temp/test/archived/sum/1-oversize.zip';
       final int testSize = File(inputPath).lengthSync();
 
       final Metadata metadata = Metadata()
-        ..problemId = 'marsx'
+        ..problemId = 'sum'
         ..testId = '2'
         ..testSize = testSize;
 

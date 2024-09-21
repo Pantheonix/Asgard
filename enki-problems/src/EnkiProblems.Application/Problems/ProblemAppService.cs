@@ -69,7 +69,10 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         problem = await _problemRepository.InsertAsync(problem);
 
-        var problemEvalMetadataUpsertedEvent = ObjectMapper.Map<Problem, ProblemEvalMetadataUpsertedEvent>(problem);
+        var problemEvalMetadataUpsertedEvent = ObjectMapper.Map<
+            Problem,
+            ProblemEvalMetadataUpsertedEvent
+        >(problem);
 
         await _daprClient.PublishEventAsync(
             EnkiProblemsConsts.PubSubName,
@@ -121,7 +124,9 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
     }
 
     [Authorize]
-    public async Task<PagedResultDto<ProblemWithTestsDto>> GetListUnpublishedAsync(ProblemListFilterDto input)
+    public async Task<PagedResultDto<ProblemWithTestsDto>> GetListUnpublishedAsync(
+        ProblemListFilterDto input
+    )
     {
         _logger.LogInformation(
             "Getting unpublished problems list for user {UserId}",
@@ -142,8 +147,9 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         var problemQueryable = await _problemRepository.GetQueryableAsync();
 
-        problemQueryable = problemQueryable
-            .Where(p => !p.IsPublished && p.ProposerId == CurrentUser.Id);
+        problemQueryable = problemQueryable.Where(p =>
+            !p.IsPublished && p.ProposerId == CurrentUser.Id
+        );
 
         if (!string.IsNullOrEmpty(input.Name))
         {
@@ -273,8 +279,15 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
 
         updatedProblem = await _problemRepository.UpdateAsync(updatedProblem);
 
-        var problemEvalMetadataUpsertedEvent = ObjectMapper.Map<Problem, ProblemEvalMetadataUpsertedEvent>(updatedProblem);
-        _logger.LogInformation("Publishing ProblemEvalMetadataUpsertedEvent for problem {ProblemId}: {Event}", id, problemEvalMetadataUpsertedEvent);
+        var problemEvalMetadataUpsertedEvent = ObjectMapper.Map<
+            Problem,
+            ProblemEvalMetadataUpsertedEvent
+        >(updatedProblem);
+        _logger.LogInformation(
+            "Publishing ProblemEvalMetadataUpsertedEvent for problem {ProblemId}: {Event}",
+            id,
+            problemEvalMetadataUpsertedEvent
+        );
 
         await _daprClient.PublishEventAsync(
             EnkiProblemsConsts.PubSubName,
@@ -282,9 +295,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
             problemEvalMetadataUpsertedEvent
         );
 
-        return ObjectMapper.Map<Problem, ProblemDto>(
-           updatedProblem
-        );
+        return ObjectMapper.Map<Problem, ProblemDto>(updatedProblem);
     }
 
     [Authorize]
@@ -304,19 +315,31 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         }
 
         // TODO: convert to permission
-        if (problem.IsPublished && CurrentUser.Roles.All(r => r != EnkiProblemsConsts.AdminRoleName))
+        if (
+            problem.IsPublished && CurrentUser.Roles.All(r => r != EnkiProblemsConsts.AdminRoleName)
+        )
         {
-            _logger.LogError("User {UserId} is not allowed to delete problem {ProblemId}", CurrentUser.Id, id);
+            _logger.LogError(
+                "User {UserId} is not allowed to delete problem {ProblemId}",
+                CurrentUser.Id,
+                id
+            );
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.NotAllowedToDeletePublishedProblem
             );
         }
 
         // TODO: convert to permission
-        if (CurrentUser.Roles.All(r => r != EnkiProblemsConsts.AdminRoleName) &&
-            CurrentUser.Id != id)
+        if (
+            CurrentUser.Roles.All(r => r != EnkiProblemsConsts.AdminRoleName)
+            && CurrentUser.Id != id
+        )
         {
-            _logger.LogError("User {UserId} is not allowed to delete problem {ProblemId}", CurrentUser.Id, id);
+            _logger.LogError(
+                "User {UserId} is not allowed to delete problem {ProblemId}",
+                CurrentUser.Id,
+                id
+            );
             throw new AbpAuthorizationException(
                 EnkiProblemsDomainErrorCodes.ProblemCannotBeDeleted
             );
@@ -327,7 +350,11 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         foreach (var problemTest in problemTests)
         {
             var deleteResponse = await _testService.DeleteTestAsync(
-                new DeleteTestRequest { ProblemId = id.ToString(), TestId = problemTest.Id.ToString() }
+                new DeleteTestRequest
+                {
+                    ProblemId = id.ToString(),
+                    TestId = problemTest.Id.ToString()
+                }
             );
 
             if (deleteResponse.Status.Code != StatusCode.Ok)
@@ -338,9 +365,9 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
                     deleteResponse.Status.Message
                 );
                 throw new BusinessException(
-                        EnkiProblemsDomainErrorCodes.TestDeleteFailed,
-                        $"Test delete failed with status code {deleteResponse.Status.Code}: {deleteResponse.Status.Message}."
-                    )
+                    EnkiProblemsDomainErrorCodes.TestDeleteFailed,
+                    $"Test delete failed with status code {deleteResponse.Status.Code}: {deleteResponse.Status.Message}."
+                )
                     .WithData("id", problem.Id)
                     .WithData("testId", problemTest.Id);
             }
@@ -632,11 +659,7 @@ public class ProblemAppService : EnkiProblemsAppService, IProblemAppService
         await _daprClient.PublishEventAsync(
             EnkiProblemsConsts.PubSubName,
             EnkiProblemsConsts.TestDeletedTopic,
-            new TestDeletedEvent
-            {
-                Id = testId,
-                ProblemId = id,
-            }
+            new TestDeletedEvent { Id = testId, ProblemId = id, }
         );
 
         return ObjectMapper.Map<Problem, ProblemWithTestsDto>(updatedProblem);

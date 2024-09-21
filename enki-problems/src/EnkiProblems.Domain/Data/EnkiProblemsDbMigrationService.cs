@@ -54,8 +54,7 @@ public class EnkiProblemsDbMigrationService : ITransientDependency
                 if (tenant.ConnectionStrings.Any())
                 {
                     var tenantConnectionStrings = tenant
-                        .ConnectionStrings
-                        .Select(x => x.Value)
+                        .ConnectionStrings.Select(x => x.Value)
                         .ToList();
 
                     if (!migratedDatabaseSchemas.IsSupersetOf(tenantConnectionStrings))

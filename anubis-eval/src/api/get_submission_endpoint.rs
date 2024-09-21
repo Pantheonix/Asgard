@@ -78,3 +78,211 @@ pub async fn get_submission(
     })
     .await
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::api::middleware::auth::tests::encode_jwt;
+    use crate::contracts::get_submission_dtos::GetSubmissionWithTestCasesDto;
+    use crate::tests::common::{Result, ROCKET_CLIENT};
+    use crate::tests::submission::tests::SUBMISSIONS;
+    use crate::tests::user::tests::{User, UserProfile};
+    use rocket::http::{Header, Status};
+    use uuid::Uuid;
+
+    #[tokio::test]
+    async fn unauthenticated_user_cannot_get_submission() -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let submission = SUBMISSIONS.get("Ordinary_SumAB_Submission1")?;
+
+        // Act
+        let response = client
+            .get(format!("/api/submissions/{}", submission.id))
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Unauthorized,
+            "Unauthenticated user cannot get submission"
+        );
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn authenticated_user_can_get_own_submission() -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let token = encode_jwt(User::get(UserProfile::Ordinary))?;
+        let submission = SUBMISSIONS.get("Ordinary_SumAB_Submission1")?;
+
+        // Act
+        let response = client
+            .get(format!("/api/submissions/{}", submission.id))
+            .header(Header::new("Authorization", format!("Bearer {}", token)))
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Ok,
+            "Authenticated user can get own submission"
+        );
+
+        let body: GetSubmissionWithTestCasesDto =
+            serde_json::from_str(&response.into_string().await.unwrap())?;
+        assert_eq!(body.submission.id, submission.id);
+        assert_eq!(
+            body.submission.source_code,
+            Some(submission.source_code.clone())
+        );
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn authenticated_user_can_get_other_user_submission_without_source_code_for_still_unsolved_problem(
+    ) -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let token = encode_jwt(User::get(UserProfile::Admin))?;
+        let submission = SUBMISSIONS.get("Ordinary_SumAB_Submission1")?;
+
+        // Act
+        let response = client
+            .get(format!("/api/submissions/{}", submission.id))
+            .header(Header::new("Authorization", format!("Bearer {}", token)))
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Ok,
+            "Authenticated user can get other user's submission without source code for still unsolved problem"
+        );
+
+        let body: GetSubmissionWithTestCasesDto =
+            serde_json::from_str(&response.into_string().await.unwrap())?;
+        assert_eq!(body.submission.id, submission.id);
+        assert_eq!(body.submission.source_code, None);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn authenticated_user_can_get_other_user_submission_with_source_code_for_already_solved_problem(
+    ) -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let token = encode_jwt(User::get(UserProfile::Proposer))?;
+        let submission = SUBMISSIONS.get("Ordinary_SumAB_Submission1")?;
+
+        // Act
+        let response = client
+            .get(format!("/api/submissions/{}", submission.id))
+            .header(Header::new("Authorization", format!("Bearer {}", token)))
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Ok,
+            "Authenticated user can get other user's submission with source code for already solved problem"
+        );
+
+        let body: GetSubmissionWithTestCasesDto =
+            serde_json::from_str(&response.into_string().await.unwrap())?;
+        assert_eq!(body.submission.id, submission.id);
+        assert_eq!(
+            body.submission.source_code,
+            Some(submission.source_code.clone())
+        );
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn authenticated_user_can_get_own_submission_for_prior_published_problem() -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let token = encode_jwt(User::get(UserProfile::Ordinary))?;
+        let submission = SUBMISSIONS.get("Ordinary_DiffAB_Submission5")?;
+
+        // Act
+        let response = client
+            .get(format!("/api/submissions/{}", submission.id))
+            .header(Header::new("Authorization", format!("Bearer {}", token)))
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Ok,
+            "Authenticated user can get own submission for prior published problem"
+        );
+
+        let body: GetSubmissionWithTestCasesDto =
+            serde_json::from_str(&response.into_string().await.unwrap())?;
+        assert_eq!(body.submission.id, submission.id);
+        assert_eq!(
+            body.submission.source_code,
+            Some(submission.source_code.clone())
+        );
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn authenticated_user_cannot_get_non_existent_submission() -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let token = encode_jwt(User::get(UserProfile::Ordinary))?;
+
+        // Act
+        let response = client
+            .get(format!("/api/submissions/{}", Uuid::new_v4().to_string()))
+            .header(Header::new("Authorization", format!("Bearer {}", token)))
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::NotFound,
+            "Authenticated user cannot get non-existent submission"
+        );
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn authenticated_user_cannot_get_other_user_submission_for_unpublished_problem(
+    ) -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let token = encode_jwt(User::get(UserProfile::Proposer))?;
+        let submission = SUBMISSIONS.get("Admin_DiffAB_Submission4")?;
+
+        // Act
+        let response = client
+            .get(format!("/api/submissions/{}", submission.id))
+            .header(Header::new("Authorization", format!("Bearer {}", token)))
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Forbidden,
+            "Authenticated user cannot get other user's submission for unpublished problem"
+        );
+
+        Ok(())
+    }
+}

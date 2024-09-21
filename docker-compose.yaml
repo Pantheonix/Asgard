@@ -1,6 +1,6 @@
 # Define services for Asgard
 # TODO: add health checks, restart policies and extract hardcoded ports/tags/etc. to .env files
-version: "3.8"
+# version: "3.8"
 
 x-logging: &default-logging
   logging:
@@ -610,7 +610,7 @@ services:
     container_name: asgard-redis
     image: redis:alpine
     ports:
-      - "6379"
+      - "6380:6379"
     restart: unless-stopped
     volumes:
       - dapr-redis-data:/data

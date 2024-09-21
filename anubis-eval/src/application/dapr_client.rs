@@ -264,7 +264,7 @@ impl DaprClient {
         Ok(response)
     }
 
-    async fn get_item_from_state_store(
+    pub(crate) async fn get_item_from_state_store(
         &self,
         key: &str,
     ) -> Result<Option<Value>, ApplicationError> {
@@ -296,7 +296,7 @@ impl DaprClient {
         Ok(response)
     }
 
-    async fn set_items_in_state_store(
+    pub(crate) async fn set_items_in_state_store(
         &self,
         items: Vec<StateStoreSetItemDto>,
     ) -> Result<(), ApplicationError> {

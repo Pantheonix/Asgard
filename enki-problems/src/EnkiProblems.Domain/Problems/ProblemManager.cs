@@ -85,7 +85,9 @@ public class ProblemManager : DomainService
             );
         }
 
-        var oldProblem = await _problemRepository.FirstOrDefaultAsync(p => p.Name == name && p.Id != problem.Id);
+        var oldProblem = await _problemRepository.FirstOrDefaultAsync(p =>
+            p.Name == name && p.Id != problem.Id
+        );
         if (oldProblem is not null)
         {
             _logger.LogError("Problem {Name} already exists", name);

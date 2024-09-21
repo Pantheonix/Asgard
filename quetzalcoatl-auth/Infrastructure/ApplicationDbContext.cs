@@ -26,7 +26,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     {
         base.OnConfiguring(optionsBuilder);
 
-        if (optionsBuilder.IsConfigured) return;
+        if (optionsBuilder.IsConfigured)
+            return;
 
         var connectionString = Environment.GetEnvironmentVariable("QUETZALCOATL_DSN");
         optionsBuilder.UseSqlServer(connectionString!);

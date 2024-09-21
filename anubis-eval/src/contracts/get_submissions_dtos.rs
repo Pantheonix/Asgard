@@ -1,14 +1,14 @@
 use crate::domain::problem::Problem;
 use crate::domain::submission::Submission;
 use chrono::{DateTime, Utc};
-use rocket::serde::Serialize;
+use rocket::serde::{Deserialize, Serialize};
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct GetSubmissionsDto {
-    submissions: Vec<GetSubmissionDto>,
-    items: usize,
-    total_pages: usize,
+    pub submissions: Vec<GetSubmissionDto>,
+    pub items: usize,
+    pub total_pages: usize,
 }
 
 #[rocket::async_trait]
@@ -51,7 +51,7 @@ impl From<Vec<(Submission, Problem)>> for GetSubmissionsDto {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct GetSubmissionDto {
     id: String,

@@ -41,6 +41,7 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
 
         const string validPassword = "P@ssw0rd!";
         await userManager.CreateAsync(applicationUser, validPassword);
+        var users = await userManager.Users.ToListAsync();
 
         var request = new DeleteUserRequest { Id = applicationUser.Id };
 
@@ -132,9 +133,9 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
 
         using var scope = _apiWebFactory.Services.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var roleManager = scope
-            .ServiceProvider
-            .GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<
+            RoleManager<IdentityRole<Guid>>
+        >();
 
         await roleManager.CreateAsync(new IdentityRole<Guid>(ApplicationRole.Admin.ToString()));
 
@@ -204,9 +205,9 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
 
         using var scope = _apiWebFactory.Services.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var roleManager = scope
-            .ServiceProvider
-            .GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<
+            RoleManager<IdentityRole<Guid>>
+        >();
 
         await roleManager.CreateAsync(new IdentityRole<Guid>(ApplicationRole.Admin.ToString()));
 

@@ -8,8 +8,7 @@ public static class EnkiProblemsDtoExtensions
 
     public static void Configure()
     {
-        OneTimeRunner.Run(() =>
-        {
+        OneTimeRunner.Run(() => {
             /* You can add extension properties to DTOs
              * defined in the depended modules.
              *

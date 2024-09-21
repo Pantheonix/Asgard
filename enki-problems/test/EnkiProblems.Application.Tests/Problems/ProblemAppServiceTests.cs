@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Asgard.Hermes;
+using Dapr.Client;
 using EnkiProblems.Problems.Tests;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -26,6 +27,7 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     private readonly EnkiProblemsTestData _testData;
     private ICurrentUser _currentUser;
     private ITestService _testService;
+    private DaprClient _daprClient;
 
     public ProblemAppServiceTests()
     {
@@ -42,6 +44,9 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
 
         _testService = Substitute.For<ITestService>();
         services.AddSingleton(_testService);
+        
+        _daprClient = Substitute.For<DaprClient>();
+        services.AddSingleton(_daprClient);
     }
 
     #region CreateAsync
@@ -125,14 +130,11 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         var problemListDto = await _problemAppService.GetListAsync(new ProblemListFilterDto());
 
         problemListDto.TotalCount.ShouldBe(1);
-        problemListDto
-            .Items
-            .ShouldContain(
-                p =>
-                    p.Name == _testData.ProblemName1
-                    && p.ProposerId == _testData.ProposerUserId1
-                    && p.IsPublished == true
-            );
+        problemListDto.Items.ShouldContain(p =>
+            p.Name == _testData.ProblemName1
+            && p.ProposerId == _testData.ProposerUserId1
+            && p.IsPublished == true
+        );
     }
     #endregion
 
@@ -142,26 +144,23 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
     {
         Login(_testData.ProposerUserId1, _testData.ProposerUserRoles);
 
-        var problemListDto = await _problemAppService.GetListUnpublishedAsync(new ProblemListFilterDto());
+        var problemListDto = await _problemAppService.GetListUnpublishedAsync(
+            new ProblemListFilterDto()
+        );
 
         problemListDto.TotalCount.ShouldBe(1);
-        problemListDto
-            .Items
-            .ShouldContain(
-                p =>
-                    p.Name == _testData.ProblemName1
-                    && p.ProposerId == _testData.ProposerUserId1
-                    && p.IsPublished == false
-            );
+        problemListDto.Items.ShouldContain(p =>
+            p.Name == _testData.ProblemName1
+            && p.ProposerId == _testData.ProposerUserId1
+            && p.IsPublished == false
+        );
 
         problemListDto
             .Items[0]
-            .Tests
-            .ShouldContain(
-                t =>
-                    t.Score == _testData.TestScore1
-                    && t.InputDownloadUrl == _testData.TestInputLink1
-                    && t.OutputDownloadUrl == _testData.TestOutputLink1
+            .Tests.ShouldContain(t =>
+                t.Score == _testData.TestScore1
+                && t.InputDownloadUrl == _testData.TestInputLink1
+                && t.OutputDownloadUrl == _testData.TestOutputLink1
             );
     }
 
@@ -222,14 +221,11 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         problemDto.ShouldNotBeNull();
         problemDto.Id.ShouldBe(_testData.ProblemId1);
         problemDto.Name.ShouldBe(_testData.ProblemName1);
-        problemDto
-            .Tests
-            .ShouldContain(
-                t =>
-                    t.Score == _testData.TestScore1
-                    && t.InputDownloadUrl == _testData.TestInputLink1
-                    && t.OutputDownloadUrl == _testData.TestOutputLink1
-            );
+        problemDto.Tests.ShouldContain(t =>
+            t.Score == _testData.TestScore1
+            && t.InputDownloadUrl == _testData.TestInputLink1
+            && t.OutputDownloadUrl == _testData.TestOutputLink1
+        );
     }
 
     [Fact]
@@ -242,14 +238,11 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         problemDto.ShouldNotBeNull();
         problemDto.Id.ShouldBe(_testData.ProblemId1);
         problemDto.Name.ShouldBe(_testData.ProblemName1);
-        problemDto
-            .Tests
-            .ShouldContain(
-                t =>
-                    t.Score == _testData.TestScore1
-                    && t.InputDownloadUrl == _testData.TestInputLink1
-                    && t.OutputDownloadUrl == _testData.TestOutputLink1
-            );
+        problemDto.Tests.ShouldContain(t =>
+            t.Score == _testData.TestScore1
+            && t.InputDownloadUrl == _testData.TestInputLink1
+            && t.OutputDownloadUrl == _testData.TestOutputLink1
+        );
     }
 
     [Fact]
@@ -1096,14 +1089,11 @@ public class ProblemAppServiceTests : EnkiProblemsApplicationTestBase
         evalMetadataDto.StackMemory.ShouldBe(_testData.ProblemStackMemoryLimit1);
         evalMetadataDto.IoType.ShouldBe(_testData.ProblemIoType1);
         evalMetadataDto.Tests.Count().ShouldBe(1);
-        evalMetadataDto
-            .Tests
-            .ShouldContain(
-                t =>
-                    t.Score == _testData.TestScore1
-                    && t.InputDownloadUrl == _testData.TestInputLink1
-                    && t.OutputDownloadUrl == _testData.TestOutputLink1
-            );
+        evalMetadataDto.Tests.ShouldContain(t =>
+            t.Score == _testData.TestScore1
+            && t.InputDownloadUrl == _testData.TestInputLink1
+            && t.OutputDownloadUrl == _testData.TestOutputLink1
+        );
     }
 
     [Fact]

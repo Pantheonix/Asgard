@@ -6,7 +6,11 @@ public class RemoveRoleSummary : Summary<RemoveRoleEndpoint>
     {
         Summary = "Remove a role from a user";
         Description = "Remove a role from a user by id";
-        ExampleRequest = new RemoveRoleRequest { Id = Guid.NewGuid(), Role = ApplicationRole.Proposer.ToString() };
+        ExampleRequest = new RemoveRoleRequest
+        {
+            Id = Guid.NewGuid(),
+            Role = ApplicationRole.Proposer.ToString()
+        };
         Response<UserDto>(
             200,
             "Role removed successfully",

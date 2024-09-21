@@ -60,16 +60,12 @@ public class UserTokenServiceEndpoint : RefreshTokenService<UserTokenRequest, Us
 
     public override async Task RefreshRequestValidationAsync(UserTokenRequest req)
     {
-        _logger.LogInformation(
-            "Validating the refresh token for user {UserId}",
-            req.UserId
-        );
+        _logger.LogInformation("Validating the refresh token for user {UserId}", req.UserId);
 
-        var storedRefreshToken = await _tokenRepository.GetRefreshTokenAsync(
-            rt =>
-                rt.Token == Guid.Parse(req.RefreshToken)
-                && rt.UserId == Guid.Parse(req.UserId)
-                && rt.ExpiryDate > DateTime.UtcNow
+        var storedRefreshToken = await _tokenRepository.GetRefreshTokenAsync(rt =>
+            rt.Token == Guid.Parse(req.RefreshToken)
+            && rt.UserId == Guid.Parse(req.UserId)
+            && rt.ExpiryDate > DateTime.UtcNow
         );
 
         if (storedRefreshToken is null)

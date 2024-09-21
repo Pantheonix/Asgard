@@ -9,5 +9,10 @@ public static class ApplicationUserConsts
     public const int BioMaxLength = 300;
     public const int ProfilePictureMaxLength = 10_000_000;
     public const string PasswordRegex = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{6,20}$";
-    public static readonly string[] AllowedProfilePictureTypes = { "image/png", "image/jpeg", "image/jpg" };
+    public static readonly string[] AllowedProfilePictureTypes =
+    {
+        "image/png",
+        "image/jpeg",
+        "image/jpg"
+    };
 }

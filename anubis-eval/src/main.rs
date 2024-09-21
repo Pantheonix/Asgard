@@ -14,6 +14,7 @@ mod contracts;
 mod domain;
 mod infrastructure;
 mod schema;
+mod tests;
 
 #[launch]
 async fn rocket() -> _ {

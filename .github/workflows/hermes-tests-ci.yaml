@@ -1,0 +1,55 @@
+name: Hermes - Build Docker image and publish to GHCR and Docker Hub
+
+on:
+  push:
+    tags:
+      - "hermes/**"
+
+env:
+  NAMESPACE: pantheonix
+  REPOSITORY: hermes
+  IMAGE_NAME: hermes-tests
+  BUILD_CONTEXT: hermes-tests
+  HERMES_CONFIG: ${{ secrets.HERMES_CONFIG }}
+
+jobs:
+  build:
+    name: Build and Test Hermes Tests Microservice
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: hermes-tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 2.19.2
+
+      - name: Create logs/test.log file
+        run: |
+          mkdir -p logs
+          touch logs/test.log
+
+      - name: Get dependencies
+        run: dart pub get
+
+      - name: Test
+        run: dart test
+
+  deploy-to-ghcr:
+    needs: build
+    uses: ./.github/workflows/step-deploy-to-ghcr.yaml
+    with:
+      image_name: ${{ env.IMAGE_NAME }}
+      build_context: ${{ env.BUILD_CONTEXT }}
+
+  deploy-to-docker-hub:
+    needs: build
+    uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
+    with:
+      namespace: ${{ env.NAMESPACE }}
+      repository: ${{ env.REPOSITORY }}
+      build_context: ${{ env.BUILD_CONTEXT }}
