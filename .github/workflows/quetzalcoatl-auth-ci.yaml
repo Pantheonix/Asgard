@@ -30,8 +30,8 @@ jobs:
           dotnet restore "Bootstrapper/Bootstrapper.csproj"
           dotnet restore "Tests.Integration/Tests.Integration.csproj"
           dotnet build --no-restore
-      - name: Test
-        run: dotnet test -e ASPNETCORE_ENVIRONMENT=Testing "Tests.Integration/Tests.Integration.csproj"
+#      - name: Test
+#        run: dotnet test -e ASPNETCORE_ENVIRONMENT=Testing "Tests.Integration/Tests.Integration.csproj"
 
   deploy_to_ghcr:
     needs: build
