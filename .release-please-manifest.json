@@ -1,5 +1,5 @@
 {
-  "dapr": "2.0.0",
+  "dapr": "2.1.0",
   "anubis-eval/eval-lb": "1.0.0",
   "enki-problems": "1.0.0",
   "quetzalcoatl-auth": "1.0.0",
