@@ -9,6 +9,9 @@ on:
       build_context:
         type: string
         required: true
+    secrets:
+      TOKEN:
+        required: true
 
 jobs:
   deploy:
