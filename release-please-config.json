@@ -4,32 +4,33 @@
   "tag-separator": "/",
   "separate-pull-requests": true,
   "packages": {
-    "quetzalcoatl": {
-      "path": "quetzalcoatl-auth",
+    "quetzalcoatl-auth": {
+      "package-name": "quetzalcoatl",
       "release-type": "simple"
     },
-    "enki": {
-      "path": "enki-problems",
+    "enki-problems": {
+      "package-name": "enki",
       "release-type": "simple"
     },
-    "hermes": {
-      "path": "hermes-tests",
+    "hermes-tests": {
+      "package-name": "hermes",
       "release-type": "dart"
     },
-    "anubis": {
-      "path": "anubis-eval",
-      "release-type": "rust"
+    "anubis-eval": {
+      "package-name": "anubis",
+      "release-type": "rust",
+      "exclude-paths": ["anubis/eval-lb"]
     },
-    "odin": {
-      "path": "odin-gateway",
+    "odin-gateway": {
+      "package-name": "odin",
       "release-type": "simple"
     },
     "dapr": {
-      "path": "dapr",
+      "package-name": "dapr",
       "release-type": "simple"
     },
-    "eval-lb": {
-      "path": "anubis-eval/eval-lb",
+    "anubis-eval/eval-lb": {
+      "package-name": "eval-lb",
       "release-type": "simple"
     }
   },
