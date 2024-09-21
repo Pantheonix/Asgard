@@ -1,0 +1,27 @@
+name: Odin - Build Docker image and publish to GHCR and Docker Hub
+
+on:
+  push:
+    tags:
+      - "odin/**"
+
+env:
+  NAMESPACE: pantheonix
+  REPOSITORY: odin
+  IMAGE_NAME: odin-api-gateway
+  BUILD_CONTEXT: odin-gateway
+
+jobs:
+  deploy_to_ghcr:
+    uses: ./.github/workflows/step-deploy-to-ghcr.yaml
+    with:
+      image_name: ${{ env.IMAGE_NAME }}
+      build_context: ${{ env.BUILD_CONTEXT }}
+
+  deploy_to_docker_hub:
+    uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
+    with:
+      namespace: ${{ env.NAMESPACE }}
+      repository: ${{ env.REPOSITORY }}
+      build_context: ${{ env.BUILD_CONTEXT }}
+
