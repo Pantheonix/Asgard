@@ -33,14 +33,14 @@ jobs:
 #      - name: Test
 #        run: dotnet test -e ASPNETCORE_ENVIRONMENT=Testing "Tests.Integration/Tests.Integration.csproj"
 
-  deploy_to_ghcr:
+  deploy-to-ghcr:
     needs: build
     uses: ./.github/workflows/step-deploy-to-ghcr.yaml
     with:
       image_name: ${{ env.IMAGE_NAME }}
       build_context: ${{ env.BUILD_CONTEXT }}
 
-  deploy_to_docker_hub:
+  deploy-to-docker-hub:
     needs: build
     uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
     with:

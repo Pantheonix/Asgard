@@ -12,13 +12,13 @@ env:
   BUILD_CONTEXT: dapr
 
 jobs:
-  deploy_to_ghcr:
+  deploy-to-ghcr:
     uses: ./.github/workflows/step-deploy-to-ghcr.yaml
     with:
       image_name: ${{ env.IMAGE_NAME }}
       build_context: ${{ env.BUILD_CONTEXT }}
 
-  deploy_to_docker_hub:
+  deploy-to-docker-hub:
     uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
     with:
       namespace: ${{ env.NAMESPACE }}
