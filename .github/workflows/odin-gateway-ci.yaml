@@ -5,23 +5,17 @@ on:
     tags:
       - "odin/**"
 
-env:
-  NAMESPACE: pantheonix
-  REPOSITORY: odin
-  IMAGE_NAME: odin-api-gateway
-  BUILD_CONTEXT: odin-gateway
-
 jobs:
   deploy-to-ghcr:
     uses: ./.github/workflows/step-deploy-to-ghcr.yaml
     with:
-      image_name: ${{ env.IMAGE_NAME }}
-      build_context: ${{ env.BUILD_CONTEXT }}
+      image_name: odin-api-gateway
+      build_context: odin-gateway
 
   deploy-to-docker-hub:
     uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
     with:
-      namespace: ${{ env.NAMESPACE }}
-      repository: ${{ env.REPOSITORY }}
-      build_context: ${{ env.BUILD_CONTEXT }}
+      namespace: pantheonix
+      repository: odin
+      build_context: odin-gateway
 
