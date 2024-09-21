@@ -5,5 +5,6 @@
   "anubis": "2.0.0",
   "odin": "2.0.0",
   "dapr": "2.0.0",
-  "eval-lb": "2.0.0"
+  "eval-lb": "2.0.0",
+  "hermes-tests": "1.0.0"
 }
