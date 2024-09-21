@@ -1,7 +1,7 @@
 {
   "include-component-in-tag": true,
   "include-v-in-tag": true,
-  "tag-separator": "@",
+  "tag-separator": "/",
   "separate-pull-requests": true,
   "packages": {
     "quetzalcoatl": {
