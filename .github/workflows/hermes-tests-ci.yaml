@@ -5,13 +5,6 @@ on:
     tags:
       - "hermes/**"
 
-env:
-  NAMESPACE: pantheonix
-  REPOSITORY: hermes
-  IMAGE_NAME: hermes-tests
-  BUILD_CONTEXT: hermes-tests
-  HERMES_CONFIG: ${{ secrets.HERMES_CONFIG }}
-
 jobs:
   build:
     name: Build and Test Hermes Tests Microservice
@@ -43,13 +36,13 @@ jobs:
     needs: build
     uses: ./.github/workflows/step-deploy-to-ghcr.yaml
     with:
-      image_name: ${{ env.IMAGE_NAME }}
-      build_context: ${{ env.BUILD_CONTEXT }}
+      image_name: hermes-tests
+      build_context: hermes-tests
 
   deploy-to-docker-hub:
     needs: build
     uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
     with:
-      namespace: ${{ env.NAMESPACE }}
-      repository: ${{ env.REPOSITORY }}
-      build_context: ${{ env.BUILD_CONTEXT }}
+      namespace: pantheonix
+      repository: hermes
+      build_context: hermes-tests
