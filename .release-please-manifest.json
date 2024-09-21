@@ -1,9 +1,9 @@
 {
   "quetzalcoatl": "2.0.0",
   "enki": "2.0.0",
-  "hermes": "2.0.0",
   "dapr": "2.0.0",
   "eval-lb": "2.0.0",
+  "hermes-tests": "1.0.0"
   "odin-gateway": "1.0.0"
   "anubis-eval": "0.1.0"
 }
