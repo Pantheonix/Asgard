@@ -5,12 +5,6 @@ on:
     tags:
       - "anubis/**"
 
-env:
-  NAMESPACE: pantheonix
-  REPOSITORY: anubis
-  IMAGE_NAME: anubis-eval
-  BUILD_CONTEXT: anubis-eval
-
 jobs:
   build:
     name: Build and Test Anubis Eval Microservice
@@ -50,13 +44,13 @@ jobs:
     needs: build
     uses: ./.github/workflows/step-deploy-to-ghcr.yaml
     with:
-      image_name: ${{ env.IMAGE_NAME }}
-      build_context: ${{ env.BUILD_CONTEXT }}
+      image_name: anubis-eval
+      build_context: anubis-eval
 
   deploy-to-docker-hub:
     needs: build
     uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
     with:
-      namespace: ${{ env.NAMESPACE }}
-      repository: ${{ env.REPOSITORY }}
-      build_context: ${{ env.BUILD_CONTEXT }}
+      namespace: pantheonix
+      repository: anubis
+      build_context: anubis-eval
