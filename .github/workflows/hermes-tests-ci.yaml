@@ -38,6 +38,8 @@ jobs:
     with:
       image_name: hermes-tests
       build_context: hermes-tests
+    secrets:
+      TOKEN: ${{ secrets.TOKEN }}
 
   deploy-to-docker-hub:
     needs: build
@@ -46,3 +48,6 @@ jobs:
       namespace: pantheonix
       repository: hermes
       build_context: hermes-tests
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

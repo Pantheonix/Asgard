@@ -46,6 +46,8 @@ jobs:
     with:
       image_name: anubis-eval
       build_context: anubis-eval
+    secrets:
+      TOKEN: ${{ secrets.TOKEN }}
 
   deploy-to-docker-hub:
     needs: build
@@ -54,3 +56,6 @@ jobs:
       namespace: pantheonix
       repository: anubis
       build_context: anubis-eval
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

@@ -11,6 +11,8 @@ jobs:
     with:
       image_name: odin-api-gateway
       build_context: odin-gateway
+    secrets:
+      TOKEN: ${{ secrets.TOKEN }}
 
   deploy-to-docker-hub:
     uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
@@ -18,4 +20,7 @@ jobs:
       namespace: pantheonix
       repository: odin
       build_context: odin-gateway
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 

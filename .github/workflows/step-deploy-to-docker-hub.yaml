@@ -12,6 +12,11 @@ on:
       build_context:
         type: string
         required: true
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
 
 jobs:
   deploy:
