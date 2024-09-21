@@ -1,15 +1,12 @@
-name: Anubis - Build Docker image and publish to GHCR and Docker Hub
+name: Anubis - PR Verify
 
 on:
-  push:
-    tags:
-      - "anubis/**"
-
-env:
-  NAMESPACE: pantheonix
-  REPOSITORY: anubis
-  IMAGE_NAME: anubis-eval
-  BUILD_CONTEXT: anubis-eval
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - "anubis-eval/**"
+      - ".github/workflows/anubis-eval-pr-verify.yaml"
 
 jobs:
   build:
@@ -45,18 +42,3 @@ jobs:
 
       - name: Test
         run: cargo nextest run --all-features --profile ci
-
-  deploy-to-ghcr:
-    needs: build
-    uses: ./.github/workflows/step-deploy-to-ghcr.yaml
-    with:
-      image_name: ${{ env.IMAGE_NAME }}
-      build_context: ${{ env.BUILD_CONTEXT }}
-
-  deploy-to-docker-hub:
-    needs: build
-    uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
-    with:
-      namespace: ${{ env.NAMESPACE }}
-      repository: ${{ env.REPOSITORY }}
-      build_context: ${{ env.BUILD_CONTEXT }}

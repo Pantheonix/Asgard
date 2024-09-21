@@ -1,18 +1,19 @@
-name: Enki - Build and Test Problems Service
+name: Enki - Build Docker image and publish to GHCR and Docker Hub
 
 on:
   push:
-    paths:
-      - "enki-problems/**"
-      - ".github/workflows/enki-problems-ci.yaml"
+    tags:
+      - "enki/**"
 
-  pull_request:
-    paths:
-      - "enki-problems/**"
-      - ".github/workflows/enki-problems-ci.yaml"
+env:
+  NAMESPACE: pantheonix
+  REPOSITORY: enki
+  IMAGE_NAME: enki-problems
+  BUILD_CONTEXT: enki-problems
 
 jobs:
   build:
+    name: Build and Test Enki Problems Microservice
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -31,3 +32,18 @@ jobs:
           dotnet build --no-restore
       - name: Test
         run: dotnet test -e DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+  deploy-to-ghcr:
+    needs: build
+    uses: ./.github/workflows/step-deploy-to-ghcr.yaml
+    with:
+      image_name: ${{ env.IMAGE_NAME }}
+      build_context: ${{ env.BUILD_CONTEXT }}
+
+  deploy-to-docker-hub:
+    needs: build
+    uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
+    with:
+      namespace: ${{ env.NAMESPACE }}
+      repository: ${{ env.REPOSITORY }}
+      build_context: ${{ env.BUILD_CONTEXT }}

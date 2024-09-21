@@ -1,21 +1,20 @@
-name: Hermes - Build and Test Tests Service
+name: Hermes - Build Docker image and publish to GHCR and Docker Hub
 
 on:
   push:
-    paths:
-      - "hermes-tests/**"
-      - ".github/workflows/hermes-tests-ci.yaml"
-
-  pull_request:
-    paths:
-      - "hermes-tests/**"
-      - ".github/workflows/hermes-tests-ci.yaml"
+    tags:
+      - "hermes/**"
 
 env:
+  NAMESPACE: pantheonix
+  REPOSITORY: hermes
+  IMAGE_NAME: hermes-tests
+  BUILD_CONTEXT: hermes-tests
   HERMES_CONFIG: ${{ secrets.HERMES_CONFIG }}
 
 jobs:
   build:
+    name: Build and Test Hermes Tests Microservice
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -39,3 +38,18 @@ jobs:
 
       - name: Test
         run: dart test
+
+  deploy-to-ghcr:
+    needs: build
+    uses: ./.github/workflows/step-deploy-to-ghcr.yaml
+    with:
+      image_name: ${{ env.IMAGE_NAME }}
+      build_context: ${{ env.BUILD_CONTEXT }}
+
+  deploy-to-docker-hub:
+    needs: build
+    uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
+    with:
+      namespace: ${{ env.NAMESPACE }}
+      repository: ${{ env.REPOSITORY }}
+      build_context: ${{ env.BUILD_CONTEXT }}

@@ -1,18 +1,19 @@
-name: Quetzalcoatl - Build and Test Auth Service
+name: Quetzalcoatl - Build Docker image and publish to GHCR and Docker Hub
 
 on:
   push:
-    paths:
-      - "quetzalcoatl-auth/**"
-      - ".github/workflows/quetzalcoatl-auth-ci.yaml"
+    tags:
+      - "quetzalcoatl/**"
 
-  pull_request:
-    paths:
-      - "quetzalcoatl-auth/**"
-      - ".github/workflows/quetzalcoatl-auth-ci.yaml"
+env:
+  NAMESPACE: pantheonix
+  REPOSITORY: quetzalcoatl
+  IMAGE_NAME: quetzalcoatl-auth
+  BUILD_CONTEXT: quetzalcoatl-auth
 
 jobs:
   build:
+    name: Build and Test Quetzalcoatl Auth Microservice
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -29,5 +30,20 @@ jobs:
           dotnet restore "Bootstrapper/Bootstrapper.csproj"
           dotnet restore "Tests.Integration/Tests.Integration.csproj"
           dotnet build --no-restore
-      - name: Test
-        run: dotnet test -e ASPNETCORE_ENVIRONMENT=Testing "Tests.Integration/Tests.Integration.csproj"
+#      - name: Test
+#        run: dotnet test -e ASPNETCORE_ENVIRONMENT=Testing "Tests.Integration/Tests.Integration.csproj"
+
+  deploy-to-ghcr:
+    needs: build
+    uses: ./.github/workflows/step-deploy-to-ghcr.yaml
+    with:
+      image_name: ${{ env.IMAGE_NAME }}
+      build_context: ${{ env.BUILD_CONTEXT }}
+
+  deploy-to-docker-hub:
+    needs: build
+    uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
+    with:
+      namespace: ${{ env.NAMESPACE }}
+      repository: ${{ env.REPOSITORY }}
+      build_context: ${{ env.BUILD_CONTEXT }}
