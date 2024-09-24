@@ -1,0 +1,12 @@
+.dockerignore
+Dockerfile
+README.md
+.vscode/
+.idea/
+target/
+logs/
+tests/
+.env*
+.gitignore
+eval-lb/
+tests-setup/

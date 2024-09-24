@@ -70,6 +70,50 @@ const DownloadResponse$json = const {
 
 /// Descriptor for `DownloadResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List downloadResponseDescriptor = $convert.base64Decode('ChBEb3dubG9hZFJlc3BvbnNlEjUKCG1ldGFkYXRhGAEgASgLMhcuYXNnYXJkLmhlcm1lcy5NZXRhZGF0YUgAUghtZXRhZGF0YRIsCgVjaHVuaxgCIAEoCzIULmFzZ2FyZC5oZXJtZXMuQ2h1bmtIAFIFY2h1bmsSNwoGc3RhdHVzGAMgASgLMh0uYXNnYXJkLmhlcm1lcy5TdGF0dXNSZXNwb25zZUgAUgZzdGF0dXNCCAoGcGFja2V0');
+@$core.Deprecated('Use getDownloadLinkForTestRequestDescriptor instead')
+const GetDownloadLinkForTestRequest$json = const {
+  '1': 'GetDownloadLinkForTestRequest',
+  '2': const [
+    const {'1': 'problem_id', '3': 1, '4': 1, '5': 9, '10': 'problemId'},
+    const {'1': 'test_id', '3': 2, '4': 1, '5': 9, '10': 'testId'},
+  ],
+};
+
+/// Descriptor for `GetDownloadLinkForTestRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getDownloadLinkForTestRequestDescriptor = $convert.base64Decode('Ch1HZXREb3dubG9hZExpbmtGb3JUZXN0UmVxdWVzdBIdCgpwcm9ibGVtX2lkGAEgASgJUglwcm9ibGVtSWQSFwoHdGVzdF9pZBgCIAEoCVIGdGVzdElk');
+@$core.Deprecated('Use getDownloadLinkForTestResponseDescriptor instead')
+const GetDownloadLinkForTestResponse$json = const {
+  '1': 'GetDownloadLinkForTestResponse',
+  '2': const [
+    const {'1': 'input_link', '3': 1, '4': 1, '5': 9, '10': 'inputLink'},
+    const {'1': 'output_link', '3': 2, '4': 1, '5': 9, '10': 'outputLink'},
+    const {'1': 'status', '3': 3, '4': 1, '5': 11, '6': '.asgard.hermes.StatusResponse', '10': 'status'},
+  ],
+};
+
+/// Descriptor for `GetDownloadLinkForTestResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getDownloadLinkForTestResponseDescriptor = $convert.base64Decode('Ch5HZXREb3dubG9hZExpbmtGb3JUZXN0UmVzcG9uc2USHQoKaW5wdXRfbGluaxgBIAEoCVIJaW5wdXRMaW5rEh8KC291dHB1dF9saW5rGAIgASgJUgpvdXRwdXRMaW5rEjUKBnN0YXR1cxgDIAEoCzIdLmFzZ2FyZC5oZXJtZXMuU3RhdHVzUmVzcG9uc2VSBnN0YXR1cw==');
+@$core.Deprecated('Use deleteTestRequestDescriptor instead')
+const DeleteTestRequest$json = const {
+  '1': 'DeleteTestRequest',
+  '2': const [
+    const {'1': 'problem_id', '3': 1, '4': 1, '5': 9, '10': 'problemId'},
+    const {'1': 'test_id', '3': 2, '4': 1, '5': 9, '10': 'testId'},
+  ],
+};
+
+/// Descriptor for `DeleteTestRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List deleteTestRequestDescriptor = $convert.base64Decode('ChFEZWxldGVUZXN0UmVxdWVzdBIdCgpwcm9ibGVtX2lkGAEgASgJUglwcm9ibGVtSWQSFwoHdGVzdF9pZBgCIAEoCVIGdGVzdElk');
+@$core.Deprecated('Use deleteTestResponseDescriptor instead')
+const DeleteTestResponse$json = const {
+  '1': 'DeleteTestResponse',
+  '2': const [
+    const {'1': 'status', '3': 1, '4': 1, '5': 11, '6': '.asgard.hermes.StatusResponse', '10': 'status'},
+  ],
+};
+
+/// Descriptor for `DeleteTestResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List deleteTestResponseDescriptor = $convert.base64Decode('ChJEZWxldGVUZXN0UmVzcG9uc2USNQoGc3RhdHVzGAEgASgLMh0uYXNnYXJkLmhlcm1lcy5TdGF0dXNSZXNwb25zZVIGc3RhdHVz');
 @$core.Deprecated('Use metadataDescriptor instead')
 const Metadata$json = const {
   '1': 'Metadata',

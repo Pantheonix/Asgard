@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:firebase_dart/firebase_dart.dart';
+import 'package:hermes_tests/api/core/hermes.pb.dart';
 import 'package:hermes_tests/domain/entities/test_metadata.dart';
 import 'package:hermes_tests/domain/exceptions/storage_failures.dart';
 import 'package:hermes_tests/domain/interfaces/i_test_repository.dart';
@@ -140,7 +141,7 @@ class TestRepository implements ITestRepository {
           return right(unit);
         } catch (e) {
           return left(
-            StorageFailure.unexpected(
+            StorageFailure.remoteTestNotFound(
               message: e.toString(),
             ),
           );
@@ -151,6 +152,101 @@ class TestRepository implements ITestRepository {
           message: 'Invalid test metadata passed to repository download method',
         ),
       ),
+    );
+  }
+
+  @override
+  Future<Either<StorageFailure, Unit>> delete(TestMetadata testMetadata) async {
+    return await testMetadata.maybeMap(
+      testToDelete: (testMetadata) async {
+        try {
+          final remoteInputFilePath = path.join(
+            testMetadata.fromDir,
+            testMetadata.problemId,
+            testMetadata.testId,
+            testMetadata.inputFilename,
+          );
+          await _storage.ref(remoteInputFilePath).delete();
+
+          final remoteOutputFilePath = path.join(
+            testMetadata.fromDir,
+            testMetadata.problemId,
+            testMetadata.testId,
+            testMetadata.outputFilename,
+          );
+          await _storage.ref(remoteOutputFilePath).delete();
+
+          return right(unit);
+        } catch (e) {
+          return left(
+            StorageFailure.remoteTestNotFound(
+              message: e.toString(),
+            ),
+          );
+        }
+      },
+      orElse: () {
+        return left(
+          StorageFailure.unexpected(
+            message: 'Invalid test metadata passed to repository delete method',
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Future<Either<StorageFailure, GetDownloadLinkForTestResponse>>
+      getDownloadLinkForTest(TestMetadata testMetadata) async {
+    return await testMetadata.maybeMap(
+      testToGetDownloadLinkFor: (testMetadata) async {
+        try {
+          final remoteInputFilePath = path.join(
+            testMetadata.fromDir,
+            testMetadata.problemId,
+            testMetadata.testId,
+            testMetadata.inputFilename,
+          );
+
+          final remoteOutputFilePath = path.join(
+            testMetadata.fromDir,
+            testMetadata.problemId,
+            testMetadata.testId,
+            testMetadata.outputFilename,
+          );
+
+          final testRelativePath = path.join(
+            testMetadata.problemId,
+            testMetadata.testId,
+          );
+
+          final response = GetDownloadLinkForTestResponse(
+            inputLink: await _storage.ref(remoteInputFilePath).getDownloadURL(),
+            outputLink:
+                await _storage.ref(remoteOutputFilePath).getDownloadURL(),
+            status: StatusResponse()
+              ..message =
+                  'Successfully download link retrieval for $testRelativePath test'
+              ..code = StatusCode.Ok,
+          );
+
+          return right(response);
+        } catch (e) {
+          return left(
+            StorageFailure.remoteTestNotFound(
+              message: e.toString(),
+            ),
+          );
+        }
+      },
+      orElse: () {
+        return left(
+          StorageFailure.unexpected(
+            message:
+                'Invalid test metadata passed to repository getDownloadLinkForTest method',
+          ),
+        );
+      },
     );
   }
 }

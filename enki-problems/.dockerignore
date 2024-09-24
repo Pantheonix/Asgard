@@ -1,0 +1,14 @@
+.idea/
+test/
+.env*
+src/*/bin/
+src/*/obj/
+*.md
+Dockerfile*
+.dockerignore
+Makefile
+.gitattributes
+.gitignore
+EnkiProblems.sln.DotSettings
+EnkiProblems.sln.DotSettings.user
+src/EnkiProblems.HttpApi.Host/appsettings.json

@@ -3,7 +3,9 @@
 */bin/
 */obj/
 */Logs/
-*.env
+.env*
 QuetzalcoatlAuth.sln.DotSettings.user
 *.md
+Tests.Integration/
 Dockerfile*
+.dockerignore

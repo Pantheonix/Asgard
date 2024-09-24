@@ -5,9 +5,11 @@ import 'package:dartz/dartz.dart';
 import 'package:grpc/grpc.dart';
 import 'package:hermes_tests/api/core/hermes.pb.dart';
 import 'package:hermes_tests/api/core/hermes.pbgrpc.dart' as hermes;
+import 'package:hermes_tests/application/use_cases/delete/delete_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/download/download_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/download/encode_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/download/fragment_test_use_case.dart';
+import 'package:hermes_tests/application/use_cases/get_download_link/get_download_link_for_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/upload/decode_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/upload/defragment_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/upload/upload_test_use_case.dart';
@@ -311,6 +313,74 @@ class HermesGrpcServer extends hermes.HermesTestsServiceBase {
     );
 
     yield* responseStreamController.stream;
+  }
+
+  @override
+  Future<DeleteTestResponse> deleteTest(
+      ServiceCall call, DeleteTestRequest request) async {
+    _logger.i('Delete test method called');
+
+    final Either<StorageFailure, Unit> deleteResponse = await _mediator.run(
+      DeleteTestAsyncQuery(
+        testMetadata: TestMetadata.testToDelete(
+          problemId: request.problemId,
+          testId: request.testId,
+          fromDir: _config.remoteUnarchivedTestFolder,
+          inputFilename: _config.inputFilename,
+          outputFilename: _config.outputFilename,
+        ),
+      ),
+    );
+
+    return deleteResponse.fold(
+      (failure) {
+        _logger.e('Delete response received: $failure');
+        return DeleteTestResponse()
+          ..status = (hermes.StatusResponse()
+            ..code = hermes.StatusCode.Failed
+            ..message = failure.message);
+      },
+      (success) {
+        _logger.i('Delete response received: success');
+        return DeleteTestResponse()
+          ..status = (hermes.StatusResponse()
+            ..code = hermes.StatusCode.Ok
+            ..message = 'Test deleted successfully');
+      },
+    );
+  }
+
+  @override
+  Future<GetDownloadLinkForTestResponse> getDownloadLinkForTest(
+      ServiceCall call, GetDownloadLinkForTestRequest request) async {
+    _logger.i('Get download link for test method called');
+
+    final Either<StorageFailure, GetDownloadLinkForTestResponse>
+        getDownloadLinkResponse = await _mediator.run(
+      GetDownloadLinkForTestAsyncQuery(
+        testMetadata: TestMetadata.testToGetDownloadLinkFor(
+          problemId: request.problemId,
+          testId: request.testId,
+          fromDir: _config.remoteUnarchivedTestFolder,
+          inputFilename: _config.inputFilename,
+          outputFilename: _config.outputFilename,
+        ),
+      ),
+    );
+
+    return getDownloadLinkResponse.fold(
+      (failure) {
+        _logger.e('Get download link response received: $failure');
+        return GetDownloadLinkForTestResponse()
+          ..status = (hermes.StatusResponse()
+            ..code = hermes.StatusCode.Failed
+            ..message = failure.message);
+      },
+      (response) {
+        _logger.i('Get download link response received: $response');
+        return response;
+      },
+    );
   }
 
   void initServices() {

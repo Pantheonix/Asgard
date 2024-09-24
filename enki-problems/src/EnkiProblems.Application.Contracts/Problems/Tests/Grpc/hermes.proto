@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option csharp_namespace = "Asgard.Hermes";
+option java_package = "com.asgard.hermes";
+option java_outer_classname = "HermesTests";
+option objc_class_prefix = "Hermes";
+
+package asgard.hermes;
+
+// gRPC Upload request and response messages
+message UploadRequest {
+  oneof packet {
+    Metadata metadata = 1;
+    Chunk chunk = 2;
+  }
+}
+
+message UploadResponse {
+  StatusResponse status = 1;
+}
+
+// gRPC Download request and response messages
+message DownloadRequest {
+  string problem_id = 1;
+  string test_id = 2;
+}
+
+message DownloadResponse {
+  oneof packet {
+    Metadata metadata = 1;
+    Chunk chunk = 2;
+    StatusResponse status = 3;
+  }
+}
+
+// gRPC GetDownloadLinkForTest request and response messages
+message GetDownloadLinkForTestRequest {
+  string problem_id = 1;
+  string test_id = 2;
+}
+
+message GetDownloadLinkForTestResponse {
+  string input_link = 1;
+  string output_link = 2;
+  StatusResponse status = 3;
+}
+
+// gRPC DeleteTest request and response messages
+message DeleteTestRequest {
+  string problem_id = 1;
+  string test_id = 2;
+}
+
+message DeleteTestResponse {
+  StatusResponse status = 1;
+}
+
+// Hermes Service
+service HermesTestsService {
+  rpc UploadTest(stream UploadRequest) returns (UploadResponse) {}
+  rpc DownloadTest(DownloadRequest) returns (stream DownloadResponse) {}
+  rpc GetDownloadLinkForTest(GetDownloadLinkForTestRequest) returns (GetDownloadLinkForTestResponse) {}
+  rpc DeleteTest(DeleteTestRequest) returns (DeleteTestResponse) {}
+}
+
+// core messages
+message Metadata {
+  string problem_id = 1;
+  string test_id = 2;
+  int32 test_size = 3;
+}
+
+message Chunk {
+  bytes data = 1;
+}
+
+message StatusResponse {
+  string message = 1;
+  StatusCode code = 2;
+}
+
+enum StatusCode {
+  Ok = 0;
+  Failed = 1;
+  Unknown = 2;
+}

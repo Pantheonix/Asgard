@@ -12,6 +12,10 @@ class StorageFailure with _$StorageFailure {
     required String message,
   }) = LocalTestNotFound;
 
+  const factory StorageFailure.remoteTestNotFound({
+    required String message,
+  }) = RemoteTestNotFound;
+
   const factory StorageFailure.invalidLocalTestFormat({
     required String message,
   }) = InvalidLocalTestFormat;

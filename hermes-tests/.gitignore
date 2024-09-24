@@ -3,6 +3,11 @@
 .dart_tool/
 .idea/
 .vscode/
-config.json
-temp/
+#temp/
 logs/
+config.json
+.env
+
+# FVM Version Cache
+.fvm/
+.fvmrc

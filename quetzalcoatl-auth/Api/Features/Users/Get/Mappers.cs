@@ -25,15 +25,10 @@ public class ApplicationUserToGetUserResponseProfile : Profile
                 }
             )
             .ForMember(
-                dest => dest.ProfilePictureUrl,
+                dest => dest.ProfilePictureId,
                 opt =>
-                    opt.MapFrom(
-                        src =>
-                            src.GetProfilePictureUrl(
-                                ProfilePictureConstants.BaseUrl,
-                                ProfilePictureConstants.EndpointUrl,
-                                ProfilePictureConstants.Extension
-                            )
+                    opt.MapFrom<Guid?>(src =>
+                        src.ProfilePicture != null ? src.ProfilePicture!.Id : null
                     )
             );
     }

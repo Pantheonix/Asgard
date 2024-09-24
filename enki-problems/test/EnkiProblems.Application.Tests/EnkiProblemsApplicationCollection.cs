@@ -1,0 +1,7 @@
+using EnkiProblems.MongoDB;
+using Xunit;
+
+namespace EnkiProblems;
+
+[CollectionDefinition(EnkiProblemsTestConsts.CollectionDefinitionName)]
+public class EnkiProblemsApplicationCollection : EnkiProblemsMongoDbCollectionFixtureBase { }

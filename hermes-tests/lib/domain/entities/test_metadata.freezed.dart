@@ -56,6 +56,12 @@ mixin _$TestMetadata {
     required TResult Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)
         testToUpload,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToDelete,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToGetDownloadLinkFor,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -96,6 +102,12 @@ mixin _$TestMetadata {
     TResult? Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)?
         testToUpload,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -136,6 +148,12 @@ mixin _$TestMetadata {
     TResult Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)?
         testToUpload,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -147,6 +165,9 @@ mixin _$TestMetadata {
     required TResult Function(TestToDefragment value) testToDefragment,
     required TResult Function(TestToDecode value) testToDecode,
     required TResult Function(TestToUpload value) testToUpload,
+    required TResult Function(TestToDelete value) testToDelete,
+    required TResult Function(TestToGetDownloadLinkFor value)
+        testToGetDownloadLinkFor,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -157,6 +178,8 @@ mixin _$TestMetadata {
     TResult? Function(TestToDefragment value)? testToDefragment,
     TResult? Function(TestToDecode value)? testToDecode,
     TResult? Function(TestToUpload value)? testToUpload,
+    TResult? Function(TestToDelete value)? testToDelete,
+    TResult? Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -167,6 +190,8 @@ mixin _$TestMetadata {
     TResult Function(TestToDefragment value)? testToDefragment,
     TResult Function(TestToDecode value)? testToDecode,
     TResult Function(TestToUpload value)? testToUpload,
+    TResult Function(TestToDelete value)? testToDelete,
+    TResult Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -351,6 +376,12 @@ class _$TestToFragment implements TestToFragment {
     required TResult Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)
         testToUpload,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToDelete,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToGetDownloadLinkFor,
   }) {
     return testToFragment(problemId, testId, fromDir, archiveTypeExtension);
   }
@@ -394,6 +425,12 @@ class _$TestToFragment implements TestToFragment {
     TResult? Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)?
         testToUpload,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
   }) {
     return testToFragment?.call(
         problemId, testId, fromDir, archiveTypeExtension);
@@ -438,6 +475,12 @@ class _$TestToFragment implements TestToFragment {
     TResult Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)?
         testToUpload,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
     required TResult orElse(),
   }) {
     if (testToFragment != null) {
@@ -455,6 +498,9 @@ class _$TestToFragment implements TestToFragment {
     required TResult Function(TestToDefragment value) testToDefragment,
     required TResult Function(TestToDecode value) testToDecode,
     required TResult Function(TestToUpload value) testToUpload,
+    required TResult Function(TestToDelete value) testToDelete,
+    required TResult Function(TestToGetDownloadLinkFor value)
+        testToGetDownloadLinkFor,
   }) {
     return testToFragment(this);
   }
@@ -468,6 +514,8 @@ class _$TestToFragment implements TestToFragment {
     TResult? Function(TestToDefragment value)? testToDefragment,
     TResult? Function(TestToDecode value)? testToDecode,
     TResult? Function(TestToUpload value)? testToUpload,
+    TResult? Function(TestToDelete value)? testToDelete,
+    TResult? Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
   }) {
     return testToFragment?.call(this);
   }
@@ -481,6 +529,8 @@ class _$TestToFragment implements TestToFragment {
     TResult Function(TestToDefragment value)? testToDefragment,
     TResult Function(TestToDecode value)? testToDecode,
     TResult Function(TestToUpload value)? testToUpload,
+    TResult Function(TestToDelete value)? testToDelete,
+    TResult Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
     required TResult orElse(),
   }) {
     if (testToFragment != null) {
@@ -678,6 +728,12 @@ class _$TestToEncode implements TestToEncode {
     required TResult Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)
         testToUpload,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToDelete,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToGetDownloadLinkFor,
   }) {
     return testToEncode(problemId, testId, fromDir, toDir, archiveTypeExtension,
         inputFilename, outputFilename);
@@ -722,6 +778,12 @@ class _$TestToEncode implements TestToEncode {
     TResult? Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)?
         testToUpload,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
   }) {
     return testToEncode?.call(problemId, testId, fromDir, toDir,
         archiveTypeExtension, inputFilename, outputFilename);
@@ -766,6 +828,12 @@ class _$TestToEncode implements TestToEncode {
     TResult Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)?
         testToUpload,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
     required TResult orElse(),
   }) {
     if (testToEncode != null) {
@@ -784,6 +852,9 @@ class _$TestToEncode implements TestToEncode {
     required TResult Function(TestToDefragment value) testToDefragment,
     required TResult Function(TestToDecode value) testToDecode,
     required TResult Function(TestToUpload value) testToUpload,
+    required TResult Function(TestToDelete value) testToDelete,
+    required TResult Function(TestToGetDownloadLinkFor value)
+        testToGetDownloadLinkFor,
   }) {
     return testToEncode(this);
   }
@@ -797,6 +868,8 @@ class _$TestToEncode implements TestToEncode {
     TResult? Function(TestToDefragment value)? testToDefragment,
     TResult? Function(TestToDecode value)? testToDecode,
     TResult? Function(TestToUpload value)? testToUpload,
+    TResult? Function(TestToDelete value)? testToDelete,
+    TResult? Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
   }) {
     return testToEncode?.call(this);
   }
@@ -810,6 +883,8 @@ class _$TestToEncode implements TestToEncode {
     TResult Function(TestToDefragment value)? testToDefragment,
     TResult Function(TestToDecode value)? testToDecode,
     TResult Function(TestToUpload value)? testToUpload,
+    TResult Function(TestToDelete value)? testToDelete,
+    TResult Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
     required TResult orElse(),
   }) {
     if (testToEncode != null) {
@@ -1002,6 +1077,12 @@ class _$TestToDownload implements TestToDownload {
     required TResult Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)
         testToUpload,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToDelete,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToGetDownloadLinkFor,
   }) {
     return testToDownload(
         problemId, testId, fromDir, toDir, inputFilename, outputFilename);
@@ -1046,6 +1127,12 @@ class _$TestToDownload implements TestToDownload {
     TResult? Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)?
         testToUpload,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
   }) {
     return testToDownload?.call(
         problemId, testId, fromDir, toDir, inputFilename, outputFilename);
@@ -1090,6 +1177,12 @@ class _$TestToDownload implements TestToDownload {
     TResult Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)?
         testToUpload,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
     required TResult orElse(),
   }) {
     if (testToDownload != null) {
@@ -1108,6 +1201,9 @@ class _$TestToDownload implements TestToDownload {
     required TResult Function(TestToDefragment value) testToDefragment,
     required TResult Function(TestToDecode value) testToDecode,
     required TResult Function(TestToUpload value) testToUpload,
+    required TResult Function(TestToDelete value) testToDelete,
+    required TResult Function(TestToGetDownloadLinkFor value)
+        testToGetDownloadLinkFor,
   }) {
     return testToDownload(this);
   }
@@ -1121,6 +1217,8 @@ class _$TestToDownload implements TestToDownload {
     TResult? Function(TestToDefragment value)? testToDefragment,
     TResult? Function(TestToDecode value)? testToDecode,
     TResult? Function(TestToUpload value)? testToUpload,
+    TResult? Function(TestToDelete value)? testToDelete,
+    TResult? Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
   }) {
     return testToDownload?.call(this);
   }
@@ -1134,6 +1232,8 @@ class _$TestToDownload implements TestToDownload {
     TResult Function(TestToDefragment value)? testToDefragment,
     TResult Function(TestToDecode value)? testToDecode,
     TResult Function(TestToUpload value)? testToUpload,
+    TResult Function(TestToDelete value)? testToDelete,
+    TResult Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
     required TResult orElse(),
   }) {
     if (testToDownload != null) {
@@ -1336,6 +1436,12 @@ class _$TestToDefragment implements TestToDefragment {
     required TResult Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)
         testToUpload,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToDelete,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToGetDownloadLinkFor,
   }) {
     return testToDefragment(problemId, testId, testSize, toDir,
         archiveTypeExtension, chunkStream, maxTestSize);
@@ -1380,6 +1486,12 @@ class _$TestToDefragment implements TestToDefragment {
     TResult? Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)?
         testToUpload,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
   }) {
     return testToDefragment?.call(problemId, testId, testSize, toDir,
         archiveTypeExtension, chunkStream, maxTestSize);
@@ -1424,6 +1536,12 @@ class _$TestToDefragment implements TestToDefragment {
     TResult Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)?
         testToUpload,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
     required TResult orElse(),
   }) {
     if (testToDefragment != null) {
@@ -1442,6 +1560,9 @@ class _$TestToDefragment implements TestToDefragment {
     required TResult Function(TestToDefragment value) testToDefragment,
     required TResult Function(TestToDecode value) testToDecode,
     required TResult Function(TestToUpload value) testToUpload,
+    required TResult Function(TestToDelete value) testToDelete,
+    required TResult Function(TestToGetDownloadLinkFor value)
+        testToGetDownloadLinkFor,
   }) {
     return testToDefragment(this);
   }
@@ -1455,6 +1576,8 @@ class _$TestToDefragment implements TestToDefragment {
     TResult? Function(TestToDefragment value)? testToDefragment,
     TResult? Function(TestToDecode value)? testToDecode,
     TResult? Function(TestToUpload value)? testToUpload,
+    TResult? Function(TestToDelete value)? testToDelete,
+    TResult? Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
   }) {
     return testToDefragment?.call(this);
   }
@@ -1468,6 +1591,8 @@ class _$TestToDefragment implements TestToDefragment {
     TResult Function(TestToDefragment value)? testToDefragment,
     TResult Function(TestToDecode value)? testToDecode,
     TResult Function(TestToUpload value)? testToUpload,
+    TResult Function(TestToDelete value)? testToDelete,
+    TResult Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
     required TResult orElse(),
   }) {
     if (testToDefragment != null) {
@@ -1671,6 +1796,12 @@ class _$TestToDecode implements TestToDecode {
     required TResult Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)
         testToUpload,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToDelete,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToGetDownloadLinkFor,
   }) {
     return testToDecode(problemId, testId, fromDir, toDir, archiveTypeExtension,
         inputFilename, outputFilename);
@@ -1715,6 +1846,12 @@ class _$TestToDecode implements TestToDecode {
     TResult? Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)?
         testToUpload,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
   }) {
     return testToDecode?.call(problemId, testId, fromDir, toDir,
         archiveTypeExtension, inputFilename, outputFilename);
@@ -1759,6 +1896,12 @@ class _$TestToDecode implements TestToDecode {
     TResult Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)?
         testToUpload,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
     required TResult orElse(),
   }) {
     if (testToDecode != null) {
@@ -1777,6 +1920,9 @@ class _$TestToDecode implements TestToDecode {
     required TResult Function(TestToDefragment value) testToDefragment,
     required TResult Function(TestToDecode value) testToDecode,
     required TResult Function(TestToUpload value) testToUpload,
+    required TResult Function(TestToDelete value) testToDelete,
+    required TResult Function(TestToGetDownloadLinkFor value)
+        testToGetDownloadLinkFor,
   }) {
     return testToDecode(this);
   }
@@ -1790,6 +1936,8 @@ class _$TestToDecode implements TestToDecode {
     TResult? Function(TestToDefragment value)? testToDefragment,
     TResult? Function(TestToDecode value)? testToDecode,
     TResult? Function(TestToUpload value)? testToUpload,
+    TResult? Function(TestToDelete value)? testToDelete,
+    TResult? Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
   }) {
     return testToDecode?.call(this);
   }
@@ -1803,6 +1951,8 @@ class _$TestToDecode implements TestToDecode {
     TResult Function(TestToDefragment value)? testToDefragment,
     TResult Function(TestToDecode value)? testToDecode,
     TResult Function(TestToUpload value)? testToUpload,
+    TResult Function(TestToDelete value)? testToDelete,
+    TResult Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
     required TResult orElse(),
   }) {
     if (testToDecode != null) {
@@ -1995,6 +2145,12 @@ class _$TestToUpload implements TestToUpload {
     required TResult Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)
         testToUpload,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToDelete,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToGetDownloadLinkFor,
   }) {
     return testToUpload(
         problemId, testId, fromDir, toDir, inputFilename, outputFilename);
@@ -2039,6 +2195,12 @@ class _$TestToUpload implements TestToUpload {
     TResult? Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)?
         testToUpload,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
   }) {
     return testToUpload?.call(
         problemId, testId, fromDir, toDir, inputFilename, outputFilename);
@@ -2083,6 +2245,12 @@ class _$TestToUpload implements TestToUpload {
     TResult Function(String problemId, String testId, String fromDir,
             String toDir, String inputFilename, String outputFilename)?
         testToUpload,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
     required TResult orElse(),
   }) {
     if (testToUpload != null) {
@@ -2101,6 +2269,9 @@ class _$TestToUpload implements TestToUpload {
     required TResult Function(TestToDefragment value) testToDefragment,
     required TResult Function(TestToDecode value) testToDecode,
     required TResult Function(TestToUpload value) testToUpload,
+    required TResult Function(TestToDelete value) testToDelete,
+    required TResult Function(TestToGetDownloadLinkFor value)
+        testToGetDownloadLinkFor,
   }) {
     return testToUpload(this);
   }
@@ -2114,6 +2285,8 @@ class _$TestToUpload implements TestToUpload {
     TResult? Function(TestToDefragment value)? testToDefragment,
     TResult? Function(TestToDecode value)? testToDecode,
     TResult? Function(TestToUpload value)? testToUpload,
+    TResult? Function(TestToDelete value)? testToDelete,
+    TResult? Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
   }) {
     return testToUpload?.call(this);
   }
@@ -2127,6 +2300,8 @@ class _$TestToUpload implements TestToUpload {
     TResult Function(TestToDefragment value)? testToDefragment,
     TResult Function(TestToDecode value)? testToDecode,
     TResult Function(TestToUpload value)? testToUpload,
+    TResult Function(TestToDelete value)? testToDelete,
+    TResult Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
     required TResult orElse(),
   }) {
     if (testToUpload != null) {
@@ -2157,4 +2332,676 @@ abstract class TestToUpload implements TestMetadata {
   @JsonKey(ignore: true)
   _$$TestToUploadCopyWith<_$TestToUpload> get copyWith =>
       throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$TestToDeleteCopyWith<$Res>
+    implements $TestMetadataCopyWith<$Res> {
+  factory _$$TestToDeleteCopyWith(
+          _$TestToDelete value, $Res Function(_$TestToDelete) then) =
+      __$$TestToDeleteCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String problemId,
+      String testId,
+      String fromDir,
+      String inputFilename,
+      String outputFilename});
+}
+
+/// @nodoc
+class __$$TestToDeleteCopyWithImpl<$Res>
+    extends _$TestMetadataCopyWithImpl<$Res, _$TestToDelete>
+    implements _$$TestToDeleteCopyWith<$Res> {
+  __$$TestToDeleteCopyWithImpl(
+      _$TestToDelete _value, $Res Function(_$TestToDelete) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? problemId = null,
+    Object? testId = null,
+    Object? fromDir = null,
+    Object? inputFilename = null,
+    Object? outputFilename = null,
+  }) {
+    return _then(_$TestToDelete(
+      problemId: null == problemId
+          ? _value.problemId
+          : problemId // ignore: cast_nullable_to_non_nullable
+              as String,
+      testId: null == testId
+          ? _value.testId
+          : testId // ignore: cast_nullable_to_non_nullable
+              as String,
+      fromDir: null == fromDir
+          ? _value.fromDir
+          : fromDir // ignore: cast_nullable_to_non_nullable
+              as String,
+      inputFilename: null == inputFilename
+          ? _value.inputFilename
+          : inputFilename // ignore: cast_nullable_to_non_nullable
+              as String,
+      outputFilename: null == outputFilename
+          ? _value.outputFilename
+          : outputFilename // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$TestToDelete implements TestToDelete {
+  const _$TestToDelete(
+      {required this.problemId,
+      required this.testId,
+      required this.fromDir,
+      required this.inputFilename,
+      required this.outputFilename});
+
+  @override
+  final String problemId;
+  @override
+  final String testId;
+  @override
+  final String fromDir;
+  @override
+  final String inputFilename;
+  @override
+  final String outputFilename;
+
+  @override
+  String toString() {
+    return 'TestMetadata.testToDelete(problemId: $problemId, testId: $testId, fromDir: $fromDir, inputFilename: $inputFilename, outputFilename: $outputFilename)';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$TestToDelete &&
+            (identical(other.problemId, problemId) ||
+                other.problemId == problemId) &&
+            (identical(other.testId, testId) || other.testId == testId) &&
+            (identical(other.fromDir, fromDir) || other.fromDir == fromDir) &&
+            (identical(other.inputFilename, inputFilename) ||
+                other.inputFilename == inputFilename) &&
+            (identical(other.outputFilename, outputFilename) ||
+                other.outputFilename == outputFilename));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, problemId, testId, fromDir, inputFilename, outputFilename);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$TestToDeleteCopyWith<_$TestToDelete> get copyWith =>
+      __$$TestToDeleteCopyWithImpl<_$TestToDelete>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(String problemId, String testId, String fromDir,
+            String archiveTypeExtension)
+        testToFragment,
+    required TResult Function(
+            String problemId,
+            String testId,
+            String fromDir,
+            String toDir,
+            String archiveTypeExtension,
+            String inputFilename,
+            String outputFilename)
+        testToEncode,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String toDir, String inputFilename, String outputFilename)
+        testToDownload,
+    required TResult Function(
+            String problemId,
+            String testId,
+            int testSize,
+            String toDir,
+            String archiveTypeExtension,
+            Stream<Chunk> chunkStream,
+            int maxTestSize)
+        testToDefragment,
+    required TResult Function(
+            String problemId,
+            String testId,
+            String fromDir,
+            String toDir,
+            String archiveTypeExtension,
+            String inputFilename,
+            String outputFilename)
+        testToDecode,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String toDir, String inputFilename, String outputFilename)
+        testToUpload,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToDelete,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToGetDownloadLinkFor,
+  }) {
+    return testToDelete(
+        problemId, testId, fromDir, inputFilename, outputFilename);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String problemId, String testId, String fromDir,
+            String archiveTypeExtension)?
+        testToFragment,
+    TResult? Function(
+            String problemId,
+            String testId,
+            String fromDir,
+            String toDir,
+            String archiveTypeExtension,
+            String inputFilename,
+            String outputFilename)?
+        testToEncode,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String toDir, String inputFilename, String outputFilename)?
+        testToDownload,
+    TResult? Function(
+            String problemId,
+            String testId,
+            int testSize,
+            String toDir,
+            String archiveTypeExtension,
+            Stream<Chunk> chunkStream,
+            int maxTestSize)?
+        testToDefragment,
+    TResult? Function(
+            String problemId,
+            String testId,
+            String fromDir,
+            String toDir,
+            String archiveTypeExtension,
+            String inputFilename,
+            String outputFilename)?
+        testToDecode,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String toDir, String inputFilename, String outputFilename)?
+        testToUpload,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
+  }) {
+    return testToDelete?.call(
+        problemId, testId, fromDir, inputFilename, outputFilename);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String problemId, String testId, String fromDir,
+            String archiveTypeExtension)?
+        testToFragment,
+    TResult Function(
+            String problemId,
+            String testId,
+            String fromDir,
+            String toDir,
+            String archiveTypeExtension,
+            String inputFilename,
+            String outputFilename)?
+        testToEncode,
+    TResult Function(String problemId, String testId, String fromDir,
+            String toDir, String inputFilename, String outputFilename)?
+        testToDownload,
+    TResult Function(
+            String problemId,
+            String testId,
+            int testSize,
+            String toDir,
+            String archiveTypeExtension,
+            Stream<Chunk> chunkStream,
+            int maxTestSize)?
+        testToDefragment,
+    TResult Function(
+            String problemId,
+            String testId,
+            String fromDir,
+            String toDir,
+            String archiveTypeExtension,
+            String inputFilename,
+            String outputFilename)?
+        testToDecode,
+    TResult Function(String problemId, String testId, String fromDir,
+            String toDir, String inputFilename, String outputFilename)?
+        testToUpload,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
+    required TResult orElse(),
+  }) {
+    if (testToDelete != null) {
+      return testToDelete(
+          problemId, testId, fromDir, inputFilename, outputFilename);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(TestToFragment value) testToFragment,
+    required TResult Function(TestToEncode value) testToEncode,
+    required TResult Function(TestToDownload value) testToDownload,
+    required TResult Function(TestToDefragment value) testToDefragment,
+    required TResult Function(TestToDecode value) testToDecode,
+    required TResult Function(TestToUpload value) testToUpload,
+    required TResult Function(TestToDelete value) testToDelete,
+    required TResult Function(TestToGetDownloadLinkFor value)
+        testToGetDownloadLinkFor,
+  }) {
+    return testToDelete(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(TestToFragment value)? testToFragment,
+    TResult? Function(TestToEncode value)? testToEncode,
+    TResult? Function(TestToDownload value)? testToDownload,
+    TResult? Function(TestToDefragment value)? testToDefragment,
+    TResult? Function(TestToDecode value)? testToDecode,
+    TResult? Function(TestToUpload value)? testToUpload,
+    TResult? Function(TestToDelete value)? testToDelete,
+    TResult? Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
+  }) {
+    return testToDelete?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(TestToFragment value)? testToFragment,
+    TResult Function(TestToEncode value)? testToEncode,
+    TResult Function(TestToDownload value)? testToDownload,
+    TResult Function(TestToDefragment value)? testToDefragment,
+    TResult Function(TestToDecode value)? testToDecode,
+    TResult Function(TestToUpload value)? testToUpload,
+    TResult Function(TestToDelete value)? testToDelete,
+    TResult Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
+    required TResult orElse(),
+  }) {
+    if (testToDelete != null) {
+      return testToDelete(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class TestToDelete implements TestMetadata {
+  const factory TestToDelete(
+      {required final String problemId,
+      required final String testId,
+      required final String fromDir,
+      required final String inputFilename,
+      required final String outputFilename}) = _$TestToDelete;
+
+  @override
+  String get problemId;
+  @override
+  String get testId;
+  String get fromDir;
+  String get inputFilename;
+  String get outputFilename;
+  @override
+  @JsonKey(ignore: true)
+  _$$TestToDeleteCopyWith<_$TestToDelete> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$TestToGetDownloadLinkForCopyWith<$Res>
+    implements $TestMetadataCopyWith<$Res> {
+  factory _$$TestToGetDownloadLinkForCopyWith(_$TestToGetDownloadLinkFor value,
+          $Res Function(_$TestToGetDownloadLinkFor) then) =
+      __$$TestToGetDownloadLinkForCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String problemId,
+      String testId,
+      String fromDir,
+      String inputFilename,
+      String outputFilename});
+}
+
+/// @nodoc
+class __$$TestToGetDownloadLinkForCopyWithImpl<$Res>
+    extends _$TestMetadataCopyWithImpl<$Res, _$TestToGetDownloadLinkFor>
+    implements _$$TestToGetDownloadLinkForCopyWith<$Res> {
+  __$$TestToGetDownloadLinkForCopyWithImpl(_$TestToGetDownloadLinkFor _value,
+      $Res Function(_$TestToGetDownloadLinkFor) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? problemId = null,
+    Object? testId = null,
+    Object? fromDir = null,
+    Object? inputFilename = null,
+    Object? outputFilename = null,
+  }) {
+    return _then(_$TestToGetDownloadLinkFor(
+      problemId: null == problemId
+          ? _value.problemId
+          : problemId // ignore: cast_nullable_to_non_nullable
+              as String,
+      testId: null == testId
+          ? _value.testId
+          : testId // ignore: cast_nullable_to_non_nullable
+              as String,
+      fromDir: null == fromDir
+          ? _value.fromDir
+          : fromDir // ignore: cast_nullable_to_non_nullable
+              as String,
+      inputFilename: null == inputFilename
+          ? _value.inputFilename
+          : inputFilename // ignore: cast_nullable_to_non_nullable
+              as String,
+      outputFilename: null == outputFilename
+          ? _value.outputFilename
+          : outputFilename // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$TestToGetDownloadLinkFor implements TestToGetDownloadLinkFor {
+  const _$TestToGetDownloadLinkFor(
+      {required this.problemId,
+      required this.testId,
+      required this.fromDir,
+      required this.inputFilename,
+      required this.outputFilename});
+
+  @override
+  final String problemId;
+  @override
+  final String testId;
+  @override
+  final String fromDir;
+  @override
+  final String inputFilename;
+  @override
+  final String outputFilename;
+
+  @override
+  String toString() {
+    return 'TestMetadata.testToGetDownloadLinkFor(problemId: $problemId, testId: $testId, fromDir: $fromDir, inputFilename: $inputFilename, outputFilename: $outputFilename)';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$TestToGetDownloadLinkFor &&
+            (identical(other.problemId, problemId) ||
+                other.problemId == problemId) &&
+            (identical(other.testId, testId) || other.testId == testId) &&
+            (identical(other.fromDir, fromDir) || other.fromDir == fromDir) &&
+            (identical(other.inputFilename, inputFilename) ||
+                other.inputFilename == inputFilename) &&
+            (identical(other.outputFilename, outputFilename) ||
+                other.outputFilename == outputFilename));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, problemId, testId, fromDir, inputFilename, outputFilename);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$TestToGetDownloadLinkForCopyWith<_$TestToGetDownloadLinkFor>
+      get copyWith =>
+          __$$TestToGetDownloadLinkForCopyWithImpl<_$TestToGetDownloadLinkFor>(
+              this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(String problemId, String testId, String fromDir,
+            String archiveTypeExtension)
+        testToFragment,
+    required TResult Function(
+            String problemId,
+            String testId,
+            String fromDir,
+            String toDir,
+            String archiveTypeExtension,
+            String inputFilename,
+            String outputFilename)
+        testToEncode,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String toDir, String inputFilename, String outputFilename)
+        testToDownload,
+    required TResult Function(
+            String problemId,
+            String testId,
+            int testSize,
+            String toDir,
+            String archiveTypeExtension,
+            Stream<Chunk> chunkStream,
+            int maxTestSize)
+        testToDefragment,
+    required TResult Function(
+            String problemId,
+            String testId,
+            String fromDir,
+            String toDir,
+            String archiveTypeExtension,
+            String inputFilename,
+            String outputFilename)
+        testToDecode,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String toDir, String inputFilename, String outputFilename)
+        testToUpload,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToDelete,
+    required TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)
+        testToGetDownloadLinkFor,
+  }) {
+    return testToGetDownloadLinkFor(
+        problemId, testId, fromDir, inputFilename, outputFilename);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String problemId, String testId, String fromDir,
+            String archiveTypeExtension)?
+        testToFragment,
+    TResult? Function(
+            String problemId,
+            String testId,
+            String fromDir,
+            String toDir,
+            String archiveTypeExtension,
+            String inputFilename,
+            String outputFilename)?
+        testToEncode,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String toDir, String inputFilename, String outputFilename)?
+        testToDownload,
+    TResult? Function(
+            String problemId,
+            String testId,
+            int testSize,
+            String toDir,
+            String archiveTypeExtension,
+            Stream<Chunk> chunkStream,
+            int maxTestSize)?
+        testToDefragment,
+    TResult? Function(
+            String problemId,
+            String testId,
+            String fromDir,
+            String toDir,
+            String archiveTypeExtension,
+            String inputFilename,
+            String outputFilename)?
+        testToDecode,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String toDir, String inputFilename, String outputFilename)?
+        testToUpload,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult? Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
+  }) {
+    return testToGetDownloadLinkFor?.call(
+        problemId, testId, fromDir, inputFilename, outputFilename);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String problemId, String testId, String fromDir,
+            String archiveTypeExtension)?
+        testToFragment,
+    TResult Function(
+            String problemId,
+            String testId,
+            String fromDir,
+            String toDir,
+            String archiveTypeExtension,
+            String inputFilename,
+            String outputFilename)?
+        testToEncode,
+    TResult Function(String problemId, String testId, String fromDir,
+            String toDir, String inputFilename, String outputFilename)?
+        testToDownload,
+    TResult Function(
+            String problemId,
+            String testId,
+            int testSize,
+            String toDir,
+            String archiveTypeExtension,
+            Stream<Chunk> chunkStream,
+            int maxTestSize)?
+        testToDefragment,
+    TResult Function(
+            String problemId,
+            String testId,
+            String fromDir,
+            String toDir,
+            String archiveTypeExtension,
+            String inputFilename,
+            String outputFilename)?
+        testToDecode,
+    TResult Function(String problemId, String testId, String fromDir,
+            String toDir, String inputFilename, String outputFilename)?
+        testToUpload,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToDelete,
+    TResult Function(String problemId, String testId, String fromDir,
+            String inputFilename, String outputFilename)?
+        testToGetDownloadLinkFor,
+    required TResult orElse(),
+  }) {
+    if (testToGetDownloadLinkFor != null) {
+      return testToGetDownloadLinkFor(
+          problemId, testId, fromDir, inputFilename, outputFilename);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(TestToFragment value) testToFragment,
+    required TResult Function(TestToEncode value) testToEncode,
+    required TResult Function(TestToDownload value) testToDownload,
+    required TResult Function(TestToDefragment value) testToDefragment,
+    required TResult Function(TestToDecode value) testToDecode,
+    required TResult Function(TestToUpload value) testToUpload,
+    required TResult Function(TestToDelete value) testToDelete,
+    required TResult Function(TestToGetDownloadLinkFor value)
+        testToGetDownloadLinkFor,
+  }) {
+    return testToGetDownloadLinkFor(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(TestToFragment value)? testToFragment,
+    TResult? Function(TestToEncode value)? testToEncode,
+    TResult? Function(TestToDownload value)? testToDownload,
+    TResult? Function(TestToDefragment value)? testToDefragment,
+    TResult? Function(TestToDecode value)? testToDecode,
+    TResult? Function(TestToUpload value)? testToUpload,
+    TResult? Function(TestToDelete value)? testToDelete,
+    TResult? Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
+  }) {
+    return testToGetDownloadLinkFor?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(TestToFragment value)? testToFragment,
+    TResult Function(TestToEncode value)? testToEncode,
+    TResult Function(TestToDownload value)? testToDownload,
+    TResult Function(TestToDefragment value)? testToDefragment,
+    TResult Function(TestToDecode value)? testToDecode,
+    TResult Function(TestToUpload value)? testToUpload,
+    TResult Function(TestToDelete value)? testToDelete,
+    TResult Function(TestToGetDownloadLinkFor value)? testToGetDownloadLinkFor,
+    required TResult orElse(),
+  }) {
+    if (testToGetDownloadLinkFor != null) {
+      return testToGetDownloadLinkFor(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class TestToGetDownloadLinkFor implements TestMetadata {
+  const factory TestToGetDownloadLinkFor(
+      {required final String problemId,
+      required final String testId,
+      required final String fromDir,
+      required final String inputFilename,
+      required final String outputFilename}) = _$TestToGetDownloadLinkFor;
+
+  @override
+  String get problemId;
+  @override
+  String get testId;
+  String get fromDir;
+  String get inputFilename;
+  String get outputFilename;
+  @override
+  @JsonKey(ignore: true)
+  _$$TestToGetDownloadLinkForCopyWith<_$TestToGetDownloadLinkFor>
+      get copyWith => throw _privateConstructorUsedError;
 }
