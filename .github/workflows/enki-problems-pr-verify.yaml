@@ -3,7 +3,7 @@ name: Enki - PR Verify
 on:
   pull_request:
     branches:
-      - develop
+      - enki
     paths:
       - "enki-problems/**"
       - ".github/workflows/enki-problems-pr-verify.yaml"
