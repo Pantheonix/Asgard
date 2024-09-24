@@ -3,7 +3,7 @@ name: Hermes - PR Verify
 on:
   pull_request:
     branches:
-      - develop
+      - hermes
     paths:
       - "hermes-tests/**"
       - ".github/workflows/hermes-tests-pr-verify.yaml"

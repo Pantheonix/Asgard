@@ -5,12 +5,6 @@ on:
     tags:
       - "enki/**"
 
-env:
-  NAMESPACE: pantheonix
-  REPOSITORY: enki
-  IMAGE_NAME: enki-problems
-  BUILD_CONTEXT: enki-problems
-
 jobs:
   build:
     name: Build and Test Enki Problems Microservice
@@ -37,13 +31,18 @@ jobs:
     needs: build
     uses: ./.github/workflows/step-deploy-to-ghcr.yaml
     with:
-      image_name: ${{ env.IMAGE_NAME }}
-      build_context: ${{ env.BUILD_CONTEXT }}
+      image_name: enki-problems
+      build_context: enki-problems
+    secrets:
+      TOKEN: ${{ secrets.TOKEN }}
 
   deploy-to-docker-hub:
     needs: build
     uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
     with:
-      namespace: ${{ env.NAMESPACE }}
-      repository: ${{ env.REPOSITORY }}
-      build_context: ${{ env.BUILD_CONTEXT }}
+      namespace: pantheonix
+      repository: enki
+      build_context: enki-problems
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

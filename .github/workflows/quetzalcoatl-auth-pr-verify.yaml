@@ -3,7 +3,7 @@ name: Quetzalcoatl - PR Verify
 on:
   pull_request:
     branches:
-      - develop
+      - quetzalcoatl
     paths:
       - "quetzalcoatl-auth/**"
       - ".github/workflows/quetzalcoatl-auth-pr-verify.yaml"

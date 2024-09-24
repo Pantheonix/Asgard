@@ -12,6 +12,11 @@ on:
       build_context:
         type: string
         required: true
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
 
 jobs:
   deploy:
@@ -37,6 +42,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ inputs.namespace }}/${{ inputs.repository }}
+          tags: |
+            type=semver,pattern={{version}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6

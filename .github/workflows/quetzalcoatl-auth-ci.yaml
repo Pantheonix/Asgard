@@ -5,12 +5,6 @@ on:
     tags:
       - "quetzalcoatl/**"
 
-env:
-  NAMESPACE: pantheonix
-  REPOSITORY: quetzalcoatl
-  IMAGE_NAME: quetzalcoatl-auth
-  BUILD_CONTEXT: quetzalcoatl-auth
-
 jobs:
   build:
     name: Build and Test Quetzalcoatl Auth Microservice
@@ -37,13 +31,18 @@ jobs:
     needs: build
     uses: ./.github/workflows/step-deploy-to-ghcr.yaml
     with:
-      image_name: ${{ env.IMAGE_NAME }}
-      build_context: ${{ env.BUILD_CONTEXT }}
+      image_name: quetzalcoatl-auth
+      build_context: quetzalcoatl-auth
+    secrets:
+      TOKEN: ${{ secrets.TOKEN }}
 
   deploy-to-docker-hub:
     needs: build
     uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
     with:
-      namespace: ${{ env.NAMESPACE }}
-      repository: ${{ env.REPOSITORY }}
-      build_context: ${{ env.BUILD_CONTEXT }}
+      namespace: pantheonix
+      repository: quetzalcoatl
+      build_context: quetzalcoatl-auth
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
