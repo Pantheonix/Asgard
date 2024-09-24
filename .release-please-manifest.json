@@ -2,7 +2,7 @@
   "dapr": "2.1.0",
   "anubis-eval/eval-lb": "1.0.0",
   "enki-problems": "1.0.0",
-  "quetzalcoatl-auth": "1.0.1",
+  "quetzalcoatl-auth": "1.0.2",
   "hermes-tests": "1.0.0",
   "odin-gateway": "1.0.0",
   "anubis-eval": "0.1.0"
