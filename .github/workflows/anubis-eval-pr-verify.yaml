@@ -3,7 +3,7 @@ name: Anubis - PR Verify
 on:
   pull_request:
     branches:
-      - develop
+      - anubis
     paths:
       - "anubis-eval/**"
       - ".github/workflows/anubis-eval-pr-verify.yaml"
