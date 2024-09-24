@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/Pantheonix/Asgard/compare/quetzalcoatl/v1.0.1...quetzalcoatl/v1.0.2) (2024-09-24)
+
+
+### Bug Fixes
+
+* **quetzalcoatl:** remove redundant compose file ([#45](https://github.com/Pantheonix/Asgard/issues/45)) ([481a13b](https://github.com/Pantheonix/Asgard/commit/481a13bc2545e5ac2f4e845b96db41c2773686ed))
+
 ## [1.0.1](https://github.com/Pantheonix/Asgard/compare/quetzalcoatl/v1.0.0...quetzalcoatl/v1.0.1) (2024-09-24)
 
 
