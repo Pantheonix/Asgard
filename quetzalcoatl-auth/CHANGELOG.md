@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/Pantheonix/Asgard/compare/quetzalcoatl/v1.0.0...quetzalcoatl/v1.0.1) (2024-09-24)
+
+
+### Bug Fixes
+
+* **quetzalcoatl:** remove obsolete role enum ([#42](https://github.com/Pantheonix/Asgard/issues/42)) ([0794dfe](https://github.com/Pantheonix/Asgard/commit/0794dfe8d4f7210dc311a2685f27f22d60dda306))
+
 ## 1.0.0 (2024-09-21)
 
 
