@@ -43,7 +43,7 @@ jobs:
         with:
           images: ${{ inputs.namespace }}/${{ inputs.repository }}
           tags: |
-            type=semver,pattern={{version}}
+            type=match,pattern=(.*)-v(\d.\d.\d),group=1
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
