@@ -12,5 +12,6 @@ public class UserTokenResponse : TokenResponse
     public string Email { get; set; } = default!;
     public string? Fullname { get; set; }
     public string? Bio { get; set; }
-    public string? ProfilePictureUrl { get; set; }
+    public Guid? ProfilePictureId { get; set; }
+    public IEnumerable<string> Roles { get; set; } = new List<string>();
 }

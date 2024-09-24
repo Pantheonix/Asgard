@@ -1,0 +1,27 @@
+{
+  "culture": "en",
+  "texts": {
+    "Menu:Home": "Home",
+    "Welcome": "Welcome",
+    "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io.",
+    "EnkiProblems:ProblemNameAlreadyExists": "A problem with the same name already exists.",
+    "EnkiProblems:TotalMemoryLessThanStackMemory": "Total memory must be greater than stack memory.",
+    "EnkiProblems:NotAllowedToCreateProblem": "You are not allowed to create a problem.",
+    "EnkiProblems:NotAllowedToViewUnpublishedProblems": "You are not allowed to view unpublished problems.",
+    "EnkiProblems:NotAllowedToEditProblem": "You are not allowed to edit this problem.",
+    "EnkiProblems:NotAllowedToEditPublishedProblem": "A published problem cannot be updated.",
+    "EnkiProblems:UnpublishedProblemNotBelongingToCurrentUser": "You are not the proposer of this unpublished problem.",
+    "EnkiProblems:ProblemNotFound": "Problem not found.",
+    "EnkiProblems:TestNotFound": "Test not found.",
+    "EnkiProblems:NumberOfTestsExceedsLimit": "The number of tests exceeds the allowed limit.",
+    "EnkiProblems:TestUploadFailed": "The uploading process for the current test failed.",
+    "EnkiProblems:TestDeleteFailed": "The deleting process for the current test failed.",
+    "EnkiProblems:DownloadTestArchiveError": "Download failed for test archive.",
+    "EnkiProblems:TotalScoreExceeded": "The total score of the problem tests cannot exceed the predefined limit.",
+    "EnkiProblems:NumberOfTestExceeded": "The number of tests cannot exceed the predefined limit.",
+    "EnkiProblems:TestDownloadUrlRetrievalFailed": "The download URL for the current test could not be retrieved.",
+    "EnkiProblems:ProblemCannotBePublished": "The problem cannot be published.",
+    "EnkiProblems:ProblemCannotBeDeleted": "The problem cannot be deleted due to lack of permissions or not existing in the system.",
+    "EnkiProblems:NotAllowedToDeletePublishedProblem": "A published problem cannot be deleted unless you are admin."
+  }
+}

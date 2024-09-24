@@ -19,7 +19,7 @@ void main() {
   group('Fragment Test UseCase Unit Tests', () {
     setUpAll(() {
       testConfig = ServerConfig.fromJson(
-        Config.fromJsonFile('config.json').test,
+        Config.fromEnv('HERMES_CONFIG').test,
       );
       final logger = Logger(
         output: FileLogOutput(
@@ -42,7 +42,7 @@ void main() {
         'Then a stream of chunks is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToFragment(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '1',
         archiveTypeExtension: testConfig.archiveTypeExtension,
         fromDir: testConfig.tempLocalArchivedTestFolder,
@@ -78,7 +78,7 @@ void main() {
         'Then localTestNotFound storage failure is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToFragment(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '7',
         archiveTypeExtension: testConfig.archiveTypeExtension,
         fromDir: testConfig.tempLocalArchivedTestFolder,
@@ -108,7 +108,7 @@ void main() {
         'Then invalidLocalTestFormat storage failure is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToFragment(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '4',
         archiveTypeExtension: testConfig.archiveTypeExtension,
         fromDir: testConfig.tempLocalArchivedTestFolder,
@@ -138,7 +138,7 @@ void main() {
         'Then unexpected storage failure is returned', () async {
       // Arrange
       final TestMetadata testMetadata = TestMetadata.testToUpload(
-        problemId: 'marsx',
+        problemId: 'sum',
         testId: '4',
         fromDir: testConfig.tempLocalUnarchivedTestFolder,
         toDir: testConfig.remoteUnarchivedTestFolder,

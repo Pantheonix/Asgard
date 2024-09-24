@@ -1,0 +1,25 @@
+name: Eval Nginx Load Balancer - Build Docker image and publish to GHCR and Docker Hub
+
+on:
+  push:
+    tags:
+      - "eval-lb/**"
+
+jobs:
+  deploy-to-ghcr:
+    uses: ./.github/workflows/step-deploy-to-ghcr.yaml
+    with:
+      image_name: asgard-eval-lb
+      build_context: anubis-eval/eval-lb
+    secrets:
+      TOKEN: ${{ secrets.TOKEN }}
+
+  deploy-to-docker-hub:
+    uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
+    with:
+      namespace: pantheonix
+      repository: eval-lb
+      build_context: anubis-eval/eval-lb
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

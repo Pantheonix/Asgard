@@ -1,8 +1,10 @@
 import 'package:cqrs_mediator/cqrs_mediator.dart';
 import 'package:get_it/get_it.dart';
+import 'package:hermes_tests/application/use_cases/delete/delete_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/download/download_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/download/encode_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/download/fragment_test_use_case.dart';
+import 'package:hermes_tests/application/use_cases/get_download_link/get_download_link_for_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/upload/decode_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/upload/defragment_test_use_case.dart';
 import 'package:hermes_tests/application/use_cases/upload/upload_test_use_case.dart';
@@ -78,6 +80,18 @@ Future<void> configureDependencies(String env) async {
   );
   mediator.registerHandler(
     () => DownloadTestAsyncQueryHandler(
+      testRepository,
+      logger,
+    ),
+  );
+  mediator.registerHandler(
+    () => DeleteTestAsyncQueryHandler(
+      testRepository,
+      logger,
+    ),
+  );
+  mediator.registerHandler(
+    () => GetDownloadLinkForTestAsyncQueryHandler(
       testRepository,
       logger,
     ),

@@ -67,4 +67,28 @@ class FileManager {
 
     yield* streamController.stream;
   }
+
+  static Future<void> createLocalDirectory(String path) async {
+    final Directory dir = Directory(path);
+    if (!dir.existsSync()) {
+      await dir.create(recursive: true);
+    }
+  }
+
+  static Future<bool> localDirectoryExists(String path) async {
+    final Directory dir = Directory(path);
+    return dir.existsSync();
+  }
+
+  static Future<void> createLocalFile(String path) async {
+    final File file = File(path);
+    if (!file.existsSync()) {
+      await file.create(recursive: true);
+    }
+  }
+
+  static Future<bool> localFileExists(String path) async {
+    final File file = File(path);
+    return file.existsSync();
+  }
 }

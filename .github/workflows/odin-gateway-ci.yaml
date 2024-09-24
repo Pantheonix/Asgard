@@ -1,0 +1,26 @@
+name: Odin - Build Docker image and publish to GHCR and Docker Hub
+
+on:
+  push:
+    tags:
+      - "odin/**"
+
+jobs:
+  deploy-to-ghcr:
+    uses: ./.github/workflows/step-deploy-to-ghcr.yaml
+    with:
+      image_name: odin-api-gateway
+      build_context: odin-gateway
+    secrets:
+      TOKEN: ${{ secrets.TOKEN }}
+
+  deploy-to-docker-hub:
+    uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
+    with:
+      namespace: pantheonix
+      repository: odin
+      build_context: odin-gateway
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+

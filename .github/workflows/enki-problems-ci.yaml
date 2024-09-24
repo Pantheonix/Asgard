@@ -1,0 +1,48 @@
+name: Enki - Build Docker image and publish to GHCR and Docker Hub
+
+on:
+  push:
+    tags:
+      - "enki/**"
+
+jobs:
+  build:
+    name: Build and Test Enki Problems Microservice
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: enki-problems
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0.x'
+      - name: Build
+        run: |
+          dotnet restore "src/EnkiProblems.HttpApi.Host/EnkiProblems.HttpApi.Host.csproj"
+          dotnet restore "test/EnkiProblems.Application.Tests/EnkiProblems.Application.Tests.csproj"
+          dotnet build --no-restore
+      - name: Test
+        run: dotnet test -e DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+  deploy-to-ghcr:
+    needs: build
+    uses: ./.github/workflows/step-deploy-to-ghcr.yaml
+    with:
+      image_name: enki-problems
+      build_context: enki-problems
+    secrets:
+      TOKEN: ${{ secrets.TOKEN }}
+
+  deploy-to-docker-hub:
+    needs: build
+    uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
+    with:
+      namespace: pantheonix
+      repository: enki
+      build_context: enki-problems
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

@@ -9,7 +9,7 @@ public static class WebApplicationExtensions
 
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
 
-        var roles = Enum.GetValues<ApplicationRoles>();
+        var roles = Enum.GetValues<ApplicationRole>();
         foreach (var role in roles)
         {
             var roleExists = await roleManager.RoleExistsAsync(role.ToString());
@@ -40,12 +40,12 @@ public static class WebApplicationExtensions
                 adminUser,
                 adminConfig.Value.Password
             );
-            var resultAddRole = await userManager.AddToRoleAsync(
+            var resultAddRoles = await userManager.AddToRolesAsync(
                 adminUser,
-                ApplicationRoles.Admin.ToString()
+                new[] { ApplicationRole.Proposer.ToString(), ApplicationRole.Admin.ToString() }
             );
 
-            if (!resultCreateUser.Succeeded || !resultAddRole.Succeeded)
+            if (!resultCreateUser.Succeeded || !resultAddRoles.Succeeded)
             {
                 throw new Exception("Failed to create admin user");
             }

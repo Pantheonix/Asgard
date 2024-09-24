@@ -1,5 +1,3 @@
-using Api.Features.Auth.RefreshToken;
-
 namespace Api.Features.Auth.Register;
 
 public class RegisterUserSummary : Summary<RegisterUserEndpoint>
@@ -25,7 +23,7 @@ public class RegisterUserSummary : Summary<RegisterUserEndpoint>
                 Email = "test@gmail.com",
                 Fullname = "Test User",
                 Bio = "Test user bio",
-                ProfilePictureUrl = "https://picsum.photos/id/237/200/300",
+                ProfilePictureId = Guid.NewGuid(),
             }
         );
         Response<ErrorResponse>(400, "Validation failure");

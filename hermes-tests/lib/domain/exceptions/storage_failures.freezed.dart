@@ -21,6 +21,7 @@ mixin _$StorageFailure {
   TResult when<TResult extends Object?>({
     required TResult Function(String message) unexpected,
     required TResult Function(String message) localTestNotFound,
+    required TResult Function(String message) remoteTestNotFound,
     required TResult Function(String message) invalidLocalTestFormat,
     required TResult Function(String message) testSizeLimitExceeded,
   }) =>
@@ -29,6 +30,7 @@ mixin _$StorageFailure {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String message)? unexpected,
     TResult? Function(String message)? localTestNotFound,
+    TResult? Function(String message)? remoteTestNotFound,
     TResult? Function(String message)? invalidLocalTestFormat,
     TResult? Function(String message)? testSizeLimitExceeded,
   }) =>
@@ -37,6 +39,7 @@ mixin _$StorageFailure {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String message)? unexpected,
     TResult Function(String message)? localTestNotFound,
+    TResult Function(String message)? remoteTestNotFound,
     TResult Function(String message)? invalidLocalTestFormat,
     TResult Function(String message)? testSizeLimitExceeded,
     required TResult orElse(),
@@ -46,6 +49,7 @@ mixin _$StorageFailure {
   TResult map<TResult extends Object?>({
     required TResult Function(Unexpected value) unexpected,
     required TResult Function(LocalTestNotFound value) localTestNotFound,
+    required TResult Function(RemoteTestNotFound value) remoteTestNotFound,
     required TResult Function(InvalidLocalTestFormat value)
         invalidLocalTestFormat,
     required TResult Function(TestSizeLimitExceeded value)
@@ -56,6 +60,7 @@ mixin _$StorageFailure {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(Unexpected value)? unexpected,
     TResult? Function(LocalTestNotFound value)? localTestNotFound,
+    TResult? Function(RemoteTestNotFound value)? remoteTestNotFound,
     TResult? Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
     TResult? Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
   }) =>
@@ -64,6 +69,7 @@ mixin _$StorageFailure {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Unexpected value)? unexpected,
     TResult Function(LocalTestNotFound value)? localTestNotFound,
+    TResult Function(RemoteTestNotFound value)? remoteTestNotFound,
     TResult Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
     TResult Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
     required TResult orElse(),
@@ -176,6 +182,7 @@ class _$Unexpected implements Unexpected {
   TResult when<TResult extends Object?>({
     required TResult Function(String message) unexpected,
     required TResult Function(String message) localTestNotFound,
+    required TResult Function(String message) remoteTestNotFound,
     required TResult Function(String message) invalidLocalTestFormat,
     required TResult Function(String message) testSizeLimitExceeded,
   }) {
@@ -187,6 +194,7 @@ class _$Unexpected implements Unexpected {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String message)? unexpected,
     TResult? Function(String message)? localTestNotFound,
+    TResult? Function(String message)? remoteTestNotFound,
     TResult? Function(String message)? invalidLocalTestFormat,
     TResult? Function(String message)? testSizeLimitExceeded,
   }) {
@@ -198,6 +206,7 @@ class _$Unexpected implements Unexpected {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String message)? unexpected,
     TResult Function(String message)? localTestNotFound,
+    TResult Function(String message)? remoteTestNotFound,
     TResult Function(String message)? invalidLocalTestFormat,
     TResult Function(String message)? testSizeLimitExceeded,
     required TResult orElse(),
@@ -213,6 +222,7 @@ class _$Unexpected implements Unexpected {
   TResult map<TResult extends Object?>({
     required TResult Function(Unexpected value) unexpected,
     required TResult Function(LocalTestNotFound value) localTestNotFound,
+    required TResult Function(RemoteTestNotFound value) remoteTestNotFound,
     required TResult Function(InvalidLocalTestFormat value)
         invalidLocalTestFormat,
     required TResult Function(TestSizeLimitExceeded value)
@@ -226,6 +236,7 @@ class _$Unexpected implements Unexpected {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(Unexpected value)? unexpected,
     TResult? Function(LocalTestNotFound value)? localTestNotFound,
+    TResult? Function(RemoteTestNotFound value)? remoteTestNotFound,
     TResult? Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
     TResult? Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
   }) {
@@ -237,6 +248,7 @@ class _$Unexpected implements Unexpected {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Unexpected value)? unexpected,
     TResult Function(LocalTestNotFound value)? localTestNotFound,
+    TResult Function(RemoteTestNotFound value)? remoteTestNotFound,
     TResult Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
     TResult Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
     required TResult orElse(),
@@ -327,6 +339,7 @@ class _$LocalTestNotFound implements LocalTestNotFound {
   TResult when<TResult extends Object?>({
     required TResult Function(String message) unexpected,
     required TResult Function(String message) localTestNotFound,
+    required TResult Function(String message) remoteTestNotFound,
     required TResult Function(String message) invalidLocalTestFormat,
     required TResult Function(String message) testSizeLimitExceeded,
   }) {
@@ -338,6 +351,7 @@ class _$LocalTestNotFound implements LocalTestNotFound {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String message)? unexpected,
     TResult? Function(String message)? localTestNotFound,
+    TResult? Function(String message)? remoteTestNotFound,
     TResult? Function(String message)? invalidLocalTestFormat,
     TResult? Function(String message)? testSizeLimitExceeded,
   }) {
@@ -349,6 +363,7 @@ class _$LocalTestNotFound implements LocalTestNotFound {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String message)? unexpected,
     TResult Function(String message)? localTestNotFound,
+    TResult Function(String message)? remoteTestNotFound,
     TResult Function(String message)? invalidLocalTestFormat,
     TResult Function(String message)? testSizeLimitExceeded,
     required TResult orElse(),
@@ -364,6 +379,7 @@ class _$LocalTestNotFound implements LocalTestNotFound {
   TResult map<TResult extends Object?>({
     required TResult Function(Unexpected value) unexpected,
     required TResult Function(LocalTestNotFound value) localTestNotFound,
+    required TResult Function(RemoteTestNotFound value) remoteTestNotFound,
     required TResult Function(InvalidLocalTestFormat value)
         invalidLocalTestFormat,
     required TResult Function(TestSizeLimitExceeded value)
@@ -377,6 +393,7 @@ class _$LocalTestNotFound implements LocalTestNotFound {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(Unexpected value)? unexpected,
     TResult? Function(LocalTestNotFound value)? localTestNotFound,
+    TResult? Function(RemoteTestNotFound value)? remoteTestNotFound,
     TResult? Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
     TResult? Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
   }) {
@@ -388,6 +405,7 @@ class _$LocalTestNotFound implements LocalTestNotFound {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Unexpected value)? unexpected,
     TResult Function(LocalTestNotFound value)? localTestNotFound,
+    TResult Function(RemoteTestNotFound value)? remoteTestNotFound,
     TResult Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
     TResult Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
     required TResult orElse(),
@@ -408,6 +426,165 @@ abstract class LocalTestNotFound implements StorageFailure {
   @override
   @JsonKey(ignore: true)
   _$$LocalTestNotFoundCopyWith<_$LocalTestNotFound> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$RemoteTestNotFoundCopyWith<$Res>
+    implements $StorageFailureCopyWith<$Res> {
+  factory _$$RemoteTestNotFoundCopyWith(_$RemoteTestNotFound value,
+          $Res Function(_$RemoteTestNotFound) then) =
+      __$$RemoteTestNotFoundCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String message});
+}
+
+/// @nodoc
+class __$$RemoteTestNotFoundCopyWithImpl<$Res>
+    extends _$StorageFailureCopyWithImpl<$Res, _$RemoteTestNotFound>
+    implements _$$RemoteTestNotFoundCopyWith<$Res> {
+  __$$RemoteTestNotFoundCopyWithImpl(
+      _$RemoteTestNotFound _value, $Res Function(_$RemoteTestNotFound) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? message = null,
+  }) {
+    return _then(_$RemoteTestNotFound(
+      message: null == message
+          ? _value.message
+          : message // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$RemoteTestNotFound implements RemoteTestNotFound {
+  const _$RemoteTestNotFound({required this.message});
+
+  @override
+  final String message;
+
+  @override
+  String toString() {
+    return 'StorageFailure.remoteTestNotFound(message: $message)';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$RemoteTestNotFound &&
+            (identical(other.message, message) || other.message == message));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, message);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$RemoteTestNotFoundCopyWith<_$RemoteTestNotFound> get copyWith =>
+      __$$RemoteTestNotFoundCopyWithImpl<_$RemoteTestNotFound>(
+          this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(String message) unexpected,
+    required TResult Function(String message) localTestNotFound,
+    required TResult Function(String message) remoteTestNotFound,
+    required TResult Function(String message) invalidLocalTestFormat,
+    required TResult Function(String message) testSizeLimitExceeded,
+  }) {
+    return remoteTestNotFound(message);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String message)? unexpected,
+    TResult? Function(String message)? localTestNotFound,
+    TResult? Function(String message)? remoteTestNotFound,
+    TResult? Function(String message)? invalidLocalTestFormat,
+    TResult? Function(String message)? testSizeLimitExceeded,
+  }) {
+    return remoteTestNotFound?.call(message);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String message)? unexpected,
+    TResult Function(String message)? localTestNotFound,
+    TResult Function(String message)? remoteTestNotFound,
+    TResult Function(String message)? invalidLocalTestFormat,
+    TResult Function(String message)? testSizeLimitExceeded,
+    required TResult orElse(),
+  }) {
+    if (remoteTestNotFound != null) {
+      return remoteTestNotFound(message);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(Unexpected value) unexpected,
+    required TResult Function(LocalTestNotFound value) localTestNotFound,
+    required TResult Function(RemoteTestNotFound value) remoteTestNotFound,
+    required TResult Function(InvalidLocalTestFormat value)
+        invalidLocalTestFormat,
+    required TResult Function(TestSizeLimitExceeded value)
+        testSizeLimitExceeded,
+  }) {
+    return remoteTestNotFound(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(Unexpected value)? unexpected,
+    TResult? Function(LocalTestNotFound value)? localTestNotFound,
+    TResult? Function(RemoteTestNotFound value)? remoteTestNotFound,
+    TResult? Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
+    TResult? Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
+  }) {
+    return remoteTestNotFound?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(Unexpected value)? unexpected,
+    TResult Function(LocalTestNotFound value)? localTestNotFound,
+    TResult Function(RemoteTestNotFound value)? remoteTestNotFound,
+    TResult Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
+    TResult Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
+    required TResult orElse(),
+  }) {
+    if (remoteTestNotFound != null) {
+      return remoteTestNotFound(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class RemoteTestNotFound implements StorageFailure {
+  const factory RemoteTestNotFound({required final String message}) =
+      _$RemoteTestNotFound;
+
+  @override
+  String get message;
+  @override
+  @JsonKey(ignore: true)
+  _$$RemoteTestNotFoundCopyWith<_$RemoteTestNotFound> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -480,6 +657,7 @@ class _$InvalidLocalTestFormat implements InvalidLocalTestFormat {
   TResult when<TResult extends Object?>({
     required TResult Function(String message) unexpected,
     required TResult Function(String message) localTestNotFound,
+    required TResult Function(String message) remoteTestNotFound,
     required TResult Function(String message) invalidLocalTestFormat,
     required TResult Function(String message) testSizeLimitExceeded,
   }) {
@@ -491,6 +669,7 @@ class _$InvalidLocalTestFormat implements InvalidLocalTestFormat {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String message)? unexpected,
     TResult? Function(String message)? localTestNotFound,
+    TResult? Function(String message)? remoteTestNotFound,
     TResult? Function(String message)? invalidLocalTestFormat,
     TResult? Function(String message)? testSizeLimitExceeded,
   }) {
@@ -502,6 +681,7 @@ class _$InvalidLocalTestFormat implements InvalidLocalTestFormat {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String message)? unexpected,
     TResult Function(String message)? localTestNotFound,
+    TResult Function(String message)? remoteTestNotFound,
     TResult Function(String message)? invalidLocalTestFormat,
     TResult Function(String message)? testSizeLimitExceeded,
     required TResult orElse(),
@@ -517,6 +697,7 @@ class _$InvalidLocalTestFormat implements InvalidLocalTestFormat {
   TResult map<TResult extends Object?>({
     required TResult Function(Unexpected value) unexpected,
     required TResult Function(LocalTestNotFound value) localTestNotFound,
+    required TResult Function(RemoteTestNotFound value) remoteTestNotFound,
     required TResult Function(InvalidLocalTestFormat value)
         invalidLocalTestFormat,
     required TResult Function(TestSizeLimitExceeded value)
@@ -530,6 +711,7 @@ class _$InvalidLocalTestFormat implements InvalidLocalTestFormat {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(Unexpected value)? unexpected,
     TResult? Function(LocalTestNotFound value)? localTestNotFound,
+    TResult? Function(RemoteTestNotFound value)? remoteTestNotFound,
     TResult? Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
     TResult? Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
   }) {
@@ -541,6 +723,7 @@ class _$InvalidLocalTestFormat implements InvalidLocalTestFormat {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Unexpected value)? unexpected,
     TResult Function(LocalTestNotFound value)? localTestNotFound,
+    TResult Function(RemoteTestNotFound value)? remoteTestNotFound,
     TResult Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
     TResult Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
     required TResult orElse(),
@@ -633,6 +816,7 @@ class _$TestSizeLimitExceeded implements TestSizeLimitExceeded {
   TResult when<TResult extends Object?>({
     required TResult Function(String message) unexpected,
     required TResult Function(String message) localTestNotFound,
+    required TResult Function(String message) remoteTestNotFound,
     required TResult Function(String message) invalidLocalTestFormat,
     required TResult Function(String message) testSizeLimitExceeded,
   }) {
@@ -644,6 +828,7 @@ class _$TestSizeLimitExceeded implements TestSizeLimitExceeded {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String message)? unexpected,
     TResult? Function(String message)? localTestNotFound,
+    TResult? Function(String message)? remoteTestNotFound,
     TResult? Function(String message)? invalidLocalTestFormat,
     TResult? Function(String message)? testSizeLimitExceeded,
   }) {
@@ -655,6 +840,7 @@ class _$TestSizeLimitExceeded implements TestSizeLimitExceeded {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String message)? unexpected,
     TResult Function(String message)? localTestNotFound,
+    TResult Function(String message)? remoteTestNotFound,
     TResult Function(String message)? invalidLocalTestFormat,
     TResult Function(String message)? testSizeLimitExceeded,
     required TResult orElse(),
@@ -670,6 +856,7 @@ class _$TestSizeLimitExceeded implements TestSizeLimitExceeded {
   TResult map<TResult extends Object?>({
     required TResult Function(Unexpected value) unexpected,
     required TResult Function(LocalTestNotFound value) localTestNotFound,
+    required TResult Function(RemoteTestNotFound value) remoteTestNotFound,
     required TResult Function(InvalidLocalTestFormat value)
         invalidLocalTestFormat,
     required TResult Function(TestSizeLimitExceeded value)
@@ -683,6 +870,7 @@ class _$TestSizeLimitExceeded implements TestSizeLimitExceeded {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(Unexpected value)? unexpected,
     TResult? Function(LocalTestNotFound value)? localTestNotFound,
+    TResult? Function(RemoteTestNotFound value)? remoteTestNotFound,
     TResult? Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
     TResult? Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
   }) {
@@ -694,6 +882,7 @@ class _$TestSizeLimitExceeded implements TestSizeLimitExceeded {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Unexpected value)? unexpected,
     TResult Function(LocalTestNotFound value)? localTestNotFound,
+    TResult Function(RemoteTestNotFound value)? remoteTestNotFound,
     TResult Function(InvalidLocalTestFormat value)? invalidLocalTestFormat,
     TResult Function(TestSizeLimitExceeded value)? testSizeLimitExceeded,
     required TResult orElse(),

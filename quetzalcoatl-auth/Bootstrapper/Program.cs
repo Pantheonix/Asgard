@@ -1,5 +1,5 @@
-Log.Logger = new LoggerConfiguration().MinimumLevel
-    .Override("Microsoft", LogEventLevel.Information)
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
     .Enrich.FromLogContext()
     .WriteTo.Console()
     .CreateLogger();
@@ -10,9 +10,14 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
+    if (builder.Environment.IsEnvironment(SystemConsts.TestingEnvironment))
+    {
+        _ = builder.Configuration.AddDotNetEnv(".env.template", LoadOptions.TraversePath()).Build();
+    }
+
     builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection(nameof(JwtConfig)));
     builder.Services.Configure<AdminConfig>(builder.Configuration.GetSection(nameof(AdminConfig)));
-    
+
     var jwtConfig = builder.Configuration.GetSection(nameof(JwtConfig)).Get<JwtConfig>();
     var tokenValidationParameters = new TokenValidationParameters
     {
@@ -25,19 +30,26 @@ try
     };
     var dsnConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-    builder.Services.AddHealthChecks().AddSqlServer(dsnConnectionString!);
+    if (!builder.Environment.IsEnvironment(SystemConsts.TestingEnvironment))
+    {
+        builder.Services.AddHealthChecks().AddSqlServer(dsnConnectionString!);
+    }
 
     builder.Host.UseSerilog(
         (context, services, configuration) =>
             configuration.ReadFrom.Configuration(context.Configuration).ReadFrom.Services(services)
     );
-    
-    builder.Services
-        .AddDbContext<ApplicationDbContext>(options =>
+
+    builder
+        .Services.AddDbContext<ApplicationDbContext>(options =>
         {
-            options.UseSqlServer(dsnConnectionString);
-            options.UseTriggers(
-                triggerOptions => triggerOptions.AddTrigger<DeleteStaleRefreshTokens>()
+            if (!builder.Environment.IsEnvironment(SystemConsts.TestingEnvironment))
+            {
+                options.UseSqlServer(dsnConnectionString);
+            }
+
+            options.UseTriggers(triggerOptions =>
+                triggerOptions.AddTrigger<DeleteStaleRefreshTokens>()
             );
         })
         .AddScoped<IPictureRepository, PictureRepository>()
@@ -50,10 +62,28 @@ try
 
     if (builder.Environment.IsDevelopment())
     {
-        builder.Services.EnsureDbCreated<ApplicationDbContext>();
+        builder.Services.ApplyMigrations<ApplicationDbContext>();
     }
 
-    builder.Services
+    var corsOrigins = builder.Configuration.GetSection("AllowedOrigins").Value?.Split(';');
+    Log.Information("Allowed origins: {CorsOrigins}", corsOrigins);
+    builder
+        .Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(corsPolicyBuilder =>
+            {
+                corsPolicyBuilder
+                    .WithOrigins(
+                        corsOrigins ?? new[] { "http://localhost:10000", "https://pantheonix.live" }
+                    )
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+            });
+        })
+        .AddSingleton(tokenValidationParameters)
+        .AddJWTBearerAuth(jwtConfig.SecretKey)
+        .AddAutoMapper(typeof(IApiMarker), typeof(IApplicationMarker))
         .AddFastEndpoints(options =>
         {
             options.DisableAutoDiscovery = true;
@@ -62,31 +92,30 @@ try
                 typeof(IApiMarker).Assembly,
                 typeof(IApplicationMarker).Assembly
             };
-        })
-        .AddSingleton(tokenValidationParameters)
-        .AddJWTBearerAuth(jwtConfig.SecretKey)
-        .AddAutoMapper(typeof(IApiMarker), typeof(IApplicationMarker))
-        .AddSwaggerDoc(settings =>
-        {
-            settings.Title = "Quetzalcoatl Auth API";
-            settings.Version = "v1";
         });
 
     var app = builder.Build();
-    
+
     if (app.Environment.IsDevelopment())
     {
         await app.UseSeedData();
     }
 
-    app.MapHealthChecks(
-            "/_health",
-            new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse, }
-        )
-        .RequireHost("*:5210");
+    if (!app.Environment.IsEnvironment(SystemConsts.TestingEnvironment))
+    {
+        app.MapHealthChecks(
+                "/_health",
+                new HealthCheckOptions
+                {
+                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
+                }
+            )
+            .RequireHost("*:5210");
+    }
 
     app.UseSerilogRequestLogging()
         .UseDefaultExceptionHandler()
+        .UseCors()
         .UseAuthentication()
         .UseAuthorization()
         .UseFastEndpoints(config =>

@@ -24,8 +24,7 @@ public class UpdateUserSummary : Summary<UpdateUserEndpoint>
                 Email = "test@gmail.com",
                 Fullname = "Test User",
                 Bio = "Test user bio",
-                ProfilePictureUrl =
-                    "https://localhost:5001/api/images/6D31153C-C832-4530-8B93-B99CF657828C.png"
+                ProfilePictureId = Guid.NewGuid()
             }
         );
         Response<ErrorResponse>(400, "Validation failure");

@@ -50,9 +50,9 @@ void main() {
         'Then the uploaded test is accessible from the remote firebase cloud storage',
         () async {
       // Arrange
-      final String testPath = 'temp/test/archived/marsx/1-valid.zip';
+      final String testPath = 'temp/test/archived/sum/1-valid.zip';
       final Metadata testMetadata = Metadata()
-        ..problemId = 'marsx'
+        ..problemId = 'sum'
         ..testId = '10'
         ..testSize = File(testPath).lengthSync();
 
@@ -100,7 +100,7 @@ void main() {
         () async {
       // Arrange
       final request = DownloadRequest()
-        ..problemId = 'marsx'
+        ..problemId = 'sum'
         ..testId = '9';
 
       // Act
@@ -123,6 +123,64 @@ void main() {
       FileManager.disposeLocalFile(localTestArchivePath);
       FileManager.disposeLocalDirectory(localTestPath);
       FileManager.disposeLocalFile(localTestClientDownloadPath);
+
+      client.close();
+    });
+
+    test(
+        'Given grpc client requests to delete given test, '
+        'When delete rpc service method is called on the server-side, '
+        'Then the test is deleted from the remote firebase cloud storage',
+        () async {
+      // Arrange
+      final String testPath = 'temp/test/archived/sum/1-valid.zip';
+      final Metadata testMetadata = Metadata()
+        ..problemId = 'sum'
+        ..testId = '10'
+        ..testSize = File(testPath).lengthSync();
+
+      await client.uploadTest(
+        testPath,
+        testMetadata,
+      );
+
+      final DeleteTestRequest request = DeleteTestRequest()
+        ..problemId = testMetadata.problemId
+        ..testId = testMetadata.testId;
+
+      // Act
+      final DeleteTestResponse response = await client.deleteTest(request);
+
+      // Assert
+      expect(response.status.code, StatusCode.Ok);
+
+      final String localTestArchivePath =
+          '${testConfig.tempLocalArchivedTestFolder}/${testMetadata.problemId}/${testMetadata.testId}.zip';
+      final String localTestPath =
+          '${testConfig.tempLocalUnarchivedTestFolder}/${testMetadata.problemId}/${testMetadata.testId}';
+
+      FileManager.disposeLocalFile(localTestArchivePath);
+      FileManager.disposeLocalDirectory(localTestPath);
+
+      client.close();
+    });
+
+    test(
+        'Given grpc client requests to retrieve the download link for a given test, '
+        'When getDownloadLink rpc service method is called on the server-side, '
+        'Then the download link is successfully retrieved', () async {
+      // Arrange
+      final request = GetDownloadLinkForTestRequest()
+        ..problemId = 'sum'
+        ..testId = '9';
+
+      // Act
+      final response = await client.getDownloadLinkForTest(request);
+
+      // Assert
+      expect(response.status.code, StatusCode.Ok);
+      expect(response.inputLink, isNotNull);
+      expect(response.outputLink, isNotNull);
 
       client.close();
     });

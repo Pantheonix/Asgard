@@ -1,0 +1,31 @@
+name: Enki - PR Verify
+
+on:
+  pull_request:
+    branches:
+      - enki
+    paths:
+      - "enki-problems/**"
+      - ".github/workflows/enki-problems-pr-verify.yaml"
+
+jobs:
+  build:
+    name: Build and Test Enki Problems Microservice
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: enki-problems
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0.x'
+      - name: Build
+        run: |
+          dotnet restore "src/EnkiProblems.HttpApi.Host/EnkiProblems.HttpApi.Host.csproj"
+          dotnet restore "test/EnkiProblems.Application.Tests/EnkiProblems.Application.Tests.csproj"
+          dotnet build --no-restore
+      - name: Test
+        run: dotnet test -e DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false

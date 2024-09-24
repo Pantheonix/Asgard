@@ -22,45 +22,6 @@ public class GetImageEndpointTests : IClassFixture<ApiWebFactory>
     #endregion
 
     [Fact]
-    public async Task GivenAnonymousUser_WhenGettingImage_ThenReturnsUnauthorized()
-    {
-        #region Arrange
-
-        using var scope = _apiWebFactory.Services.CreateScope();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-        var profilePictureData = await ImageHelpers.GetImageAsByteArrayAsync(
-            "https://picsum.photos/200"
-        );
-        var profilePicture = new Picture { Data = profilePictureData };
-
-        var applicationUser = _applicationUserFaker
-            .Clone()
-            .RuleFor(rule => rule.ProfilePicture, profilePicture)
-            .Generate();
-
-        const string validPassword = "P@ssw0rd!";
-        await userManager.CreateAsync(applicationUser, validPassword);
-
-        var request = new GetImageRequest { Id = applicationUser.ProfilePicture!.Id };
-
-        #endregion
-
-        #region Act
-
-        var response = await _client.GETAsync<GetImageEndpoint, GetImageRequest>(request);
-
-        #endregion
-
-        #region Assert
-
-        response.Should().NotBeNull();
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-
-        #endregion
-    }
-
-    [Fact]
     public async Task GivenAuthorizedUserAndNonExistingImageId_WhenGettingImage_ThenReturnsNotFound()
     {
         #region Arrange
