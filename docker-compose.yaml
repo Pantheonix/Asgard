@@ -179,7 +179,7 @@ services:
 
   quetzalcoatl-mssql-db:
     container_name: quetzalcoatl-mssql-db
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04
     restart: unless-stopped
     user: root
     ports:
