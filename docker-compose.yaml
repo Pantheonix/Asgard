@@ -37,8 +37,8 @@ services:
     build:
       context: odin-gateway
       dockerfile: ../odin-gateway/Dockerfile
-    # env_file:
-    #   - envs/.env.odin
+    env_file:
+      - envs/.env.odin
     ports:
       - "80:80"
       - "443:443"

@@ -4,7 +4,7 @@ admin:
     socket_address:
       protocol: TCP
       address: 0.0.0.0
-      port_value: 4001
+      port_value: ${ENVOY_ADMIN_PORT}
 static_resources:
   listeners:
     # HTTP listener - routes to Dapr
@@ -55,7 +55,7 @@ static_resources:
         socket_address:
           protocol: TCP
           address: 0.0.0.0
-          port_value: 80
+          port_value: ${ENVOY_HTTP_PORT}
       filter_chains:
         - filters:
             - name: envoy.filters.network.http_connection_manager
@@ -236,7 +236,7 @@ static_resources:
         socket_address:
           protocol: TCP
           address: 0.0.0.0
-          port_value: 443
+          port_value: ${ENVOY_HTTPS_PORT}
       filter_chains:
         - filters:
             - name: envoy.filters.network.http_connection_manager
@@ -427,7 +427,7 @@ static_resources:
                   address:
                     socket_address:
                       address: 127.0.0.1
-                      port_value: 3400
+                      port_value: ${DAPR_SIDECAR_PORT} # 3400
     - name: quetzalcoatl
       connect_timeout: 0.25s
       type: logical_dns
@@ -441,7 +441,7 @@ static_resources:
                   address:
                     socket_address:
                       address: quetzalcoatl-auth-api
-                      port_value: 5210
+                      port_value: ${QUETZALCOATL_AUTH_API_PORT} # 5210
     - name: enki
       connect_timeout: 0.25s
       type: logical_dns
@@ -455,7 +455,7 @@ static_resources:
                   address:
                     socket_address:
                       address: enki-problems-api
-                      port_value: 5211
+                      port_value: ${ENKI_PROBLEMS_API_PORT} # 5211
     - name: anubis
       connect_timeout: 0.25s
       type: logical_dns
@@ -469,4 +469,4 @@ static_resources:
                   address:
                     socket_address:
                       address: anubis-eval-api
-                      port_value: 5213
+                      port_value: ${ANUBIS_EVAL_API_PORT} # 5213
