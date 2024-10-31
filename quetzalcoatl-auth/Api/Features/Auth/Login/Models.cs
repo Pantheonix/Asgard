@@ -1,6 +1,4 @@
-﻿using FastEndpoints.Security;
-
-namespace Api.Features.Auth.Login;
+﻿namespace Api.Features.Auth.Login;
 
 public class LoginUserRequest
 {

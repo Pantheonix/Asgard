@@ -30,6 +30,8 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
     {
         _logger.LogInformation("Login user {Email}", req.Email);
 
+        _logger.LogInformation(HttpContext.Request.Cookies.Count.ToString());
+
         var validateUserCredentialsCommand = _mapper.Map<ValidateUserCredentialsCommand>(req);
         var user = await validateUserCredentialsCommand.ExecuteAsync(ct: ct);
 
@@ -51,7 +53,7 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
             new CookieOptions
             {
                 HttpOnly = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Secure = true,
                 Expires = DateTimeOffset.UtcNow.AddTicks(_jwtConfig.JwtAccessTokenLifetime.Ticks)
             }
@@ -63,7 +65,7 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
             new CookieOptions
             {
                 HttpOnly = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Secure = true,
                 Expires = DateTimeOffset.UtcNow.AddTicks(_jwtConfig.JwtRefreshTokenLifetime.Ticks)
             }
@@ -77,11 +79,8 @@ public class LoginUserEndpoint : Endpoint<LoginUserRequest, UserTokenResponse>
                 Email = user.Email!,
                 Fullname = user.Fullname,
                 Bio = user.Bio,
-                ProfilePictureUrl = user.GetProfilePictureUrl(
-                    ProfilePictureConstants.BaseUrl,
-                    ProfilePictureConstants.EndpointUrl,
-                    ProfilePictureConstants.Extension
-                )
+                ProfilePictureId = user.ProfilePicture?.Id,
+                Roles = userRoles
             },
             cancellation: ct
         );

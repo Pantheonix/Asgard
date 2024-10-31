@@ -17,7 +17,7 @@ public class DeleteUserEndpoint : Endpoint<DeleteUserRequest>
     public override void Configure()
     {
         Delete("{id}");
-        Roles(ApplicationRoles.Admin.ToString());
+        Roles(ApplicationRole.Admin.ToString());
         Group<UsersGroup>();
     }
 
@@ -38,8 +38,8 @@ public class DeleteUserEndpoint : Endpoint<DeleteUserRequest>
 
         if (!result.Succeeded)
         {
-            var errors = result.Errors
-                .Select(e => e.Description)
+            var errors = result
+                .Errors.Select(e => e.Description)
                 .Aggregate("Identity Errors: ", (a, b) => $"{a}, {b}");
 
             _logger.LogWarning(

@@ -1,11 +1,10 @@
-use crate::application::auth::JwtContext;
-use crate::application::fsp_dtos::FspSubmissionDto;
+use crate::api::middleware::auth::JwtContext;
+use crate::contracts::fps_dtos::FpsSubmissionDto;
+use crate::contracts::get_submissions_dtos::GetSubmissionsDto;
 use crate::domain::application_error::ApplicationError;
 use crate::domain::submission::Submission;
 use crate::infrastructure::db::Db;
-use chrono::{DateTime, Utc};
 use rocket::{error, get, info, Responder};
-use serde::Serialize;
 use std::str::FromStr;
 use uuid::Uuid;
 
@@ -15,9 +14,9 @@ pub struct GetSubmissionsResponse {
     dto: GetSubmissionsDto,
 }
 
-#[get("/submissions?<fsp_dto..>")]
+#[get("/submissions?<fps_dto..>")]
 pub async fn get_submissions(
-    fsp_dto: FspSubmissionDto,
+    fps_dto: FpsSubmissionDto,
     user_ctx: JwtContext,
     db: Db,
 ) -> Result<GetSubmissionsResponse, ApplicationError> {
@@ -25,11 +24,11 @@ pub async fn get_submissions(
         ApplicationError::AuthError("Failed to parse user id from token".to_string())
     })?;
 
-    info!("Get Submissions Request: {:?}", fsp_dto);
+    info!("Get Submissions Request: {:?}", fps_dto);
 
     // Filter out submissions which should not be visible to the user
     db.run(
-        move |conn| match Submission::find_all(fsp_dto, &user_id, conn) {
+        move |conn| match Submission::find_all(fps_dto, &user_id, conn) {
             Ok(submissions) => {
                 info!("Submissions retrieved: {:?}", submissions);
                 Ok(GetSubmissionsResponse {
@@ -45,67 +44,115 @@ pub async fn get_submissions(
     .await
 }
 
-#[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
-pub struct GetSubmissionsDto {
-    submissions: Vec<GetSubmissionDto>,
-    items: usize,
-    total_pages: usize,
-}
+#[cfg(test)]
+mod tests {
+    use crate::api::middleware::auth::tests::encode_jwt;
+    use crate::contracts::get_submissions_dtos::GetSubmissionsDto;
+    use crate::tests::common::{Result, ROCKET_CLIENT};
+    use crate::tests::user::tests::{User, UserProfile};
+    use rocket::http::{Header, Status};
 
-#[rocket::async_trait]
-impl<'r> rocket::response::Responder<'r, 'static> for GetSubmissionsDto {
-    fn respond_to(self, _: &'r rocket::Request<'_>) -> rocket::response::Result<'static> {
-        let json =
-            serde_json::to_string(&self).unwrap_or("Failed to serialize response".to_string());
+    #[tokio::test]
+    async fn unauthenticated_user_cannot_get_submissions() -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
 
-        rocket::Response::build()
-            .header(rocket::http::ContentType::JSON)
-            .sized_body(json.len(), std::io::Cursor::new(json))
-            .ok()
+        // Act
+        let response = client.get("/api/submissions").dispatch().await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Unauthorized,
+            "Unauthenticated user cannot get submissions"
+        );
+
+        Ok(())
     }
-}
 
-impl From<(Vec<Submission>, usize, usize)> for GetSubmissionsDto {
-    fn from((submissions, items, total_pages): (Vec<Submission>, usize, usize)) -> Self {
-        Self {
-            submissions: submissions
-                .into_iter()
-                .map(|submission| submission.into())
-                .collect::<Vec<_>>(),
-            items,
-            total_pages,
-        }
+    #[tokio::test]
+    async fn authenticated_user_can_get_submissions_including_own_for_prior_published_problem(
+    ) -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let token = encode_jwt(User::get(UserProfile::Ordinary))?;
+
+        // Act
+        let response = client
+            .get("/api/submissions")
+            .header(Header::new("Authorization", format!("Bearer {}", token)))
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Ok,
+            "Authenticated user can get submissions including own for prior published problem"
+        );
+
+        let body: GetSubmissionsDto = serde_json::from_str(&response.into_string().await.unwrap())?;
+        assert_eq!(body.items, 4);
+        assert_eq!(body.total_pages, 1);
+        assert_eq!(body.submissions.len(), 4);
+
+        Ok(())
     }
-}
 
-#[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
-pub struct GetSubmissionDto {
-    id: String,
-    problem_id: String,
-    user_id: String,
-    language: String,
-    status: String,
-    score: usize,
-    #[serde(with = "chrono::serde::ts_seconds")]
-    created_at: DateTime<Utc>,
-    avg_time: f32,
-    avg_memory: f32,
-}
+    #[tokio::test]
+    async fn authenticated_user_can_get_submissions_including_those_for_own_unpublished_problem(
+    ) -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let token = encode_jwt(User::get(UserProfile::Admin))?;
 
-impl From<Submission> for GetSubmissionDto {
-    fn from(submission: Submission) -> Self {
-        Self {
-            id: submission.id().to_string(),
-            problem_id: submission.problem_id().to_string(),
-            user_id: submission.user_id().to_string(),
-            language: submission.language().to_string(),
-            status: submission.status().to_string(),
-            score: submission.score() as usize,
-            created_at: DateTime::<Utc>::from(submission.created_at()),
-            avg_time: submission.avg_time().unwrap_or(0.0),
-            avg_memory: submission.avg_memory().unwrap_or(0.0),
-        }
+        // Act
+        let response = client
+            .get("/api/submissions")
+            .header(Header::new("Authorization", format!("Bearer {}", token)))
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Ok,
+            "Authenticated user can get submissions including those for own unpublished problem"
+        );
+
+        let body: GetSubmissionsDto = serde_json::from_str(&response.into_string().await.unwrap())?;
+        assert_eq!(body.items, 5);
+        assert_eq!(body.total_pages, 1);
+        assert_eq!(body.submissions.len(), 5);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn authenticated_user_can_get_submissions() -> Result<()> {
+        // Arrange
+        let client = ROCKET_CLIENT.get().await.clone();
+        let token = encode_jwt(User::get(UserProfile::Proposer))?;
+
+        // Act
+        let response = client
+            .get("/api/submissions")
+            .header(Header::new("Authorization", format!("Bearer {}", token)))
+            .dispatch()
+            .await;
+
+        // Assert
+        assert_eq!(
+            response.status(),
+            Status::Ok,
+            "Authenticated user can get submissions"
+        );
+
+        let body: GetSubmissionsDto = serde_json::from_str(&response.into_string().await.unwrap())?;
+        assert_eq!(body.items, 3);
+        assert_eq!(body.total_pages, 1);
+        assert_eq!(body.submissions.len(), 3);
+
+        Ok(())
     }
 }

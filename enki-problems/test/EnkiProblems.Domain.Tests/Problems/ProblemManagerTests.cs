@@ -132,7 +132,7 @@ public class ProblemManagerTests : EnkiProblemsDomainTestBase
             {
                 await _problemManager.UpdateAsync(
                     problem,
-                    _testData.ProblemName1,
+                    _testData.ProblemName3,
                     _testData.ProblemBrief2,
                     _testData.ProblemDescription2,
                     _testData.ProblemSourceName2,

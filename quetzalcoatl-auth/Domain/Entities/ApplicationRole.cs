@@ -1,6 +1,6 @@
 namespace Domain.Entities;
 
-public enum ApplicationRoles
+public enum ApplicationRole
 {
     Proposer,
     Admin

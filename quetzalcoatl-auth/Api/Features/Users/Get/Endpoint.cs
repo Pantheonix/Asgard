@@ -36,6 +36,10 @@ public class GetUserEndpoint : Endpoint<GetUserRequest, GetUserResponse>
             return;
         }
 
-        await SendOkAsync(response: _mapper.Map<GetUserResponse>(user), ct);
+        var userRoles = await _userManager.GetRolesAsync(user);
+        var response = _mapper.Map<GetUserResponse>(user);
+        response.Roles = userRoles;
+
+        await SendOkAsync(response, ct);
     }
 }

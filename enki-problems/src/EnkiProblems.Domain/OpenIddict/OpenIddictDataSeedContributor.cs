@@ -82,9 +82,8 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
         var webClientId = configurationSection["EnkiProblems_Web:ClientId"];
         if (!webClientId.IsNullOrWhiteSpace())
         {
-            var webClientRootUrl = configurationSection["EnkiProblems_Web:RootUrl"].EnsureEndsWith(
-                '/'
-            );
+            var webClientRootUrl = configurationSection["EnkiProblems_Web:RootUrl"]
+                .EnsureEndsWith('/');
 
             /* EnkiProblems_Web client is only needed if you created a tiered
              * solution. Otherwise, you can delete this client. */
@@ -110,9 +109,8 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
         var consoleAndAngularClientId = configurationSection["EnkiProblems_App:ClientId"];
         if (!consoleAndAngularClientId.IsNullOrWhiteSpace())
         {
-            var consoleAndAngularClientRootUrl = configurationSection[
-                "EnkiProblems_App:RootUrl"
-            ]?.TrimEnd('/');
+            var consoleAndAngularClientRootUrl = configurationSection["EnkiProblems_App:RootUrl"]
+                ?.TrimEnd('/');
             await CreateApplicationAsync(
                 name: consoleAndAngularClientId!,
                 type: OpenIddictConstants.ClientTypes.Public,
@@ -161,7 +159,8 @@ public class OpenIddictDataSeedContributor : IDataSeedContributor, ITransientDep
         {
             var blazorServerTieredRootUrl = configurationSection[
                 "EnkiProblems_BlazorServerTiered:RootUrl"
-            ].EnsureEndsWith('/');
+            ]
+                .EnsureEndsWith('/');
 
             await CreateApplicationAsync(
                 name: blazorServerTieredClientId!,

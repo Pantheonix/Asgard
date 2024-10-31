@@ -3,51 +3,31 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct CacheSetItemDto {
-    pub key: String,
-    pub value: serde_json::Value,
-    pub metadata: Option<CacheMetadata>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct CacheMetadata {
-    pub ttl_in_seconds: String,
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct GetEvalMetadataForProblemDto {
-    #[serde(rename = "id")]
-    pub problem_id: Uuid,
-    pub name: String,
-    pub proposer_id: Uuid,
-    pub is_published: bool,
-    pub time: f32,
-    pub stack_memory: f32,
-    pub total_memory: f32,
-    pub tests: Vec<TestDto>,
+pub struct StateStoreSetItemDto {
+    pub key: String,
+    pub value: serde_json::Value,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TestDto {
-    #[serde(rename = "id")]
+    #[serde(alias = "id", alias = "Id")]
     pub test_id: usize,
-    #[serde(rename = "inputDownloadUrl")]
-    pub input: String,
-    #[serde(rename = "outputDownloadUrl")]
-    pub output: String,
+    #[serde(alias = "inputDownloadUrl", alias = "InputDownloadUrl")]
+    pub input_url: String,
+    #[serde(alias = "outputDownloadUrl", alias = "OutputDownloadUrl")]
+    pub output_url: String,
+    #[serde(alias = "score", alias = "Score")]
     pub score: usize,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateSubmissionBatchDto {
     pub submissions: Vec<CreateSubmissionTestCaseDto>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateSubmissionTestCaseDto {
     #[serde(skip_serializing)]
     pub testcase_id: usize,
@@ -61,17 +41,17 @@ pub struct CreateSubmissionTestCaseDto {
     pub expected_output: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TestCaseTokenDto {
     pub token: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EvaluatedSubmissionBatchDto {
     pub submissions: Vec<EvaluatedSubmissionTestCaseDto>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EvaluatedSubmissionTestCaseDto {
     pub token: String,
     #[serde(default)]
@@ -89,7 +69,7 @@ pub struct EvaluatedSubmissionTestCaseDto {
     pub stderr: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StatusDto {
     pub id: usize,
     pub description: String,

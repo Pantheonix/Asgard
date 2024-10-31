@@ -2,6 +2,11 @@ using System;
 using System.Linq;
 using System.Text;
 using Asgard.Hermes;
+using EnkiProblems.MongoDB;
+using EnkiProblems.MultiTenancy;
+using EnkiProblems.Problems;
+using EnkiProblems.Problems.Tests;
+using Grpc.Net.Client;
 using Medallion.Threading;
 using Medallion.Threading.Redis;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,15 +17,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using EnkiProblems.MongoDB;
-using EnkiProblems.MultiTenancy;
-using EnkiProblems.Problems;
-using EnkiProblems.Problems.Tests;
-using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using StackExchange.Redis;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 using Volo.Abp;
 using Volo.Abp.AspNetCore.Mvc;
 using Volo.Abp.AspNetCore.Mvc.UI.MultiTenancy;
@@ -53,6 +53,7 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
         ConfigureLogger(context, configuration);
+        ConfigureHttpClient(context, configuration);
         ConfigureDapr(context, configuration);
         ConfigureHermesTestsGrpcClient(context, configuration);
         ConfigureConventionalControllers();
@@ -74,12 +75,28 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         });
     }
 
+    private void ConfigureHttpClient(
+        ServiceConfigurationContext context,
+        IConfiguration configuration
+    )
+    {
+        context.Services.AddHttpClient();
+    }
+
     private void ConfigureDapr(ServiceConfigurationContext context, IConfiguration configuration)
     {
         var hermesAppId = configuration["Dapr:HermesAppId"];
-        context.Services.AddSingleton<DaprMetadata>(
-            _ => new() { HermesContext = new() { { "dapr-app-id", hermesAppId! } } }
-        );
+        var address = configuration["Dapr:GrpcEndpoint"];
+
+        context
+            .Services.AddSingleton<DaprMetadata>(_ =>
+                new() { HermesContext = new() { { "dapr-app-id", hermesAppId! } } }
+            )
+            .AddDaprClient(options =>
+            {
+                options.UseJsonSerializationOptions(new() { PropertyNameCaseInsensitive = true });
+                options.UseGrpcEndpoint(address);
+            });
     }
 
     private void ConfigureHermesTestsGrpcClient(
@@ -87,11 +104,11 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         IConfiguration configuration
     )
     {
-        var address = configuration["Dapr:HermesAddress"];
+        var address = configuration["Dapr:GrpcEndpoint"];
         var channel = GrpcChannel.ForAddress(address!);
 
-        context.Services.AddSingleton<HermesTestsService.HermesTestsServiceClient>(
-            _ => new(channel)
+        context.Services.AddSingleton<HermesTestsService.HermesTestsServiceClient>(_ =>
+            new(channel)
         );
         context.Services.AddScoped<ITestService, HermesTestsGrpcService>();
     }
@@ -125,8 +142,8 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         IConfiguration configuration
     )
     {
-        context.Services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        context
+            .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -192,8 +209,8 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         IWebHostEnvironment hostingEnvironment
     )
     {
-        var dataProtectionBuilder = context.Services
-            .AddDataProtection()
+        var dataProtectionBuilder = context
+            .Services.AddDataProtection()
             .SetApplicationName("EnkiProblems");
         if (!hostingEnvironment.IsDevelopment())
         {
@@ -225,8 +242,8 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
             {
                 builder
                     .WithOrigins(
-                        configuration["App:CorsOrigins"]
-                            ?.Split(",", StringSplitOptions.RemoveEmptyEntries)
+                        configuration["AllowedOrigins"]
+                            ?.Split(";", StringSplitOptions.RemoveEmptyEntries)
                             .Select(o => o.RemovePostFix("/"))
                             .ToArray() ?? Array.Empty<string>()
                     )
@@ -253,6 +270,7 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         app.UseCorrelationId();
         app.UseStaticFiles();
         app.UseRouting();
+        app.UseCloudEvents();
         app.UseCors();
         app.UseAuthentication();
 
@@ -276,6 +294,9 @@ public class EnkiProblemsHttpApiHostModule : AbpModule
         app.UseAuditing();
         app.UseAbpSerilogEnrichers();
         app.UseUnitOfWork();
-        app.UseConfiguredEndpoints();
+        app.UseConfiguredEndpoints(options =>
+        {
+            options.MapSubscribeHandler();
+        });
     }
 }

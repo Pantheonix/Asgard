@@ -1,0 +1,12 @@
+services:
+  seeder:
+    container_name: asgard-seeder
+    build:
+      context: seeder
+      dockerfile: ../seeder/Dockerfile
+    volumes:
+      - ./seeder/fixtures.yaml:/temp/fixtures.yaml
+      - ../ProblemArchive/:/temp/ProblemArchive/
+    network_mode: host
+    profiles:
+      - seeding

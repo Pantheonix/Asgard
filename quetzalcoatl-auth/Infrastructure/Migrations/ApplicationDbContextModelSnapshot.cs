@@ -121,9 +121,7 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Token")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("Jti")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreationDate")
@@ -135,13 +133,10 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsInvalidated")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Token", "Jti");
+                    b.HasKey("Token");
 
                     b.HasIndex("UserId");
 

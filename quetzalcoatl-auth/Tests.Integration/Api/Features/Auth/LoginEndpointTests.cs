@@ -75,7 +75,7 @@ public class LoginEndpointTests : IClassFixture<ApiWebFactory>
         result.Email.Should().Be(applicationUser.Email);
         result.Fullname.Should().Be(applicationUser.Fullname);
         result.Bio.Should().Be(applicationUser.Bio);
-        result.ProfilePictureUrl.Should().NotBeNullOrWhiteSpace();
+        result.ProfilePictureId.Should().NotBeNull();
 
         #endregion
     }

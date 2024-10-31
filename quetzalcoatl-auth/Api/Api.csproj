@@ -9,6 +9,7 @@
     <PackageReference Include="FastEndpoints" Version="5.8.0" />
     <PackageReference Include="FastEndpoints.Security" Version="5.8.0" />
     <PackageReference Include="FastEndpoints.Swagger" Version="5.8.0" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />

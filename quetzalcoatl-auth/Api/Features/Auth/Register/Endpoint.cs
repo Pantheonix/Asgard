@@ -52,7 +52,7 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, UserTokenRespo
             new CookieOptions
             {
                 HttpOnly = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Secure = true,
                 Expires = DateTimeOffset.UtcNow.AddTicks(_jwtConfig.JwtAccessTokenLifetime.Ticks)
             }
@@ -64,7 +64,7 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, UserTokenRespo
             new CookieOptions
             {
                 HttpOnly = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Secure = true,
                 Expires = DateTimeOffset.UtcNow.AddTicks(_jwtConfig.JwtRefreshTokenLifetime.Ticks)
             }
@@ -80,11 +80,8 @@ public class RegisterUserEndpoint : Endpoint<RegisterUserRequest, UserTokenRespo
                 Email = user.Email!,
                 Fullname = user.Fullname,
                 Bio = user.Bio,
-                ProfilePictureUrl = user.GetProfilePictureUrl(
-                    ProfilePictureConstants.BaseUrl,
-                    ProfilePictureConstants.EndpointUrl,
-                    ProfilePictureConstants.Extension
-                ),
+                ProfilePictureId = user.ProfilePicture?.Id,
+                Roles = userRoles
             },
             cancellation: ct
         );

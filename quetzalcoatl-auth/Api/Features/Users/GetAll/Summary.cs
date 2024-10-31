@@ -20,7 +20,8 @@ public class GetAllUsersSummary : Summary<GetAllUsersEndpoint>
                         Username = "Test1",
                         Email = "test1@gmail.com",
                         Fullname = "Test 1",
-                        Bio = "Test 1 bio"
+                        Bio = "Test 1 bio",
+                        ProfilePictureId = Guid.NewGuid(),
                     },
                     new UserDto
                     {
@@ -28,7 +29,8 @@ public class GetAllUsersSummary : Summary<GetAllUsersEndpoint>
                         Username = "Test2",
                         Email = "test2@gmail.com",
                         Fullname = "Test 2",
-                        Bio = "Test 2 bio"
+                        Bio = "Test 2 bio",
+                        ProfilePictureId = Guid.NewGuid(),
                     },
                     new UserDto
                     {
@@ -36,7 +38,8 @@ public class GetAllUsersSummary : Summary<GetAllUsersEndpoint>
                         Username = "Test3",
                         Email = "test3@gmail.com",
                         Fullname = "Test 3",
-                        Bio = "Test 3 bio"
+                        Bio = "Test 3 bio",
+                        ProfilePictureId = Guid.NewGuid(),
                     }
                 }
             }

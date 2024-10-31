@@ -1,4 +1,5 @@
-use crate::application::dapr_dtos::GetEvalMetadataForProblemDto;
+use crate::contracts::problem_eval_metadata_upserted_dtos::EvalMetadataForProblemDto;
+use crate::domain::test::Test;
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]
@@ -10,6 +11,7 @@ pub struct Problem {
     time: Option<f32>,
     stack_memory: Option<f32>,
     total_memory: Option<f32>,
+    tests: Vec<Test>,
 }
 
 impl Problem {
@@ -21,6 +23,7 @@ impl Problem {
         time: Option<f32>,
         stack_memory: Option<f32>,
         total_memory: Option<f32>,
+        tests: Vec<Test>,
     ) -> Self {
         Self {
             id,
@@ -30,6 +33,7 @@ impl Problem {
             time,
             stack_memory,
             total_memory,
+            tests,
         }
     }
 
@@ -60,10 +64,14 @@ impl Problem {
     pub fn total_memory(&self) -> Option<f32> {
         self.total_memory
     }
+
+    pub fn tests(&self) -> &Vec<Test> {
+        &self.tests
+    }
 }
 
-impl From<GetEvalMetadataForProblemDto> for Problem {
-    fn from(dto: GetEvalMetadataForProblemDto) -> Self {
+impl From<EvalMetadataForProblemDto> for Problem {
+    fn from(dto: EvalMetadataForProblemDto) -> Self {
         Self {
             id: dto.problem_id,
             name: dto.name,
@@ -72,6 +80,11 @@ impl From<GetEvalMetadataForProblemDto> for Problem {
             time: Option::from(dto.time),
             stack_memory: Option::from(dto.stack_memory),
             total_memory: Option::from(dto.total_memory),
+            tests: dto
+                .tests
+                .into_iter()
+                .map(|test| (test, dto.problem_id.to_string()).into())
+                .collect(),
         }
     }
 }

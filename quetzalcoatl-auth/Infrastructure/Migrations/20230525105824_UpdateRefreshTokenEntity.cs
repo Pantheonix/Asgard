@@ -13,16 +13,15 @@ namespace Infrastructure.Migrations
         {
             migrationBuilder.CreateTable(
                 name: "RefreshTokens",
-                columns: table =>
-                    new
-                    {
-                        Token = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                        ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                        IsUsed = table.Column<bool>(type: "bit", nullable: false),
-                        IsInvalidated = table.Column<bool>(type: "bit", nullable: false),
-                        Jti = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                        UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                    },
+                columns: table => new
+                {
+                    Token = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsUsed = table.Column<bool>(type: "bit", nullable: false),
+                    IsInvalidated = table.Column<bool>(type: "bit", nullable: false),
+                    Jti = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RefreshTokens", x => x.Token);

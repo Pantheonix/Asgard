@@ -41,6 +41,7 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
 
         const string validPassword = "P@ssw0rd!";
         await userManager.CreateAsync(applicationUser, validPassword);
+        var users = await userManager.Users.ToListAsync();
 
         var request = new DeleteUserRequest { Id = applicationUser.Id };
 
@@ -136,7 +137,7 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
             RoleManager<IdentityRole<Guid>>
         >();
 
-        await roleManager.CreateAsync(new IdentityRole<Guid>(ApplicationRoles.Admin.ToString()));
+        await roleManager.CreateAsync(new IdentityRole<Guid>(ApplicationRole.Admin.ToString()));
 
         var profilePictureData = await ImageHelpers.GetImageAsByteArrayAsync(
             "https://picsum.photos/200"
@@ -159,7 +160,7 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
             await userManager.CreateAsync(applicationUser, validPassword);
         }
 
-        await userManager.AddToRoleAsync(users.ElementAt(0), ApplicationRoles.Admin.ToString());
+        await userManager.AddToRoleAsync(users.ElementAt(0), ApplicationRole.Admin.ToString());
 
         var loginUserRequest = new LoginUserRequest
         {
@@ -208,7 +209,7 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
             RoleManager<IdentityRole<Guid>>
         >();
 
-        await roleManager.CreateAsync(new IdentityRole<Guid>(ApplicationRoles.Admin.ToString()));
+        await roleManager.CreateAsync(new IdentityRole<Guid>(ApplicationRole.Admin.ToString()));
 
         var profilePictureData = await ImageHelpers.GetImageAsByteArrayAsync(
             "https://picsum.photos/200"
@@ -230,7 +231,7 @@ public class DeleteEndpointTests : IClassFixture<ApiWebFactory>
             await userManager.CreateAsync(applicationUser, validPassword);
         }
 
-        await userManager.AddToRoleAsync(users.ElementAt(0), ApplicationRoles.Admin.ToString());
+        await userManager.AddToRoleAsync(users.ElementAt(0), ApplicationRole.Admin.ToString());
 
         var loginUserRequest = new LoginUserRequest
         {

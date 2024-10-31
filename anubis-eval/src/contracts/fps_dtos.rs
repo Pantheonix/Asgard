@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 // FSP stands for Filter, Sort, Paginate
 #[derive(Debug, PartialEq, FromForm)]
-pub struct FspSubmissionDto {
+pub struct FpsSubmissionDto {
     pub user_id: Option<Uuids>,
     pub problem_id: Option<Uuids>,
     pub language: Option<Languages>,
@@ -95,13 +95,15 @@ impl<'v> FromFormField<'v> for Languages {
                 "c" => Language::C,
                 "cpp" => Language::Cpp,
                 "java" => Language::Java,
-                "kotlin" => Language::Kotlin,
-                "python" => Language::Python,
-                "rust" => Language::Rust,
+                "lua" => Language::Lua,
+                "py" => Language::Python,
+                "rs" => Language::Rust,
                 "go" => Language::Go,
-                "csharp" => Language::CSharp,
-                "haskell" => Language::Haskell,
-                "javascript" => Language::Javascript,
+                "cs" => Language::CSharp,
+                "ml" => Language::OCaml,
+                "js" => Language::Javascript,
+                "kt" => Language::Kotlin,
+                "hs" => Language::Haskell,
                 _ => Language::Unknown,
             })
             .collect();

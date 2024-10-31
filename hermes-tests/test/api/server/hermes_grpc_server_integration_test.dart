@@ -50,9 +50,9 @@ void main() {
         'Then the uploaded test is accessible from the remote firebase cloud storage',
         () async {
       // Arrange
-      final String testPath = 'temp/test/archived/marsx/1-valid.zip';
+      final String testPath = 'temp/test/archived/sum/1-valid.zip';
       final Metadata testMetadata = Metadata()
-        ..problemId = 'marsx'
+        ..problemId = 'sum'
         ..testId = '10'
         ..testSize = File(testPath).lengthSync();
 
@@ -100,7 +100,7 @@ void main() {
         () async {
       // Arrange
       final request = DownloadRequest()
-        ..problemId = 'marsx'
+        ..problemId = 'sum'
         ..testId = '9';
 
       // Act
@@ -133,9 +133,9 @@ void main() {
         'Then the test is deleted from the remote firebase cloud storage',
         () async {
       // Arrange
-      final String testPath = 'temp/test/archived/marsx/1-valid.zip';
+      final String testPath = 'temp/test/archived/sum/1-valid.zip';
       final Metadata testMetadata = Metadata()
-        ..problemId = 'marsx'
+        ..problemId = 'sum'
         ..testId = '10'
         ..testSize = File(testPath).lengthSync();
 
@@ -154,6 +154,14 @@ void main() {
       // Assert
       expect(response.status.code, StatusCode.Ok);
 
+      final String localTestArchivePath =
+          '${testConfig.tempLocalArchivedTestFolder}/${testMetadata.problemId}/${testMetadata.testId}.zip';
+      final String localTestPath =
+          '${testConfig.tempLocalUnarchivedTestFolder}/${testMetadata.problemId}/${testMetadata.testId}';
+
+      FileManager.disposeLocalFile(localTestArchivePath);
+      FileManager.disposeLocalDirectory(localTestPath);
+
       client.close();
     });
 
@@ -163,7 +171,7 @@ void main() {
         'Then the download link is successfully retrieved', () async {
       // Arrange
       final request = GetDownloadLinkForTestRequest()
-        ..problemId = 'marsx'
+        ..problemId = 'sum'
         ..testId = '9';
 
       // Act

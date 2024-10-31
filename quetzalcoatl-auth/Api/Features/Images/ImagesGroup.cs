@@ -8,7 +8,7 @@ public sealed class ImagesGroup : Group
             "images",
             ep =>
             {
-                ep.Description(builder => builder.RequireAuthorization());
+                ep.Description(builder => builder.AllowAnonymous());
             }
         );
     }

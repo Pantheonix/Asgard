@@ -7,9 +7,9 @@ namespace EnkiProblems.Problems;
 public class ProblemEvalMetadataDto : EntityDto<Guid>
 {
     public string Name { get; set; }
-    
+
     public Guid ProposerId { get; set; }
-    
+
     public bool IsPublished { get; set; }
 
     public decimal Time { get; set; }

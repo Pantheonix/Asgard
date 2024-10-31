@@ -7,8 +7,10 @@ public class Validator : Validator<RegisterUserRequest>
         RuleFor(x => x.Username)
             .NotEmpty()
             .WithMessage("Username is required")
-            .MinimumLength(3)
-            .WithMessage("Username must be at least 3 characters long");
+            .MinimumLength(ApplicationUserConsts.UsernameMinLength)
+            .WithMessage(
+                $"Username must be at least {ApplicationUserConsts.UsernameMinLength} characters long"
+            );
 
         RuleFor(x => x.Email)
             .NotEmpty()
@@ -19,23 +21,31 @@ public class Validator : Validator<RegisterUserRequest>
         RuleFor(x => x.Password)
             .NotEmpty()
             .WithMessage("Password is required")
-            .MinimumLength(6)
-            .WithMessage("Password must be at least 6 characters long")
-            .MaximumLength(20)
-            .WithMessage("Password must be at most 20 characters long")
-            .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{6,20}$")
+            .MinimumLength(ApplicationUserConsts.PasswordMinLength)
+            .WithMessage(
+                $"Password must be at least {ApplicationUserConsts.PasswordMinLength} characters long"
+            )
+            .MaximumLength(ApplicationUserConsts.PasswordMaxLength)
+            .WithMessage(
+                $"Password must be at most {ApplicationUserConsts.PasswordMaxLength} characters long"
+            )
+            .Matches(ApplicationUserConsts.PasswordRegex)
             .WithMessage(
                 "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character"
             );
 
         RuleFor(x => x.Fullname)
-            .MaximumLength(50)
-            .WithMessage("Fullname must be at most 50 characters long")
+            .MaximumLength(ApplicationUserConsts.FullnameMaxLength)
+            .WithMessage(
+                $"Fullname must be at most {ApplicationUserConsts.FullnameMaxLength} characters long"
+            )
             .When(x => !string.IsNullOrWhiteSpace(x.Fullname));
 
         RuleFor(x => x.Bio)
-            .MaximumLength(300)
-            .WithMessage("Bio must be at most 300 characters long")
+            .MaximumLength(ApplicationUserConsts.BioMaxLength)
+            .WithMessage(
+                $"Bio must be at most {ApplicationUserConsts.BioMaxLength} characters long"
+            )
             .When(x => !string.IsNullOrWhiteSpace(x.Bio));
 
         RuleFor(x => x.ProfilePicture)
@@ -47,8 +57,9 @@ public class Validator : Validator<RegisterUserRequest>
             .When(x => x.ProfilePicture is not null);
     }
 
-    private static bool IsAllowedSize(long length) => length <= 10_000_000;
+    private static bool IsAllowedSize(long length) =>
+        length <= ApplicationUserConsts.ProfilePictureMaxLength;
 
     private static bool IsAllowedType(string contentType) =>
-        contentType.ToLower() is "image/png" or "image/jpeg" or "image/jpg";
+        ApplicationUserConsts.AllowedProfilePictureTypes.Contains(contentType);
 }

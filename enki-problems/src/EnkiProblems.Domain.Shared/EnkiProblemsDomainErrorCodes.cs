@@ -17,6 +17,9 @@ public static class EnkiProblemsDomainErrorCodes
     public const string NotAllowedToEditPublishedProblem =
         "EnkiProblems:NotAllowedToEditPublishedProblem";
 
+    public const string NotAllowedToDeletePublishedProblem =
+        "EnkiProblems:NotAllowedToDeletePublishedProblem";
+
     public const string UnpublishedProblemNotBelongingToCurrentUser =
         "EnkiProblems:UnpublishedProblemNotBelongingToCurrentUser";
 
@@ -40,4 +43,6 @@ public static class EnkiProblemsDomainErrorCodes
         "EnkiProblems:TestDownloadUrlRetrievalFailed";
 
     public const string ProblemCannotBePublished = "EnkiProblems:ProblemCannotBePublished";
+
+    public const string ProblemCannotBeDeleted = "EnkiProblems:ProblemCannotBeDeleted";
 }

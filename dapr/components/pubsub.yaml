@@ -1,0 +1,33 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: pubsub
+spec:
+  type: pubsub.rabbitmq
+  version: v1
+  metadata:
+    - name: host
+      value: "amqp://asgard-rabbitmq:5672"
+    - name: durable
+      value: "false"
+    - name: deletedWhenUnused
+      value: "false"
+    - name: autoAck
+      value: "false"
+    - name: reconnectWait
+      value: "0"
+    - name: concurrency
+      value: parallel
+    - name: enableDeadLetter
+      value: "true"
+    - name: deliveryMode
+      value: "2"
+    - name: allowedTopics
+      value: "problem-eval-metadata-upserted,test-upserted,test-deleted"
+    - name: publishingScopes
+      value: "enki-problems=problem-eval-metadata-upserted,test-upserted,test-deleted;anubis-eval=;quetzalcoatl-auth=;hermes-tests=;odin-api-gateway=;"
+    - name: subscribingScopes
+      value: "enki-problems=test-upserted,test-deleted;anubis-eval=problem-eval-metadata-upserted;quetzalcoatl-auth=;hermes-tests=;odin-api-gateway=;"
+scopes:
+  - anubis-eval
+  - enki-problems

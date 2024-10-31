@@ -144,10 +144,11 @@ impl Submission {
         // user has solved the problem or is submission owner or is problem proposer
         let user_has_solved_problem = Submission::is_problem_solved_by_user(
             &user_id.to_string(),
-            self.problem_id.to_string(),
+            &self.problem_id.to_string(),
             conn,
         );
-        user_has_solved_problem || self.user_id == *user_id || self.user_id == *proposer_id
+
+        user_has_solved_problem || self.user_id == *user_id || user_id == proposer_id
     }
 
     pub fn id(&self) -> Uuid {
@@ -379,13 +380,15 @@ pub enum Language {
     C,
     Cpp,
     Java,
-    Kotlin,
+    Lua,
     Python,
     Rust,
     Go,
     CSharp,
-    Haskell,
+    OCaml,
     Javascript,
+    Kotlin,
+    Haskell,
     Unknown,
 }
 
@@ -395,13 +398,15 @@ impl From<usize> for Language {
             49 => Language::C,
             54 => Language::Cpp,
             62 => Language::Java,
-            78 => Language::Kotlin,
+            64 => Language::Lua,
             71 => Language::Python,
             73 => Language::Rust,
             60 => Language::Go,
             51 => Language::CSharp,
-            61 => Language::Haskell,
+            65 => Language::OCaml,
             63 => Language::Javascript,
+            78 => Language::Kotlin,
+            61 => Language::Haskell,
             _ => Language::Unknown,
         }
     }
@@ -413,13 +418,15 @@ impl From<Language> for usize {
             Language::C => 49,
             Language::Cpp => 54,
             Language::Java => 62,
-            Language::Kotlin => 78,
+            Language::Lua => 64,
             Language::Python => 71,
             Language::Rust => 73,
             Language::Go => 60,
             Language::CSharp => 51,
-            Language::Haskell => 61,
+            Language::OCaml => 65,
             Language::Javascript => 63,
+            Language::Kotlin => 78,
+            Language::Haskell => 61,
             Language::Unknown => 0,
         }
     }
@@ -431,13 +438,15 @@ impl From<String> for Language {
             "C" => Language::C,
             "C++" => Language::Cpp,
             "Java" => Language::Java,
-            "Kotlin" => Language::Kotlin,
+            "Lua" => Language::Lua,
             "Python" => Language::Python,
             "Rust" => Language::Rust,
             "Go" => Language::Go,
             "C#" => Language::CSharp,
-            "Haskell" => Language::Haskell,
+            "OCaml" => Language::OCaml,
             "Javascript" => Language::Javascript,
+            "Kotlin" => Language::Kotlin,
+            "Haskell" => Language::Haskell,
             _ => Language::Unknown,
         }
     }
@@ -449,13 +458,15 @@ impl From<Language> for String {
             Language::C => "C".to_string(),
             Language::Cpp => "C++".to_string(),
             Language::Java => "Java".to_string(),
-            Language::Kotlin => "Kotlin".to_string(),
+            Language::Lua => "Lua".to_string(),
             Language::Python => "Python".to_string(),
             Language::Rust => "Rust".to_string(),
             Language::Go => "Go".to_string(),
             Language::CSharp => "C#".to_string(),
-            Language::Haskell => "Haskell".to_string(),
+            Language::OCaml => "OCaml".to_string(),
             Language::Javascript => "Javascript".to_string(),
+            Language::Kotlin => "Kotlin".to_string(),
+            Language::Haskell => "Haskell".to_string(),
             Language::Unknown => "Unknown".to_string(),
         }
     }
@@ -467,13 +478,15 @@ impl fmt::Display for Language {
             Language::C => write!(f, "C"),
             Language::Cpp => write!(f, "C++"),
             Language::Java => write!(f, "Java"),
-            Language::Kotlin => write!(f, "Kotlin"),
+            Language::Lua => write!(f, "Lua"),
             Language::Python => write!(f, "Python"),
             Language::Rust => write!(f, "Rust"),
             Language::Go => write!(f, "Go"),
             Language::CSharp => write!(f, "C#"),
-            Language::Haskell => write!(f, "Haskell"),
+            Language::OCaml => write!(f, "OCaml"),
             Language::Javascript => write!(f, "Javascript"),
+            Language::Kotlin => write!(f, "Kotlin"),
+            Language::Haskell => write!(f, "Haskell"),
             Language::Unknown => write!(f, "Unknown"),
         }
     }

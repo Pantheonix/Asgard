@@ -6,5 +6,6 @@
 .env*
 QuetzalcoatlAuth.sln.DotSettings.user
 *.md
+Tests.Integration/
 Dockerfile*
 .dockerignore

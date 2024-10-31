@@ -1,10 +1,12 @@
 use crate::domain::problem::Problem;
-use crate::schema::problems;
-use diesel::{AsChangeset, Identifiable, Insertable, Queryable, Selectable};
+use crate::domain::test::Test;
+use crate::schema::{problems, tests};
+use diesel::{AsChangeset, Associations, Identifiable, Insertable, Queryable, Selectable};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Queryable, Insertable, Identifiable, AsChangeset, Selectable)]
 #[diesel(table_name = problems)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
 pub(in crate::infrastructure) struct ProblemModel {
     pub(in crate::infrastructure) id: String,
     pub(in crate::infrastructure) name: String,
@@ -29,16 +31,48 @@ impl From<Problem> for ProblemModel {
     }
 }
 
-impl From<ProblemModel> for Problem {
-    fn from(problem: ProblemModel) -> Self {
-        Problem::new(
-            Uuid::parse_str(&problem.id).unwrap(),
-            problem.name,
-            Uuid::parse_str(&problem.proposer_id).unwrap(),
-            problem.is_published,
-            problem.time,
-            problem.stack_memory,
-            problem.total_memory,
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Queryable,
+    Insertable,
+    Identifiable,
+    AsChangeset,
+    Selectable,
+    Associations,
+)]
+#[diesel(belongs_to(ProblemModel, foreign_key = problem_id))]
+#[diesel(table_name = tests)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub(in crate::infrastructure) struct TestModel {
+    pub(in crate::infrastructure) id: i32,
+    pub(in crate::infrastructure) problem_id: String,
+    pub(in crate::infrastructure) score: i32,
+    pub(in crate::infrastructure) input_url: String,
+    pub(in crate::infrastructure) output_url: String,
+}
+
+impl From<Test> for TestModel {
+    fn from(test: Test) -> Self {
+        Self {
+            id: test.id(),
+            problem_id: test.problem_id().to_string(),
+            score: test.score(),
+            input_url: test.input_url().to_string(),
+            output_url: test.output_url().to_string(),
+        }
+    }
+}
+
+impl From<TestModel> for Test {
+    fn from(test: TestModel) -> Self {
+        Test::new(
+            test.id,
+            Uuid::parse_str(&test.problem_id).unwrap(),
+            test.score,
+            test.input_url,
+            test.output_url,
         )
     }
 }

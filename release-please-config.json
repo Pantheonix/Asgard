@@ -1,0 +1,38 @@
+{
+  "include-component-in-tag": true,
+  "include-v-in-tag": true,
+  "tag-separator": "/",
+  "separate-pull-requests": true,
+  "packages": {
+    "quetzalcoatl-auth": {
+      "package-name": "quetzalcoatl",
+      "release-type": "simple"
+    },
+    "enki-problems": {
+      "package-name": "enki",
+      "release-type": "simple"
+    },
+    "hermes-tests": {
+      "package-name": "hermes",
+      "release-type": "dart"
+    },
+    "anubis-eval": {
+      "package-name": "anubis",
+      "release-type": "rust",
+      "exclude-paths": ["anubis/eval-lb"]
+    },
+    "odin-gateway": {
+      "package-name": "odin",
+      "release-type": "simple"
+    },
+    "dapr": {
+      "package-name": "dapr",
+      "release-type": "simple"
+    },
+    "anubis-eval/eval-lb": {
+      "package-name": "eval-lb",
+      "release-type": "simple"
+    }
+  },
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}

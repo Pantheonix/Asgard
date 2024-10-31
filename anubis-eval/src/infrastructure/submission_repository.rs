@@ -1,17 +1,23 @@
-use crate::application::fsp_dtos::FspSubmissionDto;
-use crate::application::fsp_dtos::{Languages, SortDiscriminant, SubmissionStatuses, Uuids};
+use crate::contracts::fps_dtos::{
+    FpsSubmissionDto, Languages, SortDiscriminant, SubmissionStatuses, Uuids,
+};
 use crate::domain::application_error::ApplicationError;
+use crate::domain::problem::Problem;
 use crate::domain::submission::{Submission, SubmissionStatus, TestCase, TestCaseStatus};
 use crate::infrastructure::pagination::Paginate;
+use crate::infrastructure::raw_queries;
 use crate::infrastructure::submission_model::{SubmissionModel, TestCaseModel};
 use crate::schema::problems::dsl::problems as all_problems;
 use crate::schema::submissions::dsl::submissions as all_submissions;
 use crate::schema::submissions_testcases::dsl::submissions_testcases as all_testcases;
-use diesel::{BoolExpressionMethods, ExpressionMethods, SelectableHelper};
+use diesel::sql_types::Text;
+use diesel::{sql_query, BoolExpressionMethods, ExpressionMethods, SelectableHelper};
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use rocket::error;
 use std::time::SystemTime;
 use uuid::Uuid;
+
+type SubmissionsPaginated = (Vec<(Submission, Problem)>, usize, usize);
 
 impl Submission {
     pub fn insert(&self, conn: &mut PgConnection) -> Result<(), ApplicationError> {
@@ -35,10 +41,48 @@ impl Submission {
         Ok(())
     }
 
+    pub fn upsert(&self, conn: &mut PgConnection) -> Result<(), ApplicationError> {
+        // check if submission fails to insert
+        let submission: SubmissionModel = self.clone().into();
+
+        diesel::insert_into(all_submissions)
+            .values(&submission)
+            .on_conflict(crate::schema::submissions::dsl::id)
+            .do_update()
+            .set(&submission)
+            .execute(conn)
+            .map_err(|source| ApplicationError::SubmissionSaveError {
+                submission_id: self.id().to_string(),
+                source,
+            })?;
+
+        // check if any of the test cases fail to insert
+        self.test_cases()
+            .iter()
+            .map(|testcase| testcase.upsert(conn))
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(())
+    }
+
+    pub fn delete_by_id(id: &String, conn: &mut PgConnection) -> Result<(), ApplicationError> {
+        // delete submission and its test cases
+        TestCase::delete_by_submission_id(id, conn)?;
+
+        diesel::delete(all_submissions.find(id.to_string()))
+            .execute(conn)
+            .map_err(|source| ApplicationError::SubmissionSaveError {
+                submission_id: id.to_string(),
+                source,
+            })?;
+
+        Ok(())
+    }
+
     pub fn find_by_id(
         id: &String,
         conn: &mut PgConnection,
-    ) -> Result<Submission, ApplicationError> {
+    ) -> Result<(Submission, Problem), ApplicationError> {
         all_submissions
             .find(id.to_string())
             .inner_join(all_testcases)
@@ -51,24 +95,31 @@ impl Submission {
                         submission_id: id.to_string(),
                     }),
                     false => {
-                        let submission = submission_and_testcases[0].0.clone();
-                        let testcases = submission_and_testcases
+                        let submission = submission_and_testcases.first().unwrap().0.clone();
+                        let problem = Problem::find_by_id(&submission.problem_id, conn)?;
+
+                        let mut testcases = submission_and_testcases
                             .into_iter()
                             .map(|(_, testcase)| testcase.into())
-                            .collect::<Vec<_>>();
+                            .collect::<Vec<TestCase>>();
 
-                        Ok(Submission::new(
-                            Uuid::parse_str(&submission.id).unwrap(),
-                            Uuid::parse_str(&submission.user_id).unwrap(),
-                            Uuid::parse_str(&submission.problem_id).unwrap(),
-                            submission.language.into(),
-                            submission.source_code,
-                            submission.status.into(),
-                            submission.score,
-                            submission.created_at,
-                            submission.avg_time,
-                            submission.avg_memory,
-                            testcases,
+                        testcases.sort_by_key(|a| a.testcase_id());
+
+                        Ok((
+                            Submission::new(
+                                Uuid::parse_str(&submission.id).unwrap(),
+                                Uuid::parse_str(&submission.user_id).unwrap(),
+                                Uuid::parse_str(&submission.problem_id).unwrap(),
+                                submission.language.into(),
+                                submission.source_code,
+                                submission.status.into(),
+                                submission.score,
+                                submission.created_at,
+                                submission.avg_time,
+                                submission.avg_memory,
+                                testcases,
+                            ),
+                            problem,
                         ))
                     }
                 },
@@ -86,12 +137,53 @@ impl Submission {
             .map_err(|source| ApplicationError::SubmissionFindError { source })
     }
 
+    pub fn find_highest_score_submissions_by_user_id(
+        current_user_id: &Uuid,
+        user_id: &String,
+        problem_id: &Option<String>,
+        conn: &mut PgConnection,
+    ) -> Result<Vec<(Submission, Problem)>, ApplicationError> {
+        // filter out submissions which should not be visible for current user,
+        // i.e. keep only submissions for which the problem is published or
+        // the user is the submitter or the user is the proposer
+
+        // if problem_id is provided, return the submission with the highest score for that problem
+        // else return a vector of submissions with the highest score for each problem
+
+        let query_results = match problem_id {
+            Some(problem_id) => {
+                sql_query(raw_queries::GET_HIGHEST_SCORE_SUBMISSIONS_PER_USER_AND_PROBLEM)
+                    .bind::<Text, _>(current_user_id.to_string())
+                    .bind::<Text, _>(user_id.to_string())
+                    .bind::<Text, _>(problem_id.to_string())
+                    .load::<SubmissionModel>(conn)
+            }
+            None => sql_query(raw_queries::GET_HIGHEST_SCORE_SUBMISSIONS_PER_USER)
+                .bind::<Text, _>(current_user_id.to_string())
+                .bind::<Text, _>(user_id.to_string())
+                .load::<SubmissionModel>(conn),
+        };
+
+        query_results
+            .map_err(|source| ApplicationError::SubmissionFindError { source })
+            .map(|submissions| {
+                submissions
+                    .into_iter()
+                    .map(|submission| {
+                        let problem = Problem::find_by_id(&submission.problem_id, conn)?;
+
+                        Ok((submission.into(), problem))
+                    })
+                    .collect::<Result<Vec<_>, _>>()
+            })?
+    }
+
     pub fn find_all(
-        fsp_dto: FspSubmissionDto,
+        fps_dto: FpsSubmissionDto,
         user_id: &Uuid,
         conn: &mut PgConnection,
-    ) -> Result<(Vec<Submission>, usize, usize), ApplicationError> {
-        use crate::application::fsp_dtos;
+    ) -> Result<SubmissionsPaginated, ApplicationError> {
+        use crate::contracts::fps_dtos;
         use crate::schema::{problems, submissions};
 
         let mut query = all_submissions
@@ -113,7 +205,7 @@ impl Submission {
                 .or(submissions::dsl::user_id.eq(user_id.to_string())),
         );
 
-        if let Some(Uuids { uuids: user_ids }) = fsp_dto.user_id {
+        if let Some(Uuids { uuids: user_ids }) = fps_dto.user_id {
             let user_ids = user_ids
                 .into_iter()
                 .map(|user_id| user_id.to_string())
@@ -121,7 +213,7 @@ impl Submission {
             query = query.filter(submissions::dsl::user_id.eq_any(user_ids));
         }
 
-        if let Some(Uuids { uuids: problem_ids }) = fsp_dto.problem_id {
+        if let Some(Uuids { uuids: problem_ids }) = fps_dto.problem_id {
             let problem_ids = problem_ids
                 .into_iter()
                 .map(|problem_id| problem_id.to_string())
@@ -129,7 +221,7 @@ impl Submission {
             query = query.filter(submissions::dsl::problem_id.eq_any(problem_ids));
         }
 
-        if let Some(Languages { languages }) = fsp_dto.language {
+        if let Some(Languages { languages }) = fps_dto.language {
             let languages = languages
                 .into_iter()
                 .map(|language| language.to_string())
@@ -137,7 +229,7 @@ impl Submission {
             query = query.filter(submissions::dsl::language.eq_any(languages));
         }
 
-        if let Some(SubmissionStatuses { statuses }) = fsp_dto.status {
+        if let Some(SubmissionStatuses { statuses }) = fps_dto.status {
             let statuses = statuses
                 .into_iter()
                 .map(|status| status.to_string())
@@ -145,47 +237,47 @@ impl Submission {
             query = query.filter(submissions::dsl::status.eq_any(statuses));
         }
 
-        if let Some(lt_score) = fsp_dto.lt_score {
+        if let Some(lt_score) = fps_dto.lt_score {
             query = query.filter(submissions::dsl::score.lt(lt_score as i32));
         }
 
-        if let Some(gt_score) = fsp_dto.gt_score {
+        if let Some(gt_score) = fps_dto.gt_score {
             query = query.filter(submissions::dsl::score.gt(gt_score as i32));
         }
 
-        if let Some(lt_avg_time) = fsp_dto.lt_avg_time {
+        if let Some(lt_avg_time) = fps_dto.lt_avg_time {
             query = query.filter(submissions::dsl::avg_time.lt(lt_avg_time));
         }
 
-        if let Some(gt_avg_time) = fsp_dto.gt_avg_time {
+        if let Some(gt_avg_time) = fps_dto.gt_avg_time {
             query = query.filter(submissions::dsl::avg_time.gt(gt_avg_time));
         }
 
-        if let Some(lt_avg_memory) = fsp_dto.lt_avg_memory {
+        if let Some(lt_avg_memory) = fps_dto.lt_avg_memory {
             query = query.filter(submissions::dsl::avg_memory.lt(lt_avg_memory));
         }
 
-        if let Some(gt_avg_memory) = fsp_dto.gt_avg_memory {
+        if let Some(gt_avg_memory) = fps_dto.gt_avg_memory {
             query = query.filter(submissions::dsl::avg_memory.gt(gt_avg_memory));
         }
 
-        if let Some(fsp_dtos::DateTime {
+        if let Some(fps_dtos::DateTime {
             date_time: start_date,
-        }) = fsp_dto.start_date
+        }) = fps_dto.start_date
         {
             let start_date = SystemTime::from(start_date);
             query = query.filter(submissions::dsl::created_at.gt(start_date));
         }
 
-        if let Some(fsp_dtos::DateTime {
+        if let Some(fps_dtos::DateTime {
             date_time: end_date,
-        }) = fsp_dto.end_date
+        }) = fps_dto.end_date
         {
             let end_date = SystemTime::from(end_date);
             query = query.filter(submissions::dsl::created_at.lt(end_date));
         }
 
-        if let Some(sort_by) = fsp_dto.sort_by {
+        if let Some(sort_by) = fps_dto.sort_by {
             query = match sort_by {
                 SortDiscriminant::ScoreAsc => query.order(submissions::dsl::score.asc()),
                 SortDiscriminant::ScoreDesc => query.order(submissions::dsl::score.desc()),
@@ -198,9 +290,9 @@ impl Submission {
             };
         }
 
-        let mut query = query.paginate(fsp_dto.page.unwrap_or(1));
+        let mut query = query.paginate(fps_dto.page.unwrap_or(1));
 
-        if let Some(per_page) = fsp_dto.per_page {
+        if let Some(per_page) = fps_dto.per_page {
             query = query.per_page(per_page);
         }
 
@@ -210,11 +302,15 @@ impl Submission {
             .map(|(submissions, total_pages)| {
                 let submissions = submissions
                     .into_iter()
-                    .map(|submission| submission.into())
-                    .collect::<Vec<_>>();
+                    .map(|submission| {
+                        let problem = Problem::find_by_id(&submission.problem_id, conn)?;
+
+                        Ok((submission.into(), problem))
+                    })
+                    .collect::<Result<Vec<_>, ApplicationError>>()?;
                 let items = submissions.len();
-                (submissions, items, total_pages as usize)
-            })
+                Ok((submissions, items, total_pages as usize))
+            })?
     }
 
     pub fn update_evaluation_metadata(
@@ -241,26 +337,9 @@ impl Submission {
         Ok(())
     }
 
-    pub fn get_problems_solved_by_user(
-        user_id: &String,
-        conn: &mut PgConnection,
-    ) -> Result<Vec<String>, ApplicationError> {
-        use crate::schema::submissions::dsl::{
-            problem_id as problem_id_column, status as status_column, user_id as user_id_column,
-        };
-
-        all_submissions
-            .filter(user_id_column.eq(user_id.to_string()))
-            .filter(status_column.eq(SubmissionStatus::Accepted.to_string()))
-            .select(problem_id_column)
-            .distinct()
-            .load::<String>(conn)
-            .map_err(|source| ApplicationError::SubmissionFindError { source })
-    }
-
     pub fn is_problem_solved_by_user(
         user_id: &String,
-        problem_id: String,
+        problem_id: &String,
         conn: &mut PgConnection,
     ) -> bool {
         use crate::schema::submissions::dsl::{
@@ -290,6 +369,24 @@ impl TestCase {
 
         diesel::insert_into(all_testcases)
             .values(testcase.clone())
+            .execute(conn)
+            .map_err(|source| ApplicationError::TestCaseSaveError {
+                testcase_id: testcase.testcase_id.to_string(),
+                submission_id: testcase.submission_id.clone(),
+                source,
+            })?;
+
+        Ok(())
+    }
+
+    fn upsert(&self, conn: &mut PgConnection) -> Result<(), ApplicationError> {
+        let testcase: TestCaseModel = self.clone().into();
+
+        diesel::insert_into(all_testcases)
+            .values(testcase.clone())
+            .on_conflict(crate::schema::submissions_testcases::dsl::token)
+            .do_update()
+            .set(&testcase)
             .execute(conn)
             .map_err(|source| ApplicationError::TestCaseSaveError {
                 testcase_id: testcase.testcase_id.to_string(),
@@ -365,6 +462,24 @@ impl TestCase {
             .iter()
             .map(|testcase| testcase.update(conn))
             .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(())
+    }
+
+    pub fn delete_by_submission_id(
+        submission_id: &String,
+        conn: &mut PgConnection,
+    ) -> Result<(), ApplicationError> {
+        diesel::delete(
+            all_testcases
+                .filter(crate::schema::submissions_testcases::dsl::submission_id.eq(submission_id)),
+        )
+        .execute(conn)
+        .map_err(|source| ApplicationError::TestCaseSaveError {
+            testcase_id: "".to_string(),
+            submission_id: submission_id.clone(),
+            source,
+        })?;
 
         Ok(())
     }

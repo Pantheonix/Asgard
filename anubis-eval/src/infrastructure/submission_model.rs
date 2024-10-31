@@ -1,22 +1,35 @@
 use crate::domain::submission::{Submission, TestCase};
 use crate::schema::submissions;
 use crate::schema::submissions_testcases;
-use diesel::{AsChangeset, Associations, Identifiable, Insertable, Queryable, Selectable};
+use diesel::{
+    AsChangeset, Associations, Identifiable, Insertable, Queryable, QueryableByName, Selectable,
+};
 use std::time::SystemTime;
 use uuid::Uuid;
 
-#[derive(Debug, Clone, PartialEq, Queryable, Insertable, Identifiable, AsChangeset, Selectable)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Queryable,
+    Insertable,
+    Identifiable,
+    AsChangeset,
+    Selectable,
+    QueryableByName,
+)]
 #[diesel(belongs_to(ProblemModel, foreign_key = problem_id))]
 #[diesel(table_name = submissions)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
 pub(in crate::infrastructure) struct SubmissionModel {
+    pub(in crate::infrastructure) id: String,
+    pub(in crate::infrastructure) user_id: String,
+    pub(in crate::infrastructure) problem_id: String,
     pub(in crate::infrastructure) language: String,
     pub(in crate::infrastructure) source_code: String,
     pub(in crate::infrastructure) status: String,
     pub(in crate::infrastructure) score: i32,
     pub(in crate::infrastructure) created_at: SystemTime,
-    pub(in crate::infrastructure) id: String,
-    pub(in crate::infrastructure) user_id: String,
-    pub(in crate::infrastructure) problem_id: String,
     pub(in crate::infrastructure) avg_time: Option<f32>,
     pub(in crate::infrastructure) avg_memory: Option<f32>,
 }
@@ -69,15 +82,16 @@ impl From<SubmissionModel> for Submission {
 #[diesel(belongs_to(SubmissionModel, foreign_key = submission_id))]
 #[diesel(table_name = submissions_testcases)]
 #[diesel(primary_key(token))]
+#[diesel(check_for_backend(diesel::pg::Pg))]
 pub(in crate::infrastructure) struct TestCaseModel {
+    pub(in crate::infrastructure) token: String,
+    pub(in crate::infrastructure) submission_id: String,
     pub(in crate::infrastructure) status: String,
     pub(in crate::infrastructure) time: f32,
     pub(in crate::infrastructure) memory: f32,
     pub(in crate::infrastructure) eval_message: Option<String>,
     pub(in crate::infrastructure) stdout: Option<String>,
     pub(in crate::infrastructure) stderr: Option<String>,
-    pub(in crate::infrastructure) token: String,
-    pub(in crate::infrastructure) submission_id: String,
     pub(in crate::infrastructure) testcase_id: i32,
     pub(in crate::infrastructure) expected_score: i32,
     pub(in crate::infrastructure) compile_output: Option<String>,

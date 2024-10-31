@@ -1,0 +1,17 @@
+Ordinary:
+  id: f0833576-d077-4c08-89b5-9fc47dfcb7d2
+  email: "user@gmail.com"
+  role:
+    
+Proposer:
+  id: dabdfa1f-0e29-4c74-81e4-39e91b126dff
+  email: "proposer@gmail.com"
+  role:
+    - !Proposer
+      
+Admin:
+  id: db4c3d60-229f-4d49-84f9-ee560f9160d5
+  email: "admin@gmail.com"
+  role:
+    - !Admin
+    - !Proposer

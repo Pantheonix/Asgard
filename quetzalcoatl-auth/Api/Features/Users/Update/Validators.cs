@@ -7,8 +7,10 @@ public class Validator : Validator<UpdateUserRequest>
         RuleFor(x => x.Id).NotEmpty().WithMessage("Id is required");
 
         RuleFor(x => x.Username)
-            .MinimumLength(3)
-            .WithMessage("Username must be at least 3 characters long")
+            .MinimumLength(ApplicationUserConsts.UsernameMinLength)
+            .WithMessage(
+                $"Username must be at least {ApplicationUserConsts.UsernameMinLength} characters long"
+            )
             .When(x => !x.Username.IsNullOrEmpty());
 
         RuleFor(x => x.Email)
@@ -17,13 +19,17 @@ public class Validator : Validator<UpdateUserRequest>
             .When(x => !x.Email.IsNullOrEmpty());
 
         RuleFor(x => x.Fullname)
-            .MaximumLength(50)
-            .WithMessage("Fullname must be at most 50 characters long")
+            .MaximumLength(ApplicationUserConsts.FullnameMaxLength)
+            .WithMessage(
+                $"Fullname must be at most {ApplicationUserConsts.FullnameMaxLength} characters long"
+            )
             .When(x => !string.IsNullOrWhiteSpace(x.Fullname));
 
         RuleFor(x => x.Bio)
-            .MaximumLength(300)
-            .WithMessage("Bio must be at most 300 characters long")
+            .MaximumLength(ApplicationUserConsts.BioMaxLength)
+            .WithMessage(
+                $"Bio must be at most {ApplicationUserConsts.BioMaxLength} characters long"
+            )
             .When(x => !string.IsNullOrWhiteSpace(x.Bio));
 
         RuleFor(x => x.ProfilePicture)
@@ -35,8 +41,9 @@ public class Validator : Validator<UpdateUserRequest>
             .When(x => x.ProfilePicture is not null);
     }
 
-    private static bool IsAllowedSize(long length) => length <= 10_000_000;
+    private static bool IsAllowedSize(long length) =>
+        length <= ApplicationUserConsts.ProfilePictureMaxLength;
 
     private static bool IsAllowedType(string contentType) =>
-        contentType.ToLower() is "image/png" or "image/jpeg" or "image/jpg";
+        ApplicationUserConsts.AllowedProfilePictureTypes.Contains(contentType);
 }

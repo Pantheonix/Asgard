@@ -13,13 +13,12 @@ namespace Infrastructure.Migrations
         {
             migrationBuilder.CreateTable(
                 name: "Pictures",
-                columns: table =>
-                    new
-                    {
-                        Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                        Data = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
-                        UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                    },
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Data = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Pictures", x => x.Id);

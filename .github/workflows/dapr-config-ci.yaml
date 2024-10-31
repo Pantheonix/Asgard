@@ -1,0 +1,25 @@
+name: Dapr - Build Docker image and publish to GHCR and Docker Hub
+
+on:
+  push:
+    tags:
+      - "dapr/**"
+
+jobs:
+  deploy-to-ghcr:
+    uses: ./.github/workflows/step-deploy-to-ghcr.yaml
+    with:
+      image_name: asgard-dapr-config
+      build_context: dapr
+    secrets:
+      TOKEN: ${{ secrets.TOKEN }}
+
+  deploy-to-docker-hub:
+    uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
+    with:
+      namespace: pantheonix
+      repository: asgard-dapr
+      build_context: dapr
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

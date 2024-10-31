@@ -6,6 +6,22 @@ public static class EnkiProblemsConsts
 
     public const string DbSchema = null;
 
+    public const string StateStoreName = "statestore";
+
+    public const string PubSubName = "pubsub";
+
+    public const string ProblemEvalMetadataUpsertedTopic = "problem-eval-metadata-upserted";
+
+    public const string ProblemEvalMetadataDeletedTopic = "problem-eval-metadata-deleted";
+
+    public const string TestUpsertedTopic = "test-upserted";
+
+    public const string TestDeletedTopic = "test-deleted";
+
+    public const string TestInputSuffix = "input";
+
+    public const string TestOutputSuffix = "output";
+
     public const string ProposerRoleName = "Proposer";
 
     public const string AdminRoleName = "Admin";

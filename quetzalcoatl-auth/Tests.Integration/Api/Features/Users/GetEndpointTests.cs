@@ -104,11 +104,7 @@ public class GetEndpointTests : IClassFixture<ApiWebFactory>
             Email = applicationUser.Email!,
             Fullname = applicationUser.Fullname,
             Bio = applicationUser.Bio,
-            ProfilePictureUrl = applicationUser.GetProfilePictureUrl(
-                ProfilePictureConstants.BaseUrl,
-                ProfilePictureConstants.EndpointUrl,
-                ProfilePictureConstants.Extension
-            )
+            ProfilePictureId = applicationUser.ProfilePicture?.Id
         };
 
         #endregion

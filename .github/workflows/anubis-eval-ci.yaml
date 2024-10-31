@@ -1,0 +1,61 @@
+name: Anubis - Build Docker image and publish to GHCR and Docker Hub
+
+on:
+  push:
+    tags:
+      - "anubis/**"
+
+jobs:
+  build:
+    name: Build and Test Anubis Eval Microservice
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: anubis-eval
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run docker-compose
+        uses: hoverkraft-tech/compose-action@v2.0.1
+        with:
+          compose-file: "./anubis-eval/tests-setup/docker-compose.yaml"
+          up-flags: "--build -d"
+
+      - name: Setup rust
+        uses: hecrj/setup-rust-action@v2
+        with:
+          rust-version: '1.72.0'
+
+      - name: Install cargo-nextest
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: cargo-nextest
+          version: '0.9.64'
+          locked: true
+
+      - name: Build
+        run: cargo build --release
+
+      - name: Test
+        run: cargo nextest run --all-features --profile ci
+
+  deploy-to-ghcr:
+    needs: build
+    uses: ./.github/workflows/step-deploy-to-ghcr.yaml
+    with:
+      image_name: anubis-eval
+      build_context: anubis-eval
+    secrets:
+      TOKEN: ${{ secrets.TOKEN }}
+
+  deploy-to-docker-hub:
+    needs: build
+    uses: ./.github/workflows/step-deploy-to-docker-hub.yaml
+    with:
+      namespace: pantheonix
+      repository: anubis
+      build_context: anubis-eval
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
