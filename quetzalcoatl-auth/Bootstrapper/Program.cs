@@ -104,13 +104,13 @@ try
     if (!app.Environment.IsEnvironment(SystemConsts.TestingEnvironment))
     {
         app.MapHealthChecks(
-                "/_health",
+                "/api/_health",
                 new HealthCheckOptions
                 {
                     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
                 }
             )
-            .RequireHost("*:5210");
+            .RequireHost("*:80");
     }
 
     app.UseSerilogRequestLogging()

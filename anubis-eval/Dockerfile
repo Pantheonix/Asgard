@@ -5,7 +5,7 @@ FROM chef AS planner
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM chef as builder
+FROM chef AS builder
 LABEL stage=builder
 ENV CARGO_TERM_COLOR always
 RUN apt-get update && apt-get install -y libpq-dev libsqlite3-dev libmariadbclient-dev-compat pkg-config libssl1.1 libssl-dev && apt-get clean && rm -rf /var/lib/apt/lists/*
