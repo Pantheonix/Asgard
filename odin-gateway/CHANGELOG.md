@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/Pantheonix/Asgard/compare/odin/v1.0.0...odin/v1.1.0) (2024-11-02)
+
+
+### Features
+
+* **odin:** replace hard-coded clusters with dapr cluster ([#51](https://github.com/Pantheonix/Asgard/issues/51)) ([f909f0b](https://github.com/Pantheonix/Asgard/commit/f909f0b2cf293617f119f015ebb48820c9d90e98))
+
 ## 1.0.0 (2024-09-21)
 
 
