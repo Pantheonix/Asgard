@@ -37,7 +37,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
 {{- define "judge0.postgresql.fullname" -}}
-{{- printf "%s-%s" .Release.Name "postgresql" | trunc 63 | trimSuffix "-" -}}
+{{- printf "postgresql" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -45,7 +45,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
 {{- define "judge0.redis.fullname" -}}
-{{- printf "%s-%s" .Release.Name "redis" | trunc 63 | trimSuffix "-" -}}
+{{- printf "redis" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*

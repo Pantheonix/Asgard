@@ -3,6 +3,9 @@
 # Install the cluster and wait for it to be ready
 kind create cluster --name asgard-cluster --config kind-cluster.yaml --wait 90s
 
+# Create a namespace for the application
+kubectl create namespace asgard
+
 # Install Nginx Ingress Controller
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 

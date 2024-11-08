@@ -1,3 +1,4 @@
+# TODO: simplify judge0 resource
 apiVersion: v1
 kind: Service
 metadata:
@@ -37,7 +38,7 @@ spec:
 apiVersion: {{ template "judge0.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
-  name: {{ .Release.Namespace }}-{{ .Chart.Name }}-api
+  name: {{ .Release.Namespace }}-judge0-api
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}
@@ -225,7 +226,7 @@ spec:
 apiVersion: {{ template "judge0.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
-  name: {{ .Release.Namespace }}-{{ .Chart.Name }}-worker
+  name: {{ .Release.Namespace }}-judge0-worker
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}
