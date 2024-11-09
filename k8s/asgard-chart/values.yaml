@@ -1,31 +1,143 @@
 namespace: asgard
 
-## Global Docker image parameters
-## Please, note that this will override the image parameters, including dependencies, configured to use the global value
-## Current available global Docker image parameters: imageRegistry and imagePullSecrets
-image:
-  registry: docker.io
-  repository: judge0/api
-  tag: 1.13.0
-## Kubernetes configuration
-## For minikube, set this to NodePort, elsewhere use LoadBalancer
-##
-service:
-  type: ClusterIP
-  # HTTP Port
-  port: 80
-  ## loadBalancerIP:
-  ##
-  ## nodePorts:
-  ##   http: <to set explicitly, choose port between 30000-32767>
-  nodePorts:
-    http: ""
-  ## Enable client source IP preservation
-  ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
-  ##
-  externalTrafficPolicy: Cluster
-  ## Service annotations done as key:value pairs
-  annotations:
+###############################################################################
+# Asgard General Configuration
+###############################################################################
+
+hostname: localhost
+microservices:
+  odin:
+    name: odin
+    replicas: 1
+    image:
+      repository: pantheonix
+      name: odin
+      tag: latest
+    envs:
+      ENVOY_ADMIN_PORT: 4001
+      ENVOY_HTTPS_PORT: 443
+      ENVOY_HTTP_PORT: 80
+      DAPR_SIDECAR_PORT: 3500
+  quetzalcoatl:
+    name: quetzalcoatl
+    replicas: 2
+    image:
+      repository: pantheonix
+      name: quetzalcoatl
+      tag: latest
+    envs:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:80
+      JwtConfig__SecretKey: z7F+ut_aphaxeja0&ba*p9spew!4fe0rAFRO5HestitIKOv5nistlz3b=+edu1aP
+      JwtConfig__JwtAccessTokenLifeTime: 0:01:00:00.0
+      JwtConfig__JwtRefreshTokenLifeTime: 10:00:00:00.0
+      AdminConfig__UserName: admin
+      AdminConfig__Email: admin@gmail.com
+      AdminConfig__Password: Password@123
+      ConnectionStrings__DefaultConnection: Server=quetzalcoatl-mssql-db;Database=QuetzalcoatlAuthDb;User Id=SA;Password=Quetzalcoatl2021!;MultipleActiveResultSets=true;TrustServerCertificate=True;
+      AllowedHosts: *
+      AllowedOrigins: https://localhost:10000;http://localhost:10000;https://pantheonix.live;https://pantheonix-midgard.web.app;https://pantheonix-midgard.firebaseapp.com
+      ACCEPT_EULA: Y
+      SA_PASSWORD: Quetzalcoatl2021!
+  enki:
+    name: enki
+    replicas: 2
+    image:
+      repository: pantheonix
+      name: enki
+      tag: latest
+    envs:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:80
+      ConnectionStrings__Default: mongodb://enki-mongo-db:30001/EnkiProblems/?replicaSet=enki-rs
+      Redis__Configuration: asgard-redis:6379,abortConnect=false,connectTimeout=30000,responseTimeout=30000
+      AuthServer__SecurityKey: z7F+ut_aphaxeja0&ba*p9spew!4fe0rAFRO5HestitIKOv5nistlz3b=+edu1aP
+      Dapr__GrpcEndpoint: http://localhost:50001
+      Dapr__HermesAppId: hermes-tests
+      AllowedHosts: *
+      AllowedOrigins: https://localhost:10000;http://localhost:10000;https://pantheonix.live;https://pantheonix-midgard.web.app;https://pantheonix-midgard.firebaseapp.com
+  hermes:
+    name: hermes
+    replicas: 2
+    image:
+      repository: pantheonix
+      name: hermes
+      tag: latest
+    envs:
+      HERMES_CONFIG: |
+        {
+          "firebase": {
+            "apiKey": "AIzaSyC7ZeJKOBKw4UcB3pPQDvH37jYKDCHqxvg",
+            "authDomain": "pantheonix-hermes.firebaseapp.com",
+            "projectId": "pantheonix-hermes",
+            "storageBucket": "pantheonix-hermes.appspot.com",
+            "messagingSenderId": "891556041451",
+            "appId": "1:891556041451:web:c39afb5c5f21c2363924ae",
+            "measurementId": "G-BESQNT21LP"
+          },
+          "dev": {
+            "host": "localhost",
+            "port": 80,
+            "timeoutInSeconds": 60,
+            "tempLocalArchivedTestFolder": "temp/archived",
+            "tempLocalUnarchivedTestFolder": "temp/unarchived",
+            "remoteUnarchivedTestFolder": "problems",
+            "archiveTypeExtension": "zip",
+            "inputFilename": "input.txt",
+            "outputFilename": "output.txt",
+            "testMaxSizeInBytes": 10000000,
+            "logOutputFilePath": "logs/hermes.log"
+          },
+          "test": {
+            "host": "localhost",
+            "port": 3010,
+            "timeoutInSeconds": 60,
+            "tempLocalArchivedTestFolder": "temp/test/archived",
+            "tempLocalUnarchivedTestFolder": "temp/test/unarchived",
+            "remoteUnarchivedTestFolder": "test",
+            "archiveTypeExtension": "zip",
+            "inputFilename": "input.txt",
+            "outputFilename": "output.txt",
+            "testMaxSizeInBytes": 1000000,
+            "logOutputFilePath": "logs/test.log"
+          }
+        }
+  anubis:
+    name: anubis
+    replicas: 2
+    image:
+      repository: pantheonix
+      name: anubis
+      tag: latest
+    envs:
+      ROCKET_ADDRESS: 0.0.0.0
+      ROCKET_PORT: 80
+      ROCKET_DATABASES: {anubis-submissions={url="postgres://postgres:2002@anubis-psql-db:5432/anubis-submissions"}}
+      CONFIG_JWT_SECRET_KEY: z7F+ut_aphaxeja0&ba*p9spew!4fe0rAFRO5HestitIKOv5nistlz3b=+edu1aP
+      CONFIG_DAPR_HTTP_PORT: 3503
+      CONFIG_DAPR_EVAL_METADATA_ENDPOINT: http://dapr-app-id:enki-problems@127.0.0.1:3500/api/enki/problem/{problem_id}/eval-metadata
+      CONFIG_DAPR_JUDGE_SUBMISSION_BATCH_ENDPOINT: http://judge0-lb:4000/submissions/batch
+      CONFIG_DAPR_JUDGE_SUBMISSION_ENDPOINT: http://judge0-lb:4000/submissions
+      CONFIG_DAPR_GET_SUBMISSION_BATCH_ENDPOINT: http://judge0-lb:4000/submissions/batch?tokens={tokens}
+      CONFIG_DAPR_GET_SUBMISSION_ENDPOINT: http://judge0-lb:4000/submissions/{token}
+      CONFIG_DAPR_STATE_STORE_POST_ENDPOINT: http://127.0.0.1:3500/v1.0/state/statestore
+      CONFIG_DAPR_STATE_STORE_GET_ENDPOINT: http://127.0.0.1:3500/v1.0/state/statestore/{key}
+      CONFIG_EVAL_CRON_SCHEDULE: 1/5 * * * * *
+      CONFIG_DEFAULT_NO_SUBMISSIONS_PER_PAGE: 10
+      CONFIG_EVAL_BATCH_SIZE: 4
+      CONFIG_ALLOWED_ORIGINS: http://localhost:10000
+      DATABASE_URL: postgres://postgres:2002@anubis-psql-db:5432/anubis-submissions
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 2002
+      POSTGRES_DB: anubis-submissions
+  judge0:
+    name: judge0
+    replicas: 2
+    image:
+      repository: judge0
+      name: judge0
+      tag: 1.13.0
+
 ###############################################################################
 # Rails Environment
 ###############################################################################
@@ -43,7 +155,7 @@ RAILS_MAX_THREADS: 10
 MAINTENANCE_MODE: false
 
 # Set custom maintenance message that will be returned to clients
-# who try to create or delete submisions.
+# who try to create or delete submissions.
 # Default: Judge0 API is currently in maintenance.
 # MAINTENANCE_MESSAGE:
 

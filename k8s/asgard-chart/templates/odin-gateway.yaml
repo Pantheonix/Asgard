@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.microservices.odin.name }}-svc
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.odin.name }}
+spec:
+  selector:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.odin.name }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: odin-http
+    - name: https
+      port: 443
+      targetPort: odin-https
+      
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.microservices.odin.name }}-api-gateway
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.odin.name }}
+spec:
+  replicas: {{ .Values.microservices.odin.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      service: {{ .Values.microservices.odin.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        service: {{ .Values.microservices.odin.name }}
+    spec:
+      containers:
+        - name: {{ .Values.microservices.odin.name }}-api-gateway
+          image: {{ template "odin.image" . }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: odin-http
+              containerPort: 80
+              protocol: TCP
+            - name: odin-https
+              containerPort: 443
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.microservices.odin.name }}-cm
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.microservices.odin.name }}-cm
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.odin.name }}
+data:
+  ENVOY_ADMIN_PORT: {{ .Values.microservices.odin.envs.ENVOY_ADMIN_PORT | quote }}
+  ENVOY_HTTPS_PORT: {{ .Values.microservices.odin.envs.ENVOY_HTTPS_PORT | quote }}
+  ENVOY_HTTP_PORT: {{ .Values.microservices.odin.envs.ENVOY_HTTP_PORT | quote }}
+  DAPR_SIDECAR_PORT: {{ .Values.microservices.odin.envs.DAPR_SIDECAR_PORT | quote }}
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.microservices.odin.name }}-ingress
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.odin.name }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: {{ .Values.hostname }}
+      http:
+        paths:
+          - path: /gateway(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.microservices.odin.name }}-svc
+                port:
+                  number: 80

@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.microservices.anubis.name }}-svc
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.anubis.name }}
+spec:
+  selector:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.anubis.name }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: anubis-http
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.microservices.anubis.name }}-api
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.anubis.name }}
+spec:
+  replicas: {{ .Values.microservices.anubis.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      service: {{ .Values.microservices.anubis.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        service: {{ .Values.microservices.anubis.name }}
+    spec:
+      containers:
+        - name: {{ .Values.microservices.anubis.name }}-api
+          image: {{ template "anubis.image" . }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: anubis-http
+              containerPort: 80
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.microservices.anubis.name }}-cm
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.microservices.anubis.name }}-cm
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.anubis.name }}
+data:
+  ROCKET_ADDRESS: {{ .Values.microservices.anubis.envs.ROCKET_ADDRESS | quote }}
+  ROCKET_PORT: {{ .Values.microservices.anubis.envs.ROCKET_PORT | quote }}
+  ROCKET_DATABASES: {{ .Values.microservices.anubis.envs.ROCKET_DATABASES | quote }}
+  CONFIG_JWT_SECRET_KEY: {{ .Values.microservices.anubis.envs.CONFIG_JWT_SECRET_KEY | quote }}
+  CONFIG_DAPR_HTTP_PORT: {{ .Values.microservices.anubis.envs.CONFIG_DAPR_HTTP_PORT | quote }}
+  CONFIG_DAPR_EVAL_METADATA_ENDPOINT: {{ .Values.microservices.anubis.envs.CONFIG_DAPR_EVAL_METADATA_ENDPOINT | quote }}
+  CONFIG_DAPR_JUDGE_SUBMISSION_BATCH_ENDPOINT: {{ .Values.microservices.anubis.envs.CONFIG_DAPR_JUDGE_SUBMISSION_BATCH_ENDPOINT | quote }}
+  CONFIG_DAPR_JUDGE_SUBMISSION_ENDPOINT: {{ .Values.microservices.anubis.envs.CONFIG_DAPR_JUDGE_SUBMISSION_ENDPOINT | quote }}
+  CONFIG_DAPR_GET_SUBMISSION_BATCH_ENDPOINT: {{ .Values.microservices.anubis.envs.CONFIG_DAPR_GET_SUBMISSION_BATCH_ENDPOINT | quote }}
+  CONFIG_DAPR_GET_SUBMISSION_ENDPOINT: {{ .Values.microservices.anubis.envs.CONFIG_DAPR_GET_SUBMISSION_ENDPOINT | quote }}
+  CONFIG_DAPR_STATE_STORE_POST_ENDPOINT: {{ .Values.microservices.anubis.envs.CONFIG_DAPR_STATE_STORE_POST_ENDPOINT | quote }}
+  CONFIG_DAPR_STATE_STORE_GET_ENDPOINT: {{ .Values.microservices.anubis.envs.CONFIG_DAPR_STATE_STORE_GET_ENDPOINT | quote }}
+  CONFIG_EVAL_CRON_SCHEDULE: {{ .Values.microservices.anubis.envs.CONFIG_EVAL_CRON_SCHEDULE | quote }}
+  CONFIG_DEFAULT_NO_SUBMISSIONS_PER_PAGE: {{ .Values.microservices.anubis.envs.CONFIG_DEFAULT_NO_SUBMISSIONS_PER_PAGE | quote }}
+  CONFIG_EVAL_BATCH_SIZE: {{ .Values.microservices.anubis.envs.CONFIG_EVAL_BATCH_SIZE | quote }}
+  CONFIG_ALLOWED_ORIGINS: {{ .Values.microservices.anubis.envs.CONFIG_ALLOWED_ORIGINS | quote }}
+  DATABASE_URL: {{ .Values.microservices.anubis.envs.DATABASE_URL | quote }}
+  POSTGRES_USER: {{ .Values.microservices.anubis.envs.POSTGRES_USER | quote }}
+  POSTGRES_PASSWORD: {{ .Values.microservices.anubis.envs.POSTGRES_PASSWORD | quote }}
+  POSTGRES_DB: {{ .Values.microservices.anubis.envs.POSTGRES_DB | quote }}

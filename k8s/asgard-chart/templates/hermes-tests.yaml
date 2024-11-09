@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.microservices.hermes.name }}-svc
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.hermes.name }}
+spec:
+  selector:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.hermes.name }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: hermes-http
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.microservices.hermes.name }}-api
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.hermes.name }}
+spec:
+  replicas: {{ .Values.microservices.hermes.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      service: {{ .Values.microservices.hermes.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        service: {{ .Values.microservices.hermes.name }}
+    spec:
+      containers:
+        - name: {{ .Values.microservices.hermes.name }}-api
+          image: {{ template "hermes.image" . }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: hermes-http
+              containerPort: 80
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: {{ .Values.microservices.hermes.name }}-secret
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.microservices.hermes.name }}-secret
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.hermes.name }}
+data:
+  HERMES_CONFIG: {{ .Values.microservices.hermes.envs.HERMES_CONFIG | b64enc }}

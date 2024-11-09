@@ -1,108 +1,23 @@
-{{/* vim: set filetype=mustache: */}}
-{{/*
-Expand the name of the chart.
-*/}}
-{{- define "judge0.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- define "odin.image" -}}
+{{- printf "%s/%s:%s" .Values.microservices.odin.image.repository .Values.microservices.odin.image.name .Values.microservices.odin.image.tag -}}
 {{- end -}}
 
-{{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
-*/}}
-{{- define "judge0.fullname" -}}
-{{- if .Values.fullnameOverride -}}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- if contains $name .Release.Name -}}
-{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- end -}}
+{{- define "quetzalcoatl.image" -}}
+{{- printf "%s/%s:%s" .Values.microservices.quetzalcoatl.image.repository .Values.microservices.quetzalcoatl.image.name .Values.microservices.quetzalcoatl.image.tag -}}
 {{- end -}}
 
-{{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-*/}}
-{{- define "judge0.mysql.fullname" -}}
-{{- printf "%s-%s" .Release.Name "mysql" | trunc 63 | trimSuffix "-" -}}
+{{- define "enki.image" -}}
+{{- printf "%s/%s:%s" .Values.microservices.enki.image.repository .Values.microservices.enki.image.name .Values.microservices.enki.image.tag -}}
 {{- end -}}
 
-{{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-*/}}
-{{- define "judge0.postgresql.fullname" -}}
-{{- printf "postgresql" | trunc 63 | trimSuffix "-" -}}
+{{- define "hermes.image" }}
+{{- printf "%s/%s:%s" .Values.microservices.hermes.image.repository .Values.microservices.hermes.image.name .Values.microservices.hermes.image.tag -}}
 {{- end -}}
 
-{{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-*/}}
-{{- define "judge0.redis.fullname" -}}
-{{- printf "redis" | trunc 63 | trimSuffix "-" -}}
+{{- define "anubis.image" }}
+{{- printf "%s/%s:%s" .Values.microservices.anubis.image.repository .Values.microservices.anubis.image.name .Values.microservices.anubis.image.tag -}}
 {{- end -}}
 
-{{/*
-Return the proper image name
-*/}}
 {{- define "judge0.image" -}}
-{{- $registryName := .Values.image.registry -}}
-{{- $repositoryName := .Values.image.repository -}}
-{{- $tag := .Values.image.tag | toString -}}
-{{/*
-Helm 2.11 supports the assignment of a value to a variable defined in a different scope,
-but Helm 2.9 and 2.10 doesn't support it, so we need to implement this if-else logic.
-Also, we can't use a single if because lazy evaluation is not an option
-*/}}
-{{- if .Values.global }}
-    {{- if .Values.global.imageRegistry }}
-        {{- printf "%s/%s:%s" .Values.global.imageRegistry $repositoryName $tag -}}
-    {{- else -}}
-        {{- printf "%s/%s:%s" $registryName $repositoryName $tag -}}
-    {{- end -}}
-{{- else -}}
-    {{- printf "%s/%s:%s" $registryName $repositoryName $tag -}}
-{{- end -}}
-{{- end -}}
-
-
-{{/*
-Return the proper Docker Image Registry Secret Names
-*/}}
-{{- define "judge0.imagePullSecrets" -}}
-{{/*
-Helm 2.11 supports the assignment of a value to a variable defined in a different scope,
-but Helm 2.9 and 2.10 does not support it, so we need to implement this if-else logic.
-Also, we can not use a single if because lazy evaluation is not an option
-*/}}
-{{- if .Values.global }}
-{{- if .Values.global.imagePullSecrets }}
-imagePullSecrets:
-{{- range .Values.global.imagePullSecrets }}
-  - name: {{ . }}
-{{- end }}
-{{- else if .Values.image.pullSecrets}}
-imagePullSecrets:
-{{- range .Values.image.pullSecrets }}
-  - name: {{ . }}
-{{- end }}
-{{- end -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the appropriate apiVersion for deployment.
-*/}}
-{{- define "judge0.deployment.apiVersion" -}}
-{{- if semverCompare "<1.14-0" .Capabilities.KubeVersion.GitVersion -}}
-{{- print "extensions/v1beta1" -}}
-{{- else -}}
-{{- print "apps/v1" -}}
-{{- end -}}
+{{- printf "%s/%s:%s" .Values.microservices.judge0.image.repository .Values.microservices.judge0.image.name .Values.microservices.judge0.image.tag -}}
 {{- end -}}

@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.microservices.enki.name }}-svc
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.enki.name }}
+spec:
+  selector:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.enki.name }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: enki-http
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.microservices.enki.name }}-api
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.enki.name }}
+spec:
+  replicas: {{ .Values.microservices.enki.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      service: {{ .Values.microservices.enki.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        service: {{ .Values.microservices.enki.name }}
+    spec:
+      containers:
+        - name: {{ .Values.microservices.enki.name }}-api
+          image: {{ template "enki.image" . }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: enki-http
+              containerPort: 80
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.microservices.enki.name }}-cm
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.microservices.enki.name }}-cm
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.enki.name }}
+data:
+  ASPNETCORE_ENVIRONMENT: {{ .Values.microservices.enki.envs.ASPNETCORE_ENVIRONMENT | quote }}
+  ASPNETCORE_URLS: {{ .Values.microservices.enki.envs.ASPNETCORE_URLS | quote }}
+  ConnectionStrings__Default: {{ .Values.microservices.enki.envs.ConnectionStrings__Default | quote }}
+  Redis__Configuration: {{ .Values.microservices.enki.envs.Redis__Configuration | quote }}
+  AuthServer__SecurityKey: {{ .Values.microservices.enki.envs.AuthServer__SecurityKey | quote }}
+  Dapr__GrpcEndpoint: {{ .Values.microservices.enki.envs.Dapr__GrpcEndpoint | quote }}
+  Dapr__HermesAppId: {{ .Values.microservices.enki.envs.Dapr__HermesAppId | quote }}
+  AllowedHosts: {{ .Values.microservices.enki.envs.AllowedHosts | quote }}
+  AllowedOrigins: {{ .Values.microservices.enki.envs.AllowedOrigins | quote }}

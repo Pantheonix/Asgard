@@ -1,391 +1,140 @@
-# TODO: simplify judge0 resource
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Chart.Name }}
-  namespace: {{ .Release.Namespace }}
+  name:  {{ .Values.microservices.judge0.name }}-svc
+  namespace: {{ .Values.namespace }}
   labels:
-    app: {{ .Chart.Name }}-service
-    kubernetes.io/name: {{ .Chart.Name | quote }}
-    dns: {{ default "" .Values.service.dns |  quote }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-  annotations:
-    {{- range $key, $value := .Values.service.annotations }}
-    {{ $key }}: {{ $value | quote }}
-    {{- end }}
-
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.judge0.name }}
 spec:
-  type: {{ .Values.service.type }}
-  {{- if (or (eq .Values.service.type "LoadBalancer") (eq .Values.service.type "NodePort")) }}
-  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy | quote }}
-  {{- end }}
-  {{- if eq .Values.service.type "LoadBalancer" }}
-  loadBalancerIP: {{ default "" .Values.service.loadBalancerIP | quote }}
-  {{- end }}
+  selector:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.judge0.name }}
   ports:
     - name: http
-      port: {{  default "http"  .Values.service.port }}
-      targetPort: http
-      {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.nodePorts.http)))}}
-      nodePort: {{ .Values.service.nodePorts.http }}
-      {{- end }}
-  selector:
-    app: {{ .Chart.Name }}
+      port: 80
+      targetPort: judge0-http
 
 ---
 
-apiVersion: {{ template "judge0.deployment.apiVersion" . }}
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Namespace }}-judge0-api
-  namespace: {{ .Release.Namespace }}
+  name:  {{ .Values.microservices.judge0.name }}-api
+  namespace: {{ .Values.namespace }}
   labels:
     app: {{ .Chart.Name }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service | quote }}
+    service: {{ .Values.microservices.judge0.name }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.microservices.judge0.replicas }}
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
-      release:  {{ .Release.Name | quote }}
+      service: {{ .Values.microservices.judge0.name }}
   template:
     metadata:
       labels:
         app: {{ .Chart.Name }}
-        chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-        release: {{ .Release.Name }}
+        service: {{ .Values.microservices.judge0.name }}
     spec:
-      restartPolicy: Always
-{{- include "judge0.imagePullSecrets" . | indent 6 }}
-      initContainers:
-        - name: init-wait-for-dependencies
-          image: docker.io/saikatharryc/wait_for_dep:latest
-          command: ["/docker-entrypoint.sh"]
-          args: ["wait_for", "redis:REDIS_HOST", "postgressql:POSTGRES_HOST"]
-          env:
-        {{- if .Values.redis.enabled }}
-            - name: REDIS_HOST
-              value: {{ template "judge0.redis.fullname" . }}-master
-        {{- else }}
-            - name: REDIS_HOST
-              value:  {{ .Values.external.redis.host | quote }}
-        {{- end }}
-        {{- if .Values.postgresql.enabled }}
-            - name: POSTGRES_HOST
-              value: {{ template "judge0.postgresql.fullname" . }}
-        {{- else }}
-            - name: POSTGRES_HOST
-              value: {{ .Values.external.postgresql.host | quote }}
-        {{- end }}
       containers:
-        - name: {{ .Chart.Name }}-api
+        - name:  {{ .Values.microservices.judge0.name }}-api
           image: {{ template "judge0.image" . }}
-          securityContext:
-            privileged: true
           imagePullPolicy: IfNotPresent
           ports:
-            - name: http-port
-              containerPort: 3000
-      {{- if .Values.readinessProbe.enable }}
-          readinessProbe:
-            httpGet:
-              path: /system_info
-              port: http-port
-              scheme: HTTP
-            initialDelaySeconds: {{ .Values.readinessProbe.initialDelay }}
-            periodSeconds: {{ .Values.readinessProbe.interval }}
-            timeoutSeconds: {{ .Values.readinessProbe.timeout }}
-        {{- end }}
-        {{- if .Values.livenessProbe.enable }}
-          livenessProbe:
-            httpGet:
-              path: /config_info
-              port: http-port
-              scheme: HTTP
-            initialDelaySeconds: {{ add .Values.livenessProbe.initialDelay .Values.readinessProbe.initialDelay }}
-            periodSeconds: 60
-            timeoutSeconds: {{ .Values.livenessProbe.timeout }}
-        {{- end }}
-          env:
-            - name: RAILS_ENV
-              value:  {{  .Values.RAILS_ENV | quote }}
-            - name: RAILS_MAX_THREADS
-              value:  {{ .Values.RAILS_MAX_THREADS | quote }}
-            - name: SECRET_KEY_BASE
-              value:  {{ .Values.SECRET_KEY_BASE | quote }}
-            - name: ALLOW_ORIGIN
-              value:  {{ .Values.ALLOW_ORIGIN | quote }}
-            - name: AUTHN_HEADER
-              value:  {{ .Values.AUTHN_HEADER | quote }}
-            - name: AUTHN_TOKEN
-              value:  {{ .Values.AUTHN_TOKEN | quote }}
-            - name: AUTHZ_HEADER
-              value:  {{ .Values.AUTHZ_HEADER | quote }}
-            - name: AUTHZ_TOKEN
-              value:  {{ .Values.AUTHZ_TOKEN | quote }}
-            - name: INTERVAL
-              value:  {{ .Values.INTERVAL | quote }}
-            - name: COUNT
-              value:  {{ .Values.COUNT | quote }}
-        {{- if .Values.redis.enabled }}
-            - name: REDIS_HOST
-              value: {{ template "judge0.redis.fullname" . }}-master
-            - name: REDIS_PASSWORD
-              value: {{ .Values.redis.password | quote }}
-            - name: REDIS_PORT
-              value: {{ .Values.redis.redisPort | quote }}
-        {{- else }}
-            - name: REDIS_HOST
-              value:  {{ .Values.external.redis.host | quote }}
-            - name: REDIS_PASSWORD
-              value: {{ .Values.external.redis.password | quote }}
-            - name: REDIS_PORT
-              value: {{  .Values.external.redis.port | quote }}
-        {{- end }}
-        {{- if .Values.postgresql.enabled }}
-            - name: POSTGRES_HOST
-              value: {{ template "judge0.postgresql.fullname" . }}
-            - name: POSTGRES_DB
-              value: {{ .Values.postgresql.postgresqlDatabase | quote }}
-            - name: POSTGRES_USER
-              value: {{ .Values.postgresql.postgresqlUsername | quote }}
-            - name: POSTGRES_PASSWORD
-              value: {{ .Values.postgresql.postgresqlPassword | quote }}
-            - name: POSTGRES_PORT
-              value:  {{.Values.postgresql.service.port | quote }}
-        {{- else }}
-            - name: POSTGRES_HOST
-              value: {{ .Values.external.postgresql.host | quote }}
-            - name: POSTGRES_DB
-              value: {{ .Values.external.postgresql.postgresqlDatabase | quote }}
-            - name: POSTGRES_USER
-              value: {{ .Values.external.postgresql.postgresqlUsername | quote }}
-            - name: POSTGRES_PASSWORD
-              value: {{ .Values.external.postgresql.postgresqlPassword | quote }}
-            - name: POSTGRES_PORT
-              value:  {{.Values.external.postgresql.port | quote }}
-        {{- end }}
-            - name: ENABLE_WAIT_RESULT
-              value:  {{ .Values.ENABLE_WAIT_RESULT | quote }}
-            - name: CPU_TIME_LIMIT
-              value:  {{ .Values.CPU_TIME_LIMIT | quote }}
-            - name: MAX_CPU_TIME_LIMIT
-              value:  {{ .Values.MAX_CPU_TIME_LIMIT | quote }}
-            - name: CPU_EXTRA_TIME
-              value:  {{ .Values.CPU_EXTRA_TIME | quote }}
-            - name: MAX_CPU_EXTRA_TIME
-              value:  {{ .Values.MAX_CPU_EXTRA_TIME | quote }}
-            - name: WALL_TIME_LIMIT
-              value:  {{ .Values.WALL_TIME_LIMIT | quote }}
-            - name: MAX_WALL_TIME_LIMIT
-              value:  {{ .Values.MAX_WALL_TIME_LIMIT | quote }}
-            - name: MEMORY_LIMIT
-              value:  {{ .Values.MEMORY_LIMIT | quote }}
-            - name: MAX_MEMORY_LIMIT
-              value:  {{ .Values.MAX_MEMORY_LIMIT | quote }}
-            - name: MAX_STACK_LIMIT
-              value:  {{ .Values.MAX_STACK_LIMIT | quote }}
-            - name: MAX_PROCESSES_AND_OR_THREADS
-              value:  {{ .Values.MAX_PROCESSES_AND_OR_THREADS | quote }}
-            - name: MAX_MAX_PROCESSES_AND_OR_THREADS
-              value:  {{ .Values.MAX_MAX_PROCESSES_AND_OR_THREADS | quote }}
-            - name: ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT
-              value:  {{ .Values.ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT | quote }}
-            - name: ALLOW_ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT
-              value:  {{ .Values.ALLOW_ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT | quote }}
-            - name: ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT
-              value: {{ .Values.ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT | quote }}
-            - name: ALLOW_ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT
-              value:  {{ .Values.ALLOW_ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT | quote }}
-            - name: MAX_FILE_SIZE
-              value: {{ .Values.MAX_FILE_SIZE | quote }}
-            - name: MAX_MAX_FILE_SIZE
-              value:  {{ .Values.MAX_MAX_FILE_SIZE | quote }}
-            - name: NUMBER_OF_RUNS
-              value:  {{ .Values.NUMBER_OF_RUNS | quote }}
-            - name: MAX_NUMBER_OF_RUNS
-              value:  {{ .Values.MAX_NUMBER_OF_RUNS | quote }}
-            - name: MAX_QUEUE_SIZE
-              value:  {{ .Values.MAX_QUEUE_SIZE | quote }}
-            - name: DISALLOW_IP
-              value:  {{ .Values.DISALLOW_IP | quote }}
-            - name: ALLOW_IP
-              value:  {{ .Values.ALLOW_IP | quote }}
-            - name: DISALLOW_ORIGIN
-              value:  {{ .Values.DISALLOW_ORIGIN | quote }}
-            - name: MAINTENANCE_MESSAGE
-              value:  {{ .Values.MAINTENANCE_MESSAGE | quote }}
-            - name: MAINTENANCE_MODE
-              value:  {{ .Values.MAINTENANCE_MODE | quote }}
+            - name: judge0-http
+              containerPort: 2358
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.microservices.judge0.name }}-cm
 
 ---
 
-apiVersion: {{ template "judge0.deployment.apiVersion" . }}
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Namespace }}-judge0-worker
-  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.namespace }}-worker
+  namespace: {{ .Values.namespace }}
   labels:
     app: {{ .Chart.Name }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service | quote }}
+    service: {{ .Values.microservices.judge0.name }}
 spec:
-  replicas: {{  .Values.COUNT }}
+  replicas: {{ .Values.microservices.judge0.replicas }}
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
-      release:  {{ .Release.Name | quote }}
+      service: {{ .Values.microservices.judge0.name }}
   template:
     metadata:
       labels:
         app: {{ .Chart.Name }}
-        chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-        release: {{ .Release.Name }}
+        service: {{ .Values.microservices.judge0.name }}
     spec:
-      restartPolicy: Always
-      # {{- include "judge0.imagePullSecrets" . | indent 6 }}
-      initContainers:
-        - name: init-wait-for-dependencies
-          image: docker.io/saikatharryc/wait_for_dep:latest
-          command: ["/docker-entrypoint.sh"]
-          args: ["wait_for", "redis:REDIS_HOST", "postgressql:POSTGRES_HOST"]
-          env:
-        {{- if .Values.redis.enabled }}
-            - name: REDIS_HOST
-              value: {{ template "judge0.redis.fullname" . }}-master
-        {{- else }}
-            - name: REDIS_HOST
-              value:  {{ .Values.external.redis.host | quote }}
-        {{- end }}
-        {{- if .Values.postgresql.enabled }}
-            - name: POSTGRES_HOST
-              value: {{ template "judge0.postgresql.fullname" . }}
-        {{- else }}
-            - name: POSTGRES_HOST
-              value: {{ .Values.external.postgresql.host | quote }}
-        {{- end }}
       containers:
-        - name: {{ .Chart.Name }}-worker
+        - name: {{ .Values.microservices.judge0.name }}-worker
           image: {{ template "judge0.image" . }}
-          securityContext:
-            privileged: true
           imagePullPolicy: IfNotPresent
           args:
             - bash
             - -c
             - while true; do rails resque:work; done
-          env:
-            - name: RAILS_ENV
-              value:  {{  .Values.RAILS_ENV | quote }}
-            - name: RAILS_MAX_THREADS
-              value:  {{ .Values.RAILS_MAX_THREADS | quote }}
-            - name: SECRET_KEY_BASE
-              value:  {{ .Values.SECRET_KEY_BASE | quote }}
-            - name: ALLOW_ORIGIN
-              value:  {{ .Values.ALLOW_ORIGIN | quote }}
-            - name: AUTHN_HEADER
-              value:  {{ .Values.AUTHN_HEADER | quote }}
-            - name: AUTHN_TOKEN
-              value:  {{ .Values.AUTHN_TOKEN | quote }}
-            - name: AUTHZ_HEADER
-              value:  {{ .Values.AUTHZ_HEADER | quote }}
-            - name: AUTHZ_TOKEN
-              value:  {{ .Values.AUTHZ_TOKEN | quote }}
-            - name: INTERVAL
-              value:  {{ .Values.INTERVAL | quote }}
-            - name: COUNT
-              value:  {{ .Values.COUNT | quote }}
-        {{- if .Values.redis.enabled }}
-            - name: REDIS_HOST
-              value: {{ template "judge0.redis.fullname" . }}-master
-            - name: REDIS_PASSWORD
-              value: {{ .Values.redis.password | quote }}
-            - name: REDIS_PORT
-              value: {{ .Values.redis.redisPort | quote }}
-        {{- else }}
-            - name: REDIS_HOST
-              value:  {{ .Values.external.redis.host | quote }}
-            - name: REDIS_PASSWORD
-              value: {{ .Values.external.redis.password | quote }}
-            - name: REDIS_PORT
-              value: {{  .Values.external.redis.port | quote }}
-        {{- end }}
-        {{- if .Values.postgresql.enabled }}
-            - name: POSTGRES_HOST
-              value: {{ template "judge0.postgresql.fullname" . }}
-            - name: POSTGRES_DB
-              value: {{ .Values.postgresql.postgresqlDatabase | quote }}
-            - name: POSTGRES_USER
-              value: {{ .Values.postgresql.postgresqlUsername | quote }}
-            - name: POSTGRES_PASSWORD
-              value: {{ .Values.postgresql.postgresqlPassword | quote }}
-            - name: POSTGRES_PORT
-              value:  {{.Values.postgresql.service.port | quote }}
-        {{- else }}
-            - name: POSTGRES_HOST
-              value: {{ .Values.external.postgresql.host | quote }}
-            - name: POSTGRES_DB
-              value: {{ .Values.external.postgresql.postgresqlDatabase | quote }}
-            - name: POSTGRES_USER
-              value: {{ .Values.external.postgresql.postgresqlUsername | quote }}
-            - name: POSTGRES_PASSWORD
-              value: {{ .Values.external.postgresql.postgresqlPassword | quote }}
-            - name: POSTGRES_PORT
-              value:  {{.Values.external.postgresql.port | quote }}
-        {{- end }}
-            - name: ENABLE_WAIT_RESULT
-              value:  {{ .Values.ENABLE_WAIT_RESULT | quote }}
-            - name: CPU_TIME_LIMIT
-              value:  {{ .Values.CPU_TIME_LIMIT | quote }}
-            - name: MAX_CPU_TIME_LIMIT
-              value:  {{ .Values.MAX_CPU_TIME_LIMIT | quote }}
-            - name: CPU_EXTRA_TIME
-              value:  {{ .Values.CPU_EXTRA_TIME | quote }}
-            - name: MAX_CPU_EXTRA_TIME
-              value:  {{ .Values.MAX_CPU_EXTRA_TIME | quote }}
-            - name: WALL_TIME_LIMIT
-              value:  {{ .Values.WALL_TIME_LIMIT | quote }}
-            - name: MAX_WALL_TIME_LIMIT
-              value:  {{ .Values.MAX_WALL_TIME_LIMIT | quote }}
-            - name: MEMORY_LIMIT
-              value:  {{ .Values.MEMORY_LIMIT | quote }}
-            - name: MAX_MEMORY_LIMIT
-              value:  {{ .Values.MAX_MEMORY_LIMIT | quote }}
-            - name: MAX_STACK_LIMIT
-              value:  {{ .Values.MAX_STACK_LIMIT | quote }}
-            - name: MAX_PROCESSES_AND_OR_THREADS
-              value:  {{ .Values.MAX_PROCESSES_AND_OR_THREADS | quote }}
-            - name: MAX_MAX_PROCESSES_AND_OR_THREADS
-              value:  {{ .Values.MAX_MAX_PROCESSES_AND_OR_THREADS | quote }}
-            - name: ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT
-              value:  {{ .Values.ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT | quote }}
-            - name: ALLOW_ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT
-              value:  {{ .Values.ALLOW_ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT | quote }}
-            - name: ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT
-              value: {{ .Values.ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT | quote }}
-            - name: ALLOW_ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT
-              value:  {{ .Values.ALLOW_ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT | quote }}
-            - name: MAX_FILE_SIZE
-              value: {{ .Values.MAX_FILE_SIZE | quote }}
-            - name: MAX_MAX_FILE_SIZE
-              value:  {{ .Values.MAX_MAX_FILE_SIZE | quote }}
-            - name: NUMBER_OF_RUNS
-              value:  {{ .Values.NUMBER_OF_RUNS | quote }}
-            - name: MAX_NUMBER_OF_RUNS
-              value:  {{ .Values.MAX_NUMBER_OF_RUNS | quote }}
-            - name: MAX_QUEUE_SIZE
-              value:  {{ .Values.MAX_QUEUE_SIZE | quote }}
-            - name: DISALLOW_IP
-              value:  {{ .Values.DISALLOW_IP | quote }}
-            - name: ALLOW_IP
-              value:  {{ .Values.ALLOW_IP | quote }}
-            - name: DISALLOW_ORIGIN
-              value:  {{ .Values.DISALLOW_ORIGIN | quote }}
-            - name: MAINTENANCE_MESSAGE
-              value:  {{ .Values.MAINTENANCE_MESSAGE | quote }}
-            - name: MAINTENANCE_MODE
-              value:  {{ .Values.MAINTENANCE_MODE | quote }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.microservices.judge0.name }}-cm
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.microservices.judge0.name }}-cm
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.judge0.name }}
+data:
+  RAILS_ENV: {{ .Values.RAILS_ENV | quote }}
+  RAILS_MAX_THREADS: {{ .Values.RAILS_MAX_THREADS | quote }}
+  SECRET_KEY_BASE: {{ .Values.SECRET_KEY_BASE | quote }}
+  ALLOW_ORIGIN: {{ .Values.ALLOW_ORIGIN | quote }}
+  AUTHN_HEADER: {{ .Values.AUTHN_HEADER | quote }}
+  AUTHN_TOKEN: {{ .Values.AUTHN_TOKEN | quote }}
+  AUTHZ_HEADER: {{ .Values.AUTHZ_HEADER | quote }}
+  AUTHZ_TOKEN: {{ .Values.AUTHZ_TOKEN | quote }}
+  INTERVAL: {{ .Values.INTERVAL | quote }}
+  COUNT: {{ .Values.COUNT | quote }}
+  REDIS_HOST: {{ if .Values.redis.enabled }}{{ template "judge0.redis.fullname" . }}-master{{ else }}{{ .Values.external.redis.host | quote }}{{ end }}
+  REDIS_PASSWORD: {{ if .Values.redis.enabled }}{{ .Values.redis.password | quote }}{{ else }}{{ .Values.external.redis.password | quote }}{{ end }}
+  REDIS_PORT: {{ if .Values.redis.enabled }}{{ .Values.redis.redisPort | quote }}{{ else }}{{ .Values.external.redis.port | quote }}{{ end }}
+  POSTGRES_HOST: {{ if .Values.postgresql.enabled }}{{ template "judge0.postgresql.fullname" . }}{{ else }}{{ .Values.external.postgresql.host | quote }}{{ end }}
+  POSTGRES_DB: {{ if .Values.postgresql.enabled }}{{ .Values.postgresql.postgresqlDatabase | quote }}{{ else }}{{ .Values.external.postgresql.postgresqlDatabase | quote }}{{ end }}
+  POSTGRES_USER: {{ if .Values.postgresql.enabled }}{{ .Values.postgresql.postgresqlUsername | quote }}{{ else }}{{ .Values.external.postgresql.postgresqlUsername | quote }}{{ end }}
+  POSTGRES_PASSWORD: {{ if .Values.postgresql.enabled }}{{ .Values.postgresql.postgresqlPassword | quote }}{{ else }}{{ .Values.external.postgresql.postgresqlPassword | quote }}{{ end }}
+  POSTGRES_PORT: {{ if .Values.postgresql.enabled }}{{ .Values.postgresql.service.port | quote }}{{ else }}{{ .Values.external.postgresql.port | quote }}{{ end }}
+  ENABLE_WAIT_RESULT: {{ .Values.ENABLE_WAIT_RESULT | quote }}
+  CPU_TIME_LIMIT: {{ .Values.CPU_TIME_LIMIT | quote }}
+  MAX_CPU_TIME_LIMIT: {{ .Values.MAX_CPU_TIME_LIMIT | quote }}
+  CPU_EXTRA_TIME: {{ .Values.CPU_EXTRA_TIME | quote }}
+  MAX_CPU_EXTRA_TIME: {{ .Values.MAX_CPU_EXTRA_TIME | quote }}
+  WALL_TIME_LIMIT: {{ .Values.WALL_TIME_LIMIT | quote }}
+  MAX_WALL_TIME_LIMIT: {{ .Values.MAX_WALL_TIME_LIMIT | quote }}
+  MEMORY_LIMIT: {{ .Values.MEMORY_LIMIT | quote }}
+  MAX_MEMORY_LIMIT: {{ .Values.MAX_MEMORY_LIMIT | quote }}
+  MAX_STACK_LIMIT: {{ .Values.MAX_STACK_LIMIT | quote }}
+  MAX_PROCESSES_AND_OR_THREADS: {{ .Values.MAX_PROCESSES_AND_OR_THREADS | quote }}
+  MAX_MAX_PROCESSES_AND_OR_THREADS: {{ .Values.MAX_MAX_PROCESSES_AND_OR_THREADS | quote }}
+  ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT: {{ .Values.ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT | quote }}
+  ALLOW_ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT: {{ .Values.ALLOW_ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT | quote }}
+  ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT: {{ .Values.ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT | quote }}
+  ALLOW_ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT: {{ .Values.ALLOW_ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT | quote }}
+  MAX_FILE_SIZE: {{ .Values.MAX_FILE_SIZE | quote }}
+  MAX_MAX_FILE_SIZE: {{ .Values.MAX_MAX_FILE_SIZE | quote }}
+  NUMBER_OF_RUNS: {{ .Values.NUMBER_OF_RUNS | quote }}
+  MAX_NUMBER_OF_RUNS: {{ .Values.MAX_NUMBER_OF_RUNS | quote }}
+  MAX_QUEUE_SIZE: {{ .Values.MAX_QUEUE_SIZE | quote }}
+  DISALLOW_IP: {{ .Values.DISALLOW_IP | quote }}
+  ALLOW_IP: {{ .Values.ALLOW_IP | quote }}
+  DISALLOW_ORIGIN: {{ .Values.DISALLOW_ORIGIN | quote }}
+  MAINTENANCE_MESSAGE: {{ .Values.MAINTENANCE_MESSAGE | quote }}
+  MAINTENANCE_MODE: {{ .Values.MAINTENANCE_MODE | quote }}

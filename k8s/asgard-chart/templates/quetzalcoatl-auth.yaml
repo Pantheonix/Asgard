@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.microservices.quetzalcoatl.name }}-svc
+  namespace: {{ .Values.namespace }}
+  labels:
+      app: {{ .Chart.Name }}
+      service: {{ .Values.microservices.quetzalcoatl.name }}
+spec:
+  selector:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.quetzalcoatl.name }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: quetzalcoatl-http
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.microservices.quetzalcoatl.name }}-api
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.quetzalcoatl.name }}
+spec:
+  replicas: {{ .Values.microservices.quetzalcoatl.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      service: {{ .Values.microservices.quetzalcoatl.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        service: {{ .Values.microservices.quetzalcoatl.name }}
+    spec:
+      containers:
+        - name: {{ .Values.microservices.quetzalcoatl.name }}-api
+          image: {{ template "quetzalcoatl.image" . }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: quetzalcoatl-http
+              containerPort: 80
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.microservices.quetzalcoatl.name }}-cm
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.microservices.quetzalcoatl.name }}-cm
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.quetzalcoatl.name }}
+data:
+  ASPNETCORE_ENVIRONMENT: {{ .Values.microservices.quetzalcoatl.envs.ASPNETCORE_ENVIRONMENT | quote }}
+  ASPNETCORE_URLS: {{ .Values.microservices.quetzalcoatl.envs.ASPNETCORE_URLS | quote }}
+  JwtConfig__SecretKey: {{ .Values.microservices.quetzalcoatl.envs.JwtConfig__SecretKey | quote }}
+  JwtConfig__JwtAccessTokenLifeTime: {{ .Values.microservices.quetzalcoatl.envs.JwtConfig__JwtAccessTokenLifeTime | quote }}
+  JwtConfig__JwtRefreshTokenLifeTime: {{ .Values.microservices.quetzalcoatl.envs.JwtConfig__JwtRefreshTokenLifeTime | quote }}
+  AdminConfig__UserName: {{ .Values.microservices.quetzalcoatl.envs.AdminConfig__UserName | quote }}
+  AdminConfig__Email: {{ .Values.microservices.quetzalcoatl.envs.AdminConfig__Email | quote }}
+  AdminConfig__Password: {{ .Values.microservices.quetzalcoatl.envs.AdminConfig__Password | quote }}
+  ConnectionStrings__DefaultConnection: {{ .Values.microservices.quetzalcoatl.envs.ConnectionStrings__DefaultConnection | quote }}
+  AllowedHosts: {{ .Values.microservices.quetzalcoatl.envs.AllowedHosts | quote }}
+  AllowedOrigins: {{ .Values.microservices.quetzalcoatl.envs.AllowedOrigins | quote }}
+  ACCEPT_EULA: {{ .Values.microservices.quetzalcoatl.envs.ACCEPT_EULA | quote }}
+  SA_PASSWORD: {{ .Values.microservices.quetzalcoatl.envs.SA_PASSWORD | quote }}
+  
+ 
