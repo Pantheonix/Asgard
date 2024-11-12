@@ -137,6 +137,7 @@ microservices:
       repository: judge0
       name: judge0
       tag: 1.13.0
+    # TODO: add the rest of the file as envs for judge0
 
 ###############################################################################
 # Rails Environment

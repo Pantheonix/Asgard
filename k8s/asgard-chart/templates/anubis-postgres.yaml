@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.microservices.anubis.name }}-db-svc
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.anubis.name }}-db
+spec:
+  selector:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.anubis.name }}-db
+  ports:
+    - port: 5433
+  clusterIP: None
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.microservices.anubis.name }}-db
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.anubis.name }}-db
+spec:
+  serviceName: {{ .Values.microservices.anubis.name }}-db-svc
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      service: {{ .Values.microservices.anubis.name }}-db
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        service: {{ .Values.microservices.anubis.name }}-db
+    spec:
+      containers:
+        - name: {{ .Values.microservices.anubis.name }}-db
+          image: postgres:14.1
+          ports:
+            - name: postgres
+              containerPort: 5432
+          # TODO: use configmap/secret for envs
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.microservices.anubis.envs.POSTGRES_DB }}
+            - name: POSTGRES_USER
+              value: {{ .Values.microservices.anubis.envs.POSTGRES_USER }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.microservices.anubis.envs.POSTGRES_PASSWORD }}
+          volumeMounts:
+            - name: {{ .Values.microservices.anubis.name }}-db-pvc
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ .Values.microservices.anubis.name }}-db-pvc
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.microservices.anubis.name }}-db-pv
+  namespace: {{ .Values.namespace }}
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  gcePersistentDisk:
+    pdName: {{ .Values.microservices.anubis.name }}-db-pv-disk
+    fsType: ext4
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.microservices.anubis.name }}-db-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: ""
+  volumeName: {{ .Values.microservices.anubis.name }}-db-pv
+

@@ -21,30 +21,6 @@ releases:
     needs:
       - dapr
 
-  - name: redis
-    namespace: asgard
-    chart: bitnami/redis
-    version: 20.2.1
-    wait: true
-    values:
-      - global:
-          redis:
-            password: a8iuw23iuizy
-      - master:
-          persistence:
-            enabled: false
-
-  - name: postgresql
-    namespace: asgard
-    chart: bitnami/postgresql
-    version: 16.1.2
-    wait: true
-    values:
-      - auth:
-          postgresqlUsername: judgemaster
-          postgresqlPassword: uaeyjbzuyq
-          postgresqlDatabase: judge
-
   - name: asgard-local
     namespace: asgard
     chart: ./asgard-chart/

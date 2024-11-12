@@ -39,6 +39,11 @@ spec:
       labels:
         app: {{ .Chart.Name }}
         service: {{ .Values.microservices.odin.name }}
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: {{ .Values.microservices.odin.name }}
+        dapr.io/app-port: "80"
+        dapr.io/config: "dapr-config"
     spec:
       containers:
         - name: {{ .Values.microservices.odin.name }}-api-gateway

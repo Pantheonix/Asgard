@@ -36,6 +36,11 @@ spec:
       labels:
         app: {{ .Chart.Name }}
         service: {{ .Values.microservices.anubis.name }}
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: {{ .Values.microservices.anubis.name }}
+        dapr.io/app-port: "80"
+        dapr.io/config: "dapr-config"
     spec:
       containers:
         - name: {{ .Values.microservices.anubis.name }}-api
