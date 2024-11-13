@@ -96,8 +96,8 @@ spec:
     - host: {{ .Values.hostname }}
       http:
         paths:
-          - path: /gateway(/|$)(.*)
-            pathType: Prefix
+          - path: /(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ .Values.microservices.odin.name }}-svc

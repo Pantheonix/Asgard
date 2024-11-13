@@ -13,7 +13,7 @@ spec:
   ports:
     - name: http
       port: 80
-      targetPort: anubis-http
+      targetPort: http-port
 
 ---
 
@@ -47,7 +47,7 @@ spec:
           image: {{ template "anubis.image" . }}
           imagePullPolicy: IfNotPresent
           ports:
-            - name: anubis-http
+            - name: http-port
               containerPort: 80
               protocol: TCP
           envFrom:

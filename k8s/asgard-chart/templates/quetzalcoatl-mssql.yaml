@@ -1,39 +1,56 @@
 # TODO: refine the following StatefulSet definition to match quetzalcoatl requirements
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.microservices.quetzalcoatl.name }}-db-svc
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.quetzalcoatl.name }}-db
+spec:
+  selector:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.quetzalcoatl.name }}-db
+  ports:
+    - port: 1433
+  clusterIP: None
+
+---
+
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: mssql # name of the StatefulSet workload, the SQL Server instance name is derived from this. We suggest to keep this name same as the .spec.template.metadata.labels, .spec.selector.matchLabels and .spec.serviceName to avoid confusion.
+  name: {{ .Values.microservices.quetzalcoatl.name }}-db
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.quetzalcoatl.name }}-db
 spec:
-  serviceName: "mssql" # serviceName is the name of the service that governs this StatefulSet. This service must exist before the StatefulSet, and is responsible for the network identity of the set.
-  replicas: 1 # only one pod, with one SQL Server instance deployed.
+  serviceName: {{ .Values.microservices.quetzalcoatl.name }}-db-svc
+  replicas: 1
   selector:
     matchLabels:
-      app: mssql  # this has to be the same as .spec.template.metadata.labels
+      app: {{ .Chart.Name }}
+      service: {{ .Values.microservices.quetzalcoatl.name }}-db
   template:
     metadata:
       labels:
-        app: mssql # this has to be the same as .spec.selector.matchLabels, as documented [here](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/):
+        app: {{ .Chart.Name }}
+        service: {{ .Values.microservices.quetzalcoatl.name }}-db
     spec:
       securityContext:
         fsGroup: 10001
       containers:
-        - name: mssql # container name within the pod.
-          image: mcr.microsoft.com/mssql/server:2019-latest
+        - name: {{ .Values.microservices.quetzalcoatl.name }}-db
+          image: mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 1433
-              name: tcpsql
-          env:
-            - name: ACCEPT_EULA
-              value: "Y"
-            - name: MSSQL_ENABLE_HADR
-              value: "1"
-            - name: MSSQL_AGENT_ENABLED
-              value: "1"
-            - name: MSSQL_SA_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mssql
-                  key: MSSQL_SA_PASSWORD
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.microservices.quetzalcoatl.name }}-db-cm
+            - secretRef:
+                name: {{ .Values.microservices.quetzalcoatl.name }}-db-secret
           volumeMounts:
             - name: mssql
               mountPath: "/var/opt/mssql"
@@ -46,3 +63,29 @@ spec:
         resources:
           requests:
             storage: 8Gi
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.microservices.quetzalcoatl.name }}-db-cm
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.quetzalcoatl.name }}-db
+data:
+  ACCEPT_EULA: {{ .Values.microservices.quetzalcoatl.envs.ACCEPT_EULA | quote }}
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.microservices.quetzalcoatl.name }}-db-secret
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.quetzalcoatl.name }}-db
+data:
+  SA_PASSWORD: {{ .Values.microservices.quetzalcoatl.envs.SA_PASSWORD | b64enc }}

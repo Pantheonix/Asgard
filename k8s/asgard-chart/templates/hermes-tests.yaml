@@ -13,7 +13,7 @@ spec:
   ports:
     - name: http
       port: 80
-      targetPort: hermes-http
+      targetPort: http-port
 
 ---
 
@@ -47,7 +47,7 @@ spec:
           image: {{ template "hermes.image" . }}
           imagePullPolicy: IfNotPresent
           ports:
-            - name: hermes-http
+            - name: http-port
               containerPort: 80
               protocol: TCP
           envFrom:
