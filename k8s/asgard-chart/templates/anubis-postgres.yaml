@@ -46,11 +46,20 @@ spec:
           # TODO: use configmap/secret for envs
           env:
             - name: POSTGRES_DB
-              value: {{ .Values.microservices.anubis.envs.POSTGRES_DB }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.microservices.anubis.name }}-db-cm
+                  key: POSTGRES_DB
             - name: POSTGRES_USER
-              value: {{ .Values.microservices.anubis.envs.POSTGRES_USER }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.microservices.anubis.name }}-db-cm
+                  key: POSTGRES_USER
             - name: POSTGRES_PASSWORD
-              value: {{ .Values.microservices.anubis.envs.POSTGRES_PASSWORD }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.microservices.anubis.name }}-db-secret
+                  key: POSTGRES_PASSWORD
           volumeMounts:
             - name: {{ .Values.microservices.anubis.name }}-db-pvc
               mountPath: /var/lib/postgresql/data
@@ -61,7 +70,7 @@ spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 1Gi
+            storage: 10Gi
 
 ---
 
@@ -72,7 +81,7 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   capacity:
-    storage: 1Gi
+    storage: 10Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -92,7 +101,33 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 10Gi
   storageClassName: ""
   volumeName: {{ .Values.microservices.anubis.name }}-db-pv
 
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.microservices.anubis.name }}-db-cm
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.anubis.name }}-db
+data:
+  POSTGRES_DB: {{ .Values.microservices.anubis.envs.POSTGRES_DB | quote }}
+  POSTGRES_USER: {{ .Values.microservices.anubis.envs.POSTGRES_USER | quote }}
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.microservices.anubis.name }}-db-secret
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    service: {{ .Values.microservices.anubis.name }}-db
+data:
+  POSTGRES_PASSWORD: {{ .Values.microservices.anubis.envs.POSTGRES_PASSWORD | b64enc }}

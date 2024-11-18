@@ -3,19 +3,19 @@
 {{- end -}}
 
 {{- define "quetzalcoatl.image" -}}
-{{- printf "%s/%s" .Values.microservices.quetzalcoatl.image.repository .Values.microservices.quetzalcoatl.image.name -}}
+{{- printf "%s/%s:%s" .Values.microservices.quetzalcoatl.image.repository .Values.microservices.quetzalcoatl.image.name .Values.microservices.quetzalcoatl.image.tag -}}
 {{- end -}}
 
 {{- define "enki.image" -}}
-{{- printf "%s/%s" .Values.microservices.enki.image.repository .Values.microservices.enki.image.name -}}
+{{- printf "%s/%s:%s" .Values.microservices.enki.image.repository .Values.microservices.enki.image.name .Values.microservices.enki.image.tag -}}
 {{- end -}}
 
 {{- define "hermes.image" }}
-{{- printf "%s/%s" .Values.microservices.hermes.image.repository .Values.microservices.hermes.image.name -}}
+{{- printf "%s/%s:%s" .Values.microservices.hermes.image.repository .Values.microservices.hermes.image.name .Values.microservices.hermes.image.tag -}}
 {{- end -}}
 
 {{- define "anubis.image" }}
-{{- printf "%s/%s" .Values.microservices.anubis.image.repository .Values.microservices.anubis.image.name -}}
+{{- printf "%s/%s:%s" .Values.microservices.anubis.image.repository .Values.microservices.anubis.image.name .Values.microservices.anubis.image.tag -}}
 {{- end -}}
 
 {{- define "judge0.image" -}}
