@@ -13,6 +13,7 @@ spec:
     service: {{ .Values.microservices.enki.name }}-db
   ports:
     - port: 27017
+      targetPort: mongo
 
 ---
 
@@ -40,6 +41,9 @@ spec:
       containers:
         - name: {{ .Values.microservices.enki.name }}-db
           image: mongo:5.0
+          ports:
+            - name: mongo
+              containerPort: 27017
           startupProbe:
             exec:
               command:
@@ -108,7 +112,7 @@ spec:
         storageClassName: demo-storage
         resources:
           requests:
-            storage: 1Gi
+            storage: 10Gi
 
 
 ---

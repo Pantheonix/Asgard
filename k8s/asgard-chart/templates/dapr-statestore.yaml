@@ -9,6 +9,6 @@ spec:
   initTimeout: 1m
   metadata:
   - name: redisHost
-    value: asgard-redis:6379
+    value: {{ .Values.microservices.judge0.name }}-redis-svc:6379
   - name: redisPassword
     value: ""

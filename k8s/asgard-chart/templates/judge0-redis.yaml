@@ -12,6 +12,7 @@ spec:
     service: {{ .Values.microservices.judge0.name }}-redis
   ports:
     - port: 6379
+      targetPort: redis-port
 
 ---
 
@@ -21,19 +22,19 @@ metadata:
   name: {{ .Values.microservices.judge0.name }}-redis
   namespace: {{ .Values.namespace }}
   labels:
-    app: {{ .Values.microservices.judge0.name }}
+    app: {{ .Values.namespace }}
     service: {{ .Values.microservices.judge0.name }}-redis
 spec:
   serviceName: {{ .Values.microservices.judge0.name }}-redis-svc
   replicas: 3
   selector:
     matchLabels:
-      app: {{ .Values.microservices.judge0.name }}
+      app: {{ .Values.namespace }}
       service: {{ .Values.microservices.judge0.name }}-redis
   template:
     metadata:
       labels:
-        app: {{ .Values.microservices.judge0.name }}
+        app: {{ .Values.namespace }}
         service: {{ .Values.microservices.judge0.name }}-redis
     spec:
       containers:
@@ -41,7 +42,8 @@ spec:
           image: redis:6.0
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 6379
+            - name: redis-port
+              containerPort: 6379
           volumeMounts:
             - name: {{ .Values.microservices.judge0.name }}-redis-pvc
               mountPath: /data

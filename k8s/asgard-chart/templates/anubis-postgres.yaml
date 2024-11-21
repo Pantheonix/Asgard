@@ -12,6 +12,7 @@ spec:
     service: {{ .Values.microservices.anubis.name }}-db
   ports:
     - port: 5433
+      targetPort: postgres
 
 ---
 
@@ -39,10 +40,17 @@ spec:
       containers:
         - name: {{ .Values.microservices.anubis.name }}-db
           image: postgres:14.1
+          args:
+            - -c
+            - max_connections=1000
+            - -c
+            - shared_buffers=1024MB
           ports:
             - name: postgres
               containerPort: 5432
           env:
+{{/*            - name: "PGOPTIONS"*/}}
+{{/*              value: "-c max_connections=250"*/}}
             - name: POSTGRES_DB
               valueFrom:
                 configMapKeyRef:
