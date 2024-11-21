@@ -12,7 +12,6 @@ spec:
     service: {{ .Values.microservices.judge0.name }}-db
   ports:
     - port: 5432
-  clusterIP: None
 
 ---
 

@@ -13,7 +13,6 @@ spec:
     service: {{ .Values.microservices.quetzalcoatl.name }}-db
   ports:
     - port: 1433
-  clusterIP: None
 
 ---
 

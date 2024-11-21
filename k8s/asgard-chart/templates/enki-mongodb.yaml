@@ -13,7 +13,6 @@ spec:
     service: {{ .Values.microservices.enki.name }}-db
   ports:
     - port: 27017
-  clusterIP: None
 
 ---
 
