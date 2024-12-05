@@ -36,6 +36,7 @@ spec:
       labels:
         app: {{ .Chart.Name }}
         service: {{ .Values.microservices.hermes.name }}
+      # TODO: Check why dapr sidecar keeps crashing
       annotations:
         dapr.io/enabled: "true"
         dapr.io/app-id: {{ .Values.microservices.hermes.name }}

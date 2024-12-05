@@ -22,10 +22,6 @@
 {{- printf "%s/%s:%s" .Values.microservices.judge0.image.repository .Values.microservices.judge0.image.name .Values.microservices.judge0.image.tag -}}
 {{- end -}}
 
-{{- define "judge0.redis.fullname" -}}
-{{- printf "%s-redis-svc" .Values.microservices.judge0.name -}}
-{{- end -}}
-
 {{- define "judge0.postgresql.fullname" -}}
 {{- printf "%s-db-svc" .Values.microservices.judge0.name -}}
 {{- end -}}

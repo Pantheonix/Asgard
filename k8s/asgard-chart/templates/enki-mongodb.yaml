@@ -1,4 +1,3 @@
-# TODO: refine the following StatefulSet definition to match enki requirements
 apiVersion: v1
 kind: Service
 metadata:
@@ -77,6 +76,7 @@ spec:
             timeoutSeconds: 5
             successThreshold: 1
             failureThreshold: 2
+            # TODO: use configmap/secret for envs
 {{/*          env:*/}}
 {{/*            - name: MONGO_INITDB_ROOT_USERNAME*/}}
 {{/*              valueFrom:*/}}

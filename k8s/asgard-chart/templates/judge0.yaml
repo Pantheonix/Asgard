@@ -104,8 +104,8 @@ data:
   AUTHZ_TOKEN: {{ .Values.AUTHZ_TOKEN | quote }}
   INTERVAL: {{ .Values.INTERVAL | quote }}
   COUNT: {{ .Values.COUNT | quote }}
-  REDIS_HOST: {{ if .Values.redis.enabled }}{{ template "judge0.redis.fullname" . }}{{ else }}{{ .Values.external.redis.host | quote }}{{ end }}
-  REDIS_PASSWORD: {{ if .Values.redis.enabled }}{{ .Values.redis.password | quote }}{{ else }}{{ .Values.external.redis.password | quote }}{{ end }}
+  REDIS_HOST: redis-svc
+  REDIS_PASSWORD: {{ .Values.redis.password | quote }}
   REDIS_PORT: {{ if .Values.redis.enabled }}{{ .Values.redis.redisPort | quote }}{{ else }}{{ .Values.external.redis.port | quote }}{{ end }}
   POSTGRES_HOST: {{ if .Values.postgresql.enabled }}{{ template "judge0.postgresql.fullname" . }}{{ else }}{{ .Values.external.postgresql.host | quote }}{{ end }}
   POSTGRES_DB: {{ if .Values.postgresql.enabled }}{{ .Values.postgresql.postgresqlDatabase | quote }}{{ else }}{{ .Values.external.postgresql.postgresqlDatabase | quote }}{{ end }}

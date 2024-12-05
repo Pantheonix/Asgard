@@ -1,4 +1,3 @@
-# TODO: refine the following StatefulSet definition to match quetzalcoatl requirements
 apiVersion: v1
 kind: Service
 metadata:

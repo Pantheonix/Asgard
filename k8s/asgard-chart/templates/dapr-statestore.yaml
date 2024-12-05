@@ -9,6 +9,6 @@ spec:
   initTimeout: 1m
   metadata:
   - name: redisHost
-    value: {{ .Values.microservices.judge0.name }}-redis-svc:6379
+    value: redis-svc:6379
   - name: redisPassword
-    value: ""
+    value: {{ .Values.redis.password | quote }}
