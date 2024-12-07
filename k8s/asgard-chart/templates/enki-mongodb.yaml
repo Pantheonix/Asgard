@@ -15,7 +15,7 @@ spec:
       targetPort: mongo
 
 ---
-
+# TODO: check why the resource is stuck in pending state
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:

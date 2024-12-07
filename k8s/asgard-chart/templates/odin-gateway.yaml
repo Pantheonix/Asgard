@@ -19,7 +19,6 @@ spec:
       targetPort: odin-https
       
 ---
-# TODO: configure certificates path
 apiVersion: apps/v1
 kind: Deployment
 metadata:
