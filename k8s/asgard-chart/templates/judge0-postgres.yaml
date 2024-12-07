@@ -61,7 +61,7 @@ spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 10Gi
+            storage: 2Gi
 
 ---
 
@@ -72,7 +72,7 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   capacity:
-    storage: 1Gi
+    storage: 2Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -92,6 +92,6 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 2Gi
   storageClassName: ""
   volumeName: {{ .Values.microservices.judge0.name }}-db-pv

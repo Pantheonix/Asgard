@@ -107,7 +107,7 @@ data:
   REDIS_HOST: redis-svc
   REDIS_PASSWORD: {{ .Values.redis.password | quote }}
   REDIS_PORT: {{ if .Values.redis.enabled }}{{ .Values.redis.redisPort | quote }}{{ else }}{{ .Values.external.redis.port | quote }}{{ end }}
-  POSTGRES_HOST: {{ if .Values.postgresql.enabled }}{{ template "judge0.postgresql.fullname" . }}{{ else }}{{ .Values.external.postgresql.host | quote }}{{ end }}
+  POSTGRES_HOST: {{ .Values.external.postgresql.host | quote }}
   POSTGRES_DB: {{ if .Values.postgresql.enabled }}{{ .Values.postgresql.postgresqlDatabase | quote }}{{ else }}{{ .Values.external.postgresql.postgresqlDatabase | quote }}{{ end }}
   POSTGRES_USER: {{ if .Values.postgresql.enabled }}{{ .Values.postgresql.postgresqlUsername | quote }}{{ else }}{{ .Values.external.postgresql.postgresqlUsername | quote }}{{ end }}
   POSTGRES_PASSWORD: {{ if .Values.postgresql.enabled }}{{ .Values.postgresql.postgresqlPassword | quote }}{{ else }}{{ .Values.external.postgresql.postgresqlPassword | quote }}{{ end }}

@@ -76,7 +76,7 @@ spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 10Gi
+            storage: 2Gi
 
 ---
 
@@ -87,7 +87,7 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   capacity:
-    storage: 10Gi
+    storage: 2Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -107,7 +107,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: 2Gi
   storageClassName: ""
   volumeName: {{ .Values.microservices.anubis.name }}-db-pv
 

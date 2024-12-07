@@ -49,13 +49,15 @@ microservices:
     envs:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:80
-      ConnectionStrings__Default: mongodb://enki-db-svc:27017/EnkiProblems/?replicaSet=enki-rs
+      ConnectionStrings__Default: mongodb://root:MongoDB2021!@enki-db-svc:27017/EnkiProblems/?replicaSet=enki-rs
       Redis__Configuration: redis-svc:6379,abortConnect=false,connectTimeout=30000,responseTimeout=30000
       AuthServer__SecurityKey: z7F+ut_aphaxeja0&ba*p9spew!4fe0rAFRO5HestitIKOv5nistlz3b=+edu1aP
       Dapr__GrpcEndpoint: http://localhost:50001
       Dapr__HermesAppId: hermes-tests
       AllowedHosts: "*"
       AllowedOrigins: https://localhost:10000;http://localhost:10000;https://pantheonix.live;https://pantheonix-midgard.web.app;https://pantheonix-midgard.firebaseapp.com
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: MongoDB2021!
   hermes:
     name: hermes
     replicas: 2
@@ -139,6 +141,10 @@ microservices:
       tag: 1.13.0
     # TODO: add the rest of the file as envs for judge0
     # TODO: add rabbitmq
+  dapr:
+    redis:
+    rabbitmq:
+    zipkin:
 
 ###############################################################################
 # Rails Environment
@@ -302,7 +308,7 @@ redis:
 # Set this incase the above services are disabled.
 external:
   postgresql:
-    host: localhost
+    host: judge0-db-svc
     postgresqlUsername: judge
     postgresqlPassword: ""
     postgresqlDatabase: judge

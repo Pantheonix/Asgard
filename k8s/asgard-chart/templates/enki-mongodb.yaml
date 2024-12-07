@@ -76,18 +76,17 @@ spec:
             timeoutSeconds: 5
             successThreshold: 1
             failureThreshold: 2
-            # TODO: use configmap/secret for envs
-{{/*          env:*/}}
-{{/*            - name: MONGO_INITDB_ROOT_USERNAME*/}}
-{{/*              valueFrom:*/}}
-{{/*                configMapKeyRef:*/}}
-{{/*                  key: username*/}}
-{{/*                  name: mongodb-config*/}}
-{{/*            - name: MONGO_INITDB_ROOT_PASSWORD*/}}
-{{/*              valueFrom:*/}}
-{{/*                secretKeyRef:*/}}
-{{/*                  key: password*/}}
-{{/*                  name: mongodb-secret*/}}
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  key: username
+                  name: mongodb-config
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: mongodb-secret
           command:
             - mongod
             - "--bind_ip_all"
@@ -112,8 +111,7 @@ spec:
         storageClassName: demo-storage
         resources:
           requests:
-            storage: 10Gi
-
+            storage: 2Gi
 
 ---
 
@@ -125,7 +123,6 @@ provisioner: k8s.io/minikube-hostpath  # Specifies the provisioner used for volu
 volumeBindingMode: Immediate  # Specifies that volumes should be immediately bound when requested
 reclaimPolicy: Delete  # Specifies the reclaim policy for the volumes (Delete in this case)
 
-
 ---
 
 apiVersion: v1
@@ -134,7 +131,7 @@ metadata:
   name: mongodb-config
 immutable: false
 data:
-  username: "admin1"
+  username: {{ .Values.microservices.enki | quote }}
   mongodb.conf: |
     storage:
       dbPath: /data/db  # Sets the MongoDB data storage path
@@ -143,11 +140,11 @@ data:
 
 ---
 
-{{/*apiVersion: v1*/}}
-{{/*kind: Secret*/}}
-{{/*metadata:*/}}
-{{/*  name: mongodb-secret*/}}
-{{/*immutable: false*/}}
-{{/*type: Opaque*/}}
-{{/*data:*/}}
-{{/*  password: password_for_mongodb*/}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongodb-secret
+immutable: false
+type: Opaque
+data:
+  password: {{ .Values.microservices.enki.envs.MONGO_INITDB_ROOT_PASSWORD | b64enc | quote }}
