@@ -3,7 +3,10 @@ repositories:
     url: https://dapr.github.io/helm-charts/
   - name: bitnami
     url: https://charts.bitnami.com/bitnami
+  - name: mongodb-helm-charts
+    url: https://mongodb.github.io/helm-charts
 
+# TODO: move operators to another namespace
 releases:
   - name: dapr
     namespace: asgard
@@ -20,6 +23,24 @@ releases:
     wait: true
     needs:
       - dapr
+
+  - name: mongodb-community-operator
+    namespace: asgard
+    chart: mongodb-helm-charts/community-operator
+    version: 0.11.0
+    wait: true
+    values:
+      - global:
+          installCRDs: true
+
+  - name: rabbitmq-cluster-operator
+    namespace: asgard
+    chart: bitnami/rabbitmq-cluster-operator
+    version: 4.3.29
+    wait: true
+    values:
+      - global:
+          installCRDs: true
 
   - name: asgard-local
     namespace: asgard

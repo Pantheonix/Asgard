@@ -1,150 +1,60 @@
 apiVersion: v1
-kind: Service
+kind: Secret
 metadata:
-  name: {{ .Values.microservices.enki.name }}-db-svc
+  name: enki-db-password
   namespace: {{ .Values.namespace }}
-  labels:
-    app: {{ .Chart.Name }}
-    service: {{ .Values.microservices.enki.name }}-db
-spec:
-  selector:
-    app: {{ .Chart.Name }}
-    service: {{ .Values.microservices.enki.name }}-db
-  ports:
-    - port: 27017
-      targetPort: mongo
-
----
-# TODO: check why the resource is stuck in pending state
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: {{ .Values.microservices.enki.name }}-db
-  namespace: {{ .Values.namespace }}
-  labels:
-    app: {{ .Chart.Name }}
-    service: {{ .Values.microservices.enki.name }}-db
-spec:
-  serviceName: {{ .Values.microservices.enki.name }}-db-svc
-  replicas: 1
-  selector:
-    matchLabels:
-      app: {{ .Chart.Name }}
-      service: {{ .Values.microservices.enki.name }}-db
-  template:
-    metadata:
-      labels:
-        app: {{ .Chart.Name }}
-        service: {{ .Values.microservices.enki.name }}-db
-    spec:
-      containers:
-        - name: {{ .Values.microservices.enki.name }}-db
-          image: mongo:5.0
-          ports:
-            - name: mongo
-              containerPort: 27017
-          startupProbe:
-            exec:
-              command:
-                - mongo
-                - --eval
-                - "db.adminCommand('ping')"
-            initialDelaySeconds: 1
-            periodSeconds: 10
-            timeoutSeconds: 5
-            successThreshold: 1
-            failureThreshold: 2
-          livenessProbe:
-            exec:
-              command:
-                - mongo
-                - --eval
-                - "db.adminCommand('ping')"
-            initialDelaySeconds: 1
-            periodSeconds: 10
-            timeoutSeconds: 5
-            successThreshold: 1
-            failureThreshold: 2
-          readinessProbe:
-            exec:
-              command:
-                - mongo
-                - --eval
-                - "db.adminCommand('ping')"
-            initialDelaySeconds: 1
-            periodSeconds: 10
-            timeoutSeconds: 5
-            successThreshold: 1
-            failureThreshold: 2
-          env:
-            - name: MONGO_INITDB_ROOT_USERNAME
-              valueFrom:
-                configMapKeyRef:
-                  key: username
-                  name: mongodb-config
-            - name: MONGO_INITDB_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: mongodb-secret
-          command:
-            - mongod
-            - "--bind_ip_all"
-            - --config=/etc/mongo/mongodb.conf
-          volumeMounts:
-            - name: mongo-volume
-              mountPath: /data/db
-            - name: mongodb-config
-              mountPath: /etc/mongo
-      volumes:
-        - name: mongodb-config
-          configMap:
-            name: mongodb-config
-            items:
-              - key: mongodb.conf
-                path: mongodb.conf
-  volumeClaimTemplates:
-    - metadata:
-        name: mongo-volume
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        storageClassName: demo-storage
-        resources:
-          requests:
-            storage: 2Gi
-
----
-
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: demo-storage  # Specifies the name of the StorageClass
-provisioner: k8s.io/minikube-hostpath  # Specifies the provisioner used for volume provisioning
-volumeBindingMode: Immediate  # Specifies that volumes should be immediately bound when requested
-reclaimPolicy: Delete  # Specifies the reclaim policy for the volumes (Delete in this case)
-
----
-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: mongodb-config
-immutable: false
+type: Opaque
 data:
-  username: {{ .Values.microservices.enki | quote }}
-  mongodb.conf: |
-    storage:
-      dbPath: /data/db  # Sets the MongoDB data storage path
-    replication:
-      replSetName: "rs0"  # Specifies the name of the MongoDB replica set
+  password: {{ .Values.microservices.enki.envs.MONGO_INITDB_ROOT_PASSWORD | b64enc }}
 
 ---
 
 apiVersion: v1
 kind: Secret
 metadata:
-  name: mongodb-secret
-immutable: false
+  name: enki-db-scram
+  namespace: {{ .Values.namespace }}
 type: Opaque
 data:
-  password: {{ .Values.microservices.enki.envs.MONGO_INITDB_ROOT_PASSWORD | b64enc | quote }}
+  password: {{ .Values.microservices.enki.envs.MONGO_INITDB_ROOT_PASSWORD | b64enc }}
+
+---
+
+apiVersion: mongodbcommunity.mongodb.com/v1
+kind: MongoDBCommunity
+metadata:
+  name: enki-db
+  namespace: {{ .Values.namespace }}
+spec:
+  members: 1
+  type: ReplicaSet
+  version: "6.0.4"
+  security:
+    authentication:
+      modes: ["SCRAM"]
+    roles: # custom roles are defined here
+      - role: root
+        db: admin
+        privileges:
+          - resource:
+              db: {{ .Values.microservices.enki.envs.MONGO_INITDB_DATABASE }}
+              collection: "" # an empty string indicates any collection
+            actions:
+              - find
+              - insert
+              - remove
+              - update
+        roles: []
+  users:
+    - name: enki-db-user
+      db: admin
+      passwordSecretRef: # a reference to the secret that will be used to generate the user's password
+        name: enki-db-password
+      roles:
+        - name: clusterAdmin
+          db: admin
+        - name: userAdminAnyDatabase
+          db: admin
+        - name: root # apply the custom role to the user
+          db: admin
+      scramCredentialsSecretName: enki-db-scram

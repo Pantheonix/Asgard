@@ -18,8 +18,8 @@ microservices:
       ENVOY_HTTPS_PORT: 443
       ENVOY_HTTP_PORT: 80
       DAPR_SIDECAR_PORT: 3500
-      CERT_FILE_PATH: /Users/sami/Desktop/Development/Asgard/envs-template/certs/asgard/https.crt
-      KEY_FILE_PATH: /Users/sami/Desktop/Development/Asgard/envs-template/certs/asgard/key.pem
+      CERT_FILE_PATH: /home/samibarbutdica/development/Pantheonix/Asgard/envs/certs/asgard/https.crt
+      KEY_FILE_PATH: /home/samibarbutdica/development/Pantheonix/Asgard/envs/certs/asgard/key.pem
   quetzalcoatl:
     name: quetzalcoatl
     replicas: 2
@@ -51,15 +51,16 @@ microservices:
     envs:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:80
-      ConnectionStrings__Default: mongodb://root:MongoDB2021!@enki-db-svc:27017/EnkiProblems/?replicaSet=enki-rs
+      ConnectionStrings__Default: mongodb://enki-db-svc:27017/EnkiProblems/?replicaSet=enki-rs
       Redis__Configuration: redis-svc:6379,abortConnect=false,connectTimeout=30000,responseTimeout=30000
       AuthServer__SecurityKey: z7F+ut_aphaxeja0&ba*p9spew!4fe0rAFRO5HestitIKOv5nistlz3b=+edu1aP
       Dapr__GrpcEndpoint: http://localhost:50001
       Dapr__HermesAppId: hermes-tests
       AllowedHosts: "*"
       AllowedOrigins: https://localhost:10000;http://localhost:10000;https://pantheonix.live;https://pantheonix-midgard.web.app;https://pantheonix-midgard.firebaseapp.com
-      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: MongoDB2021!
+      MONGO_INITDB_DATABASE: EnkiProblems
   hermes:
     name: hermes
     replicas: 2
