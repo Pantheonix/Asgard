@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/Pantheonix/Asgard/compare/odin/v1.1.0...odin/v1.2.0) (2024-12-09)
+
+
+### Features
+
+* remove https support for odin ([#54](https://github.com/Pantheonix/Asgard/issues/54)) ([179b66c](https://github.com/Pantheonix/Asgard/commit/179b66c409286a48ab3816c9dd040b52511dc13f))
+
 ## [1.1.0](https://github.com/Pantheonix/Asgard/compare/odin/v1.0.0...odin/v1.1.0) (2024-11-02)
 
 
