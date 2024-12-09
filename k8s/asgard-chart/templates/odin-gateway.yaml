@@ -58,23 +58,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Values.microservices.odin.name }}-cm
-          volumeMounts:
-            - mountPath: /etc/ssl/certs/https.crt
-              name: cert-file
-              readOnly: true
-            - mountPath: /etc/ssl/certs/key.pem
-              name: key-file
-              readOnly: true
-      # TODO: remove certificate volume mounts by creating a dedicated docker image without https support
-      volumes:
-        - name: cert-file
-          hostPath:
-            path: {{ .Values.microservices.odin.envs.CERT_FILE_PATH | quote }}
-            type: File
-        - name: key-file
-          hostPath:
-            path: {{ .Values.microservices.odin.envs.KEY_FILE_PATH | quote }}
-            type: File
 
 ---
 

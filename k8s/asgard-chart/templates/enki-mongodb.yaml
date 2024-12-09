@@ -1,61 +1,43 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: enki-db-password
+  name: {{ .Values.microservices.enki.name }}-db-password
   namespace: {{ .Values.namespace }}
 type: Opaque
-data:
-  password: {{ .Values.microservices.enki.envs.MONGO_INITDB_ROOT_PASSWORD | b64enc }}
+stringData:
+  password: {{ .Values.microservices.enki.envs.MONGO_INITDB_ROOT_PASSWORD | quote }}
 
 ---
 
 apiVersion: v1
 kind: Secret
 metadata:
-  name: enki-db-scram
+  name: {{ .Values.microservices.enki.name }}-scram-credentials
   namespace: {{ .Values.namespace }}
 type: Opaque
-data:
-  password: {{ .Values.microservices.enki.envs.MONGO_INITDB_ROOT_PASSWORD | b64enc }}
+stringData:
+  password: {{ .Values.microservices.enki.envs.MONGO_INITDB_ROOT_PASSWORD | quote }}
 
 ---
 
 apiVersion: mongodbcommunity.mongodb.com/v1
 kind: MongoDBCommunity
 metadata:
-  name: enki-db
+  name: {{ .Values.microservices.enki.name }}-db
   namespace: {{ .Values.namespace }}
 spec:
   members: 1
   type: ReplicaSet
   version: "6.0.4"
-  # TODO: investigate how to completely disable authentication
   security:
     authentication:
-      modes: []
-    roles: # custom roles are defined here
-      - role: root
-        db: admin
-        privileges:
-          - resource:
-              db: {{ .Values.microservices.enki.envs.MONGO_INITDB_DATABASE }}
-              collection: "" # an empty string indicates any collection
-            actions:
-              - find
-              - insert
-              - remove
-              - update
-        roles: []
+      modes: ["SCRAM"]
   users:
-    - name: enki-db-user
+    - name: {{ .Values.microservices.enki.envs.MONGO_INITDB_ROOT_USERNAME }}
       db: admin
-      passwordSecretRef: # a reference to the secret that will be used to generate the user's password
-        name: enki-db-password
+      passwordSecretRef:
+        name: {{ .Values.microservices.enki.name }}-db-password
+      scramCredentialsSecretName: {{ .Values.microservices.enki.name }}-scram-credentials
       roles:
-        - name: clusterAdmin
-          db: admin
-        - name: userAdminAnyDatabase
-          db: admin
-        - name: root # apply the custom role to the user
-          db: admin
-{{/*      scramCredentialsSecretName: enki-db-scram*/}}
+        - name: root
+          db: {{ .Values.microservices.enki.envs.MONGO_INITDB_DATABASE }}

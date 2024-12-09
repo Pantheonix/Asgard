@@ -11,9 +11,9 @@ spec:
     app: {{ .Chart.Name }}
     service: {{ .Values.microservices.hermes.name }}
   ports:
-    - name: http
+    - name: grpc
       port: 80
-      targetPort: http-port
+      targetPort: grpc-port
 
 ---
 
@@ -49,7 +49,7 @@ spec:
           image: {{ template "hermes.image" . }}
           imagePullPolicy: IfNotPresent
           ports:
-            - name: http-port
+            - name: grpc-port
               containerPort: 80
               protocol: TCP
           envFrom:
