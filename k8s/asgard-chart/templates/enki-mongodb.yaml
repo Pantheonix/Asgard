@@ -29,9 +29,10 @@ spec:
   members: 1
   type: ReplicaSet
   version: "6.0.4"
+  # TODO: investigate how to completely disable authentication
   security:
     authentication:
-      modes: ["SCRAM"]
+      modes: []
     roles: # custom roles are defined here
       - role: root
         db: admin
@@ -57,4 +58,4 @@ spec:
           db: admin
         - name: root # apply the custom role to the user
           db: admin
-      scramCredentialsSecretName: enki-db-scram
+{{/*      scramCredentialsSecretName: enki-db-scram*/}}

@@ -36,11 +36,12 @@ spec:
       labels:
         app: {{ .Chart.Name }}
         service: {{ .Values.microservices.hermes.name }}
-      # TODO: Check why dapr sidecar keeps crashing
+      # TODO: Check why dapr sidecar keeps on crashing
       annotations:
         dapr.io/enabled: "true"
         dapr.io/app-id: {{ .Values.microservices.hermes.name }}
         dapr.io/app-port: "80"
+        dapr.io/app-protocol: "grpc"
         dapr.io/config: "dapr-config"
     spec:
       containers:
