@@ -3,8 +3,8 @@ repositories:
     url: https://dapr.github.io/helm-charts/
   - name: bitnami
     url: https://charts.bitnami.com/bitnami
-  - name: mongodb-helm-charts
-    url: https://mongodb.github.io/helm-charts
+  - name: ot-container-kit
+    url: https://ot-container-kit.github.io/helm-charts
 
 # TODO: move operators to another namespace
 releases:
@@ -24,10 +24,10 @@ releases:
     needs:
       - dapr
 
-  - name: mongodb-community-operator
+  - name: mongodb-operator
     namespace: asgard
-    chart: mongodb-helm-charts/community-operator
-    version: 0.11.0
+    chart: ot-container-kit/mongodb-operator
+    version: 0.3.1
     wait: true
     values:
       - global:

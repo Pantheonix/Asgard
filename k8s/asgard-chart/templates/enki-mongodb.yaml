@@ -1,43 +1,35 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ .Values.microservices.enki.name }}-db-password
+  name: {{ .Values.microservices.enki.name }}-db-secret
   namespace: {{ .Values.namespace }}
 type: Opaque
-stringData:
-  password: {{ .Values.microservices.enki.envs.MONGO_INITDB_ROOT_PASSWORD | quote }}
+data:
+  password: {{ .Values.microservices.enki.envs.MONGO_INITDB_ROOT_PASSWORD | b64enc }}
 
 ---
 
-apiVersion: v1
-kind: Secret
-metadata:
-  name: {{ .Values.microservices.enki.name }}-scram-credentials
-  namespace: {{ .Values.namespace }}
-type: Opaque
-stringData:
-  password: {{ .Values.microservices.enki.envs.MONGO_INITDB_ROOT_PASSWORD | quote }}
-
----
-
-apiVersion: mongodbcommunity.mongodb.com/v1
-kind: MongoDBCommunity
+apiVersion: opstreelabs.in/v1alpha1
+kind: MongoDBCluster
 metadata:
   name: {{ .Values.microservices.enki.name }}-db
   namespace: {{ .Values.namespace }}
 spec:
-  members: 1
-  type: ReplicaSet
-  version: "6.0.4"
-  security:
-    authentication:
-      modes: ["SCRAM"]
-  users:
-    - name: {{ .Values.microservices.enki.envs.MONGO_INITDB_ROOT_USERNAME }}
-      db: admin
-      passwordSecretRef:
-        name: {{ .Values.microservices.enki.name }}-db-password
-      scramCredentialsSecretName: {{ .Values.microservices.enki.name }}-scram-credentials
-      roles:
-        - name: root
-          db: {{ .Values.microservices.enki.envs.MONGO_INITDB_DATABASE }}
+  clusterSize: 1
+  kubernetesConfig:
+    image: quay.io/opstree/mongo:v5.0
+    imagePullPolicy: IfNotPresent
+    securityContext:
+      fsGroup: 1001
+  storage:
+    accessModes: [ "ReadWriteOnce" ]
+    storageSize: 1Gi
+  mongoDBSecurity:
+    mongoDBAdminUser: {{ .Values.microservices.enki.envs.MONGO_INITDB_ROOT_USERNAME }}
+    secretRef:
+      name: {{ .Values.microservices.enki.name }}-db-secret
+      key: password
+  mongoDBMonitoring:
+    enableExporter: true
+    image: bitnami/mongodb-exporter:0.11.2-debian-10-r382
+    imagePullPolicy: IfNotPresent

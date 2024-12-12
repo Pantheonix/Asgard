@@ -43,6 +43,8 @@ spec:
         dapr.io/app-port: "80"
         dapr.io/app-protocol: "grpc"
         dapr.io/config: "dapr-config"
+        dapr.io/log-as-json: "true"
+        dapr.io/enable-api-logging: "true"
     spec:
       containers:
         - name: {{ .Values.microservices.hermes.name }}-api
