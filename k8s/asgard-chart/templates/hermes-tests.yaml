@@ -45,6 +45,8 @@ spec:
         dapr.io/config: "dapr-config"
         dapr.io/log-as-json: "true"
         dapr.io/enable-api-logging: "true"
+        dapr.io/log-level: "debug"
+        dapr.io/enable-app-health-check: "true"
     spec:
       containers:
         - name: {{ .Values.microservices.hermes.name }}-api
